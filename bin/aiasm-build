@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# aiasm-build - AI-ASM自动构建工具
+# 输入：AI-ASM格式的.asm文件
+# 输出：可执行ELF文件
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+# ── 颜色输出 ──
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+info()  { echo -e "${CYAN}[build]${NC} $*"; }
+ok()    { echo -e "${GREEN}[build]${NC} $*"; }
+warn()  { echo -e "${YELLOW}[build]${NC} $*"; }
+error() { echo -e "${RED}[build]${NC} $*"; }
+
+# ── 用法 ──
+usage() {
+    cat <<EOF
+Usage: aiasm-build [options] <input.asm> [output]
+
+Options:
+    -s, --static    Use static linking
+    -v, --verbose   Show detailed output
+    -o, --output    Specify output file name
+    -h, --help      Show this help
+
+If output is not specified, uses input.asm -> input (stripped .asm)
+EOF
+    exit 0
+}
+
+STATIC_LINK=0
+VERBOSE=0
+OUTPUT=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -s|--static) STATIC_LINK=1; shift ;;
+        -v|--verbose) VERBOSE=1; shift ;;
+        -o|--output) OUTPUT="$2"; shift 2 ;;
+        -h|--help) usage ;;
+        -*) error "Unknown option: $1"; exit 1 ;;
+        *)
+            if [[ -z "${INPUT:-}" ]]; then
+                INPUT="$1"
+            else
+                OUTPUT="$1"
+            fi
+            shift
+            ;;
+    esac
+done
+
+if [[ -z "${INPUT:-}" ]]; then
+    error "No input file specified"
+    usage
+fi
+
+if [[ ! -f "$INPUT" ]]; then
+    error "File not found: $INPUT"
+    exit 1
+fi
+
+if [[ -z "$OUTPUT" ]]; then
+    OUTPUT="${INPUT%.asm}"
+fi
+
+TMP_OBJ="${OUTPUT}.o"
+
+info "Building: $INPUT -> $OUTPUT"
+
+# ── 格式验证 ──
+if [[ $VERBOSE -eq 1 ]]; then
+    info "Validating format..."
+fi
+
+# 检查基本结构：必须有globl声明和函数标签
+if ! grep -qE '^\s*\.globl\s+' "$INPUT"; then
+    error "Missing 'global' declaration in $INPUT"
+    exit 1
+fi
+
+# 检查每行注释对齐（第40列）- 仅警告
+while IFS= read -r line; do
+    # 跳过空行和纯注释行
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*$ ]] && continue
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    # 如果有内联注释，检查对齐
+    if [[ "$line" == *"#"* ]]; then
+        comment_col=$(echo "$line" | grep -bo '#' | head -1 | cut -d: -f1)
+        if [[ $comment_col -lt 40 ]]; then
+            warn "Comment not aligned to column 40: '$line'"
+        fi
+    fi
+done < "$INPUT"
+
+ok "Format validation passed"
+
+# ── 汇编 ──
+if [[ $VERBOSE -eq 1 ]]; then
+    info "Assembling: as -o $TMP_OBJ $INPUT"
+fi
+if ! as -o "$TMP_OBJ" "$INPUT" 2>&1; then
+    error "Assembly failed"
+    rm -f "$TMP_OBJ"
+    exit 1
+fi
+ok "Assembly successful"
+
+# ── 链接 ──
+if [[ $STATIC_LINK -eq 1 ]]; then
+    LDCMD="ld -static -o $OUTPUT $TMP_OBJ"
+else
+    # 动态链接，但用-nostdlib因为我们用系统调用
+    LDCMD="ld -o $OUTPUT $TMP_OBJ"
+fi
+
+if [[ $VERBOSE -eq 1 ]]; then
+    info "Linking: $LDCMD"
+fi
+if ! eval "$LDCMD" 2>&1; then
+    error "Linking failed"
+    rm -f "$TMP_OBJ"
+    exit 1
+fi
+ok "Linking successful"
+
+rm -f "$TMP_OBJ"
+ok "Build complete: $OUTPUT"

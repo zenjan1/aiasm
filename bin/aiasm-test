@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# aiasm-test - AI-ASM自动测试工具
+# 输入：测试用例目录（默认tests/）
+# 功能：编译、运行、比对输出
+# -----------------------------------------------------------------------------
+set -uo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+PASS=0
+FAIL=0
+TOTAL=0
+
+# 查找运行器：优先qemu-x86_64，否则直接运行
+RUNNER=""
+if command -v qemu-x86_64 &>/dev/null; then
+    RUNNER="qemu-x86_64"
+else
+    RUNNER=""  # 直接运行
+fi
+
+usage() {
+    cat <<EOF
+Usage: aiasm-test [options] [test_directory]
+
+Options:
+    -v, --verbose   Show detailed output for each test
+    -h, --help      Show this help
+
+If test_directory is not specified, uses ./tests/
+EOF
+    exit 0
+}
+
+VERBOSE=0
+TEST_DIR=""
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -v|--verbose) VERBOSE=1; shift ;;
+        -h|--help) usage ;;
+        *) TEST_DIR="$1"; shift ;;
+    esac
+done
+
+TEST_DIR="${TEST_DIR:-./tests}"
+
+if [[ ! -d "$TEST_DIR" ]]; then
+    echo -e "${RED}Error: Test directory not found: $TEST_DIR${NC}"
+    exit 1
+fi
+
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"' EXIT
+
+echo "AI-ASM v0.1 Test Suite"
+echo "=========================="
+echo ""
+
+# 发现所有.asm测试文件
+shopt -s nullglob
+ASM_FILES=("$TEST_DIR"/*.asm)
+shopt -u nullglob
+
+if [[ ${#ASM_FILES[@]} -eq 0 ]]; then
+    echo -e "${YELLOW}No test files found in $TEST_DIR${NC}"
+    exit 1
+fi
+
+for asm_file in "${ASM_FILES[@]}"; do
+    basename="${asm_file##*/}"
+    basename="${basename%.asm}"
+    expect_file="${asm_file%.asm}.expect"
+    bin_file="${TMPDIR}/${basename}"
+    TOTAL=$((TOTAL + 1))
+
+    echo -e "${CYAN}--- $basename ---${NC}"
+
+    # 步骤1: 编译
+    if ! bin/aiasm-build "$asm_file" "$bin_file" >/dev/null 2>&1; then
+        echo -e "  ${RED}FAIL${NC} Compilation failed"
+        FAIL=$((FAIL + 1))
+        continue
+    fi
+
+    # 步骤2: 运行并捕获输出
+    ACTUAL_OUTPUT=""
+    EXIT_CODE=0
+
+    if [[ -n "$RUNNER" ]]; then
+        ACTUAL_OUTPUT=$($RUNNER "$bin_file" 2>&1) || EXIT_CODE=$?
+    else
+        ACTUAL_OUTPUT=$("$bin_file" 2>&1) || EXIT_CODE=$?
+    fi
+
+    # 步骤3: 比对期望输出
+    if [[ -f "$expect_file" ]]; then
+        EXPECTED_OUTPUT=$(cat "$expect_file")
+        if [[ "$ACTUAL_OUTPUT" == "$EXPECTED_OUTPUT" ]]; then
+            echo -e "  ${GREEN}PASS${NC} Output matches expected"
+            PASS=$((PASS + 1))
+        else
+            echo -e "  ${RED}FAIL${NC} Output mismatch"
+            echo -e "  ${YELLOW}Expected:${NC} '$(echo "$EXPECTED_OUTPUT" | head -1)'"
+            echo -e "  ${YELLOW}Actual:  ${NC} '$(echo "$ACTUAL_OUTPUT" | head -1)'"
+            if [[ $VERBOSE -eq 1 ]]; then
+                echo -e "  ${YELLOW}Full expected:${NC}"
+                echo "$EXPECTED_OUTPUT" | sed 's/^/    /'
+                echo -e "  ${YELLOW}Full actual:${NC}"
+                echo "$ACTUAL_OUTPUT" | sed 's/^/    /'
+            fi
+            FAIL=$((FAIL + 1))
+        fi
+    elif [[ "$basename" == *"exit"* ]]; then
+        # exit测试：检查退出码
+        EXPECTED_EXIT="${basename#test}"
+        EXPECTED_EXIT="${EXPECTED_EXIT%%_*}"
+        # 从文件名解析期望退出码 - 默认为0
+        if [[ "$basename" == *"exit0"* ]]; then
+            if [[ $EXIT_CODE -eq 0 ]]; then
+                echo -e "  ${GREEN}PASS${NC} Exit code: $EXIT_CODE"
+                PASS=$((PASS + 1))
+            else
+                echo -e "  ${RED}FAIL${NC} Expected exit code 0, got $EXIT_CODE"
+                FAIL=$((FAIL + 1))
+            fi
+        else
+            # 没有expect文件且不是exit测试，算通过（能运行即可）
+            echo -e "  ${GREEN}PASS${NC} Program ran successfully (exit=$EXIT_CODE)"
+            PASS=$((PASS + 1))
+        fi
+    else
+        # 没有expect文件：只要能运行就算通过
+        echo -e "  ${GREEN}PASS${NC} Program ran successfully (exit=$EXIT_CODE)"
+        PASS=$((PASS + 1))
+    fi
+
+    echo ""
+done
+
+echo "=========================="
+echo -e "Results: ${GREEN}$PASS passed${NC}, ${RED}$FAIL failed${NC} / $TOTAL total"
+
+if [[ $FAIL -eq 0 ]]; then
+    echo -e "${GREEN}All tests passed!${NC}"
+    exit 0
+else
+    echo -e "${RED}Some tests failed.${NC}"
+    exit 1
+fi

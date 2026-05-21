@@ -1,0 +1,132 @@
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# aiasm-new - AI-ASM项目模板生成工具
+# 输入：项目名称
+# 输出：标准项目目录结构
+# -----------------------------------------------------------------------------
+set -euo pipefail
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+info()  { echo -e "${CYAN}[new]${NC} $*"; }
+ok()    { echo -e "${GREEN}[new]${NC} $*"; }
+error() { echo -e "${RED}[new]${NC} $*"; }
+
+if [[ $# -lt 1 ]]; then
+    echo "Usage: aiasm-new <project-name>"
+    echo ""
+    echo "Creates a new AI-ASM project with standard directory structure."
+    exit 1
+fi
+
+PROJECT="$1"
+
+if [[ -d "$PROJECT" ]]; then
+    error "Directory already exists: $PROJECT"
+    exit 1
+fi
+
+info "Creating project: $PROJECT"
+
+mkdir -p "$PROJECT/src" "$PROJECT/tests"
+
+# ── 生成Makefile ──
+cat > "$PROJECT/Makefile" << 'MAKEFILE'
+BUILD=../bin/aiasm-build
+TEST=../bin/aiasm-test
+
+.PHONY: all test clean
+
+all:
+	@for f in src/*.asm; do \
+		if [ -f "$$f" ]; then \
+			name=$${f%.asm}; \
+			$(BUILD) "$$f" "$$name" || exit 1; \
+		fi \
+	done
+
+test:
+	$(TEST) -v tests/
+
+clean:
+	@find src -type f ! -name '*.asm' -delete 2>/dev/null || true
+	@find tests -type f ! -name '*.asm' ! -name '*.expect' -delete 2>/dev/null || true
+MAKEFILE
+
+# ── 生成Hello World示例 ──
+cat > "$PROJECT/src/hello.asm" << 'ASM'
+    .intel_syntax noprefix
+# -----------------------------------------------------------------------------
+# 函数：_start
+# 功能：打印"Hello, World!"并退出
+# 输入：无
+# 输出：无
+# 破坏的寄存器：rax, rdi, rsi, rdx
+# 栈使用：0字节
+# -----------------------------------------------------------------------------
+    .globl _start
+
+msg:
+    .byte   72, 101, 108, 108, 111, 44, 32, 87, 111, 114, 108, 100, 33, 10
+msg_len = . - msg
+
+_start:
+    # write(1, "Hello, World!\n", 14)
+    mov     rax, 1
+    mov     rdi, 1
+    lea     rsi, [rip + msg]
+    mov     edx, msg_len
+    syscall
+
+    # exit(0)
+    mov     rax, 60
+    mov     rdi, 0
+    syscall
+ASM
+
+# ── 生成测试用例模板 ──
+cat > "$PROJECT/tests/test_hello.asm" << 'ASM'
+    .intel_syntax noprefix
+# -----------------------------------------------------------------------------
+# 函数：_start
+# 功能：打印"Hello, AI-ASM!"用于测试
+# 输入：无
+# 输出：打印"Hello, AI-ASM!\n"到stdout
+# 破坏的寄存器：rax, rdi, rsi, rdx
+# 栈使用：0字节
+# -----------------------------------------------------------------------------
+    .globl _start
+
+msg:
+    .byte   72, 101, 108, 108, 111, 44, 32, 65, 73, 45, 65, 83, 77, 33, 10
+msg_len = . - msg
+
+_start:
+    # write(1, "Hello, AI-ASM!\n", 15)
+    mov     rax, 1
+    mov     rdi, 1
+    lea     rsi, [rip + msg]
+    mov     edx, msg_len
+    syscall
+
+    # exit(0)
+    mov     rax, 60
+    mov     rdi, 0
+    syscall
+ASM
+
+cat > "$PROJECT/tests/test_hello.expect" << 'EXPECT'
+Hello, AI-ASM!
+EXPECT
+
+ok "Project created: $PROJECT/"
+ok "  src/hello.asm       - Hello World example"
+ok "  tests/test_hello    - Basic test case"
+echo ""
+echo "To get started:"
+echo "  cd $PROJECT"
+echo "  make              # Build all examples"
+echo "  make test         # Run all tests"
