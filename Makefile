@@ -34,16 +34,15 @@ examples: all
 		fi \
 	done
 
-run-kernel: examples/minimal_kernel.bin
-	@qemu-system-x86_64 -drive format=raw,file=examples/minimal_kernel.bin,if=ide -serial mon:stdio -display none
+run-kernel: examples/minimal_kernel
+	@qemu-system-x86_64 -kernel examples/minimal_kernel -serial mon:stdio -display none
 
-examples/minimal_kernel.bin: examples/minimal_kernel.asm
+examples/minimal_kernel: examples/minimal_kernel.asm examples/kernel.ld
 	@echo "Building minimal kernel..."
 	as --32 -o /tmp/minimal_kernel.o examples/minimal_kernel.asm
-	ld -m elf_i386 -Ttext 0x7c00 -o /tmp/minimal_kernel.elf /tmp/minimal_kernel.o
-	objcopy -O binary /tmp/minimal_kernel.elf examples/minimal_kernel.bin
-	rm -f /tmp/minimal_kernel.o /tmp/minimal_kernel.elf
-	@echo "Kernel ready: examples/minimal_kernel.bin"
+	ld -m elf_i386 -T examples/kernel.ld -o examples/minimal_kernel /tmp/minimal_kernel.o
+	rm -f /tmp/minimal_kernel.o
+	@echo "Kernel ready: examples/minimal_kernel"
 
 clean:
 	@find examples -type f ! -name '*.asm' ! -name '*.expect' -delete
