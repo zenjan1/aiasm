@@ -4,13 +4,18 @@
 BUILD=./bin/aiasm-build
 TEST=./bin/aiasm-test
 
-.PHONY: all test examples clean release install
+.PHONY: all test examples clean release install run-kernel
 
 all:
 	@echo "AI-ASM v0.1 - Build all examples"
-		@for f in examples/*.asm; do \
+	@for f in examples/*.asm; do \
 		if [ -f "$$f" ]; then \
 			name=$${f%.asm}; \
+			bn=$${name##*/}; \
+			if [ "$$bn" = "minimal_kernel" ]; then \
+				echo "Skipping $$f (use 'make run-kernel')"; \
+				continue; \
+			fi; \
 			echo "Building $$f..."; \
 			$(BUILD) -o "$$name" "$$f" || exit 1; \
 		fi \
@@ -28,6 +33,17 @@ examples: all
 			"./$$f"; \
 		fi \
 	done
+
+run-kernel: examples/minimal_kernel.bin
+	@qemu-system-x86_64 -drive format=raw,file=examples/minimal_kernel.bin,if=ide -serial mon:stdio -display none
+
+examples/minimal_kernel.bin: examples/minimal_kernel.asm
+	@echo "Building minimal kernel..."
+	as --32 -o /tmp/minimal_kernel.o examples/minimal_kernel.asm
+	ld -m elf_i386 -Ttext 0x7c00 -o /tmp/minimal_kernel.elf /tmp/minimal_kernel.o
+	objcopy -O binary /tmp/minimal_kernel.elf examples/minimal_kernel.bin
+	rm -f /tmp/minimal_kernel.o /tmp/minimal_kernel.elf
+	@echo "Kernel ready: examples/minimal_kernel.bin"
 
 clean:
 	@find examples -type f ! -name '*.asm' ! -name '*.expect' -delete
