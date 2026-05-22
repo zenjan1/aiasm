@@ -43,7 +43,8 @@ run-interactive: examples/kernel/interactive
 examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm \
     examples/kernel/idt.asm examples/kernel/pic.asm examples/kernel/pit.asm \
     examples/kernel/vga.asm examples/kernel/keyboard.asm examples/kernel/shell.asm \
-    examples/kernel/utils.asm examples/kernel/linker.ld
+    examples/kernel/utils.asm examples/kernel/uart.asm examples/kernel/log.asm \
+    examples/kernel/linker.ld
 	@echo "Building interactive kernel..."
 	as --32 -o /tmp/ikernel_kernel.o examples/kernel/kernel.asm
 	as --32 -o /tmp/ikernel_gdt.o examples/kernel/gdt.asm
@@ -54,10 +55,13 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
 	as --32 -o /tmp/ikernel_keyboard.o examples/kernel/keyboard.asm
 	as --32 -o /tmp/ikernel_shell.o examples/kernel/shell.asm
 	as --32 -o /tmp/ikernel_utils.o examples/kernel/utils.asm
+	as --32 -o /tmp/ikernel_uart.o examples/kernel/uart.asm
+	as --32 -o /tmp/ikernel_log.o examples/kernel/log.asm
 	ld -m elf_i386 -T examples/kernel/linker.ld -o examples/kernel/interactive \
 		/tmp/ikernel_kernel.o /tmp/ikernel_gdt.o /tmp/ikernel_idt.o \
 		/tmp/ikernel_pic.o /tmp/ikernel_pit.o /tmp/ikernel_vga.o \
-		/tmp/ikernel_keyboard.o /tmp/ikernel_shell.o /tmp/ikernel_utils.o
+		/tmp/ikernel_keyboard.o /tmp/ikernel_shell.o /tmp/ikernel_utils.o \
+		/tmp/ikernel_uart.o /tmp/ikernel_log.o
 	rm -f /tmp/ikernel_*.o
 	@echo "Interactive kernel ready: examples/kernel/interactive"
 

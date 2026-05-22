@@ -29,11 +29,9 @@ shell_history_buf:
 shell_run:
     # 打印提示符（串口 + VGA）
     mov     esi, offset shell_prompt
-    mov     ecx, offset shell_prompt_len
-    call    serial_print_string
+    call    uart_puts
     mov     esi, offset shell_prompt
-    mov     ecx, offset shell_prompt_len
-    call    vga_print_string
+    call    vga_print_string_len
 
     # 清空命令缓冲
     xor     eax, eax
@@ -41,7 +39,7 @@ shell_run:
     mov     [shell_cursor_pos], eax
 
 1:  # 读取字符（串口输入）
-    call    serial_getchar
+    call    uart_getc
 
     cmp     al, 0x1B          # ESC — 可能是方向键
     je      .escape_seq
@@ -73,7 +71,7 @@ shell_run:
 
     # 回显（字符仍在 al 中）
     push    eax
-    call    serial_putchar    # 回显到串口
+    call    uart_putc         # 回显到串口
     pop     eax
     push    eax
     call    vga_putchar       # 回显到VGA
@@ -82,11 +80,11 @@ shell_run:
 
 .escape_seq:
     # 读取 ESC [ X 序列
-    call    serial_getchar
+    call    uart_getc
     cmp     al, '['
     jne     1b                # 不是 [ 开头的 ESC 序列，忽略
 
-    call    serial_getchar
+    call    uart_getc
     cmp     al, 'A'           # 上箭头
     je      .arrow_up
     cmp     al, 'B'           # 下箭头
@@ -118,7 +116,7 @@ shell_run:
     mov     ecx, eax
 4:  movzx   eax, byte ptr [esi]
     push    eax
-    call    serial_putchar
+    call    uart_putc
     pop     eax
     push    eax
     call    vga_putchar
@@ -143,8 +141,7 @@ shell_run:
     inc     dword ptr [shell_cursor_pos]
     # 串口光标右移 (ANSI)
     mov     esi, offset ansi_cursor_right
-    mov     ecx, offset ansi_cursor_right_len
-    call    serial_print_string
+    call    uart_puts
     jmp     1b
 
 .arrow_left:
@@ -155,8 +152,7 @@ shell_run:
     dec     dword ptr [shell_cursor_pos]
     # 串口光标左移 (ANSI)
     mov     esi, offset ansi_cursor_left
-    mov     ecx, offset ansi_cursor_left_len
-    call    serial_print_string
+    call    uart_puts
     jmp     1b
 
 .backspace:
@@ -172,11 +168,11 @@ shell_run:
 
     # 回显退格序列（串口）
     mov     al, 0x08
-    call    serial_putchar
+    call    uart_putc
     mov     al, ' '
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x08
-    call    serial_putchar
+    call    uart_putc
 
     # VGA退格：回退光标
     mov     eax, [vga_cursor]
@@ -203,9 +199,9 @@ shell_run:
 
     # 打印换行（串口 + VGA）
     mov     al, 0x0a
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0d
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0a
     call    vga_putchar
     mov     al, 0x0d
@@ -216,11 +212,9 @@ shell_run:
 
     # 新提示符（串口 + VGA）
     mov     esi, offset shell_prompt
-    mov     ecx, offset shell_prompt_len
-    call    serial_print_string
+    call    uart_puts
     mov     esi, offset shell_prompt
-    mov     ecx, offset shell_prompt_len
-    call    vga_print_string
+    call    vga_print_string_len
 
     # 重置缓冲
     xor     eax, eax
@@ -232,14 +226,38 @@ shell_run:
 .ctrl_c:
     # 打印 "^C" 然后关机
     mov     al, '^'
-    call    serial_putchar
+    call    uart_putc
     mov     al, 'C'
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0a
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0d
-    call    serial_putchar
+    call    uart_putc
     jmp     kernel_halt
+
+# ============================================================================
+# vga_print_string_len: VGA 输出指定长度字符串
+# 输入: esi = 字符串指针, ecx = 长度
+# （shell 内部使用，因为历史回显等场景已知长度但无 null 终止）
+# ============================================================================
+    .globl  vga_print_string_len
+vga_print_string_len:
+    push    edx
+    push    ecx
+    push    esi
+1:  cmp     ecx, 0
+    je      2f
+    mov     al, [esi]
+    push    eax
+    call    vga_putchar
+    pop     eax
+    inc     esi
+    dec     ecx
+    jmp     1b
+2:  pop     esi
+    pop     ecx
+    pop     edx
+    ret
 
 # ============================================================================
 # shell_dispatch: 命令分发
@@ -297,26 +315,19 @@ shell_dispatch:
 
     # 未知命令
     mov     esi, offset msg_unknown
-    mov     ecx, offset msg_unknown_len
-    call    serial_print_string
-    mov     esi, offset msg_unknown
-    mov     ecx, offset msg_unknown_len
-    call    vga_print_string
+    call    uart_puts
     mov     esi, offset shell_cmd_buf
     call    utils_strlen
-    mov     ecx, eax
-    call    serial_print_string
-    mov     esi, offset shell_cmd_buf
-    mov     ecx, eax
-    call    vga_print_string
+    push    eax
+    push    esi
+    call    uart_puts
+    pop     esi
+    pop     ecx
+    # 换行
     mov     al, 0x0a
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0d
-    call    serial_putchar
-    mov     al, 0x0a
-    call    vga_putchar
-    mov     al, 0x0d
-    call    vga_putchar
+    call    uart_putc
 
     pop     ecx
     pop     edi
@@ -325,11 +336,9 @@ shell_dispatch:
 
 .do_help:
     mov     esi, offset help_text
-    mov     ecx, offset help_text_len
-    call    serial_print_string
+    call    uart_puts
     mov     esi, offset help_text
-    mov     ecx, offset help_text_len
-    call    vga_print_string
+    call    vga_print_string_len
     pop     ecx
     pop     edi
     pop     esi
@@ -338,8 +347,7 @@ shell_dispatch:
 .do_clear:
     # ANSI 清屏（串口）
     mov     esi, offset ansi_clear
-    mov     ecx, offset ansi_clear_len
-    call    serial_print_string
+    call    uart_puts
     # VGA 清屏
     call    vga_clear
     pop     ecx
@@ -349,11 +357,9 @@ shell_dispatch:
 
 .do_version:
     mov     esi, offset version_text
-    mov     ecx, offset version_text_len
-    call    serial_print_string
+    call    uart_puts
     mov     esi, offset version_text
-    mov     ecx, offset version_text_len
-    call    vga_print_string
+    call    vga_print_string_len
     pop     ecx
     pop     edi
     pop     esi
@@ -363,11 +369,9 @@ shell_dispatch:
     call    get_tick_count
     push    eax
     mov     esi, offset tick_prefix
-    mov     ecx, offset tick_prefix_len
-    call    serial_print_string
+    call    uart_puts
     mov     esi, offset tick_prefix
-    mov     ecx, offset tick_prefix_len
-    call    vga_print_string
+    call    vga_print_string_len
     pop     eax
     lea     edi, [shell_cmd_buf]
     mov     dl, 10
@@ -376,17 +380,13 @@ shell_dispatch:
     call    utils_strlen
     mov     ecx, eax
     push    esi               # 保存 buffer 指针
-    call    serial_print_string
+    call    uart_puts
     pop     esi               # 恢复 buffer 指针
-    call    vga_print_string
+    call    vga_print_string_len
     mov     al, 0x0a
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0d
-    call    serial_putchar
-    mov     al, 0x0a
-    call    vga_putchar
-    mov     al, 0x0d
-    call    vga_putchar
+    call    uart_putc
     pop     ecx
     pop     edi
     pop     esi
@@ -426,21 +426,28 @@ shell_dispatch:
 .echo_print:
     test    ecx, ecx
     jz      .echo_done
-    push    ecx
+    # 临时 null 终止以便 uart_puts
     push    esi
-    call    serial_print_string
-    pop     esi
+    push    ecx
+    mov     eax, esi
+    add     eax, ecx
+    push    eax
+    mov     byte ptr [eax], 0
+    call    uart_puts
+    pop     eax
     pop     ecx
-    call    vga_print_string
+    pop     esi
+    push    esi
+    push    ecx
+    call    vga_print_string_len
+    pop     ecx
+    pop     esi
+
 .echo_done:
     mov     al, 0x0a
-    call    serial_putchar
+    call    uart_putc
     mov     al, 0x0d
-    call    serial_putchar
-    mov     al, 0x0a
-    call    vga_putchar
-    mov     al, 0x0d
-    call    vga_putchar
+    call    uart_putc
     pop     ecx
     pop     edi
     pop     esi
@@ -452,8 +459,7 @@ shell_dispatch:
     .section .rodata
 
 shell_prompt:
-    .ascii  "aiasm> "
-shell_prompt_len = . - shell_prompt
+    .asciz  "aiasm> "
 
 cmd_help:
     .asciz  "help"
@@ -472,8 +478,7 @@ cmd_echo_prefix:
 
 version_text:
     .ascii  "AI-ASM Kernel v0.2"
-    .byte   13, 10
-version_text_len = . - version_text
+    .byte   13, 10, 0
 
 help_text:
     .ascii  "Commands:"
@@ -491,25 +496,19 @@ help_text:
     .ascii  "  reboot        - Reboot system"
     .byte   13, 10
     .ascii  "  shutdown      - Halt system"
-    .byte   13, 10
-help_text_len = . - help_text
+    .byte   13, 10, 0
 
 tick_prefix:
-    .ascii  "System ticks: "
-tick_prefix_len = . - tick_prefix
+    .asciz  "System ticks: "
 
 msg_unknown:
-    .ascii  "Unknown command: "
-msg_unknown_len = . - msg_unknown
+    .asciz  "Unknown command: "
 
 ansi_clear:
-    .byte   0x1B, '[', '2', 'J', 0x1B, '[', 'H'
-ansi_clear_len = . - ansi_clear
+    .byte   0x1B, '[', '2', 'J', 0x1B, '[', 'H', 0
 
 ansi_cursor_right:
-    .byte   0x1B, '[', 'C'
-ansi_cursor_right_len = . - ansi_cursor_right
+    .byte   0x1B, '[', 'C', 0
 
 ansi_cursor_left:
-    .byte   0x1B, '[', 'D'
-ansi_cursor_left_len = . - ansi_cursor_left
+    .byte   0x1B, '[', 'D', 0
