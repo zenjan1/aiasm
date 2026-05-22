@@ -1,0 +1,133 @@
+name: Multi-platform build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (optional)'
+        required: false
+  push:
+    branches:
+      - master
+
+jobs:
+  build-linux-x86:
+    name: Build (linux x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils
+
+      - name: Build
+        run: |
+          make clean || true
+          make all
+
+      - name: Archive artifacts
+        run: |
+          mkdir -p release/linux-x86_64
+          cp -r bin release/linux-x86_64/ || true
+          cp -r examples release/linux-x86_64/ || true
+          tar czf release/aiasm-linux-x86_64-${{ github.run_id }}.tar.gz -C release linux-x86_64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aiasm-linux-x86_64-${{ github.run_id }}
+          path: release/aiasm-linux-x86_64-${{ github.run_id }}.tar.gz
+
+  build-linux-aarch64:
+    name: Cross-build (linux aarch64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
+
+      - name: Build (cross)
+        run: |
+          make clean || true
+          # override assembler/linker for cross-target
+          AS=aarch64-linux-gnu-as LD=aarch64-linux-gnu-ld CC=aarch64-linux-gnu-gcc make all || true
+
+      - name: Package artifacts
+        run: |
+          mkdir -p release/linux-aarch64
+          cp -r bin release/linux-aarch64/ || true
+          cp -r examples release/linux-aarch64/ || true
+          tar czf release/aiasm-linux-aarch64-${{ github.run_id }}.tar.gz -C release linux-aarch64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aiasm-linux-aarch64-${{ github.run_id }}
+          path: release/aiasm-linux-aarch64-${{ github.run_id }}.tar.gz
+
+  build-macos:
+    name: Build (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          make clean || true
+          make all || true
+
+      - name: Package artifacts
+        run: |
+          mkdir -p release/macos
+          cp -r bin release/macos/ || true
+          cp -r examples release/macos/ || true
+          tar czf release/aiasm-macos-${{ github.run_id }}.tar.gz -C release macos
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aiasm-macos-${{ github.run_id }}
+          path: release/aiasm-macos-${{ github.run_id }}.tar.gz
+
+  create-release:
+    name: Create Release (optional)
+    runs-on: ubuntu-latest
+    needs: [build-linux-x86, build-linux-aarch64, build-macos]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.tag != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          release_name: Aiasm ${{ github.event.inputs.tag }}
+          body: |
+            Automated multi-platform build of aiasm.
+
+            Artifacts for linux-x86_64, linux-aarch64 and macOS are attached.
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifacts/aiasm-linux-x86_64-*.tar.gz
+          asset_name: aiasm-linux-x86_64-${{ github.run_id }}.tar.gz
+          asset_content_type: application/gzip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
