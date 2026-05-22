@@ -4,15 +4,16 @@ SECTIONS
 {
     . = 0x00100000;
 
+    /* Multiboot header must be within first 8KB of file */
     .note.Xen : {
         KEEP(*(.note.Xen))
     }
-
     .multiboot : {
         KEEP(*(.multiboot))
     }
 
     .text : {
+        *(.multiboot)
         *(.text)
         *(.text.*)
     }

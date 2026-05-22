@@ -14,6 +14,12 @@ shell_cmd_buf:
     .globl  shell_cmd_len
 shell_cmd_len:
     .space  4
+    .globl  shell_cursor_pos    # 当前光标在缓冲中的位置（支持左右移动）
+shell_cursor_pos:
+    .space  4
+    .globl  shell_history_buf   # 上一条命令缓冲区 (128 字节)
+shell_history_buf:
+    .space  128
 
 # ============================================================================
 # shell_run: 主循环（串口终端）
@@ -21,18 +27,24 @@ shell_cmd_len:
     .section .text
     .globl  shell_run
 shell_run:
-    # 打印提示符
+    # 打印提示符（串口 + VGA）
     mov     esi, offset shell_prompt
-    mov     ecx, shell_prompt_len
+    mov     ecx, offset shell_prompt_len
     call    serial_print_string
+    mov     esi, offset shell_prompt
+    mov     ecx, offset shell_prompt_len
+    call    vga_print_string
 
     # 清空命令缓冲
     xor     eax, eax
     mov     [shell_cmd_len], eax
+    mov     [shell_cursor_pos], eax
 
-1:  # 读取字符
-    call    keyboard_getchar
+1:  # 读取字符（串口输入）
+    call    serial_getchar
 
+    cmp     al, 0x1B          # ESC — 可能是方向键
+    je      .escape_seq
     cmp     al, 0x08          # 退格
     je      .backspace
     cmp     al, 0x7F          # 退格
@@ -41,40 +53,138 @@ shell_run:
     je      .enter
     cmp     al, 0x0A          # 换行
     je      .enter
+    cmp     al, 0x03          # Ctrl+C — 关机
+    je      .ctrl_c
     cmp     al, 0x20          # 可打印字符起始
     jb      1b                # 忽略控制字符
     cmp     al, 0x7E
     ja      1b
 
-    # 普通字符: 追加到缓冲并回显
-    push    eax
+    # 普通字符: 追加到缓冲末尾
     mov     ecx, [shell_cmd_len]
     cmp     ecx, 127
     jge     1b                # 缓冲满
-    lea     edx, [shell_cmd_buf + ecx]
-    mov     [edx], al
+
+    # 存入缓冲区
+    mov     [shell_cmd_buf + ecx], al
     inc     ecx
     mov     [shell_cmd_len], ecx
-    pop     eax
+    mov     [shell_cursor_pos], ecx
+
+    # 回显（字符仍在 al 中）
     push    eax
     call    serial_putchar    # 回显到串口
     pop     eax
+    push    eax
+    call    vga_putchar       # 回显到VGA
+    pop     eax
+    jmp     1b
+
+.escape_seq:
+    # 读取 ESC [ X 序列
+    call    serial_getchar
+    cmp     al, '['
+    jne     1b                # 不是 [ 开头的 ESC 序列，忽略
+
+    call    serial_getchar
+    cmp     al, 'A'           # 上箭头
+    je      .arrow_up
+    cmp     al, 'B'           # 下箭头
+    je      .arrow_down
+    cmp     al, 'C'           # 右箭头
+    je      .arrow_right
+    cmp     al, 'D'           # 左箭头
+    je      .arrow_left
+    jmp     1b                # 其他 ESC 序列，忽略
+
+.arrow_up:
+    # 从历史缓冲区恢复上一条命令
+    mov     esi, offset shell_history_buf
+    mov     edi, offset shell_cmd_buf
+    mov     ecx, 128
+    cld
+    rep     movsb
+
+    # 计算长度
+    mov     esi, offset shell_cmd_buf
+    call    utils_strlen
+    mov     [shell_cmd_len], eax
+    mov     [shell_cursor_pos], eax
+
+    # 回显整行
+    test    eax, eax
+    jz      9f
+    mov     esi, offset shell_cmd_buf
+    mov     ecx, eax
+4:  movzx   eax, byte ptr [esi]
+    push    eax
+    call    serial_putchar
+    pop     eax
+    push    eax
+    call    vga_putchar
+    pop     eax
+    inc     esi
+    dec     ecx
+    jnz     4b
+9:  jmp     1b
+
+.arrow_down:
+    # 清空缓冲区（没有历史可前进）
+    xor     eax, eax
+    mov     [shell_cmd_len], eax
+    mov     [shell_cursor_pos], eax
+    jmp     1b
+
+.arrow_right:
+    # 光标右移
+    mov     ecx, [shell_cursor_pos]
+    cmp     ecx, [shell_cmd_len]
+    jge     1b
+    inc     dword ptr [shell_cursor_pos]
+    # 串口光标右移 (ANSI)
+    mov     esi, offset ansi_cursor_right
+    mov     ecx, offset ansi_cursor_right_len
+    call    serial_print_string
+    jmp     1b
+
+.arrow_left:
+    # 光标左移
+    mov     ecx, [shell_cursor_pos]
+    test    ecx, ecx
+    jz      1b
+    dec     dword ptr [shell_cursor_pos]
+    # 串口光标左移 (ANSI)
+    mov     esi, offset ansi_cursor_left
+    mov     ecx, offset ansi_cursor_left_len
+    call    serial_print_string
     jmp     1b
 
 .backspace:
     mov     ecx, [shell_cmd_len]
-    cmp     ecx, 0
-    je      1b
+    test    ecx, ecx
+    jz      1b                # 缓冲为空
     dec     ecx
     mov     [shell_cmd_len], ecx
+    mov     [shell_cursor_pos], ecx
 
-    # 回显退格序列
+    # 末尾补空格（覆盖最后一个字符）
+    mov     byte ptr [shell_cmd_buf + ecx], ' '
+
+    # 回显退格序列（串口）
     mov     al, 0x08
     call    serial_putchar
     mov     al, ' '
     call    serial_putchar
     mov     al, 0x08
     call    serial_putchar
+
+    # VGA退格：回退光标
+    mov     eax, [vga_cursor]
+    test    eax, eax
+    jz      1b
+    dec     eax
+    mov     [vga_cursor], eax
+    call    vga_set_cursor_hw
 
     jmp     1b
 
@@ -84,25 +194,52 @@ shell_run:
     lea     edx, [shell_cmd_buf + ecx]
     mov     byte ptr [edx], 0
 
-    # 打印换行
+    # 保存到历史缓冲区
+    mov     esi, offset shell_cmd_buf
+    mov     edi, offset shell_history_buf
+    mov     ecx, 128
+    cld
+    rep     movsb
+
+    # 打印换行（串口 + VGA）
     mov     al, 0x0a
     call    serial_putchar
     mov     al, 0x0d
     call    serial_putchar
+    mov     al, 0x0a
+    call    vga_putchar
+    mov     al, 0x0d
+    call    vga_putchar
 
     # 分发命令
     call    shell_dispatch
 
-    # 新提示符
+    # 新提示符（串口 + VGA）
     mov     esi, offset shell_prompt
-    mov     ecx, shell_prompt_len
+    mov     ecx, offset shell_prompt_len
     call    serial_print_string
+    mov     esi, offset shell_prompt
+    mov     ecx, offset shell_prompt_len
+    call    vga_print_string
 
     # 重置缓冲
     xor     eax, eax
     mov     [shell_cmd_len], eax
+    mov     [shell_cursor_pos], eax
 
     jmp     1b
+
+.ctrl_c:
+    # 打印 "^C" 然后关机
+    mov     al, '^'
+    call    serial_putchar
+    mov     al, 'C'
+    call    serial_putchar
+    mov     al, 0x0a
+    call    serial_putchar
+    mov     al, 0x0d
+    call    serial_putchar
+    jmp     kernel_halt
 
 # ============================================================================
 # shell_dispatch: 命令分发
@@ -151,24 +288,35 @@ shell_dispatch:
     test    eax, eax
     jz      .do_shutdown
 
-    # "echo <text>"
+    # "echo <text>" - prefix match (5 chars: "echo ")
     mov     edi, offset cmd_echo_prefix
-    call    utils_strcmp
+    mov     ecx, 5
+    call    utils_strncmp
     test    eax, eax
     jz      .do_echo
 
     # 未知命令
     mov     esi, offset msg_unknown
-    mov     ecx, msg_unknown_len
+    mov     ecx, offset msg_unknown_len
     call    serial_print_string
+    mov     esi, offset msg_unknown
+    mov     ecx, offset msg_unknown_len
+    call    vga_print_string
     mov     esi, offset shell_cmd_buf
     call    utils_strlen
     mov     ecx, eax
     call    serial_print_string
+    mov     esi, offset shell_cmd_buf
+    mov     ecx, eax
+    call    vga_print_string
     mov     al, 0x0a
     call    serial_putchar
     mov     al, 0x0d
     call    serial_putchar
+    mov     al, 0x0a
+    call    vga_putchar
+    mov     al, 0x0d
+    call    vga_putchar
 
     pop     ecx
     pop     edi
@@ -177,18 +325,23 @@ shell_dispatch:
 
 .do_help:
     mov     esi, offset help_text
-    mov     ecx, help_text_len
+    mov     ecx, offset help_text_len
     call    serial_print_string
+    mov     esi, offset help_text
+    mov     ecx, offset help_text_len
+    call    vga_print_string
     pop     ecx
     pop     edi
     pop     esi
     ret
 
 .do_clear:
-    # ANSI 清屏
+    # ANSI 清屏（串口）
     mov     esi, offset ansi_clear
-    mov     ecx, ansi_clear_len
+    mov     ecx, offset ansi_clear_len
     call    serial_print_string
+    # VGA 清屏
+    call    vga_clear
     pop     ecx
     pop     edi
     pop     esi
@@ -196,8 +349,11 @@ shell_dispatch:
 
 .do_version:
     mov     esi, offset version_text
-    mov     ecx, version_text_len
+    mov     ecx, offset version_text_len
     call    serial_print_string
+    mov     esi, offset version_text
+    mov     ecx, offset version_text_len
+    call    vga_print_string
     pop     ecx
     pop     edi
     pop     esi
@@ -207,8 +363,11 @@ shell_dispatch:
     call    get_tick_count
     push    eax
     mov     esi, offset tick_prefix
-    mov     ecx, tick_prefix_len
+    mov     ecx, offset tick_prefix_len
     call    serial_print_string
+    mov     esi, offset tick_prefix
+    mov     ecx, offset tick_prefix_len
+    call    vga_print_string
     pop     eax
     lea     edi, [shell_cmd_buf]
     mov     dl, 10
@@ -216,11 +375,18 @@ shell_dispatch:
     mov     esi, eax
     call    utils_strlen
     mov     ecx, eax
+    push    esi               # 保存 buffer 指针
     call    serial_print_string
+    pop     esi               # 恢复 buffer 指针
+    call    vga_print_string
     mov     al, 0x0a
     call    serial_putchar
     mov     al, 0x0d
     call    serial_putchar
+    mov     al, 0x0a
+    call    vga_putchar
+    mov     al, 0x0d
+    call    vga_putchar
     pop     ecx
     pop     edi
     pop     esi
@@ -245,12 +411,36 @@ shell_dispatch:
     mov     ecx, eax
     cmp     ecx, 0
     je      .echo_done
+
+    # 去除首尾双引号
+    movzx   eax, byte ptr [esi]
+    cmp     al, '"'
+    jne     .echo_print
+    dec     ecx             # 跳过开头引号
+    inc     esi
+    movzx   eax, byte ptr [esi + ecx - 1]
+    cmp     al, '"'
+    jne     .echo_print
+    dec     ecx             # 跳过结尾引号
+
+.echo_print:
+    test    ecx, ecx
+    jz      .echo_done
+    push    ecx
+    push    esi
     call    serial_print_string
+    pop     esi
+    pop     ecx
+    call    vga_print_string
 .echo_done:
     mov     al, 0x0a
     call    serial_putchar
     mov     al, 0x0d
     call    serial_putchar
+    mov     al, 0x0a
+    call    vga_putchar
+    mov     al, 0x0d
+    call    vga_putchar
     pop     ecx
     pop     edi
     pop     esi
@@ -315,3 +505,11 @@ msg_unknown_len = . - msg_unknown
 ansi_clear:
     .byte   0x1B, '[', '2', 'J', 0x1B, '[', 'H'
 ansi_clear_len = . - ansi_clear
+
+ansi_cursor_right:
+    .byte   0x1B, '[', 'C'
+ansi_cursor_right_len = . - ansi_cursor_right
+
+ansi_cursor_left:
+    .byte   0x1B, '[', 'D'
+ansi_cursor_left_len = . - ansi_cursor_left

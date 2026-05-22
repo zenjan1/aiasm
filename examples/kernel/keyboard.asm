@@ -57,8 +57,8 @@ keyboard_init:
     mov     byte ptr [kbd_shift], 0
     mov     byte ptr [kbd_caps], 0
 
-    # 注册 IRQ1
-    mov     edi, 1
+    # 注册 IRQ1 (向量 33)
+    mov     edi, 33
     mov     eax, offset keyboard_irq_handler
     call    idt_set_gate
 

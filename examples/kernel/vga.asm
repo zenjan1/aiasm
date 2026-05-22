@@ -169,22 +169,27 @@ vga_print_string:
 vga_set_cursor_hw:
     push    eax
     push    edx
+    push    ecx
 
     mov     eax, [vga_cursor]
-    mov     edx, 0x3D4
-    mov     al, 0x0E          # 光标位置高字节寄存器
+    mov     cl, al              # save low byte
+    shr     eax, 8              # high byte -> al
+
+    mov     dx, 0x3D4
+    mov     al, 0x0E            # 光标位置高字节寄存器
     out     dx, al
-    mov     edx, 0x3D5
-    mov     al, ah
+    mov     dx, 0x3D5
+    mov     al, ah              # high byte
     out     dx, al
 
-    mov     eax, [vga_cursor]
-    mov     edx, 0x3D4
-    mov     al, 0x0F          # 光标位置低字节寄存器
+    mov     dx, 0x3D4
+    mov     al, 0x0F            # 光标位置低字节寄存器
     out     dx, al
-    mov     edx, 0x3D5
+    mov     dx, 0x3D5
+    mov     al, cl              # low byte
     out     dx, al
 
+    pop     ecx
     pop     edx
     pop     eax
     ret
@@ -204,7 +209,7 @@ vga_print_string_panic:
 
     push    esi
     mov     esi, offset panic_prefix
-    mov     ecx, panic_prefix_len
+    mov     ecx, offset panic_prefix_len
     call    vga_print_string
     pop     esi
 

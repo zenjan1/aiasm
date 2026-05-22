@@ -35,10 +35,10 @@ examples: all
 	done
 
 run-kernel: examples/minimal_kernel
-	@qemu-system-x86_64 -kernel examples/minimal_kernel -serial mon:stdio -display none
+	@qemu-system-x86_64 -kernel examples/minimal_kernel -serial mon:stdio -display none -no-reboot
 
 run-interactive: examples/kernel/interactive
-	@qemu-system-x86_64 -kernel examples/kernel/interactive -serial mon:stdio
+	@qemu-system-i386 -kernel examples/kernel/interactive -serial mon:stdio -display none -no-reboot
 
 examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm \
     examples/kernel/idt.asm examples/kernel/pic.asm examples/kernel/pit.asm \

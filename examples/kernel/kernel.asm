@@ -5,9 +5,10 @@
     .code32
 
 # ============================================================================
-# Multiboot1 header
+# Multiboot1 header - must be within first 8KB of ELF file
 # ============================================================================
-    .section .multiboot
+    .section .text
+    .align 4
 mb_start:
     .long  0x1BADB002          # magic
     .long  0x00000003          # flags: memory info + load ELF
@@ -39,12 +40,23 @@ _start:
     and     eax, ~0x80000000    # 清除 PG 位
     mov     cr0, eax
 
+    # 初始化 VGA（清屏）
+    call    vga_clear
+
     # 初始化串口
     call    serial_init
 
-    # 打印启动信息
+    # 打印启动信息（串口）
     mov     esi, offset boot_msg
-    mov     ecx, boot_msg_len
+    mov     ecx, offset boot_msg_len
+    call    serial_print_string
+
+    # 打印 VGA 启动信息（同时显示在 VGA 屏幕上）
+    mov     esi, offset boot_msg_vga
+    mov     ecx, offset boot_msg_vga_len
+    call    vga_print_string
+    mov     esi, offset boot_msg_vga
+    mov     ecx, offset boot_msg_vga_len
     call    serial_print_string
 
     # 加载 GDT
@@ -82,16 +94,6 @@ _start:
     mov     al, 0x0a
     call    serial_putchar
 
-    # 清屏 (串口 ANSI)
-    mov     esi, offset ansi_clear
-    mov     ecx, ansi_clear_len
-    call    serial_print_string
-
-    # 打印 VGA 启动信息 (串口输出)
-    mov     esi, offset boot_msg_vga
-    mov     ecx, boot_msg_vga_len
-    call    serial_print_string
-
     # 开中断
     sti
 
@@ -104,11 +106,22 @@ _start:
     jmp     1b
 
 # ============================================================================
-# kernel_halt: 挂起系统
+# kernel_halt: 挂起系统并退出 QEMU
 # ============================================================================
     .globl  kernel_halt
 kernel_halt:
     cli
+    # Method 1: QEMU isa-debug-exit (requires -device isa-debug-exit,iobase=0xf4)
+    mov     dx, 0xF4
+    xor     al, al
+    out     dx, al
+    # Method 2: Triple fault — with -no-reboot this exits QEMU
+    xor     eax, eax
+    push    eax
+    push    eax
+    lidt    [esp]
+    add     esp, 8
+    int     0x03            # triggers triple fault with empty IDT
 1:  hlt
     jmp     1b
 
@@ -150,8 +163,8 @@ serial_init:
     ret
 
 serial_putchar:
-    push    eax
     push    edx
+    push    eax
 
     mov     dx, 0x3fd
 1:  in      al, dx
@@ -161,6 +174,19 @@ serial_putchar:
     pop     eax
     mov     dx, 0x3f8
     out     dx, al
+    pop     edx
+    ret
+
+serial_getchar:
+    push    edx
+
+    mov     dx, 0x3fd
+1:  in      al, dx
+    test    al, 0x01
+    jz      1b
+
+    mov     dx, 0x3f8
+    in      al, dx
     pop     edx
     ret
 
@@ -182,6 +208,7 @@ serial_print_string:
 
     .globl  serial_print_string
     .globl  serial_putchar
+    .globl  serial_getchar
     .globl  serial_init
 
 # ============================================================================

@@ -21,8 +21,8 @@ pit_init:
     push    eax
     push    edx
 
-    # 注册 IRQ0 处理函数
-    mov     edi, 0
+    # 注册 IRQ0 处理函数 (向量 32)
+    mov     edi, 32
     mov     eax, offset pit_irq_handler
     call    idt_set_gate
 

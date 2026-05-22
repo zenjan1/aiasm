@@ -144,16 +144,19 @@ isr_handler:
     jmp     .done
 
 .is_exception:
-    # 异常: 打印 panic 信息
-    push    eax
-    call    vga_print_string_panic
-    add     esp, 4
-    call    kernel_halt
+    # 异常: 直接挂起 (VGA 在 PVH 分页下不可用，打印会触发 page fault)
+    jmp     kernel_halt
 
 .unknown:
-    call    kernel_halt
+    # 未知中断向量: 静默忽略
+    jmp     .done
 
 .no_handler:
+    # 未注册的 IRQ: 发送 EOI 并静默忽略
+    # eax 已经是 IRQ 编号 (0-15)，因为前面 sub eax, 32
+    push    eax
+    call    pic_send_eoi
+    add     esp, 4
 .done:
     pop     edx
     pop     ecx
@@ -214,5 +217,4 @@ idt_load:
 # ============================================================================
 # 外部符号声明
 # ============================================================================
-    .globl  vga_print_string_panic
     .globl  kernel_halt

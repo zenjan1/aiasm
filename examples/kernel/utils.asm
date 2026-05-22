@@ -23,6 +23,32 @@ utils_strlen:
     ret
 
 # -----------------------------------------------------------------------------
+# strncmp: 比较两个字符串的前 n 个字符
+# 输入：esi = a, edi = b, ecx = n
+# 输出：eax = 0 相等, 1 不等
+# -----------------------------------------------------------------------------
+    .globl  utils_strncmp
+utils_strncmp:
+    push    esi
+    push    edi
+    test    ecx, ecx
+    jz      2f
+1:  mov     al, [esi]
+    mov     dl, [edi]
+    cmp     al, dl
+    jne     3f
+    inc     esi
+    inc     edi
+    dec     ecx
+    jnz     1b
+2:  xor     eax, eax
+    jmp     4f
+3:  mov     eax, 1
+4:  pop     edi
+    pop     esi
+    ret
+
+# -----------------------------------------------------------------------------
 # strcmp: 比较两个字符串
 # 输入：esi = a, edi = b
 # 输出：eax = 0 相等, 1 不等
@@ -96,6 +122,7 @@ utils_itoa:
     push    ebx
 
     mov     ecx, edi          # 保存 buf 指针
+    mov     bl, dl            # 保存 base 到 bl (div 会破坏 edx)
     add     edi, 31           # 写到缓冲区末尾
     mov     byte ptr [edi], 0 # null 终止
     dec     edi
@@ -110,8 +137,7 @@ utils_itoa:
     test    eax, eax
     jz      .reverse
     xor     edx, edx
-    mov     ebx, edx
-    mov     bl, dl            # bl = base
+    movzx   ebx, bl           # ebx = base
     div     ebx               # eax = eax/base, edx = remainder
     cmp     edx, 9
     jle     .digit
