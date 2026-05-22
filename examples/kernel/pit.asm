@@ -46,6 +46,10 @@ pit_init:
     .globl  pit_irq_handler
 pit_irq_handler:
     inc     dword ptr [tick_count]
+
+    # 调用调度器时间片递减
+    call    schedule_tick
+
     mov     eax, 0              # IRQ0
     jmp     pic_send_eoi
 

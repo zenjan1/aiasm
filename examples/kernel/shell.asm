@@ -306,6 +306,18 @@ shell_dispatch:
     test    eax, eax
     jz      .do_shutdown
 
+    # "meminfo"
+    mov     edi, offset cmd_meminfo
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_meminfo
+
+    # "ps"
+    mov     edi, offset cmd_ps
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_ps
+
     # "echo <text>" - prefix match (5 chars: "echo ")
     mov     edi, offset cmd_echo_prefix
     mov     ecx, 5
@@ -404,6 +416,149 @@ shell_dispatch:
     pop     esi
     jmp     kernel_halt
 
+.do_meminfo:
+    # 打印 "Memory: "
+    mov     esi, offset meminfo_prefix
+    call    uart_puts
+
+    # 获取总内存（KB）
+    call    get_total_memory
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+
+    # 打印 "KB total, "
+    mov     esi, offset meminfo_total_suffix
+    call    uart_puts
+
+    # 获取可用内存（KB）
+    call    get_free_memory
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+
+    # 打印 "KB free\n"
+    mov     esi, offset meminfo_free_suffix
+    call    uart_puts
+    pop     eax
+    pop     eax                 # clean up the first saved eax
+
+    # 打印进程数
+    mov     esi, offset meminfo_procs
+    call    uart_puts
+    call    get_proc_count
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     esi, offset meminfo_procs_suffix
+    call    uart_puts
+    pop     eax
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_ps:
+    mov     esi, offset ps_header
+    call    uart_puts
+
+    xor     ebx, ebx            # 进程索引
+.ps_loop:
+    cmp     ebx, 16
+    jge     .ps_done
+
+    mov     eax, ebx
+    imul    eax, 256            # PCB_SIZE
+    add     eax, offset proc_table
+
+    # 检查进程状态
+    mov     esi, [eax]          # PID
+    cmp     esi, -1
+    je      .ps_next            # 未分配
+
+    # 打印 PID (esi = PID)
+    push    esi                 # 保存 PID
+    mov     edi, offset shell_cmd_buf
+    mov     eax, esi
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     esi                 # 恢复 PID
+
+    mov     esi, offset ps_space
+    call    uart_puts
+
+    # 状态
+    mov     edi, [eax + 4]      # state (注意 eax 已被 utils_itoa 修改)
+    # 需要重新计算 PCB 地址
+    mov     edi, ebx
+    imul    edi, 256
+    add     edi, offset proc_table
+    mov     ecx, [edi + 4]      # state
+
+    cmp     ecx, 1
+    je      .ps_running
+    cmp     ecx, 2
+    je      .ps_ready
+    cmp     ecx, 3
+    je      .ps_zombie
+    mov     esi, offset ps_dash
+    call    uart_puts
+    jmp     .ps_state_done
+
+.ps_running:
+    mov     esi, offset ps_run_str
+    call    uart_puts
+    jmp     .ps_state_done
+
+.ps_ready:
+    mov     esi, offset ps_ready_str
+    call    uart_puts
+    jmp     .ps_state_done
+
+.ps_zombie:
+    mov     esi, offset ps_zombie_str
+    call    uart_puts
+
+.ps_state_done:
+    mov     esi, offset ps_space
+    call    uart_puts
+
+    # PPID
+    mov     edi, ebx
+    imul    edi, 256
+    add     edi, offset proc_table
+    mov     eax, [edi + 76]     # PPID
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+
+    mov     esi, offset ps_newline
+    call    uart_puts
+
+.ps_next:
+    inc     ebx
+    jmp     .ps_loop
+
+.ps_done:
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_echo:
     # 跳过 "echo " 前缀 (5 字符)
     lea     esi, [shell_cmd_buf + 5]
@@ -473,11 +628,15 @@ cmd_reboot:
     .asciz  "reboot"
 cmd_shutdown:
     .asciz  "shutdown"
+cmd_meminfo:
+    .asciz  "meminfo"
+cmd_ps:
+    .asciz  "ps"
 cmd_echo_prefix:
     .asciz  "echo "
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.2"
+    .ascii  "AI-ASM Kernel v0.3"
     .byte   13, 10, 0
 
 help_text:
@@ -496,6 +655,10 @@ help_text:
     .ascii  "  reboot        - Reboot system"
     .byte   13, 10
     .ascii  "  shutdown      - Halt system"
+    .byte   13, 10
+    .ascii  "  meminfo       - Show memory info"
+    .byte   13, 10
+    .ascii  "  ps            - Show process list"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -512,3 +675,33 @@ ansi_cursor_right:
 
 ansi_cursor_left:
     .byte   0x1B, '[', 'D', 0
+
+# meminfo 输出字符串
+meminfo_prefix:
+    .asciz  "Memory: "
+meminfo_total_suffix:
+    .asciz  "KB total, "
+meminfo_free_suffix:
+    .asciz  "KB free\r\n"
+meminfo_procs:
+    .asciz  "Processes: "
+meminfo_procs_suffix:
+    .asciz  "\r\n"
+
+# ps 输出字符串
+ps_header:
+    .asciz  "PID  STATE  PPID\r\n"
+ps_space:
+    .asciz  "  "
+ps_dash:
+    .asciz  "-"
+ps_run_str:
+    .asciz  "RUN"
+ps_ready_str:
+    .asciz  "RDY"
+ps_zombie_str:
+    .asciz  "ZOM"
+ps_newline:
+    .asciz  "\r\n"
+ps_debug_prefix:
+    .asciz  "current_pid = "

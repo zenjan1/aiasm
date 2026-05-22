@@ -35,6 +35,15 @@ _start:
     # 设置栈
     lea     esp, [stack_top]
 
+    # 清零 BSS 段（QEMU -kernel 不清零 BSS）
+    mov     edi, offset __bss_start
+    mov     ecx, offset __bss_end
+    sub     ecx, edi
+    shr     ecx, 2              # ecx = size / 4
+    xor     eax, eax
+    cld
+    rep     stosd
+
     # 禁用分页
     mov     eax, cr0
     and     eax, ~0x80000000
@@ -60,7 +69,7 @@ _start:
     mov     edi, 1
     call    log_print
 
-    # 初始化 IDT
+    # 初始化 IDT（256 向量，含 INT 0x80）
     call    idt_load
     mov     esi, offset msg_idt
     mov     edi, 1
@@ -84,11 +93,29 @@ _start:
     mov     edi, 1
     call    log_print
 
+    # 初始化物理内存管理器
+    call    memory_init
+    mov     esi, offset msg_mem
+    mov     edi, 1
+    call    log_print
+
+    # 初始化进程管理与调度器
+    call    process_init
+    mov     esi, offset msg_proc
+    mov     edi, 1
+    call    log_print
+
+    # 初始化系统调用接口（INT 0x80）
+    call    syscall_init
+    mov     esi, offset msg_syscall
+    mov     edi, 1
+    call    log_print
+
     # 开中断
     sti
 
     # 延时让 QEMU stdin 稳定
-    mov     ecx, 50000000
+    mov     ecx, 100000000
 1:  loop    1b
 
     # 进入 shell
@@ -138,14 +165,20 @@ stack_top:
 
     .section .rodata
 msg_boot:
-    .asciz  "AI-ASM Kernel v0.2 booting..."
+    .asciz  "AI-ASM Kernel v0.3 booting..."
 msg_gdt:
     .asciz  "  GDT loaded"
 msg_idt:
-    .asciz  "  IDT loaded"
+    .asciz  "  IDT loaded (256 vectors)"
 msg_pic:
     .asciz  "  PIC remapped"
 msg_pit:
     .asciz  "  PIT initialized (100Hz)"
 msg_kbd:
     .asciz  "  Keyboard initialized"
+msg_mem:
+    .asciz  "  Physical memory manager initialized"
+msg_proc:
+    .asciz  "  Process scheduler initialized"
+msg_syscall:
+    .asciz  "  Syscall interface (INT 0x80) ready"

@@ -1,8 +1,12 @@
     .intel_syntax noprefix
 # -----------------------------------------------------------------------------
-# idt.asm - 中断描述符表 (IDT) + 48 个中断处理函数
+# idt.asm - 中断描述符表 (IDT) + 中断处理函数
+# -----------------------------------------------------------------------------
+# 支持 0-255 向量（INT 0x80 = 128 为系统调用）
 # -----------------------------------------------------------------------------
     .code32
+
+NUM_IDT_ENTRIES = 256
 
 # ============================================================================
 # IRQ 处理函数表 (16 个指针，由 pit/keyboard 注册)
@@ -14,15 +18,15 @@ irq_handler_table:
     .space  64                # 16 * 4 字节
 
 # ============================================================================
-# IDT 表 (48 项 × 8 字节 = 384 字节) — 必须可写，运行时填充
+# IDT 表 (256 项 × 8 字节 = 2048 字节) — 必须可写，运行时填充
 # ============================================================================
     .section .data
     .align  8
 idt_table:
-    .space  384
+    .space  NUM_IDT_ENTRIES * 8
 
 idt_ptr_val:
-    .word   383               # limit = 48*8 - 1
+    .word   NUM_IDT_ENTRIES * 8 - 1
     .long   idt_table
 
 # ============================================================================
@@ -89,15 +93,15 @@ isr_\idx:
     iret
 .endm
 
-# 生成 48 个中断处理函数
+# 生成 256 个中断处理函数
 .set i, 0
-.rept 48
+.rept 256
     DEFINE_ISR %i
     .set i, i+1
 .endr
 
 # ============================================================================
-# 中断处理函数地址表 (48 项)
+# 中断处理函数地址表 (256 项)
 # ============================================================================
     .align  4
 isr_address_table:
@@ -107,7 +111,7 @@ isr_address_table:
 .endm
 
 .set j, 0
-.rept 48
+.rept 256
     ADDR_ENTRY %j
     .set j, j+1
 .endr
@@ -128,6 +132,10 @@ isr_handler:
 
     mov     eax, [ebp + 8]    # 中断编号
 
+    # INT 0x80 (128) = 系统调用
+    cmp     eax, 128
+    je      .syscall
+
     # 判断是否为 IRQ (32-47)
     cmp     eax, 32
     jl      .is_exception
@@ -144,7 +152,7 @@ isr_handler:
     jmp     .done
 
 .is_exception:
-    # 异常: 直接挂起 (VGA 在 PVH 分页下不可用，打印会触发 page fault)
+    # 异常: 直接挂起
     jmp     kernel_halt
 
 .unknown:
@@ -153,11 +161,19 @@ isr_handler:
 
 .no_handler:
     # 未注册的 IRQ: 发送 EOI 并静默忽略
-    # eax 已经是 IRQ 编号 (0-15)，因为前面 sub eax, 32
     push    eax
     call    pic_send_eoi
     add     esp, 4
 .done:
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     eax
+    pop     ebp
+    ret
+
+.syscall:
+    call    syscall_dispatch
     pop     edx
     pop     ecx
     pop     ebx
@@ -180,7 +196,28 @@ idt_set_gate:
     mov     [ecx + 6], ax       # offset high
     mov     word ptr [ecx + 2], 0x08  # selector (kernel code)
     mov     byte ptr [ecx + 4], 0x00  # zero
-    mov     byte ptr [ecx + 5], 0x8E  # flags
+    mov     byte ptr [ecx + 5], 0x8E  # flags: present, DPL=0, 32-bit interrupt gate
+
+    pop     ecx
+    pop     edx
+    ret
+
+# ============================================================================
+# idt_set_gate_user: 设置用户态可访问的 IDT 项 (DPL=3)
+# 输入: edi = index, eax = handler address
+# ============================================================================
+    .globl  idt_set_gate_user
+idt_set_gate_user:
+    push    edx
+    push    ecx
+
+    lea     ecx, [idt_table + edi * 8]
+    mov     [ecx], ax           # offset low
+    shr     eax, 16
+    mov     [ecx + 6], ax       # offset high
+    mov     word ptr [ecx + 2], 0x08  # selector (kernel code)
+    mov     byte ptr [ecx + 4], 0x00  # zero
+    mov     byte ptr [ecx + 5], 0xEE  # flags: present, DPL=3, 32-bit interrupt gate
 
     pop     ecx
     pop     edx
@@ -196,7 +233,7 @@ idt_load:
     push    ecx
 
     xor     ecx, ecx
-1:  cmp     ecx, 48
+1:  cmp     ecx, NUM_IDT_ENTRIES
     jge     2f
 
     lea     edx, [isr_address_table + ecx * 4]
@@ -218,3 +255,5 @@ idt_load:
 # 外部符号声明
 # ============================================================================
     .globl  kernel_halt
+    .globl  pic_send_eoi
+    .globl  syscall_dispatch
