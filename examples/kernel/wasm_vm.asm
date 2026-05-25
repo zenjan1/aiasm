@@ -103,6 +103,18 @@ OP_I32_ROTL      = 0x77
 OP_I32_ROTR      = 0x78
 
 # ============================================================================
+# WASM 宿主函数 ID（与 wasm_syscall.asm 保持一致）
+# ============================================================================
+WASM_HOST_PRINT      = 0
+WASM_HOST_PRINTLN    = 1
+WASM_HOST_PUTCHAR    = 2
+WASM_HOST_GETCHAR    = 3
+WASM_HOST_MEMINFO    = 4
+WASM_HOST_TIME       = 5
+WASM_HOST_ALLOC      = 6
+WASM_HOST_FREE       = 7
+
+# ============================================================================
 # 虚拟机状态（BSS）
 # ============================================================================
     .section .bss
@@ -571,15 +583,47 @@ do_call:
     jmp     dispatch_done
 
 do_call_host:
-    # 宿主函数调用：eax = 函数 ID, 从操作数栈取参数
-    push    eax
-    call    _stack_pop           # 参数1
-    mov     ebx, eax
+    # Map WASM function index to host function slot
+    sub     eax, [wasm_func_count]    # eax = host slot (= host ID)
+    mov     ecx, eax              # ecx = host function ID
+    push    eax                   # save function ID
+    # putchar(2): 1 arg; getchar(3): 0 args; time(5): 0 args
+    # print(0), println(1): 2 args; meminfo(4): 0 args
+    # alloc(6): 1 arg; free(7): 1 arg
+    cmp     ecx, WASM_HOST_PUTCHAR
+    je      .host_1arg
+    cmp     ecx, WASM_HOST_GETCHAR
+    je      .host_0arg
+    cmp     ecx, WASM_HOST_TIME
+    je      .host_0arg
+    cmp     ecx, WASM_HOST_MEMINFO
+    je      .host_0arg
+    cmp     ecx, WASM_HOST_ALLOC
+    je      .host_1arg
+    cmp     ecx, WASM_HOST_FREE
+    je      .host_1arg
+    # default: print/println - 2 args
+.host_2arg:
     call    _stack_pop           # 参数2
     mov     ecx, eax
-    call    _stack_pop           # 参数3
-    mov     edx, eax
-    pop     eax                  # 函数 ID
+    call    _stack_pop           # 参数1
+    mov     ebx, eax
+    xor     edx, edx             # 参数3 = 0
+    pop     eax
+    jmp     .do_host_call
+.host_1arg:
+    call    _stack_pop           # 参数1
+    mov     ebx, eax
+    xor     ecx, ecx             # 参数2 = 0
+    xor     edx, edx             # 参数3 = 0
+    pop     eax
+    jmp     .do_host_call
+.host_0arg:
+    xor     ebx, ebx
+    xor     ecx, ecx
+    xor     edx, edx
+    pop     eax
+.do_host_call:
     call    wasm_host_call
     # 返回值压入操作数栈
     push    eax

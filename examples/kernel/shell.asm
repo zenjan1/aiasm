@@ -698,7 +698,40 @@ shell_dispatch:
     mov     esi, offset msg_wasm_test3
     call    uart_puts
     mov     esi, offset wasm_test_loop_module
-    mov     ecx, 48              # wasm_test_loop_module size (hardcoded)
+    mov     ecx, offset wasm_test_loop_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest4:
+    mov     esi, offset msg_wasm_test4
+    call    uart_puts
+    mov     esi, offset wasm_test_syscall_module
+    mov     ecx, offset wasm_test_syscall_size
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
@@ -808,6 +841,8 @@ cmd_wasmtest2:
     .asciz  "wasmtest2"
 cmd_wasmtest3:
     .asciz  "wasmtest3"
+cmd_wasmtest4:
+    .asciz  "wasmtest4"
 cmd_echo_prefix:
     .asciz  "echo "
 
@@ -843,6 +878,8 @@ help_text:
     .ascii  "  wasmtest2     - Run WASM const test (returns 42)"
     .byte   13, 10
     .ascii  "  wasmtest3     - Run WASM loop test (countdown)"
+    .byte   13, 10
+    .ascii  "  wasmtest4     - Run WASM syscall test (putchar 'A')"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -897,6 +934,8 @@ msg_wasm_test2:
     .asciz  "Running WASM test2 (const 42)...\r\n"
 msg_wasm_test3:
     .asciz  "Running WASM test3 (loop countdown)...\r\n"
+msg_wasm_test4:
+    .asciz  "Running WASM test4 (syscall: putchar 'A')...\r\n"
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasm_parse_err:
@@ -1010,3 +1049,34 @@ wasm_test_loop_module:
     .byte   0x20, 0x00             # local.get 0
     .byte   0x0B                   # end (function)
 wasm_test_loop_size = . - wasm_test_loop_module
+
+# WASM 测试模块 4：系统调用测试 (host_putchar 'A')
+# 函数 0: void -> i32, calls host function 1 (putchar) with arg 65
+# Host functions start at index 1 (after the 1 module function)
+wasm_test_syscall_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2): 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section (id=10, size=7)
+    # code body: 00 (num locals) + 41 41 (i32.const 65) + 10 01 (call 1=host_putchar) + 0B (end)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # code size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x41             # i32.const 65 ('A')
+    .byte   0x10, 0x03             # call 3 (host slot 2 = putchar, since func_count=1)
+    .byte   0x0B                   # end
+wasm_test_syscall_size = . - wasm_test_syscall_module
