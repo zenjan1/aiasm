@@ -102,6 +102,44 @@ OP_I32_SHR_U     = 0x76
 OP_I32_ROTL      = 0x77
 OP_I32_ROTR      = 0x78
 
+# i64 比较运算
+OP_I64_EQZ       = 0x50
+OP_I64_EQ        = 0x51
+OP_I64_NE        = 0x52
+OP_I64_LT_S      = 0x53
+OP_I64_LT_U      = 0x54
+OP_I64_GT_S      = 0x55
+OP_I64_GT_U      = 0x56
+OP_I64_LE_S      = 0x57
+OP_I64_LE_U      = 0x58
+OP_I64_GE_S      = 0x59
+OP_I64_GE_U      = 0x5A
+
+# i64 算术运算
+OP_I64_CLZ       = 0x79
+OP_I64_CTZ       = 0x7A
+OP_I64_POPCNT    = 0x7B
+OP_I64_ADD       = 0x7C
+OP_I64_SUB       = 0x7D
+OP_I64_MUL       = 0x7E
+OP_I64_DIV_S     = 0x7F
+OP_I64_DIV_U     = 0x80
+OP_I64_REM_S     = 0x81
+OP_I64_REM_U     = 0x82
+OP_I64_AND       = 0x83
+OP_I64_OR        = 0x84
+OP_I64_XOR       = 0x85
+OP_I64_SHL       = 0x86
+OP_I64_SHR_S     = 0x87
+OP_I64_SHR_U     = 0x88
+OP_I64_ROTL      = 0x89
+OP_I64_ROTR      = 0x8A
+
+# i32/i64 转换
+OP_I32_WRAP_I64  = 0xA7
+OP_I64_EXTEND_I32_S = 0xAC
+OP_I64_EXTEND_I32_U = 0xAD
+
 # ============================================================================
 # WASM 宿主函数 ID（与 wasm_syscall.asm 保持一致）
 # ============================================================================
@@ -471,12 +509,28 @@ _dispatch_opcode:
     # 内存
     cmp     ebx, OP_I32_LOAD
     je      do_i32_load
+    cmp     ebx, OP_I32_LOAD8_S
+    je      do_i32_load8_s
+    cmp     ebx, OP_I32_LOAD8_U
+    je      do_i32_load8_u
+    cmp     ebx, OP_I32_LOAD16_S
+    je      do_i32_load16_s
+    cmp     ebx, OP_I32_LOAD16_U
+    je      do_i32_load16_u
     cmp     ebx, OP_I32_STORE
     je      do_i32_store
+    cmp     ebx, OP_I32_STORE8
+    je      do_i32_store8
+    cmp     ebx, OP_I32_STORE16
+    je      do_i32_store16
     cmp     ebx, OP_MEMORY_SIZE
     je      do_memory_size
     cmp     ebx, OP_MEMORY_GROW
     je      do_memory_grow
+
+    # br_table
+    cmp     ebx, OP_BR_TABLE
+    je      do_br_table
 
     # 常量
     cmp     ebx, OP_I32_CONST
@@ -623,6 +677,70 @@ do_br_if:
     call    _ctrl_frame_pop_n
     jmp     dispatch_done
 do_br_if_loop:
+    mov     esi, [wasm_loop_start]
+    mov     [wasm_pc], esi
+    jmp     dispatch_done
+
+# br_table: 实现 switch-case 分支表
+# 格式: br_table vec[label1, label2, ..., labelN] default_label
+do_br_table:
+    # 读取分支表数量
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm
+    mov     ecx, eax              # ecx = 分支数量
+
+    # 弹出选择索引
+    call    _stack_pop
+    mov     edx, eax              # edx = 索引
+
+    # 检查索引是否在范围内
+    cmp     edx, ecx
+    jb      .br_table_in_range
+
+    # 索引超出范围，跳到 default label
+    # 读取所有 label 并跳过，最后读取 default
+.br_table_skip_to_default:
+    test    ecx, ecx
+    jz      .br_table_read_default
+    call    _read_leb128_vm       # 跳过一个 label
+    dec     ecx
+    jmp     .br_table_skip_to_default
+
+.br_table_read_default:
+    call    _read_leb128_vm
+    mov     ebx, eax              # ebx = default label
+    jmp     .br_table_execute
+
+.br_table_in_range:
+    # 读取第 edx 个 label
+    test    edx, edx
+    jz      .br_table_target_found
+    call    _read_leb128_vm       # 跳过一个 label
+    dec     edx
+    jmp     .br_table_in_range
+
+.br_table_target_found:
+    call    _read_leb128_vm
+    mov     ebx, eax              # ebx = target label
+    # 跳过剩余 labels 和 default
+    add     ecx, 1                # 剩余数量 + 1 (default)
+.br_table_skip_rest:
+    test    ecx, ebx              # 使用 ebx 作为计数器（避免冲突）
+    jz      .br_table_execute
+    push    ebx                   # 保存 target label
+    call    _read_leb128_vm
+    pop     ebx
+    dec     ecx
+    jmp     .br_table_skip_rest
+
+.br_table_execute:
+    # 执行分支跳转（与 br 相同的逻辑）
+    call    _ctrl_frame_peek_at
+    cmp     eax, 2                # LOOP type
+    je      .br_table_loop
+    call    _ctrl_frame_pop_n
+    jmp     dispatch_done
+.br_table_loop:
     mov     esi, [wasm_loop_start]
     mov     [wasm_pc], esi
     jmp     dispatch_done
@@ -798,6 +916,85 @@ do_i32_store:
     call    _stack_pop           # eax = address
     add     eax, ebx
     mov     [wasm_linear_memory + eax], edx
+    jmp     dispatch_done
+
+# 新增内存操作 - byte 和 word 存取
+do_i32_load8_s:
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # offset
+    mov     ebx, eax             # ebx = offset
+    call    _stack_pop           # eax = address
+    add     eax, ebx
+    movzx   eax, byte ptr [wasm_linear_memory + eax]
+    # sign extend: if high bit set, extend to negative
+    test    eax, 0x80
+    jz      .load8u_ok
+    or      eax, 0xFFFFFF00
+.load8u_ok:
+    call    _stack_push
+    jmp     dispatch_done
+
+do_i32_load8_u:
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # offset
+    mov     ebx, eax             # ebx = offset
+    call    _stack_pop           # eax = address
+    add     eax, ebx
+    movzx   eax, byte ptr [wasm_linear_memory + eax]
+    call    _stack_push
+    jmp     dispatch_done
+
+do_i32_load16_s:
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # offset
+    mov     ebx, eax             # ebx = offset
+    call    _stack_pop           # eax = address
+    add     eax, ebx
+    movzx   eax, word ptr [wasm_linear_memory + eax]
+    # sign extend: if high bit set, extend to negative
+    test    eax, 0x8000
+    jz      .load16u_ok
+    or      eax, 0xFFFF0000
+.load16u_ok:
+    call    _stack_push
+    jmp     dispatch_done
+
+do_i32_load16_u:
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # offset
+    mov     ebx, eax             # ebx = offset
+    call    _stack_pop           # eax = address
+    add     eax, ebx
+    movzx   eax, word ptr [wasm_linear_memory + eax]
+    call    _stack_push
+    jmp     dispatch_done
+
+do_i32_store8:
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # offset
+    mov     ebx, eax             # ebx = offset
+    call    _stack_pop           # eax = value
+    mov     edx, eax
+    call    _stack_pop           # eax = address
+    add     eax, ebx
+    mov     [wasm_linear_memory + eax], dl
+    jmp     dispatch_done
+
+do_i32_store16:
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # offset
+    mov     ebx, eax             # ebx = offset
+    call    _stack_pop           # eax = value
+    mov     edx, eax
+    call    _stack_pop           # eax = address
+    add     eax, ebx
+    mov     [wasm_linear_memory + eax], dx
     jmp     dispatch_done
 
 do_memory_size:

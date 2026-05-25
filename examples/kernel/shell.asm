@@ -351,6 +351,18 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest4
 
+    # "wasmtest5" - WASM br_table test (switch: index 2 -> 20)
+    mov     edi, offset cmd_wasmtest5
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest5
+
+    # "wasmtest6" - WASM byte memory test (store8/load8_u)
+    mov     edi, offset cmd_wasmtest6
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest6
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -363,6 +375,26 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_date
+
+    # "ls"
+    mov     edi, offset cmd_ls
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_ls
+
+    # "cat <file>" - prefix match (4 chars: "cat ")
+    mov     edi, offset cmd_cat
+    mov     ecx, 4
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_cat
+
+    # "touch <file>" - prefix match
+    mov     edi, offset cmd_touch
+    mov     ecx, 6
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_touch
 
     # "wasmapp <name>" - WASM application launcher
     mov     edi, offset cmd_wasmapp
@@ -787,6 +819,76 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_wasmtest5:
+    # br_table test (switch-case: hardcoded index 1 returns 20)
+    mov     esi, offset msg_wasm_test5
+    call    uart_puts
+    mov     esi, offset wasm_test_brtable_module
+    mov     ecx, offset wasm_test_brtable_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_brtable_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest6:
+    # store8/load8 test: store byte 42 at addr 0, load and return
+    mov     esi, offset msg_wasm_test6
+    call    uart_puts
+    mov     esi, offset wasm_test_mem8_module
+    mov     ecx, offset wasm_test_mem8_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_mem8_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -1053,6 +1155,87 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_ls:
+    # 列出根目录内容
+    mov     ebx, -1               # 根目录
+    call    vfs_list_dir
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_cat:
+    # 跳过 "cat " 前缀 (4 字符)
+    lea     esi, [shell_cmd_buf + 4]
+    mov     ebx, -1               # 根目录
+    call    vfs_find_file
+    cmp     eax, -1
+    je      .cat_not_found
+    call    vfs_read_file
+    cmp     ecx, -1
+    je      .cat_not_found
+    push    ecx
+1:  movzx   eax, byte ptr [esi]
+    push    eax
+    call    uart_putc
+    pop     eax
+    inc     esi
+    dec     ecx
+    jnz     1b
+    pop     ecx
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+.cat_not_found:
+    mov     esi, offset msg_file_notfound
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_touch:
+    lea     esi, [shell_cmd_buf + 6]
+    call    utils_strlen
+    mov     ecx, eax
+    cmp     ecx, 0
+    je      .touch_usage
+    mov     ebx, -1
+    call    vfs_create_file_ext
+    cmp     eax, -1
+    je      .touch_fail
+    mov     esi, offset msg_file_created
+    call    uart_puts
+    mov     esi, offset shell_cmd_buf + 6
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+.touch_usage:
+    mov     esi, offset msg_touch_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+.touch_fail:
+    mov     esi, offset msg_touch_fail
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_kill:
     # 跳过 "kill " 前缀 (5 字符)
     lea     esi, [shell_cmd_buf + 5]
@@ -1225,6 +1408,12 @@ cmd_kill:
     .asciz  "kill"
 cmd_date:
     .asciz  "date"
+cmd_ls:
+    .asciz  "ls"
+cmd_cat:
+    .asciz  "cat "
+cmd_touch:
+    .asciz  "touch "
 cmd_wasm:
     .asciz  "wasm"
 cmd_wasmrun:
@@ -1235,6 +1424,10 @@ cmd_wasmtest3:
     .asciz  "wasmtest3"
 cmd_wasmtest4:
     .asciz  "wasmtest4"
+cmd_wasmtest5:
+    .asciz  "wasmtest5"
+cmd_wasmtest6:
+    .asciz  "wasmtest6"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -1282,6 +1475,12 @@ help_text:
     .ascii  "  kill <pid>    - Terminate process"
     .byte   13, 10
     .ascii  "  date          - Show system uptime"
+    .byte   13, 10
+    .ascii  "  ls            - List files"
+    .byte   13, 10
+    .ascii  "  cat <file>    - Print file content"
+    .byte   13, 10
+    .ascii  "  touch <file>  - Create empty file"
     .byte   13, 10
     .ascii  "  wasm          - Show WASM module info"
     .byte   13, 10
@@ -1350,6 +1549,10 @@ msg_wasm_test3:
     .asciz  "Running WASM test3 (loop countdown)...\r\n"
 msg_wasm_test4:
     .asciz  "Running WASM test4 (syscall: putchar 'A')...\r\n"
+msg_wasm_test5:
+    .asciz  "Running WASM test5 (br_table: switch-case)...\r\n"
+msg_wasm_test6:
+    .asciz  "Running WASM test6 (store8/load8: byte ops)...\r\n"
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasm_parse_err:
@@ -1386,6 +1589,10 @@ msg_uptime_ticks:
     .asciz  " ticks\r\n"
 msg_sum_result:
     .asciz  "Sum(1..10) = "
+msg_brtable_result:
+    .asciz  "br_table result = "
+msg_mem8_result:
+    .asciz  "store8/load8 result = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -1394,6 +1601,14 @@ msg_kill_notfound:
     .asciz  "Process not found\r\n"
 newline_str2:
     .asciz  "\r\n"
+msg_file_notfound:
+    .asciz  "File not found\r\n"
+msg_file_created:
+    .asciz  "Created: "
+msg_touch_usage:
+    .asciz  "Usage: touch <filename>\r\n"
+msg_touch_fail:
+    .asciz  "Failed to create file\r\n"
 msg_date_uptime:
     .asciz  "Uptime: "
 msg_date_days:
@@ -1851,3 +2066,72 @@ wasm_app_countdown:
     .byte   0x20, 0x00             # local.get 0
     .byte   0x0B                   # end (function)
 wasm_app_countdown_size = . - wasm_app_countdown
+
+# WASM 测试模块 5：br_table - switch-case 分支表
+# 输入：索引值 (从栈弹出)
+# 输出：根据索引返回不同值 (0->10, 1->20, 2->30, default->99)
+wasm_test_brtable_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2)
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: br_table with 3 targets
+    .byte   0x0A                   # section id
+    .byte   0x15                   # section size = 21
+    .byte   0x01                   # num codes
+    .byte   0x13                   # code size = 19
+    .byte   0x00                   # num locals
+    # push test index (1)
+    .byte   0x41, 0x01             # i32.const 1 (test index)
+    # br_table: 3 labels + default
+    .byte   0x0E                   # br_table
+    .byte   0x03                   # vec_len = 3
+    .byte   0x00                   # label 0
+    .byte   0x01                   # label 1
+    .byte   0x02                   # label 2
+    .byte   0x03                   # default label
+    # blocks for each case
+    .byte   0x41, 0x63             # i32.const 99 (default)
+    .byte   0x0B                   # end block 3
+    .byte   0x41, 0x1E             # i32.const 30 (case 2)
+    .byte   0x0B                   # end block 2
+    .byte   0x41, 0x14             # i32.const 20 (case 1)
+    .byte   0x0B                   # end block 1
+    .byte   0x41, 0x0A             # i32.const 10 (case 0)
+    .byte   0x0B                   # end block 0
+wasm_test_brtable_size = . - wasm_test_brtable_module
+
+# WASM 测试模块 6：store8/load8 - 字节内存操作
+wasm_test_mem8_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # code section
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # code size = 11
+    .byte   0x00                   # num locals
+    # store byte 42 at address 0
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x41, 0x2A             # i32.const 42 (value)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # load byte from address 0
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x2D, 0x00, 0x00       # i32.load8_u
+    .byte   0x0B                   # end
+wasm_test_mem8_size = . - wasm_test_mem8_module

@@ -111,6 +111,12 @@ _start:
     mov     edi, 1
     call    log_print
 
+    # 初始化虚拟文件系统
+    call    vfs_init
+    mov     esi, offset msg_vfs
+    mov     edi, 1
+    call    log_print
+
     # 初始化 WASM 运行时
     call    wasm_parser_init
     call    wasm_vm_init
@@ -173,7 +179,7 @@ stack_top:
 
     .section .rodata
 msg_boot:
-    .asciz  "AI-ASM Kernel v0.4 booting..."
+    .asciz  "AI-ASM Kernel v0.5 booting..."
 msg_gdt:
     .asciz  "  GDT loaded"
 msg_idt:
@@ -190,5 +196,7 @@ msg_proc:
     .asciz  "  Process scheduler initialized"
 msg_syscall:
     .asciz  "  Syscall interface (INT 0x80) ready"
+msg_vfs:
+    .asciz  "  Virtual filesystem initialized"
 msg_wasm:
     .asciz  "  WASM runtime initialized"

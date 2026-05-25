@@ -45,7 +45,8 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
     examples/kernel/vga.asm examples/kernel/keyboard.asm examples/kernel/shell.asm \
     examples/kernel/utils.asm examples/kernel/uart.asm examples/kernel/log.asm \
     examples/kernel/memory.asm examples/kernel/paging.asm examples/kernel/process.asm \
-    examples/kernel/syscall.asm examples/kernel/wasm_parser.asm examples/kernel/wasm_vm.asm \
+    examples/kernel/syscall.asm examples/kernel/vfs.asm \
+    examples/kernel/wasm_parser.asm examples/kernel/wasm_vm.asm \
     examples/kernel/wasm_syscall.asm examples/kernel/linker.ld
 	@echo "Building interactive kernel..."
 	as --32 -o /tmp/ikernel_kernel.o examples/kernel/kernel.asm
@@ -63,6 +64,7 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
 	as --32 -o /tmp/ikernel_paging.o examples/kernel/paging.asm
 	as --32 -o /tmp/ikernel_process.o examples/kernel/process.asm
 	as --32 -o /tmp/ikernel_syscall.o examples/kernel/syscall.asm
+	as --32 -o /tmp/ikernel_vfs.o examples/kernel/vfs.asm
 	as --32 -o /tmp/ikernel_wasm_parser.o examples/kernel/wasm_parser.asm
 	as --32 -o /tmp/ikernel_wasm_vm.o examples/kernel/wasm_vm.asm
 	as --32 -o /tmp/ikernel_wasm_syscall.o examples/kernel/wasm_syscall.asm
@@ -72,7 +74,7 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
 		/tmp/ikernel_keyboard.o /tmp/ikernel_shell.o /tmp/ikernel_utils.o \
 		/tmp/ikernel_uart.o /tmp/ikernel_log.o \
 		/tmp/ikernel_memory.o /tmp/ikernel_paging.o \
-		/tmp/ikernel_process.o /tmp/ikernel_syscall.o \
+		/tmp/ikernel_process.o /tmp/ikernel_syscall.o /tmp/ikernel_vfs.o \
 		/tmp/ikernel_wasm_parser.o /tmp/ikernel_wasm_vm.o \
 		/tmp/ikernel_wasm_syscall.o
 	rm -f /tmp/ikernel_*.o
