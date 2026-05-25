@@ -348,6 +348,13 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest4
 
+    # "wasmapp <name>" - WASM application launcher
+    mov     edi, offset cmd_wasmapp
+    mov     ecx, 7
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_wasmapp
+
     # "echo <text>" - prefix match (5 chars: "echo ")
     mov     edi, offset cmd_echo_prefix
     mov     ecx, 5
@@ -760,6 +767,129 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_wasmapp:
+    # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
+    mov     esi, offset shell_cmd_buf + 8
+    call    utils_strlen
+    mov     ecx, eax
+    cmp     ecx, 0
+    je      .wasmapp_usage
+
+    # 比较 "uptime"
+    mov     edi, offset cmd_wasmapp_uptime
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_uptime
+
+    # 比较 "sum"
+    mov     edi, offset cmd_wasmapp_sum
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_sum
+
+    # 比较 "hello"
+    mov     edi, offset cmd_wasmapp_hello
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_hello
+
+    # 未知应用
+    mov     esi, offset msg_wasmapp_unknown
+    call    uart_puts
+    mov     esi, offset shell_cmd_buf + 8
+    call    utils_strlen
+    push    eax
+    push    esi
+    call    uart_puts
+    pop     esi
+    pop     ecx
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmapp_usage:
+    mov     esi, offset msg_wasmapp_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmapp_do_uptime:
+    mov     esi, offset msg_wasmapp_uptime
+    call    uart_puts
+    mov     esi, offset wasm_app_uptime
+    mov     ecx, offset wasm_app_uptime_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    xor     eax, eax
+    call    wasm_exec_func
+    # eax = tick count
+    mov     esi, offset msg_uptime_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     esi, offset msg_uptime_ticks
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmapp_do_sum:
+    mov     esi, offset msg_wasmapp_sum
+    call    uart_puts
+    mov     esi, offset wasm_app_sum
+    mov     ecx, offset wasm_app_sum_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_sum_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmapp_do_hello:
+    mov     esi, offset msg_wasmapp_hello
+    call    uart_puts
+    mov     esi, offset wasm_app_hello
+    mov     ecx, offset wasm_app_hello_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    xor     eax, eax
+    call    wasm_exec_func
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_echo:
     # 跳过 "echo " 前缀 (5 字符)
     lea     esi, [shell_cmd_buf + 5]
@@ -843,6 +973,14 @@ cmd_wasmtest3:
     .asciz  "wasmtest3"
 cmd_wasmtest4:
     .asciz  "wasmtest4"
+cmd_wasmapp:
+    .asciz  "wasmapp"
+cmd_wasmapp_uptime:
+    .asciz  "uptime"
+cmd_wasmapp_sum:
+    .asciz  "sum"
+cmd_wasmapp_hello:
+    .asciz  "hello"
 cmd_echo_prefix:
     .asciz  "echo "
 
@@ -880,6 +1018,8 @@ help_text:
     .ascii  "  wasmtest3     - Run WASM loop test (countdown)"
     .byte   13, 10
     .ascii  "  wasmtest4     - Run WASM syscall test (putchar 'A')"
+    .byte   13, 10
+    .ascii  "  wasmapp <app> - Run WASM app (uptime, sum, hello)"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -940,6 +1080,22 @@ msg_wasm_result:
     .asciz  "Result: "
 msg_wasm_parse_err:
     .asciz  "WASM parse error\r\n"
+msg_wasmapp_usage:
+    .asciz  "Usage: wasmapp <uptime|sum|hello>\r\n"
+msg_wasmapp_unknown:
+    .asciz  "Unknown WASM app: "
+msg_wasmapp_uptime:
+    .asciz  "Running WASM app: uptime\r\n"
+msg_wasmapp_sum:
+    .asciz  "Running WASM app: sum (1+2+...+10)\r\n"
+msg_wasmapp_hello:
+    .asciz  "Running WASM app: hello\r\n"
+msg_uptime_result:
+    .asciz  "Uptime: "
+msg_uptime_ticks:
+    .asciz  " ticks\r\n"
+msg_sum_result:
+    .asciz  "Sum(1..10) = "
 
 # WASM 测试模块 1：简单加法 (local.get 0 + local.get 1)
 # WASM 格式：
@@ -1009,9 +1165,7 @@ wasm_test_add_module:
 wasm_test_add_size = . - wasm_test_add_module
 
 # WASM 测试模块 3：循环计数 (countdown from 5 to 0)
-# type section content: 01 60 00 01 7F = 5 bytes
-# code body: 25 bytes (locals 3 + init 4 + loop body 14 + return 3 + ends 1)
-# code section content: 01 + 19 + 25 bytes = 27 bytes
+# loop: counter--; br_if(counter) → continues while counter>0, exits when 0
 wasm_test_loop_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
@@ -1028,11 +1182,11 @@ wasm_test_loop_module:
     .byte   0x02                   # section size
     .byte   0x01                   # num functions
     .byte   0x00                   # type index
-    # code section (id=10, size=27)
+    # code section (id=10, size=24)
     .byte   0x0A                   # section id
-    .byte   0x1B                   # section size = 27
+    .byte   0x17                   # section size = 23
     .byte   0x01                   # num codes
-    .byte   0x19                   # code size = 25
+    .byte   0x16                   # code size = 22
     .byte   0x01                   # 1 local declaration
     .byte   0x01, 0x7F             # 1 local of type i32
     .byte   0x41, 0x05             # i32.const 5
@@ -1042,8 +1196,7 @@ wasm_test_loop_module:
     .byte   0x41, 0x01             # i32.const 1
     .byte   0x6B                   # i32.sub
     .byte   0x21, 0x00             # local.set 0
-    .byte   0x20, 0x00             # local.get 0
-    .byte   0x45                   # i32.eqz
+    .byte   0x20, 0x00             # local.get 0 (push counter, br_if loops while non-zero)
     .byte   0x0D, 0x00             # br_if 0
     .byte   0x0B                   # end (loop)
     .byte   0x20, 0x00             # local.get 0
@@ -1080,3 +1233,115 @@ wasm_test_syscall_module:
     .byte   0x10, 0x03             # call 3 (host slot 2 = putchar, since func_count=1)
     .byte   0x0B                   # end
 wasm_test_syscall_size = . - wasm_test_syscall_module
+
+# ============================================================================
+# WASM 应用程序
+# ============================================================================
+
+# WASM 应用 1：Uptime - 调用 host_time 获取系统滴答数
+# host_time = slot 5, func_index = 1 + 5 = 6
+wasm_app_uptime:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2): 1 func, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section (id=10, size=6)
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # code size = 4
+    .byte   0x00                   # num locals
+    .byte   0x10, 0x06             # call 6 (host slot 5 = time)
+    .byte   0x0B                   # end
+wasm_app_uptime_size = . - wasm_app_uptime
+
+# WASM 应用 2：Sum - 计算 1+2+...+10 = 55
+# locals: $sum(i32), $i(i32)
+wasm_app_sum:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2): 1 func, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section (id=10, size=38)
+    .byte   0x0A                   # section id
+    .byte   0x26                   # section size = 38
+    .byte   0x01                   # num codes
+    .byte   0x25                   # code size = 37
+    .byte   0x01                   # 1 local entry
+    .byte   0x02, 0x7F             # 2 locals of type i32
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x21, 0x00             # local.set 0 (sum=0)
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x21, 0x01             # local.set 1 (i=1)
+    .byte   0x03, 0x40             # loop void
+    .byte   0x20, 0x00             # local.get 0 (sum)
+    .byte   0x20, 0x01             # local.get 1 (i)
+    .byte   0x6A                   # i32.add
+    .byte   0x21, 0x00             # local.set 0 (sum=sum+i)
+    .byte   0x20, 0x01             # local.get 1 (i)
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x6A                   # i32.add
+    .byte   0x21, 0x01             # local.set 1 (i=i+1)
+    .byte   0x20, 0x01             # local.get 1 (i)
+    .byte   0x41, 0x0B             # i32.const 11
+    .byte   0x48                   # i32.lt_s
+    .byte   0x0D, 0x00             # br_if 0
+    .byte   0x20, 0x00             # local.get 0 (sum, result)
+    .byte   0x0B                   # end
+wasm_app_sum_size = . - wasm_app_sum
+
+# WASM 应用 3：Hello - 打印 "Hi!\n" 使用 host_putchar
+# host_putchar = slot 2, func_index = 1 + 2 = 3
+wasm_app_hello:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=3): () -> ()
+    .byte   0x01                   # section id
+    .byte   0x03                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x00                   # num results
+    # function section (id=3, size=2): 1 func, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section (id=10, size=17)
+    .byte   0x0A                   # section id
+    .byte   0x11                   # section size = 17
+    .byte   0x01                   # num codes
+    .byte   0x0F                   # code size = 15
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x48             # i32.const 72 ('H')
+    .byte   0x10, 0x03             # call 3 (host_putchar)
+    .byte   0x41, 0x69             # i32.const 105 ('i')
+    .byte   0x10, 0x03             # call 3 (host_putchar)
+    .byte   0x41, 0x21             # i32.const 33 ('!')
+    .byte   0x10, 0x03             # call 3 (host_putchar)
+    .byte   0x41, 0x0A             # i32.const 10 ('\n')
+    .byte   0x10, 0x03             # call 3 (host_putchar)
+    .byte   0x0B                   # end
+wasm_app_hello_size = . - wasm_app_hello

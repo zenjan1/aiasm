@@ -272,19 +272,37 @@ wasm_exec_func:
     lea     edx, [esi + ecx]
     mov     [wasm_code_end], edx
 
-    # 跳过局部变量声明，读取局部变量数量
+    # 跳过局部变量声明，读取局部变量条目数量
     call    _read_leb128_vm
-    mov     edx, eax              # edx = 局部变量数量
+    mov     edx, eax              # edx = 局部变量条目数量
+    xor     ebx, ebx              # ebx = 当前局部变量索引
 
     # 初始化局部变量为 0
 init_locals_loop:
     test    edx, edx
     jz      start_exec_code
 
-    # 读取局部变量类型数量和类型（暂不处理，直接跳过）
-    call    _read_leb128_vm  # 数量
-    call    _read_leb128_vm  # 类型（单字节，但用 LEB128 读）
+    push    edx                   # _read_leb128_vm 会修改 edx
 
+    # 读取此条目的局部变量数量
+    call    _read_leb128_vm
+    mov     ecx, eax              # ecx = 此条目有多少个局部变量
+
+    # 跳过类型字节
+    call    _read_leb128_vm
+
+    pop     edx                   # 恢复条目数量
+
+    # 将 ecx 个局部变量清零
+init_locals_entry:
+    test    ecx, ecx
+    jz      init_locals_next
+    mov     dword ptr [wasm_locals + ebx * 4], 0
+    inc     ebx
+    dec     ecx
+    jmp     init_locals_entry
+
+init_locals_next:
     dec     edx
     jmp     init_locals_loop
 
@@ -499,16 +517,8 @@ do_else:
     jmp     dispatch_done
 
 do_end:
-    # 弹出控制帧
+    # 弹出控制帧，end 只是退出 block/loop/if，不循环
     call    _ctrl_frame_pop
-    jc      dispatch_done
-    # 如果是 LOOP，跳回循环开始
-    cmp     eax, 2                # LOOP type
-    je      do_end_loop_back
-    jmp     dispatch_done
-do_end_loop_back:
-    mov     esi, [wasm_loop_start]
-    mov     [wasm_pc], esi
     jmp     dispatch_done
 
 do_br:
@@ -516,14 +526,14 @@ do_br:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm
     mov     ebx, eax              # ebx = label index
-    # 弹出 label index + 1 个控制帧
-    call    _ctrl_frame_pop_n
-    jc      dispatch_done
-    # 如果是 LOOP，跳回循环开始；否则跳到 end 后
+    # 查找目标帧类型（不出栈）
+    call    _ctrl_frame_peek_at
     cmp     eax, 2                # LOOP type
-    je      do_br_loop_back
+    je      do_br_loop            # LOOP: 不弹出帧，直接跳回
+    # BLOCK/IF: 弹出 N+1 帧
+    call    _ctrl_frame_pop_n
     jmp     dispatch_done
-do_br_loop_back:
+do_br_loop:
     mov     esi, [wasm_loop_start]
     mov     [wasm_pc], esi
     jmp     dispatch_done
@@ -537,13 +547,14 @@ do_br_if:
     call    _stack_pop
     test    eax, eax
     jz      dispatch_done
-    # 条件为真：执行分支
+    # 条件为真：查找目标帧类型
+    call    _ctrl_frame_peek_at
+    cmp     eax, 2                # LOOP type
+    je      do_br_if_loop         # LOOP: 不弹出帧，跳回
+    # BLOCK/IF: 弹出 N+1 帧
     call    _ctrl_frame_pop_n
-    jc      dispatch_done
-    cmp     eax, 2
-    je      do_br_if_loop_back
     jmp     dispatch_done
-do_br_if_loop_back:
+do_br_if_loop:
     mov     esi, [wasm_loop_start]
     mov     [wasm_pc], esi
     jmp     dispatch_done
@@ -1071,6 +1082,29 @@ _ctrl_frame_push_loop:
     pop     edx
     pop     ecx
     pop     eax
+    ret
+
+# _ctrl_frame_peek_at: 查看指定深度的控制帧类型（不出栈）
+# 输入：ebx = label index (0=最内层)
+# 输出：eax = frame type
+_ctrl_frame_peek_at:
+    push    ecx
+    push    edx
+    mov     eax, [wasm_control_top]
+    sub     eax, ebx              # target = control_top - label_index
+    dec     eax                   # adjust: frames are at 0..control_top-1
+    test    eax, eax
+    jl      _ctrl_peek_empty
+    imul    eax, 16
+    add     eax, offset wasm_control_stack
+    mov     eax, [eax]            # eax = frame type
+    pop     edx
+    pop     ecx
+    ret
+_ctrl_peek_empty:
+    xor     eax, eax
+    pop     edx
+    pop     ecx
     ret
 
 # _ctrl_frame_pop: 弹出控制帧
