@@ -111,6 +111,14 @@ _start:
     mov     edi, 1
     call    log_print
 
+    # 初始化 WASM 运行时
+    call    wasm_parser_init
+    call    wasm_vm_init
+    call    wasm_syscall_init
+    mov     esi, offset msg_wasm
+    mov     edi, 1
+    call    log_print
+
     # 开中断
     sti
 
@@ -165,7 +173,7 @@ stack_top:
 
     .section .rodata
 msg_boot:
-    .asciz  "AI-ASM Kernel v0.3 booting..."
+    .asciz  "AI-ASM Kernel v0.4 booting..."
 msg_gdt:
     .asciz  "  GDT loaded"
 msg_idt:
@@ -182,3 +190,5 @@ msg_proc:
     .asciz  "  Process scheduler initialized"
 msg_syscall:
     .asciz  "  Syscall interface (INT 0x80) ready"
+msg_wasm:
+    .asciz  "  WASM runtime initialized"

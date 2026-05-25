@@ -318,6 +318,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_ps
 
+    # "wasm" - show WASM module info
+    mov     edi, offset cmd_wasm
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasm
+
+    # "wasmrun" - run WASM test
+    mov     edi, offset cmd_wasmrun
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmrun
+
+    # "wasmtest2" - WASM const add test (3+5=8)
+    mov     edi, offset cmd_wasmtest2
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest2
+
+    # "wasmtest3" - WASM loop test (countdown 5->0)
+    mov     edi, offset cmd_wasmtest3
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest3
+
+    # "wasmtest4" - WASM syscall test (host_putchar 'A')
+    mov     edi, offset cmd_wasmtest4
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest4
+
     # "echo <text>" - prefix match (5 chars: "echo ")
     mov     edi, offset cmd_echo_prefix
     mov     ecx, 5
@@ -559,6 +589,144 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_wasm:
+    # 打印 WASM 模块信息
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmrun:
+    # 运行内置测试 WASM 模块
+    mov     esi, offset msg_wasm_test
+    call    uart_puts
+
+    # 加载测试模块（手工编码的简单加法函数）
+    mov     esi, offset wasm_test_module
+    mov     ecx, 32              # wasm_test_module size (hardcoded)
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+
+    # 打印解析结果
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 执行函数 0
+    xor     eax, eax
+    call    wasm_exec_func
+
+    # 打印结果
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasm_parse_err:
+    mov     esi, offset msg_wasm_parse_err
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest2:
+    mov     esi, offset msg_wasm_test2
+    call    uart_puts
+    mov     esi, offset wasm_test_add_module
+    mov     ecx, 27              # wasm_test_add_module size (hardcoded)
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest3:
+    mov     esi, offset msg_wasm_test3
+    call    uart_puts
+    mov     esi, offset wasm_test_loop_module
+    mov     ecx, 48              # wasm_test_loop_module size (hardcoded)
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_echo:
     # 跳过 "echo " 前缀 (5 字符)
     lea     esi, [shell_cmd_buf + 5]
@@ -632,11 +800,19 @@ cmd_meminfo:
     .asciz  "meminfo"
 cmd_ps:
     .asciz  "ps"
+cmd_wasm:
+    .asciz  "wasm"
+cmd_wasmrun:
+    .asciz  "wasmrun"
+cmd_wasmtest2:
+    .asciz  "wasmtest2"
+cmd_wasmtest3:
+    .asciz  "wasmtest3"
 cmd_echo_prefix:
     .asciz  "echo "
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.3"
+    .ascii  "AI-ASM Kernel v0.4"
     .byte   13, 10, 0
 
 help_text:
@@ -659,6 +835,14 @@ help_text:
     .ascii  "  meminfo       - Show memory info"
     .byte   13, 10
     .ascii  "  ps            - Show process list"
+    .byte   13, 10
+    .ascii  "  wasm          - Show WASM module info"
+    .byte   13, 10
+    .ascii  "  wasmrun       - Run WASM test module"
+    .byte   13, 10
+    .ascii  "  wasmtest2     - Run WASM const test (returns 42)"
+    .byte   13, 10
+    .ascii  "  wasmtest3     - Run WASM loop test (countdown)"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -705,3 +889,124 @@ ps_newline:
     .asciz  "\r\n"
 ps_debug_prefix:
     .asciz  "current_pid = "
+
+# WASM 相关字符串
+msg_wasm_test:
+    .asciz  "Running WASM test module (local.get add)...\r\n"
+msg_wasm_test2:
+    .asciz  "Running WASM test2 (const 42)...\r\n"
+msg_wasm_test3:
+    .asciz  "Running WASM test3 (loop countdown)...\r\n"
+msg_wasm_result:
+    .asciz  "Result: "
+msg_wasm_parse_err:
+    .asciz  "WASM parse error\r\n"
+
+# WASM 测试模块 1：简单加法 (local.get 0 + local.get 1)
+# WASM 格式：
+#   magic: 0x00 0x61 0x73 0x6D
+#   version: 0x01 0x00 0x00 0x00
+#   type section content: 01 60 02 7F 7F 01 7F = 7 bytes (num types + func type + params + results)
+#   function section: 03 02 01 00  (1 function, type 0)
+#   code section: 0A 09 01 07 00 20 00 20 01 6A 0B
+wasm_test_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=7)
+    .byte   0x01                   # section id
+    .byte   0x07                   # section size (corrected: 7 bytes)
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x02                   # num params
+    .byte   0x7F                   # i32
+    .byte   0x7F                   # i32
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2)
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index
+    # code section (id=10, size=9)
+    .byte   0x0A                   # section id
+    .byte   0x09                   # section size
+    .byte   0x01                   # num codes
+    .byte   0x07                   # code size
+    .byte   0x00                   # num locals
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x20, 0x01             # local.get 1
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test_module_size = . - wasm_test_module
+
+# WASM 测试模块 2：返回常量 42
+# type section content: 01 60 00 01 7F = 5 bytes (num types + func type + 0 params + 1 result)
+wasm_test_add_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=5)
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size (corrected: 5 bytes)
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2)
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index
+    # code section (id=10, size=6)
+    # code body = 00 (num locals) + 41 2A (i32.const 42) + 0B (end) = 4 bytes
+    # section content = 01 (num codes) + 04 (code size) + code body = 6 bytes
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # code size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x2A             # i32.const 42
+    .byte   0x0B                   # end
+wasm_test_add_size = . - wasm_test_add_module
+
+# WASM 测试模块 3：循环计数 (countdown from 5 to 0)
+# type section content: 01 60 00 01 7F = 5 bytes
+# code body: 25 bytes (locals 3 + init 4 + loop body 14 + return 3 + ends 1)
+# code section content: 01 + 19 + 25 bytes = 27 bytes
+wasm_test_loop_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=5)
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2)
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index
+    # code section (id=10, size=27)
+    .byte   0x0A                   # section id
+    .byte   0x1B                   # section size = 27
+    .byte   0x01                   # num codes
+    .byte   0x19                   # code size = 25
+    .byte   0x01                   # 1 local declaration
+    .byte   0x01, 0x7F             # 1 local of type i32
+    .byte   0x41, 0x05             # i32.const 5
+    .byte   0x21, 0x00             # local.set 0
+    .byte   0x03, 0x40             # loop (block type void)
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x6B                   # i32.sub
+    .byte   0x21, 0x00             # local.set 0
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x45                   # i32.eqz
+    .byte   0x0D, 0x00             # br_if 0
+    .byte   0x0B                   # end (loop)
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x0B                   # end (function)
+wasm_test_loop_size = . - wasm_test_loop_module
