@@ -168,3 +168,67 @@ utils_itoa:
     pop     edi
     pop     ebp
     ret
+
+# -----------------------------------------------------------------------------
+# atoi: 字符串转整数
+# 输入：esi = 字符串指针
+# 输出：eax = 整数值（支持负数）
+# -----------------------------------------------------------------------------
+    .globl  utils_atoi
+utils_atoi:
+    push    ebx
+    push    ecx
+    push    edx
+
+    xor     eax, eax
+    xor     ecx, ecx              # sign = 0 (positive)
+
+    # 跳过空白
+.skip_ws:
+    movzx   edx, byte ptr [esi]
+    cmp     edx, ' '
+    je      .next_char
+    cmp     edx, '\t'
+    je      .next_char
+    jmp     .check_sign
+
+.next_char:
+    inc     esi
+    jmp     .skip_ws
+
+.check_sign:
+    cmp     edx, '-'
+    jne     .check_plus
+    mov     ecx, 1
+    inc     esi
+    jmp     .parse_digits
+
+.check_plus:
+    cmp     edx, '+'
+    jne     .parse_digits
+    inc     esi
+
+.parse_digits:
+    movzx   edx, byte ptr [esi]
+    cmp     edx, '0'
+    jl      .done_parse
+    cmp     edx, '9'
+    jg      .done_parse
+
+    # eax = eax * 10 + (edx - '0')
+    imul    eax, 10
+    sub     edx, '0'
+    add     eax, edx
+    inc     esi
+    jmp     .parse_digits
+
+.done_parse:
+    test    ecx, ecx
+    jz      .atoi_done
+    neg     eax
+
+.atoi_done:
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret

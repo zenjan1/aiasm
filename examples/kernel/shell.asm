@@ -348,6 +348,13 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest4
 
+    # "kill <pid>" - 终止进程
+    mov     edi, offset cmd_kill
+    mov     ecx, 4
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_kill
+
     # "wasmapp <name>" - WASM application launcher
     mov     edi, offset cmd_wasmapp
     mov     ecx, 7
@@ -803,6 +810,24 @@ shell_dispatch:
     test    eax, eax
     jz      .wasmapp_do_fib
 
+    # 比较 "factorial"
+    mov     edi, offset cmd_wasmapp_fact
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_fact
+
+    # 比较 "multiply"
+    mov     edi, offset cmd_wasmapp_mul
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_mul
+
+    # 比较 "countdown"
+    mov     edi, offset cmd_wasmapp_count
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_count
+
     # 未知应用
     mov     esi, offset msg_wasmapp_unknown
     call    uart_puts
@@ -932,6 +957,67 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_kill:
+    # 跳过 "kill " 前缀 (5 字符)
+    lea     esi, [shell_cmd_buf + 5]
+    call    utils_strlen
+    mov     ecx, eax
+    cmp     ecx, 0
+    je      .kill_usage
+
+    # 解析 PID
+    call    utils_atoi
+    cmp     eax, 0
+    jl      .kill_usage
+    cmp     eax, 16
+    jge     .kill_usage
+
+    # 通过系统调用终止进程 (SYS_EXIT = 1, ebx = exit_code)
+    # 但 SYS_EXIT 只终止当前进程，我们需要通过 INT 0x80 传递 kill 请求
+    # 直接使用内核内部接口：设置进程状态为 ZOMBIE
+    push    eax                   # 保存请求的 PID
+    mov     edi, eax              # pid
+    imul    edi, 256
+    add     edi, offset proc_table
+    mov     eax, [edi]            # 读取 PCB 中的 PID
+    cmp     eax, -1
+    je      .kill_not_found
+    cmp     eax, [esp]            # 与请求的 PID 比较
+    jne     .kill_not_found       # PID 不匹配
+    mov     dword ptr [edi + 4], 3  # state = PROC_ZOMBIE
+    mov     dword ptr [edi + 80], 9  # exit_code = 9 (killed)
+    mov     esi, offset msg_kill_ok
+    call    uart_puts
+    pop     eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     esi, offset newline_str2
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.kill_usage:
+    mov     esi, offset msg_kill_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.kill_not_found:
+    pop     eax
+    mov     esi, offset msg_kill_notfound
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_echo:
     # 跳过 "echo " 前缀 (5 字符)
     lea     esi, [shell_cmd_buf + 5]
@@ -1005,6 +1091,8 @@ cmd_meminfo:
     .asciz  "meminfo"
 cmd_ps:
     .asciz  "ps"
+cmd_kill:
+    .asciz  "kill"
 cmd_wasm:
     .asciz  "wasm"
 cmd_wasmrun:
@@ -1052,6 +1140,8 @@ help_text:
     .ascii  "  meminfo       - Show memory info"
     .byte   13, 10
     .ascii  "  ps            - Show process list"
+    .byte   13, 10
+    .ascii  "  kill <pid>    - Terminate process"
     .byte   13, 10
     .ascii  "  wasm          - Show WASM module info"
     .byte   13, 10
@@ -1144,6 +1234,14 @@ msg_uptime_ticks:
     .asciz  " ticks\r\n"
 msg_sum_result:
     .asciz  "Sum(1..10) = "
+msg_kill_ok:
+    .asciz  "Killed PID "
+msg_kill_usage:
+    .asciz  "Usage: kill <pid>\r\n"
+msg_kill_notfound:
+    .asciz  "Process not found\r\n"
+newline_str2:
+    .asciz  "\r\n"
 
 # WASM 测试模块 1：简单加法 (local.get 0 + local.get 1)
 # WASM 格式：
