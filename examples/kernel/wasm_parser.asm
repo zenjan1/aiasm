@@ -94,6 +94,15 @@ wasm_code_count:
 wasm_code_table:
     .space  1024                # 代码表（最多16个代码体指针）
 
+    # 数据段信息
+    .globl  wasm_data_count
+wasm_data_count:
+    .space  4                   # 数据段数量
+
+    .globl  wasm_data_table
+wasm_data_table:
+    .space  256                 # 数据段表（最多16个：ptr+offset+size）
+
     # 内存段信息
     .globl  wasm_memory_count
 wasm_memory_count:
@@ -302,8 +311,8 @@ handle_code_sec:
     jmp     section_done_ok
 
 handle_data_sec:
-    # 暂时跳过 data section
-    jmp     skip_section
+    call    _parse_data_section
+    jmp     section_done_ok
 
 skip_section:
     # 跳过 section 内容
@@ -488,6 +497,78 @@ memory_section_done:
     xor     eax, eax
     pop     ebx
     pop     eax
+    ret
+
+# ============================================================================
+# _parse_data_section: 解析 data section
+# 输入：esi = section 内容, edx = section 大小
+# ============================================================================
+_parse_data_section:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edi
+
+    # 读取数据段数量
+    call    _read_leb128_u32
+    mov     [wasm_data_count], eax
+    mov     ecx, eax
+
+    # edi = 数据段表指针
+    mov     edi, offset wasm_data_table
+
+data_entry_loop:
+    test    ecx, ecx
+    jz      data_section_done
+
+    # 读取 flags
+    movzx   ebx, byte ptr [esi]
+    inc     esi
+
+    # 读取 offset 表达式：i32.const N, end
+    cmp     byte ptr [esi], 0x41    # i32.const
+    jne     data_err_format
+    inc     esi
+    call    _read_leb128_u32
+    mov     [edi], eax              # 存储偏移
+    add     edi, 4
+
+    # 跳过 end (0x0B)
+    cmp     byte ptr [esi], 0x0B
+    jne     data_err_format
+    inc     esi
+
+    # 读取数据大小
+    call    _read_leb128_u32
+    mov     ebx, eax                # ebx = 数据大小
+    mov     [edi], ebx              # 存储大小
+    add     edi, 4
+
+    # 存储数据指针
+    mov     [edi], esi
+    add     edi, 4
+
+    # 跳过数据内容
+    add     esi, ebx
+
+    dec     ecx
+    jmp     data_entry_loop
+
+data_section_done:
+    xor     eax, eax
+    pop     edi
+    pop     ecx
+    pop     ebx
+    pop     eax
+    ret
+
+data_err_format:
+    mov     eax, 8                  # 错误码：data section 格式错误
+    pop     edi
+    pop     ecx
+    pop     ebx
+    pop     eax
+    ret
     ret
 
 # ============================================================================

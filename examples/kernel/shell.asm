@@ -619,6 +619,7 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
 
     # 打印解析结果
     call    wasm_print_info
@@ -676,6 +677,7 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
     call    wasm_print_info
     mov     al, 0x0a
     call    uart_putc
@@ -709,6 +711,7 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
     call    wasm_print_info
     mov     al, 0x0a
     call    uart_putc
@@ -742,6 +745,7 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
     call    wasm_print_info
     mov     al, 0x0a
     call    uart_putc
@@ -793,6 +797,12 @@ shell_dispatch:
     test    eax, eax
     jz      .wasmapp_do_hello
 
+    # 比较 "fibonacci"
+    mov     edi, offset cmd_wasmapp_fib
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmapp_do_fib
+
     # 未知应用
     mov     esi, offset msg_wasmapp_unknown
     call    uart_puts
@@ -828,6 +838,7 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
     xor     eax, eax
     call    wasm_exec_func
     # eax = tick count
@@ -855,6 +866,7 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_sum_result
@@ -883,8 +895,38 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_load_data
     xor     eax, eax
     call    wasm_exec_func
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmapp_do_fib:
+    mov     esi, offset msg_wasmapp_fib
+    call    uart_puts
+    mov     esi, offset wasm_app_fib
+    mov     ecx, offset wasm_app_fib_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_fib_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
     pop     ecx
     pop     edi
     pop     esi
@@ -981,6 +1023,8 @@ cmd_wasmapp_sum:
     .asciz  "sum"
 cmd_wasmapp_hello:
     .asciz  "hello"
+cmd_wasmapp_fib:
+    .asciz  "fibonacci"
 cmd_echo_prefix:
     .asciz  "echo "
 
@@ -1019,7 +1063,7 @@ help_text:
     .byte   13, 10
     .ascii  "  wasmtest4     - Run WASM syscall test (putchar 'A')"
     .byte   13, 10
-    .ascii  "  wasmapp <app> - Run WASM app (uptime, sum, hello)"
+    .ascii  "  wasmapp <app> - Run WASM app (uptime, sum, hello, fibonacci)"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -1081,7 +1125,7 @@ msg_wasm_result:
 msg_wasm_parse_err:
     .asciz  "WASM parse error\r\n"
 msg_wasmapp_usage:
-    .asciz  "Usage: wasmapp <uptime|sum|hello>\r\n"
+    .asciz  "Usage: wasmapp <uptime|sum|hello|fibonacci>\r\n"
 msg_wasmapp_unknown:
     .asciz  "Unknown WASM app: "
 msg_wasmapp_uptime:
@@ -1090,6 +1134,10 @@ msg_wasmapp_sum:
     .asciz  "Running WASM app: sum (1+2+...+10)\r\n"
 msg_wasmapp_hello:
     .asciz  "Running WASM app: hello\r\n"
+msg_wasmapp_fib:
+    .asciz  "Running WASM app: fibonacci (fib(10))\r\n"
+msg_fib_result:
+    .asciz  "fib(10) = "
 msg_uptime_result:
     .asciz  "Uptime: "
 msg_uptime_ticks:
@@ -1345,3 +1393,65 @@ wasm_app_hello:
     .byte   0x10, 0x03             # call 3 (host_putchar)
     .byte   0x0B                   # end
 wasm_app_hello_size = . - wasm_app_hello
+
+# WASM 应用 4：Fibonacci - 计算 fib(10) = 55
+# locals: $a(i32), $b(i32), $i(i32), $temp(i32)
+# a=0, b=1, for i=0..9: (a,b) = (b, a+b)
+wasm_app_fib:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2): 1 func, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section (id=10, size=51)
+    .byte   0x0A                   # section id
+    .byte   0x33                   # section size = 51
+    .byte   0x01                   # num codes
+    .byte   0x31                   # code size = 49
+    .byte   0x01                   # 1 local entry
+    .byte   0x04, 0x7F             # 4 locals of type i32
+    # 初始化: a=0, b=1, i=0
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x21, 0x00             # local.set 0 (a=0)
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x21, 0x01             # local.set 1 (b=1)
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x21, 0x02             # local.set 2 (i=0)
+    # loop {
+    .byte   0x03, 0x40             # loop void
+    #   temp = a
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x21, 0x03             # local.set 3
+    #   a = b
+    .byte   0x20, 0x01             # local.get 1
+    .byte   0x21, 0x00             # local.set 0
+    #   b = temp + b
+    .byte   0x20, 0x03             # local.get 3
+    .byte   0x20, 0x01             # local.get 1
+    .byte   0x6A                   # i32.add
+    .byte   0x21, 0x01             # local.set 1
+    #   i++
+    .byte   0x20, 0x02             # local.get 2
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x6A                   # i32.add
+    .byte   0x21, 0x02             # local.set 2
+    #   if i < 10, continue
+    .byte   0x20, 0x02             # local.get 2
+    .byte   0x41, 0x0A             # i32.const 10
+    .byte   0x48                   # i32.lt_s
+    .byte   0x0D, 0x00             # br_if 0
+    # }
+    # return a
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x0B                   # end
+wasm_app_fib_size = . - wasm_app_fib

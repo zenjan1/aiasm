@@ -240,6 +240,74 @@ wasm_vm_init:
     ret
 
 # ============================================================================
+# wasm_load_data: 将解析后的 data 段加载到线性内存
+# 输入：无（使用 wasm_data_table）
+# 输出：eax = 0（成功）或错误码
+# ============================================================================
+    .globl  wasm_load_data
+wasm_load_data:
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    mov     ecx, [wasm_data_count]
+    test    ecx, ecx
+    jz      load_data_done_ok
+
+    mov     edi, offset wasm_data_table
+
+load_data_segment:
+    test    ecx, ecx
+    jz      load_data_done_ok
+
+    # 读取：偏移(4) + 大小(4) + 数据指针(4) = 12 字节/条目
+    mov     eax, [edi]            # 偏移
+    mov     ebx, [edi + 4]        # 大小
+    mov     esi, [edi + 8]        # 数据源指针
+
+    # 检查是否超出线性内存
+    mov     edx, [wasm_memory_pages]
+    shl     edx, 16               # 内存总大小（字节）
+    mov     edx, eax
+    add     edx, ebx
+    cmp     edx, [wasm_memory_pages]
+    shl     edx, 16
+    ja      load_data_overflow
+
+    # 复制数据到线性内存
+    mov     edi, offset wasm_linear_memory
+    add     edi, eax              # 目标地址
+
+    push    ecx                   # 保存段计数器
+    mov     ecx, ebx              # ecx = 字节数
+    rep     movsb
+    pop     ecx
+
+    add     edi, 12               # 下一个数据段条目
+    dec     ecx
+    jmp     load_data_segment
+
+load_data_done_ok:
+    xor     eax, eax
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+load_data_overflow:
+    mov     eax, 1
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# ============================================================================
 # wasm_exec_func: 执行 WASM 函数
 # 输入：eax = 函数索引
 # 输出：eax = 返回值（或错误码）
