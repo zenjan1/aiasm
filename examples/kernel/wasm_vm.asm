@@ -713,24 +713,28 @@ do_br_table:
     jmp     .br_table_execute
 
 .br_table_in_range:
-    # 读取第 edx 个 label
+    # 读取第 edx 个 label，同时递减 ecx 跟踪剩余数量
+    # 注意：_read_leb128_vm 会破坏 edx，需要先保存
     test    edx, edx
     jz      .br_table_target_found
-    call    _read_leb128_vm       # 跳过一个 label
+    push    edx                   # 保存 index
+    call    _read_leb128_vm       # 跳过一个 label（clobbers edx）
+    pop     edx                   # 恢复 index
     dec     edx
+    dec     ecx                   # 剩余数量 -1
     jmp     .br_table_in_range
 
 .br_table_target_found:
-    call    _read_leb128_vm
+    call    _read_leb128_vm       # 读取目标 label
     mov     ebx, eax              # ebx = target label
     # 跳过剩余 labels 和 default
-    add     ecx, 1                # 剩余数量 + 1 (default)
+    # 此时 ecx = 剩余未读的 label 数量
+    # 需要跳过 ecx 个 label + 1 个 default = ecx + 1 个 LEB128
+    inc     ecx                   # +1 for default
 .br_table_skip_rest:
     test    ecx, ecx
     jz      .br_table_execute
-    push    ecx                   # 保存剩余计数器
-    call    _read_leb128_vm
-    pop     ecx
+    call    _read_leb128_vm       # 跳过
     dec     ecx
     jmp     .br_table_skip_rest
 

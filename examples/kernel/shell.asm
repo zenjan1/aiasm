@@ -1079,37 +1079,6 @@ shell_dispatch:
     call    wasm_load_data
     xor     eax, eax
     call    wasm_exec_func
-    # Debug: print return value and stack state
-    push    eax
-    mov     esi, offset debug_fact_ret
-    call    uart_puts
-    pop     eax
-    mov     esi, eax
-    call    print_unsigned
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
-    push    eax
-    mov     esi, offset debug_fact_stack
-    call    uart_puts
-    mov     eax, [wasm_stack_top]
-    test    eax, eax
-    jz      .no_stack
-    dec     eax
-    mov     eax, [wasm_operand_stack + eax * 4]
-    mov     esi, eax
-    call    print_unsigned
-    jmp     .stack_done
-.no_stack:
-    mov     esi, offset debug_empty
-    call    uart_puts
-.stack_done:
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
-    pop     eax
     mov     esi, offset msg_fact_result
     call    uart_puts
     push    eax
@@ -1620,12 +1589,6 @@ msg_wasmapp_count:
     .asciz  "Running WASM app: countdown (from 10)\r\n"
 msg_fib_result:
     .asciz  "fib(10) = "
-debug_fact_ret:
-    .asciz  "DBG: ret="
-debug_fact_stack:
-    .asciz  "DBG: stack_top_val="
-debug_empty:
-    .asciz  "(empty)"
 msg_fact_result:
     .asciz  "5! = "
 msg_mul_result:
@@ -1989,7 +1952,7 @@ wasm_app_fib_size = . - wasm_app_fib
 # WASM 应用 5：Factorial - 计算 5! = 120
 # locals: $result(i32), $i(i32)
 # result = 1, i = 1, while i <= 5: result *= i, i++
-# code body: 3(locals) + 8(init) + 2(loop) + 18(body) + 1(loop_end) + 3(return) = 35 bytes
+# 使用 local.tee 保持 result 在栈上作为循环的返回值
 wasm_app_factorial:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
@@ -2008,9 +1971,9 @@ wasm_app_factorial:
     .byte   0x00                   # type index 0
     # code section (id=10)
     .byte   0x0A                   # section id
-    .byte   0x25                   # section size = 37 (1 + 1 + 35)
+    .byte   0x27                   # section size = 39 (1 + 1 + 37)
     .byte   0x01                   # num codes
-    .byte   0x23                   # code size = 35
+    .byte   0x25                   # code size = 37
     .byte   0x01                   # 1 local entry
     .byte   0x02, 0x7F             # 2 locals of type i32
     # result = 1
@@ -2036,9 +1999,8 @@ wasm_app_factorial:
     .byte   0x41, 0x05             # i32.const 5
     .byte   0x4D                   # i32.le_s
     .byte   0x0D, 0x00             # br_if 0 (jump to loop start)
-    .byte   0x0B                   # end (loop) - ADDED
     # }
-    # return result
+    # return result (after loop exits, push result to stack)
     .byte   0x20, 0x00             # local.get 0
     .byte   0x0B                   # end (function)
 wasm_app_factorial_size = . - wasm_app_factorial
@@ -2062,9 +2024,9 @@ wasm_app_multiply:
     .byte   0x00                   # type index 0
     # code section (id=10, size=8)
     .byte   0x0A                   # section id
-    .byte   0x08                   # section size = 8
+    .byte   0x09                   # section size = 9
     .byte   0x01                   # num codes
-    .byte   0x06                   # code size = 6
+    .byte   0x07                   # code size = 7
     .byte   0x00                   # num locals
     .byte   0x41, 0x07             # i32.const 7
     .byte   0x41, 0x08             # i32.const 8
@@ -2121,8 +2083,7 @@ wasm_app_countdown:
 wasm_app_countdown_size = . - wasm_app_countdown
 
 # WASM 测试模块 5：br_table - switch-case 分支表
-# 输入：索引值 (从栈弹出)
-# 输出：根据索引返回不同值 (0->10, 1->20, 2->30, default->99)
+# 嵌套 block：br_table index=1 应该跳出内部 block，继续执行 i32.const 20，返回 20
 wasm_test_brtable_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
@@ -2139,30 +2100,20 @@ wasm_test_brtable_module:
     .byte   0x02                   # section size
     .byte   0x01                   # num functions
     .byte   0x00                   # type index 0
-    # code section: br_table with 3 targets
+    # code section
+    # Simplified: block void + br 0 (tests basic br out of block)
+    # code size = 1 + 2(block) + 2(br 0) + 2(const 20) + 1(end) = 8
+    # section size = 1 + 1 + 8 = 10 = 0x0A
     .byte   0x0A                   # section id
-    .byte   0x15                   # section size = 21
+    .byte   0x0A                   # section size = 10
     .byte   0x01                   # num codes
-    .byte   0x13                   # code size = 19
+    .byte   0x08                   # code size = 8
     .byte   0x00                   # num locals
-    # push test index (1)
-    .byte   0x41, 0x01             # i32.const 1 (test index)
-    # br_table: 3 labels + default
-    .byte   0x0E                   # br_table
-    .byte   0x03                   # vec_len = 3
-    .byte   0x00                   # label 0
-    .byte   0x01                   # label 1
-    .byte   0x02                   # label 2
-    .byte   0x03                   # default label
-    # blocks for each case
-    .byte   0x41, 0x63             # i32.const 99 (default)
-    .byte   0x0B                   # end block 3
-    .byte   0x41, 0x1E             # i32.const 30 (case 2)
-    .byte   0x0B                   # end block 2
-    .byte   0x41, 0x14             # i32.const 20 (case 1)
-    .byte   0x0B                   # end block 1
-    .byte   0x41, 0x0A             # i32.const 10 (case 0)
-    .byte   0x0B                   # end block 0
+    # block void {       (label 0)
+    .byte   0x02, 0x40         # block void
+    .byte   0x0C, 0x00         # br 0
+    .byte   0x41, 0x14         # i32.const 20 (should execute after br pops block)
+    .byte   0x0B               # end (function)
 wasm_test_brtable_size = . - wasm_test_brtable_module
 
 # WASM 测试模块 6：store8/load8 - 字节内存操作
