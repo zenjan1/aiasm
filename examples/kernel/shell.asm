@@ -1079,6 +1079,37 @@ shell_dispatch:
     call    wasm_load_data
     xor     eax, eax
     call    wasm_exec_func
+    # Debug: print return value and stack state
+    push    eax
+    mov     esi, offset debug_fact_ret
+    call    uart_puts
+    pop     eax
+    mov     esi, eax
+    call    print_unsigned
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    push    eax
+    mov     esi, offset debug_fact_stack
+    call    uart_puts
+    mov     eax, [wasm_stack_top]
+    test    eax, eax
+    jz      .no_stack
+    dec     eax
+    mov     eax, [wasm_operand_stack + eax * 4]
+    mov     esi, eax
+    call    print_unsigned
+    jmp     .stack_done
+.no_stack:
+    mov     esi, offset debug_empty
+    call    uart_puts
+.stack_done:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     eax
     mov     esi, offset msg_fact_result
     call    uart_puts
     push    eax
@@ -1589,6 +1620,12 @@ msg_wasmapp_count:
     .asciz  "Running WASM app: countdown (from 10)\r\n"
 msg_fib_result:
     .asciz  "fib(10) = "
+debug_fact_ret:
+    .asciz  "DBG: ret="
+debug_fact_stack:
+    .asciz  "DBG: stack_top_val="
+debug_empty:
+    .asciz  "(empty)"
 msg_fact_result:
     .asciz  "5! = "
 msg_mul_result:

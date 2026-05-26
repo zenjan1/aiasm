@@ -1,0 +1,26 @@
+{
+  "tasks": [
+    {
+      "id": "d2642222",
+      "cron": "*/5 * * * *",
+      "prompt": "Read /home/a/aiasm-v0.1/update-state. If UPDATE=0, read /home/a/aiasm-v0.1/prompt and execute all instructions in it. The prompt instructions end with setting UPDATE to 1 after completion. If UPDATE is not 0, report back \"UPDATE is not 0, skipping.\"",
+      "createdAt": 1779674213738,
+      "lastFiredAt": 1779771610730,
+      "recurring": true,
+      "createdBySessionId": "3d73d08b-ca86-432e-a701-5631ae57746e",
+      "createdByPid": 608,
+      "createdByProcStart": "8835"
+    },
+    {
+      "id": "e8a49c5d",
+      "cron": "*/5 * * * *",
+      "prompt": "检查/home/a/aiasm-v0.1/update-state文件中的UPDATE值，如果UPDATE=1则继续操作系统开发任务：按汇编底层（含WASM运行时）、WASM中间解释层、应用层的结构开发，每步qemu调试通过后发布release并推送。",
+      "createdAt": 1779674369748,
+      "lastFiredAt": 1779771610730,
+      "recurring": true,
+      "createdBySessionId": "1abf51fe-308e-48c3-b67d-c985c92d61cc",
+      "createdByPid": 1716,
+      "createdByProcStart": "500703"
+    }
+  ]
+}
