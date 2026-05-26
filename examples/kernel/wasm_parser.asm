@@ -569,7 +569,6 @@ data_err_format:
     pop     ebx
     pop     eax
     ret
-    ret
 
 # ============================================================================
 # _parse_export_section: 解析 export section

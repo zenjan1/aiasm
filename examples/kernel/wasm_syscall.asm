@@ -172,17 +172,17 @@ wasm_host_call:
     # ebx = size
     # 简化实现：从 WASM 线性内存末尾分配
     mov     eax, [wasm_memory_pages]
-    shl     eax, 16               # 页数 * 64KB
-    add     eax, ebx              # 新的末尾
+    shl     eax, 16               # eax = 当前内存总大小（字节）
+    mov     ecx, eax              # 保存分配起始偏移
+    add     eax, ebx              # eax = 新的末尾
     shr     eax, 16               # 新页数
+    inc     eax                   # 向上取整到页边界
     cmp     eax, 65536
     ja      .alloc_fail
     mov     [wasm_memory_pages], eax
 
-    # 返回分配的偏移
-    mov     eax, [wasm_memory_pages]
-    dec     eax
-    shl     eax, 16
+    # 返回分配的偏移（旧末尾）
+    mov     eax, ecx
     jmp     .done
 
 .alloc_fail:

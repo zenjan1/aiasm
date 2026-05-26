@@ -29,106 +29,92 @@ VFS_TYPE_FILE   = 1
 #   [48] data[16]     - 保留
 
 # ============================================================================
-# BSS
+# BSS (only small variables)
 # ============================================================================
     .section .bss
+
+    .globl  vfs_file_count
+vfs_file_count:
+    .space  4
+
+    .globl  vfs_current_dir
+vfs_current_dir:
+    .space  4
+
+path_temp:
+    .space  VFS_MAX_NAME
+
+# ============================================================================
+# VFS 文件表放在 .data 段（保证被正确加载且可写）
+# ============================================================================
+    .section .data, "aw", @progbits
     .align  64
 
     .globl  vfs_file_table
 vfs_file_table:
-    .space  VFS_MAX_FILES * VFS_ENTRY_SIZE
+    # Entry 0: root "/"
+    .ascii  "/"
+    .space  31, 0
+    .long   VFS_TYPE_DIR
+    .long   0
+    .long   -1
+    .long   0
+    .space  16, 0
+    # Entry 1: "etc" dir
+    .ascii  "etc"
+    .space  29, 0
+    .long   VFS_TYPE_DIR
+    .long   0
+    .long   -1
+    .long   0
+    .space  16, 0
+    # Entry 2: "version" file
+    .ascii  "version"
+    .space  25, 0
+    .long   VFS_TYPE_FILE
+    .long   5
+    .long   1
+    .long   0
+    .space  16, 0
+    # Entry 3: "motd" file
+    .ascii  "motd"
+    .space  28, 0
+    .long   VFS_TYPE_FILE
+    .long   18
+    .long   1
+    .long   0
+    .space  16, 0
+    # Entry 4: "bin" dir
+    .ascii  "bin"
+    .space  29, 0
+    .long   VFS_TYPE_DIR
+    .long   0
+    .long   -1
+    .long   0
+    .space  16, 0
+    # Entry 5-31: zeros
+    .space  27 * VFS_ENTRY_SIZE
 
-    .globl  vfs_file_count
-vfs_file_count:
-    .space  4                   # 当前文件数
-
-    .globl  vfs_current_dir
-vfs_current_dir:
-    .space  4                   # 当前目录索引（-1 = 根）
-
-# 文件数据区（每个文件 256 字节，最大 32 个文件 = 8KB）
+# 文件数据区也在 .data 段
 vfs_file_data:
-    .space  VFS_MAX_FILES * 256
+    .space  256                   # entry 0 (root): no data
+    .space  256                   # entry 1 (etc): no data
+    .ascii  "v0.4\n"              # entry 2 (version)
+    .space  251
+    .ascii  "Welcome to AI-ASM\n" # entry 3 (motd)
+    .space  238
+    .space  256                   # entry 4 (bin): no data
+    .space  27 * 256              # remaining entries
 
 # ============================================================================
-# vfs_init: 初始化虚拟文件系统
+# vfs_init: 设置运行时状态
 # ============================================================================
     .section .text
     .globl  vfs_init
 vfs_init:
-    push    eax
-    push    ecx
-    push    edi
-    push    esi
-
-    # 清零文件表
-    mov     edi, offset vfs_file_table
-    mov     ecx, (VFS_MAX_FILES * VFS_ENTRY_SIZE) / 4
-    xor     eax, eax
-    cld
-    rep     stosd
-
-    # 清零文件数据区
-    mov     edi, offset vfs_file_data
-    mov     ecx, (VFS_MAX_FILES * 256) / 4
-    xor     eax, eax
-    rep     stosd
-
-    mov     dword ptr [vfs_file_count], 0
-    mov     dword ptr [vfs_current_dir], -1  # 根目录
-
-    # 创建根目录
-    mov     edi, offset vfs_file_table
-    mov     esi, offset root_name
-    mov     ecx, 5
-    rep     movsb
-    mov     dword ptr [edi + 32], VFS_TYPE_DIR    # type = dir
-    mov     dword ptr [edi + 36], 0               # size = 0
-    mov     dword ptr [edi + 40], -1              # parent = root
-    call    get_tick_count
-    mov     [edi + 44], eax
-
-    # 创建 /etc 目录
-    call    get_tick_count
-    mov     [vfs_init_tick], eax
-    mov     dword ptr [vfs_file_count], 1
-    push    offset etc_name
-    push    VFS_TYPE_DIR
-    push    -1
-    push    0                                     # size
-    call    _vfs_create_entry
-    add     esp, 16
-
-    # 创建 /etc/version 文件
-    push    offset version_content
-    push    5                                     # size
-    push    VFS_TYPE_FILE
-    push    1                                     # parent = /etc (index 1)
-    push    offset version_name
-    call    _vfs_create_file
-    add     esp, 20
-
-    # 创建 /etc/motd 文件
-    push    offset motd_content
-    push    16                                    # size
-    push    VFS_TYPE_FILE
-    push    1                                     # parent = /etc
-    push    offset motd_name
-    call    _vfs_create_file
-    add     esp, 20
-
-    # 创建 /bin 目录
-    push    offset bin_name
-    push    VFS_TYPE_DIR
-    push    -1                                    # parent = root
-    push    0                                     # size
-    call    _vfs_create_entry
-    add     esp, 16
-
-    pop     esi
-    pop     edi
-    pop     ecx
-    pop     eax
+    # 数据已在 .text 中预填充，只需设置运行时变量
+    mov     dword ptr [vfs_current_dir], -1
+    mov     dword ptr [vfs_file_count], 5
     ret
 
 # ============================================================================
@@ -170,9 +156,9 @@ _vfs_create_entry:
     mov     [edi], al             # null 终止
 
     # 设置属性
-    mov     eax, [ebp + 8]        # type
+    mov     eax, [ebp + 12]       # type
     mov     [ebx + 32], eax
-    mov     eax, [ebp + 12]       # size
+    mov     eax, [ebp + 8]        # size
     mov     [ebx + 36], eax
     mov     eax, [ebp + 4]        # parent
     mov     [ebx + 40], eax
@@ -283,70 +269,59 @@ _vfs_file_create_done:
     .globl  vfs_list_dir
 vfs_list_dir:
     push    eax
+    push    ebx
     push    ecx
     push    edx
     push    esi
     push    edi
 
-    # 获取目标目录索引
-    mov     eax, [vfs_current_dir]
-
-    mov     ecx, [vfs_file_count]
-    test    ecx, ecx
-    jz      vfs_list_empty
-
-    xor     edx, edx              # 遍历索引
+    mov     eax, offset vfs_file_table
 
 vfs_list_loop:
-    cmp     edx, ecx
-    jge     vfs_list_done
+    # 检查名称首字节，null = 未使用条目（终止）
+    cmp     byte ptr [eax], 0
+    jz      vfs_list_done
 
-    # 获取条目地址
-    mov     eax, edx
-    imul    eax, VFS_ENTRY_SIZE
-    add     eax, offset vfs_file_table
-    mov     esi, eax              # esi = 条目地址
+    mov     edx, eax              # 保存条目基地址
 
-    # 检查父目录是否匹配
+    # 跳过根目录条目（名称为 "/"）
+    cmp     byte ptr [eax], '/'
+    je      .vfs_skip
+
+    # 检查父目录
     mov     edi, [eax + 40]       # parent
-    cmp     edi, ebx              # ebx = 目标目录
-    jne     vfs_next_entry
+    cmp     edi, ebx
+    jne     .vfs_skip
 
     # 打印名称
-    mov     esi, eax              # 条目地址
-    push    eax
-    push    edx
-1:  mov     al, [esi]
+    mov     esi, eax
+.vfs_print:
+    lodsb
     test    al, al
-    jz      2f
+    jz      .vfs_end_name
     cmp     al, ' '
-    jb      2f                    # 遇到非打印字符就停止
+    jb      .vfs_end_name
+    push    eax
     push    esi
     call    uart_putc
     pop     esi
-    inc     esi
-    jmp     1b
-2:  pop     edx
     pop     eax
+    jmp     .vfs_print
+.vfs_end_name:
 
-    # 如果是目录，添加 / 后缀
-    cmp     dword ptr [eax + 32], VFS_TYPE_DIR
-    jne     vfs_not_dir
+    # 目录加 / 后缀
+    cmp     dword ptr [edx + 32], VFS_TYPE_DIR
+    jne     .vfs_not_dir
     mov     al, '/'
     call    uart_putc
-vfs_not_dir:
-
-    # 打印空格分隔
+.vfs_not_dir:
     mov     al, ' '
     call    uart_putc
 
-vfs_next_entry:
-    inc     edx
+.vfs_skip:
+    mov     eax, edx              # 恢复条目基地址（被 lodsb 破坏）
+    add     eax, VFS_ENTRY_SIZE
     jmp     vfs_list_loop
-
-vfs_list_empty:
-    mov     esi, offset vfs_msg_no_files
-    call    uart_puts
 
 vfs_list_done:
     mov     al, 0x0a
@@ -357,6 +332,7 @@ vfs_list_done:
     pop     edi
     pop     esi
     pop     edx
+    pop     ebx
     pop     ecx
     pop     eax
     ret
@@ -368,52 +344,73 @@ vfs_list_done:
 # ============================================================================
     .globl  vfs_find_file
 vfs_find_file:
+    push    ebp
+    mov     ebp, esp
+    push    ebx
     push    ecx
     push    edx
     push    edi
-    push    esi
 
     mov     ecx, [vfs_file_count]
-    xor     edx, edx
+    xor     ebp, ebp              # ebp = entry index
 
 vfs_find_loop:
-    cmp     edx, ecx
+    cmp     ebp, ecx
     jge     vfs_find_not_found
 
-    # 获取条目
-    mov     eax, edx
-    imul    eax, VFS_ENTRY_SIZE
-    add     eax, offset vfs_file_table
+    # Get entry address: edx = ebp * 64 + vfs_file_table
+    mov     edx, ebp
+    imul    edx, VFS_ENTRY_SIZE
+    add     edx, offset vfs_file_table
 
-    # 检查父目录
-    cmp     [eax + 40], ebx
+    # Check parent directory
+    cmp     dword ptr [edx + 40], ebx
     jne     vfs_find_next
 
-    # 比较名称
-    push    edx
-    mov     edi, eax              # 条目名称地址
-    call    vfs_strcmp
-    test    eax, eax
-    jz      vfs_find_found        # 找到了
+    # Parent matches — compare name
+    # Inline strcmp: esi = search string, edx = entry address
+    push    esi                   # save search string pointer
+    push    edx                   # save entry address
+    push    ecx                   # save file count
 
-    pop     edx
-vfs_find_next:
-    inc     edx
-    jmp     vfs_find_loop
+    mov     edi, edx              # entry name address
 
-vfs_find_found:
+1:  mov     al, [edi]
+    mov     dl, [esi]
+    cmp     al, dl
+    jne     2f                    # mismatch
+    test    al, al
+    jz      3f                    # both null = match
+    inc     edi
+    inc     esi
+    jmp     1b
+
+2:  # No match — restore and try next entry
+    pop     ecx
     pop     edx
-    mov     eax, edx
+    pop     esi
+    jmp     vfs_find_next
+
+3:  # Match found
+    pop     ecx
+    pop     edx
+    pop     esi
+    mov     eax, ebp
     jmp     vfs_find_done
+
+vfs_find_next:
+    inc     ebp
+    jmp     vfs_find_loop
 
 vfs_find_not_found:
     mov     eax, -1
 
 vfs_find_done:
-    pop     esi
     pop     edi
     pop     edx
     pop     ecx
+    pop     ebx
+    pop     ebp
     ret
 
 # ============================================================================
@@ -453,37 +450,37 @@ vfs_read_ok:
     ret
 
 # ============================================================================
-# vfs_create_file: 创建文件（外部接口）
+# vfs_create_file_ext: 创建文件（外部接口）
 # 输入：esi = 文件名, ebx = 父目录索引
 # 输出：eax = 文件索引（-1 = 失败）
 # ============================================================================
     .globl  vfs_create_file_ext
 vfs_create_file_ext:
+    push    ebp
+    mov     ebp, esp
     push    esi
     push    ebx
-    push    1                     # type = file
-    push    -1                    # parent (will be set below)
+
+    push    0                     # parent
     push    0                     # size
+    push    1                     # type = file
     push    esi                   # name
     call    _vfs_create_entry
-    add     esp, 20
+    add     esp, 16
+
     pop     ebx
     pop     esi
+    pop     ebp
     ret
 
 # ============================================================================
 # vfs_strcmp: 比较条目名称和给定字符串
-# 输入：edi = 条目地址, esi = 字符串
+# 输入：edi = 条目地址（名称在偏移0）, esi = 字符串
 # 输出：eax = 0 相等, 1 不等
 # ============================================================================
 vfs_strcmp:
     push    edi
     push    esi
-
-    mov     edi, [edi]            # 条目名称（前 4 字节，假设短名称）
-    # 实际上需要逐字节比较
-    mov     edi, [esp + 4]        # 恢复条目地址
-
 1:  mov     al, [edi]
     mov     dl, [esi]
     cmp     al, dl
@@ -493,17 +490,107 @@ vfs_strcmp:
     inc     edi
     inc     esi
     jmp     1b
-
 vfs_str_eq:
     pop     esi
     pop     edi
     xor     eax, eax
     ret
-
 vfs_str_ne:
     pop     esi
     pop     edi
     mov     eax, 1
+    ret
+
+# ============================================================================
+# vfs_find_by_path: 通过完整路径查找文件（支持绝对路径）
+# 输入：esi = 路径字符串（如 "/etc/version" 或 "version"）
+# 输出：eax = 文件索引（-1 = 未找到）
+# ============================================================================
+    .globl  vfs_find_by_path
+vfs_find_by_path:
+    push    ebp
+    mov     ebp, esp
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    mov     al, [esi]
+    cmp     al, '/'
+    jne     .find_relative         # 相对路径：在当前目录查找
+
+    # 绝对路径：从根目录开始逐层解析
+    inc     esi                    # 跳过开头的 '/'
+    mov     ebx, -1                # ebx = 当前目录（-1 = 根）
+
+.find_next:
+    cmp     byte ptr [esi], 0
+    je      .find_done             # 路径结束，返回最后的目录
+    mov     edi, offset path_temp
+    mov     ecx, VFS_MAX_NAME - 1
+
+.find_copy:
+    mov     al, [esi]
+    cmp     al, 0
+    je      .find_end_component
+    cmp     al, '/'
+    je      .find_end_component
+    mov     [edi], al
+    inc     esi
+    inc     edi
+    dec     ecx
+    jnz     .find_copy
+.find_end_component:
+    xor     al, al
+    mov     [edi], al             # null 终止
+    cmp     byte ptr [esi], '/'
+    je      .find_skip
+    jmp     .find_last
+.find_skip:
+    inc     esi                    # 跳过 '/' 分隔符
+    push    esi                    # save esi (points past '/')
+
+    # 在当前目录查找该分量
+    mov     esi, offset path_temp  # name = path_temp
+    call    vfs_find_file          # eax = found index or -1
+
+    pop     esi                    # restore esi
+
+    cmp     eax, -1
+    je      .find_not_found
+
+    # 检查是否为目录
+    mov     ebx, eax
+    imul    eax, VFS_ENTRY_SIZE
+    add     eax, offset vfs_file_table
+    cmp     dword ptr [eax + 32], VFS_TYPE_FILE
+    je      .find_not_found         # 是文件不是目录，路径解析失败
+    jmp     .find_next
+
+.find_last:
+    mov     esi, offset path_temp   # name = path_temp
+    jmp     .find_by_name
+
+.find_relative:
+    mov     ebx, -1
+    jmp     .find_by_name
+
+.find_by_name:
+    # esi = 名称, ebx = 父目录
+    call    vfs_find_file
+    jmp     .find_done
+
+.find_not_found:
+    mov     eax, -1
+
+.find_done:
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     ebp
     ret
 
     .section .rodata

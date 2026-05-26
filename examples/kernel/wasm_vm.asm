@@ -307,11 +307,12 @@ load_data_segment:
 
     # 检查是否超出线性内存
     mov     edx, [wasm_memory_pages]
-    shl     edx, 16               # 内存总大小（字节）
+    shl     edx, 16               # edx = 当前内存总大小
+    push    edx                   # 保存内存大小
     mov     edx, eax
-    add     edx, ebx
-    cmp     edx, [wasm_memory_pages]
-    shl     edx, 16
+    add     edx, ebx              # edx = 偏移 + 数据大小
+    pop     ecx                   # ecx = 内存总大小
+    cmp     edx, ecx
     ja      load_data_overflow
 
     # 复制数据到线性内存
@@ -725,11 +726,11 @@ do_br_table:
     # 跳过剩余 labels 和 default
     add     ecx, 1                # 剩余数量 + 1 (default)
 .br_table_skip_rest:
-    test    ecx, ebx              # 使用 ebx 作为计数器（避免冲突）
+    test    ecx, ecx
     jz      .br_table_execute
-    push    ebx                   # 保存 target label
+    push    ecx                   # 保存剩余计数器
     call    _read_leb128_vm
-    pop     ebx
+    pop     ecx
     dec     ecx
     jmp     .br_table_skip_rest
 
@@ -1023,7 +1024,7 @@ grow_fail:
 # 常量
 do_i32_const:
     mov     esi, [wasm_pc]
-    call    _read_leb128_vm
+    call    _read_leb128_s32      # 使用有符号解码器
     call    _stack_push
     jmp     dispatch_done
 
@@ -1680,8 +1681,15 @@ exec_body_err:
 _stack_push:
     push    ebx
     mov     ebx, [wasm_stack_top]
+    cmp     ebx, 256              # 最大 256 个元素
+    jae     stack_overflow_push
     mov     [wasm_operand_stack + ebx * 4], eax
     inc     dword ptr [wasm_stack_top]
+    pop     ebx
+    ret
+stack_overflow_push:
+    mov     byte ptr [wasm_running], 0
+    mov     dword ptr [wasm_exec_error], 3
     pop     ebx
     ret
 
@@ -1755,6 +1763,61 @@ read_leb_vm_byte:
 
 read_leb_vm_done:
     mov     [wasm_pc], esi
+    pop     ecx
+    pop     ebx
+    ret
+
+# ============================================================================
+# _read_leb128_s32: 从当前 PC 读取有符号 LEB128（SLEB128）
+# 输出：eax = 有符号值, 更新 wasm_pc
+# ============================================================================
+_read_leb128_s32:
+    push    ebx
+    push    ecx
+
+    mov     esi, [wasm_pc]
+
+    xor     eax, eax
+    xor     ebx, ebx
+
+read_sleb_vm_byte:
+    movzx   edx, byte ptr [esi]
+    inc     esi
+
+    and     edx, 0x7F
+    push    ecx
+    mov     ecx, ebx
+    shl     edx, cl
+    pop     ecx
+    or      eax, edx
+
+    movzx   edx, byte ptr [esi - 1]
+    test    edx, 0x80
+    jz      read_sleb_vm_done
+
+    add     ebx, 7
+    jmp     read_sleb_vm_byte
+
+read_sleb_vm_done:
+    # 如果最高数据位（最后字节的 bit 6）为 1，执行符号扩展
+    movzx   edx, byte ptr [esi - 1]
+    test    edx, 0x40
+    jz      read_sleb_vm_no_extend
+
+    # 符号扩展：将高位填充为 1
+    mov     edx, ebx
+    cmp     edx, 32
+    jae     read_sleb_vm_done_pc  # 已经读了 32 位以上，不需要扩展
+
+    mov     ecx, edx
+    mov     edx, -1
+    shl     edx, cl
+    or      eax, edx
+
+read_sleb_vm_no_extend:
+    mov     [wasm_pc], esi
+
+read_sleb_vm_done_pc:
     pop     ecx
     pop     ebx
     ret

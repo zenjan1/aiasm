@@ -1167,22 +1167,29 @@ shell_dispatch:
 .do_cat:
     # 跳过 "cat " 前缀 (4 字符)
     lea     esi, [shell_cmd_buf + 4]
-    mov     ebx, -1               # 根目录
-    call    vfs_find_file
+    call    utils_strlen
+    test    eax, eax
+    jz      .cat_not_found
+    # 使用 vfs_find_by_path 支持绝对路径
+    lea     esi, [shell_cmd_buf + 4]
+    call    vfs_find_by_path
     cmp     eax, -1
     je      .cat_not_found
     call    vfs_read_file
     cmp     ecx, -1
     je      .cat_not_found
+    jecxz   .cat_done             # 空文件
+.print_content:
+    movzx   eax, byte ptr [esi]
     push    ecx
-1:  movzx   eax, byte ptr [esi]
-    push    eax
+    push    esi
     call    uart_putc
-    pop     eax
+    pop     esi
+    pop     ecx
     inc     esi
     dec     ecx
-    jnz     1b
-    pop     ecx
+    jnz     .print_content
+.cat_done:
     mov     al, 0x0a
     call    uart_putc
     mov     al, 0x0d
@@ -1192,7 +1199,12 @@ shell_dispatch:
     pop     esi
     ret
 .cat_not_found:
-    mov     esi, offset msg_file_notfound
+    # Print the filename that wasn't found
+    mov     esi, offset msg_cat_nf_prefix
+    call    uart_puts
+    lea     esi, [shell_cmd_buf + 4]
+    call    uart_puts
+    mov     esi, offset msg_cat_nf_suffix
     call    uart_puts
     pop     ecx
     pop     edi
@@ -1603,6 +1615,10 @@ newline_str2:
     .asciz  "\r\n"
 msg_file_notfound:
     .asciz  "File not found\r\n"
+msg_cat_nf_prefix:
+    .asciz  "cat: "
+msg_cat_nf_suffix:
+    .asciz  ": No such file\r\n"
 msg_file_created:
     .asciz  "Created: "
 msg_touch_usage:
