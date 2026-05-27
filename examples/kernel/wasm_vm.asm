@@ -663,6 +663,10 @@ _dispatch_opcode:
     je      do_i64_ctz
     cmp     ebx, OP_I64_POPCNT
     je      do_i64_popcnt
+    cmp     ebx, OP_I64_ROTL
+    je      do_i64_rotl
+    cmp     ebx, OP_I64_ROTR
+    je      do_i64_rotr
 
     # i64 常量
     cmp     ebx, OP_I64_CONST
@@ -1677,43 +1681,40 @@ do_i64_sub:
     call    _stack_push
     jmp     dispatch_done
 
-# i64.mul: a * b (64-bit, 使用 32x32->64 乘法)
+# i64.mul: a * b (64-bit × 64-bit → 64-bit 结果)
 do_i64_mul:
-    call    _stack_pop
-    mov     ecx, eax             # b_low
-    call    _stack_pop
-    mov     edx, eax             # b_high
-    call    _stack_pop
-    mov     ebx, eax             # a_low
-    call    _stack_pop           # a_high
-    # result_low = a_low * b_low (取低 32 位)
-    mov     eax, ebx
-    mul     ecx                   # edx:eax = a_low * b_low
-    push    edx                   # 保存 cross-high
-    # cross terms: a_low * b_high + a_high * b_low
-    mov     eax, ebx
-    mul     edx                   # eax = a_low * b_high (取低32)
-    pop     edx
-    add     eax, edx              # eax = cross_high + low_mul_high
-    push    eax                   # 保存最终 high
-    # result_low 已经在 eax (low mul result) 但被覆盖了，重新计算
-    # 实际上 low mul result 是第一次 mul 后的 eax，已被覆盖
-    # 需要重新做
-    # 简化：只用 a_low * b_low，忽略溢出（对于小值足够）
-    pop     eax                   # 丢弃
-    # 重新做完整的 64 位乘法太复杂，使用简化版本
-    # 对于大多数 WASM 应用，a_high 和 b_high 都是 0（小整数）
-    # 所以 a * b ≈ a_low * b_low
-    mov     eax, ebx
-    mul     ecx                   # edx:eax = a_low * b_low
-    # 如果高 32 位都为 0，结果就是 edx:eax
-    # 但需要加上 cross terms
-    # 为简单起见，只处理小值情况
-    # 完整实现需要更多代码，这里先做简化版本
-    # 推入结果
-    call    _stack_push           # low
-    xor     eax, eax
-    call    _stack_push           # high = 0（简化）
+    call    _stack_pop           # b_low
+    mov     ecx, eax
+    call    _stack_pop           # b_high
+    mov     edx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high (eax)
+    # 立即保存所有 4 个操作数到栈（mul 会破坏 eax/edx）
+    push    eax                  # [esp]    = a_high
+    push    ebx                  # [esp+4]  = a_low
+    push    ecx                  # [esp+8]  = b_low
+    push    edx                  # [esp+12] = b_high
+    # Step 1: a_low * b_low → edx:eax
+    mov     eax, [esp + 4]
+    mul     dword ptr [esp + 8]  # edx:eax = a_low * b_low
+    mov     esi, eax             # esi = result_low
+    mov     edi, edx             # edi = result_high (初始)
+    # Step 2: a_low * b_high → eax (低32位加到高位)
+    mov     eax, [esp + 4]       # eax = a_low
+    mul     dword ptr [esp + 12] # edx:eax = a_low * b_high, 只需 eax
+    add     edi, eax             # edi += (a_low * b_high)低32位
+    # Step 3: a_high * b_low → eax (低32位加到高位)
+    mov     eax, [esp]           # eax = a_high
+    mul     dword ptr [esp + 8]  # edx:eax = a_high * b_low, 只需 eax
+    add     edi, eax             # edi += (a_high * b_low)低32位
+    # 清理栈
+    add     esp, 16
+    # 推入结果: {result_high, result_low}
+    mov     eax, esi
+    call    _stack_push          # push result_low
+    mov     eax, edi
+    call    _stack_push          # push result_high
     jmp     dispatch_done
 
 # i64.div_s: 有符号 64 位除法
@@ -1724,10 +1725,13 @@ do_i64_div_s:
     mov     edx, eax
     call    _stack_pop           # a_low
     mov     ebx, eax
-    call    _stack_pop           # a_high
+    call    _stack_pop           # a_high (eax)
+    # 立即保存 a_high（后续 cdq/idiv 会破坏 eax/edx）
+    push    eax                  # [esp] = a_high
     # 被除数：edx:ebx (high:low)，除数：high:ecx (high:low)
     # 检查高 32 位是否都为 0（小值简化路径）
-    test    eax, eax             # a_high
+    mov     eax, [esp]           # eax = a_high
+    test    eax, eax
     jnz     .div_s_full
     test    edx, edx             # b_high
     jnz     .div_s_full
@@ -1736,47 +1740,45 @@ do_i64_div_s:
     cdq
     idiv    ecx                  # eax = a_low / b_low (有符号)
     cdq                          # sign extend to 64-bit
+    add     esp, 4               # 清理保存的 a_high
     # 推入商
-    push    edx                  # high
-    mov     eax, eax             # low
+    push    edx
+    mov     eax, eax
     push    eax
     call    _stack_push          # high
     pop     eax
     call    _stack_push          # low
     jmp     dispatch_done
 .div_s_full:
-    # 完整 64 位除法：使用两次 32 位除法
+    # 完整 64 位有符号除法
     # 检查除数是否为 0
-    test    edx, edx
+    test    edx, edx             # b_high
     jz      .div_s_check_low
-    # 除数高 32 位非 0，需要完整算法
-    # 简化：如果除数高 32 位也为 0，用 64/32 除法
-    jmp     .div_s_zero
+    # 除数高 32 位非 0 — 简化处理，返回 0
+    add     esp, 4
+    xor     eax, eax
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
 .div_s_check_low:
     test    ecx, ecx
     jz      .div_s_zero
 .div_s_do:
-    # edx=0 (divisor high), ebx=a_low, eax=a_high, ecx=divisor_low
-    # 64/32 -> 64 位除法: (edx:eax) / ecx 其中 edx 是被除数高 32 位
+    # 64/32 有符号除法: (a_high:a_low) / b_low
     mov     eax, ebx             # eax = a_low
-    mov     edx, [esp-4]         # edx = a_high (从栈上临时获取)
-    # 实际上栈已经被修改了，a_high 在 eax 之前被弹出
-    # 重新用寄存器值：a_high 在 do_i64_div_s 开始时是 eax，现在 eax 是 a_low
-    # 实际上此时 edx=divisor_high=0, eax=a_low, ebx=a_low, ecx=b_low
-    # a_high 已丢失！需要保存
-    # 使用简化路径
-    mov     eax, ebx
-    cdq
-    idiv    ecx
-    cdq
-    push    edx
-    mov     eax, eax
+    mov     edx, [esp]           # edx = a_high
+    idiv    ecx                  # eax = 商, edx = 余数
+    cdq                          # 符号扩展到 edx:eax
+    add     esp, 4               # 清理保存的 a_high
+    push    edx                  # 保存 high
+    mov     eax, eax             # low
     push    eax
-    call    _stack_push
+    call    _stack_push          # high
     pop     eax
-    call    _stack_push
+    call    _stack_push          # low
     jmp     dispatch_done
 .div_s_zero:
+    add     esp, 4               # 清理保存的 a_high
     mov     eax, 0xFFFFFFFF      # 除零返回最大值
     call    _stack_push
     call    _stack_push
@@ -1790,42 +1792,49 @@ do_i64_div_u:
     mov     edx, eax
     call    _stack_pop           # a_low
     mov     ebx, eax
-    call    _stack_pop           # a_high
+    call    _stack_pop           # a_high (eax)
+    push    eax                  # [esp] = a_high
     # 检查是否为小值（高 32 位都为 0）
+    mov     eax, [esp]
     test    eax, eax
     jnz     .div_u_full
-    test    edx, edx
+    test    edx, edx             # b_high
     jnz     .div_u_full
     test    ecx, ecx
     jz      .div_u_zero
     xor     edx, edx
     mov     eax, ebx
     div     ecx                  # eax = a_low / b_low
+    add     esp, 4
     xor     edx, edx
     call    _stack_push          # high
     mov     eax, eax
     call    _stack_push          # low
     jmp     dispatch_done
 .div_u_full:
-    # 64/32 除法
+    # 64/32 无符号除法: (a_high:a_low) / b_low
     test    ecx, ecx
     jz      .div_u_zero
-    test    edx, edx
+    test    edx, edx             # b_high
     jnz     .div_u_overflow
-    mov     eax, ebx
+    mov     eax, ebx             # eax = a_low
+    mov     edx, [esp]           # edx = a_high
     div     ecx                  # eax = quotient, edx = remainder
+    add     esp, 4
     xor     edx, edx
     call    _stack_push          # high
     mov     eax, eax
     call    _stack_push          # low
     jmp     dispatch_done
 .div_u_overflow:
+    add     esp, 4
     # 简化：大除数返回 0
     xor     eax, eax
     call    _stack_push
     call    _stack_push
     jmp     dispatch_done
 .div_u_zero:
+    add     esp, 4
     mov     eax, 0xFFFFFFFF
     call    _stack_push
     call    _stack_push
@@ -1839,11 +1848,13 @@ do_i64_rem_s:
     mov     edx, eax
     call    _stack_pop           # a_low
     mov     ebx, eax
-    call    _stack_pop           # a_high
+    call    _stack_pop           # a_high (eax)
+    push    eax                  # [esp] = a_high
     # 小值简化路径
+    mov     eax, [esp]
     test    eax, eax
     jnz     .rem_s_full
-    test    edx, edx
+    test    edx, edx             # b_high
     jnz     .rem_s_full
     test    ecx, ecx
     jz      .rem_s_zero
@@ -1851,19 +1862,34 @@ do_i64_rem_s:
     cdq
     idiv    ecx                  # edx = remainder
     cdq
+    add     esp, 4
     call    _stack_push          # high
     mov     eax, edx             # low = remainder
     call    _stack_push
     jmp     dispatch_done
 .rem_s_full:
-    # 简化：大值返回 0
+    # 64/32 有符号取余: (a_high:a_low) % b_low
     test    ecx, ecx
     jz      .rem_s_zero
+    test    edx, edx             # b_high
+    jnz     .rem_s_big_divisor
+    mov     eax, ebx             # eax = a_low
+    mov     edx, [esp]           # edx = a_high
+    idiv    ecx                  # edx = remainder
+    cdq
+    add     esp, 4
+    call    _stack_push          # high
+    mov     eax, edx             # remainder
+    call    _stack_push
+    jmp     dispatch_done
+.rem_s_big_divisor:
+    add     esp, 4
     xor     eax, eax
     call    _stack_push
     call    _stack_push
     jmp     dispatch_done
 .rem_s_zero:
+    add     esp, 4
     mov     eax, 0xFFFFFFFF
     call    _stack_push
     call    _stack_push
@@ -1877,30 +1903,48 @@ do_i64_rem_u:
     mov     edx, eax
     call    _stack_pop           # a_low
     mov     ebx, eax
-    call    _stack_pop           # a_high
+    call    _stack_pop           # a_high (eax)
+    push    eax                  # [esp] = a_high
     # 小值简化路径
+    mov     eax, [esp]
     test    eax, eax
     jnz     .rem_u_full
-    test    edx, edx
+    test    edx, edx             # b_high
     jnz     .rem_u_full
     test    ecx, ecx
     jz      .rem_u_zero
     xor     edx, edx
     mov     eax, ebx
     div     ecx                  # edx = remainder
+    add     esp, 4
     xor     edx, edx
     call    _stack_push          # high
     mov     eax, edx             # remainder
     call    _stack_push
     jmp     dispatch_done
 .rem_u_full:
+    # 64/32 无符号取余: (a_high:a_low) % b_low
     test    ecx, ecx
     jz      .rem_u_zero
+    test    edx, edx             # b_high
+    jnz     .rem_u_big_divisor
+    mov     eax, ebx             # eax = a_low
+    mov     edx, [esp]           # edx = a_high
+    div     ecx                  # edx = remainder
+    add     esp, 4
+    xor     edx, edx
+    call    _stack_push          # high
+    mov     eax, edx             # remainder
+    call    _stack_push
+    jmp     dispatch_done
+.rem_u_big_divisor:
+    add     esp, 4
     xor     eax, eax
     call    _stack_push
     call    _stack_push
     jmp     dispatch_done
 .rem_u_zero:
+    add     esp, 4
     mov     eax, 0xFFFFFFFF
     call    _stack_push
     call    _stack_push
@@ -1973,52 +2017,58 @@ do_i32_rotr:
     call    _stack_push
     jmp     dispatch_done
 
-# i64.and
+# i64.and: {a_high, a_low} & {b_high, b_low}
 do_i64_and:
-    call    _stack_pop
+    call    _stack_pop           # b_low
     mov     ecx, eax
-    call    _stack_pop
+    call    _stack_pop           # b_high
     mov     edx, eax
-    call    _stack_pop
-    and     eax, ecx
-    call    _stack_pop
-    and     eax, edx
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    and     eax, edx             # result_high = a_high & b_high
+    and     ebx, ecx             # result_low = a_low & b_low
     push    eax
-    call    _stack_push
+    mov     eax, ebx
+    call    _stack_push          # push result_low
     pop     eax
-    call    _stack_push
+    call    _stack_push          # push result_high
     jmp     dispatch_done
 
 # i64.or
 do_i64_or:
-    call    _stack_pop
+    call    _stack_pop           # b_low
     mov     ecx, eax
-    call    _stack_pop
+    call    _stack_pop           # b_high
     mov     edx, eax
-    call    _stack_pop
-    or      eax, ecx
-    call    _stack_pop
-    or      eax, edx
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    or      eax, edx             # result_high = a_high | b_high
+    or      ebx, ecx             # result_low = a_low | b_low
     push    eax
-    call    _stack_push
+    mov     eax, ebx
+    call    _stack_push          # push result_low
     pop     eax
-    call    _stack_push
+    call    _stack_push          # push result_high
     jmp     dispatch_done
 
 # i64.xor
 do_i64_xor:
-    call    _stack_pop
+    call    _stack_pop           # b_low
     mov     ecx, eax
-    call    _stack_pop
+    call    _stack_pop           # b_high
     mov     edx, eax
-    call    _stack_pop
-    xor     eax, ecx
-    call    _stack_pop
-    xor     eax, edx
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    xor     eax, edx             # result_high = a_high ^ b_high
+    xor     ebx, ecx             # result_low = a_low ^ b_low
     push    eax
-    call    _stack_push
+    mov     eax, ebx
+    call    _stack_push          # push result_low
     pop     eax
-    call    _stack_push
+    call    _stack_push          # push result_high
     jmp     dispatch_done
 
 # i64.shl: a << shift
@@ -2160,18 +2210,15 @@ do_i64_clz:
     test    eax, eax
     jnz     .i64clz_high
     # 高 32 位为 0，检查低 32 位
+    test    ecx, ecx
+    jz      .i64clz_zero
     bsr     edx, ecx
-    jz      .i64clz_low_zero
     mov     eax, 63
     sub     eax, edx
     call    _stack_push
-    xor     eax, eax
-    call    _stack_push
     jmp     dispatch_done
-.i64clz_low_zero:
+.i64clz_zero:
     mov     eax, 64              # 全部为 0
-    call    _stack_push
-    xor     eax, eax
     call    _stack_push
     jmp     dispatch_done
 .i64clz_high:
@@ -2180,11 +2227,9 @@ do_i64_clz:
     mov     eax, 31
     sub     eax, edx
     call    _stack_push
-    xor     eax, eax             # high = 0
-    call    _stack_push
     jmp     dispatch_done
 
-# i64.ctz: 计算 64 位尾随零
+# i64.ctz: 计算 64 位尾随零（返回 i32）
 do_i64_ctz:
     call    _stack_pop           # low
     mov     ecx, eax
@@ -2193,32 +2238,23 @@ do_i64_ctz:
     jnz     .i64ctz_low
     # 低 32 位为 0，检查高 32 位
     test    eax, eax
-    jnz     .i64ctz_high
-    # 全部为 0
-    xor     eax, eax
-    call    _stack_push
-    mov     eax, 64
+    jz      .i64ctz_zero
+    bsf     edx, eax
+    add     edx, 32
+    mov     eax, edx
     call    _stack_push
     jmp     dispatch_done
 .i64ctz_low:
     bsf     edx, ecx
-    xor     eax, eax             # high = 0
     mov     eax, edx
-    call    _stack_push
-    xor     eax, eax
     call    _stack_push
     jmp     dispatch_done
-.i64ctz_high:
-    bsf     edx, eax
-    add     edx, 32
-    xor     eax, eax
-    mov     eax, edx
-    call    _stack_push
-    xor     eax, eax
+.i64ctz_zero:
+    mov     eax, 64
     call    _stack_push
     jmp     dispatch_done
 
-# i64.popcnt: 计算 64 位中 1 的个数
+# i64.popcnt: 计算 64 位中 1 的个数（返回 i32）
 do_i64_popcnt:
     call    _stack_pop           # low
     mov     ecx, eax
@@ -2240,11 +2276,158 @@ do_i64_popcnt:
     test    ecx, ecx
     jnz     .i64popcnt_low
 .i64popcnt_done:
-    xor     eax, eax             # high = 0
     mov     eax, edx
     call    _stack_push
-    xor     eax, eax
+    jmp     dispatch_done
+
+# i64.rotl: 64 位左旋 (value <<< count)
+do_i64_rotl:
+    call    _stack_pop           # count
+    mov     ecx, eax
+    and     ecx, 63
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    # eax=a_high, ebx=a_low, ecx=count
+    push    ecx                  # save count on stack (will survive since we clean it)
+    test    ecx, ecx
+    jz      .i64rotl_noshift
+    cmp     ecx, 32
+    jae     .i64rotl_big
+    # shift < 32:
+    #   new_low  = (a_low << count) | (a_high >> (32-count))
+    #   new_high = (a_high << count) | (a_low >> (32-count))
+    mov     esi, eax             # esi = a_high
+    mov     edi, ebx             # edi = a_low
+    mov     cl, [esp]            # cl = count
+    shl     edi, cl              # edi = a_low << count
+    mov     cl, 32
+    sub     cl, [esp]
+    shr     esi, cl              # esi = a_high >> (32-count)
+    or      edi, esi             # edi = new_low
+    mov     esi, eax             # esi = a_high
+    mov     cl, [esp]
+    shl     esi, cl              # esi = a_high << count
+    mov     edi, ebx             # edi = a_low
+    mov     cl, 32
+    sub     cl, [esp]
+    shr     edi, cl              # edi = a_low >> (32-count)
+    or      esi, edi             # esi = new_high
+    pop     ecx                  # clean saved count
+    mov     eax, esi             # eax = new_high
     call    _stack_push
+    mov     eax, edi             # eax = new_low
+    call    _stack_push
+    jmp     dispatch_done
+.i64rotl_big:
+    # shift >= 32: count' = count - 32
+    #   new_low  = (a_high << count') | (a_low >> (32-count'))
+    #   new_high = (a_low << count') | (a_high >> (32-count'))
+    sub     ecx, 32
+    push    ecx                  # count'
+    mov     esi, eax             # esi = a_high
+    mov     edi, ebx             # edi = a_low
+    mov     cl, [esp]
+    shl     esi, cl              # esi = a_high << count'
+    mov     cl, 32
+    sub     cl, [esp]
+    shr     edi, cl              # edi = a_low >> (32-count')
+    or      esi, edi             # esi = new_low
+    mov     edi, ebx
+    mov     cl, [esp]
+    shl     edi, cl              # edi = a_low << count'
+    mov     cl, 32
+    sub     cl, [esp]
+    mov     edx, eax
+    shr     edx, cl              # edx = a_high >> (32-count')
+    or      edi, edx             # edi = new_high
+    pop     ecx                  # clean saved count'
+    mov     eax, edi             # eax = new_high
+    call    _stack_push
+    mov     eax, esi             # eax = new_low
+    call    _stack_push
+    jmp     dispatch_done
+.i64rotl_noshift:
+    pop     ecx                  # clean saved count
+    call    _stack_push          # push a_high
+    mov     eax, ebx
+    call    _stack_push          # push a_low
+    jmp     dispatch_done
+
+# i64.rotr: 64 位右旋 (value >>> count)
+do_i64_rotr:
+    call    _stack_pop           # count
+    mov     ecx, eax
+    and     ecx, 63
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    # eax=a_high, ebx=a_low, ecx=count
+    push    ecx
+    test    ecx, ecx
+    jz      .i64rotr_noshift
+    cmp     ecx, 32
+    jae     .i64rotr_big
+    # shift < 32:
+    #   new_low  = (a_low >> count) | (a_high << (32-count))
+    #   new_high = (a_high >> count) | (a_low << (32-count))
+    mov     esi, eax             # esi = a_high
+    mov     edi, ebx             # edi = a_low
+    mov     cl, [esp]
+    shr     edi, cl              # edi = a_low >> count
+    mov     cl, 32
+    sub     cl, [esp]
+    shl     esi, cl              # esi = a_high << (32-count)
+    or      edi, esi             # edi = new_low
+    mov     esi, eax             # esi = a_high
+    mov     cl, [esp]
+    shr     esi, cl              # esi = a_high >> count
+    mov     edi, ebx
+    mov     cl, 32
+    sub     cl, [esp]
+    shl     edi, cl              # edi = a_low << (32-count)
+    or      esi, edi             # esi = new_high
+    pop     ecx
+    mov     eax, esi
+    call    _stack_push          # push new_high
+    mov     eax, edi
+    call    _stack_push          # push new_low
+    jmp     dispatch_done
+.i64rotr_noshift:
+    pop     ecx
+    call    _stack_push
+    mov     eax, ebx
+    call    _stack_push
+    jmp     dispatch_done
+.i64rotr_big:
+    # shift >= 32: count' = count - 32
+    #   new_low  = (a_high >> count') | (a_low << (32-count'))
+    #   new_high = (a_low >> count') | (a_high << (32-count'))
+    sub     ecx, 32
+    push    ecx
+    # new_low first
+    mov     esi, eax             # esi = a_high
+    mov     edi, ebx             # edi = a_low
+    mov     cl, [esp]
+    shr     esi, cl              # esi = a_high >> count'
+    mov     cl, 32
+    sub     cl, [esp]
+    shl     edi, cl              # edi = a_low << (32-count')
+    or      edi, esi             # edi = new_low
+    # new_high
+    mov     esi, ebx             # esi = a_low
+    mov     cl, [esp]
+    shr     esi, cl              # esi = a_low >> count'
+    mov     cl, 32
+    sub     cl, [esp]
+    mov     edx, eax
+    shl     edx, cl              # edx = a_high << (32-count')
+    or      esi, edx             # esi = new_high
+    pop     ecx
+    mov     eax, esi
+    call    _stack_push          # push new_high
+    mov     eax, edi
+    call    _stack_push          # push new_low
     jmp     dispatch_done
 
 # i32.wrap/i64: 弹出 i64，推入 i32（截断高 32 位）

@@ -55,40 +55,119 @@
 
 ---
 
-## 当前项目状态（v0.12）
+## 当前项目状态（v0.12）Bug 分析
 
-### v0.12 已完成的功能 ✓
-1. **wasm_exec_func 返回值修复** - eax 在 ret 前加载 wasm_return_value
-2. **_read_leb128_s32 PC更新修复** - 符号位未设置时也更新 wasm_pc
-3. **fibonacci/factorial 字节码修复** - 修正 section/code 尺寸，fib(10)=55, 5!=120
-4. **i64.div_s/u** - 64位有符号/无符号除法
-5. **i64.rem_s/u** - 64位有符号/无符号取余
-6. **i32.clz/ctz/popcnt** - 前导零/尾随零/位计数
-7. **i32.rotl/rotr** - 左旋/右旋（使用 ROL/ROR 指令）
-8. **i64.clz/ctz/popcnt** - 64位位操作
+### 🔴 严重 Bug（需要立即修复）
 
-### 测试验证结果
-- wasmtest2 → Result: 42 ✓
-- wasmtest3 → Result: 0 (loop countdown) ✓
-- wasmtest4 → putchar 'A' ✓
-- wasmtest5 → br_table result = 20 ✓
-- wasmtest6 → store8/load8 result = 42 ✓
-- wasmtest7 → clz(1) = 31 ✓
-- wasmtest8 → ctz(8) = 3 ✓
-- wasmtest9 → popcnt(0xFF) = 8 ✓
-- wasmtest10 → rotl(1, 1) = 2 ✓
-- wasmtest11 → rotr(8, 1) = 4 ✓
-- wasmapp fibonacci → fib(10)=55 ✓
-- wasmapp factorial → 5!=120 ✓
-- wasmapp multiply → 7*8=56 ✓
-- wasmapp sum → Sum(1..10)=55 ✓
+#### 1. wasm_vm.asm: i64.mul 实现严重缺陷 (Line 1680-1717)
+**问题**: i64.mul 简化实现只处理小值情况，忽略交叉项溢出
+```asm
+do_i64_mul:
+    ...
+    # 简化：只用 a_low * b_low，忽略溢出（对于小值足够）
+    mov     eax, ebx
+    mul     ecx                   # edx:eax = a_low * b_low
+    # 如果高 32 位都为 0，结果就是 edx:eax
+    # 但需要加上 cross terms
+    # 为简单起见，只处理小值情况
+    # 完整实现需要更多代码，这里先做简化版本
+    # 推入结果
+    call    _stack_push           # low
+    xor     eax, eax
+    call    _stack_push           # high = 0（简化）
+```
+**影响**: wasmapp multiply (7*8=56) 能正常工作，但大值乘法（如 1000000 * 1000000）会返回错误结果
+**修复**: 需要完整实现 64 位乘法：
+```
+result_low = a_low * b_low
+result_high = a_high * b_high + (a_low * b_high) + (a_high * b_low) + carry
+```
 
-### 已知问题
-- **i64.mul 简化实现** - 仅处理小值情况
-- **i64.div_s/u 简化实现** - 完整 64/64 除法路径使用 64/32 简化
-- **call_indirect 未实现** (0x11)
-- **f32/f64 浮点运算未实现**
-- **动态线性内存扩展未实现** - 目前最大 256KB
+#### 2. wasm_vm.asm: i64.div_s/u 大值除法丢失 a_high (Line 1719-1832)
+**问题**: 当 a_high != 0 时，跳转到 .div_s_full 但 a_high 已丢失
+```asm
+.div_s_full:
+    # 完整 64 位除法：使用两次 32 位除法
+    # 检查除数是否为 0
+    test    edx, edx
+    jz      .div_s_check_low
+    # 除数高 32 位非 0，需要完整算法
+    jmp     .div_s_zero           # 直接返回错误！
+.div_s_check_low:
+    test    ecx, ecx
+    jz      .div_s_zero
+.div_s_do:
+    # edx=0 (divisor high), ebx=a_low, eax=a_low, ecx=b_low
+    # a_high 已丢失！需要保存
+```
+**修复**: 需要在弹出参数时保存 a_high，或使用栈保存。
+
+#### 3. wasm_vm.asm: i64.clz/ctz/popcnt 返回值类型错误 (Line 2155-2248)
+**问题**: 这些指令应该返回 i32（结果值），但代码 push 两次（模仿 i64 返回值）
+```asm
+do_i64_clz:
+    ...
+    mov     eax, 63
+    sub     eax, edx
+    call    _stack_push          # push result (这是正确的！)
+    xor     eax, eax
+    call    _stack_push          # 再 push 0（错误！不应 push）
+```
+**影响**: 返回 i64 而非 i32，栈不平衡
+**修复**: 删除第二次 push，只返回单值 i32
+
+### 🟡 中等 Bug（功能不完整）
+
+#### 4. wasm_vm.asm: call_indirect 未实现 (Line 26)
+**问题**: OP_CALL_INDIRECT (0x11) 在操作码定义中列出，但未实现处理逻辑
+```asm
+OP_CALL_INDIRECT = 0x11
+# 但在 _dispatch_opcode 中没有对应处理分支
+```
+**修复**: 需要实现：
+- 读取 table 索引
+- 从 table 获取函数引用
+- 类型检查
+- 间接调用
+
+#### 5. wasm_syscall.asm: host_alloc 内存分配限制 (Line 170-190)
+**问题**: 最大只支持 4 页 = 256KB，无法满足大型 WASM 应用需求
+```asm
+.host_alloc:
+    # ebx = size
+    mov     eax, [wasm_memory_pages]
+    ...
+    cmp     eax, 4               # 最大 4 页 = 256KB
+    ja      .alloc_fail
+```
+**修复**: 应使用内核 alloc_page 动态扩展线性内存。
+
+#### 6. wasm_vm.asm: i64.rotl/rotr 未实现 (Line 135-136)
+**问题**: 操作码定义存在但未实现处理分支
+```asm
+OP_I64_ROTL      = 0x89
+OP_I64_ROTR      = 0x8A
+```
+**修复**: 类似 i32.rotl/rotr，但处理 64 位值。
+
+### 🟢 已知问题（已记录但未修复）
+
+#### 7. f32/f64 浮点运算未实现
+**影响**: 无法运行需要浮点运算的 WASM 应用
+**修复**: 需要实现 x87 FPU 或软浮点库。
+
+#### 8. wasm_vm.asm: i64.and/or/xor 参数顺序问题 (Line 1976-2022)
+**问题**: 弹出 b_low, b_high, 然后 a_low, a_high，但 and 操作顺序可能混乱
+```asm
+do_i64_and:
+    call    _stack_pop           # 弹出什么？
+    mov     ecx, eax
+    call    _stack_pop
+    mov     edx, eax
+    call    _stack_pop
+    and     eax, ecx             # 这里 eax 是什么？
+```
+**验证**: 需要测试 i64 位运算。
 
 ---
 
@@ -103,14 +182,15 @@
 - i32比较: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u
 - i32算术: add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
 - i64比较: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u
-- i64算术: add, sub, mul(simplified), div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt
+- i64算术: add, sub, mul(简化), div_s/u(简化), rem_s/u(简化), and, or, xor, shl, shr_s/u
+- i64位操作: clz(有bug), ctz(有bug), popcnt(有bug)
 - 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u
 
 ### 未实现 ❌
 - f32/f64 浮点运算
 - call_indirect
 - i64.rotl, i64.rotr
-- i32/i64 trunc浮点转换
+- i32/i64 trunc_f32/f64 转换
 - 带对齐的内存操作完整实现
 
 ---
@@ -124,6 +204,22 @@
    ```
 
 2. **验证 WASM 测试**（全部 11 个测试 + 4 个应用必须通过）
+   ```
+   wasmtest2  → Result: 42 ✓
+   wasmtest3  → Result: 0 ✓
+   wasmtest4  → putchar 'A' ✓
+   wasmtest5  → br_table result = 20 ✓
+   wasmtest6  → store8/load8 result = 42 ✓
+   wasmtest7  → clz(1) = 31 ✓
+   wasmtest8  → ctz(8) = 3 ✓
+   wasmtest9  → popcnt(0xFF) = 8 ✓
+   wasmtest10 → rotl(1, 1) = 2 ✓
+   wasmtest11 → rotr(8, 1) = 4 ✓
+   wasmapp fibonacci → fib(10)=55 ✓
+   wasmapp factorial → 5!=120 ✓
+   wasmapp multiply → 7*8=56 ✓
+   wasmapp sum → Sum(1..10)=55 ✓
+   ```
 
 3. **版本发布流程**
    ```bash
@@ -135,16 +231,24 @@
 
 ## 优先任务列表
 
-### 下一阶段（v0.13）
-1. call_indirect 实现
-2. 动态线性内存扩展（使用内核 alloc_page）
-3. i64.mul 完整实现
-4. f32/f64 浮点运算基础
+### v0.13 优先任务：修复 WASM VM 严重 Bug
 
-### 后续阶段
-1. WASM 文件加载（从 VFS 读取 .wasm 文件）
-2. i32/i64 trunc 浮点转换
-3. Shell WASM 应用命令增强
+| 优先级 | 任务 | 文件 | 行号 | 影响 |
+|--------|------|------|------|------|
+| P0 | 修复 i64.clz/ctz/popcnt 返回值 | wasm_vm.asm | 2155-2248 | 栈不平衡 |
+| P0 | 修复 i64.mul 完整实现 | wasm_vm.asm | 1680-1717 | 大值乘法错误 |
+| P1 | 修复 i64.div_s 保存 a_high | wasm_vm.asm | 1719-1783 | 大值除法错误 |
+| P1 | 实现 call_indirect | wasm_vm.asm | 分发表 | 间接调用不支持 |
+| P2 | 动态线性内存扩展 | wasm_syscall.asm | 170-190 | 最大256KB限制 |
+| P2 | 实现 i64.rotl/rotr | wasm_vm.asm | 新增 | 位旋转 |
+
+### v0.14 后续任务：完善 WASM 运行时
+
+| 优先级 | 任务 | 说明 |
+|--------|------|------|
+| P3 | f32/f64 浮点运算基础 | x87 FPU 或软浮点库 |
+| P3 | WASM 文件加载 | 从 VFS 读取 .wasm 文件 |
+| P3 | i32/i64 trunc 转换 | 浮点到整数转换 |
 
 ---
 
@@ -152,10 +256,14 @@
 
 **最近提交**:
 ```
+a2a074b chore: update prompt for v0.12 and reset UPDATE=0
 7ebb8aa feat: WASM VM v0.12 - i32.rotl/rotr, i64.clz/ctz/popcnt
 39740a1 chore: update prompt for v0.11 and reset UPDATE=0
 aef5302 feat: WASM VM v0.11 - i64.div_s/u, i64.rem_s/u, i32.clz, i32.ctz, i32.popcnt
-e16c886 fix: WASM VM return value bug and wasmapp fibonacci/factorial bytecode
 ```
 
-**下一步**: call_indirect 实现、动态线性内存扩展、或浮点运算基础。
+**下一步**:
+1. **P0**: 修复 i64.clz/ctz/popcnt 返回值（删除第二次 push）
+2. **P0**: 修复 i64.mul 完整实现
+3. **P1**: 修复 i64.div_s 保存 a_high
+4. **P1**: 实现 call_indirect
