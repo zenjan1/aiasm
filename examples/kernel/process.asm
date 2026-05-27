@@ -474,8 +474,8 @@ schedule_tick:
     mov     dword ptr [proc_table + eax + PCB_STATE], PROC_READY
     mov     dword ptr [proc_table + eax + PCB_TICKS_LEFT], TIME_SLICE
 
-    # 保存上下文（简化：不调用完整 yield，只切换栈）
-    # 这里只是简单切换，完整的需要保存寄存器
+    # 时间片用完，触发调度
+    call    _schedule
 
 .done:
     pop     ecx

@@ -289,30 +289,29 @@ wasm_load_data:
     push    edx
     push    esi
     push    edi
+    push    ebp
 
     mov     ecx, [wasm_data_count]
     test    ecx, ecx
     jz      load_data_done_ok
 
-    mov     edi, offset wasm_data_table
+    mov     ebp, offset wasm_data_table   # ebp = 数据段表基址
 
 load_data_segment:
     test    ecx, ecx
     jz      load_data_done_ok
 
     # 读取：偏移(4) + 大小(4) + 数据指针(4) = 12 字节/条目
-    mov     eax, [edi]            # 偏移
-    mov     ebx, [edi + 4]        # 大小
-    mov     esi, [edi + 8]        # 数据源指针
+    mov     eax, [ebp]            # 偏移
+    mov     ebx, [ebp + 4]        # 大小
+    mov     esi, [ebp + 8]        # 数据源指针
 
     # 检查是否超出线性内存
     mov     edx, [wasm_memory_pages]
     shl     edx, 16               # edx = 当前内存总大小
-    push    edx                   # 保存内存大小
-    mov     edx, eax
-    add     edx, ebx              # edx = 偏移 + 数据大小
-    pop     ecx                   # ecx = 内存总大小
-    cmp     edx, ecx
+    mov     edi, eax
+    add     edi, ebx              # edi = 偏移 + 数据大小
+    cmp     edi, edx
     ja      load_data_overflow
 
     # 复制数据到线性内存
@@ -324,12 +323,13 @@ load_data_segment:
     rep     movsb
     pop     ecx
 
-    add     edi, 12               # 下一个数据段条目
+    add     ebp, 12               # 下一个数据段条目
     dec     ecx
     jmp     load_data_segment
 
 load_data_done_ok:
     xor     eax, eax
+    pop     ebp
     pop     edi
     pop     esi
     pop     edx
@@ -339,6 +339,7 @@ load_data_done_ok:
 
 load_data_overflow:
     mov     eax, 1
+    pop     ebp
     pop     edi
     pop     esi
     pop     edx
@@ -1811,17 +1812,17 @@ read_sleb_vm_done:
     # 符号扩展：将高位填充为 1
     mov     edx, ebx
     cmp     edx, 32
-    jae     read_sleb_vm_done_pc  # 已经读了 32 位以上，不需要扩展
+    jae     read_sleb_vm_skip_extend  # 已经读了 32 位以上，不需要扩展
 
     mov     ecx, edx
     mov     edx, -1
     shl     edx, cl
     or      eax, edx
 
-read_sleb_vm_no_extend:
+read_sleb_vm_skip_extend:
     mov     [wasm_pc], esi
 
-read_sleb_vm_done_pc:
+read_sleb_vm_no_extend:
     pop     ecx
     pop     ebx
     ret
