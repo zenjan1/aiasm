@@ -60,13 +60,14 @@
 
 ### ✅ v0.26 新增
 
-#### i64/f32/f64 内存操作 (wasm_vm.asm)
+#### i64/f32/f64 内存操作 + 对齐检查 (wasm_vm.asm)
 - i64.load/store: 64 位整数内存读写（2 栈槽）
 - i64.load8_s/u, i64.load16_s/u, i64.load32_s/u: 扩展加载
 - i64.store8/16/32: 截断存储
 - f32.load/store: 32 位浮点内存读写
 - f64.load/store: 64 位浮点内存读写（2 栈槽）
-- 所有内存操作解析 align/offset 参数（对齐提示已解析）
+- 所有内存操作对齐检查: align=log2 参数，effective_address & ((1<<align)-1)==0
+- 对齐失败触发 wasm_exec_error=4 trap
 
 ### ✅ v0.25 新增
 
@@ -166,10 +167,11 @@
 7. **call_indirect 实现** ✓ (v0.14)
 8. **call_indirect 类型检查** ✓ (v0.17)
 
-### 🟡 已知限制（v0.26 待修复）
+### 🟡 已知限制
 
-#### 1. 带对齐的内存操作完整实现
-**修复**: i32.load/store 对齐参数目前忽略，始终按字节访问
+#### 无明显已知限制
+- 所有主要 WASM 指令已实现
+- 内存操作含完整对齐检查
 
 ---
 
@@ -192,7 +194,7 @@
 - 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u, i32.trunc_f32_s/u, i32.trunc_f64_s/u, i64.trunc_f32_s/u, i64.trunc_f64_s/u, f32.convert_i32_s/u, f32.convert_i64_s/u, f64.convert_i32_s/u, f64.convert_i64_s/u, f32.demote_f64, f64.promote_f32
 
 ### 未实现 ❌
-- 带对齐的内存操作完整实现
+- 无明显缺失指令（核心 WASM 指令集已完整）
 
 ---
 
