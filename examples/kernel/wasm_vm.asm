@@ -732,6 +732,20 @@ _dispatch_opcode:
     cmp     ebx, OP_F64_DIV
     je      do_f64_div
 
+    # f32/f64 数学函数
+    cmp     ebx, OP_F32_ABS
+    je      do_f32_abs
+    cmp     ebx, OP_F32_NEG
+    je      do_f32_neg
+    cmp     ebx, OP_F32_SQRT
+    je      do_f32_sqrt
+    cmp     ebx, OP_F64_ABS
+    je      do_f64_abs
+    cmp     ebx, OP_F64_NEG
+    je      do_f64_neg
+    cmp     ebx, OP_F64_SQRT
+    je      do_f64_sqrt
+
     # i32/i64 转换
     cmp     ebx, OP_I32_WRAP_I64
     je      do_i32_wrap_i64
@@ -3270,6 +3284,89 @@ do_f64_ge:
     setae   al
     movzx   eax, al
     add     esp, 16
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# f32/f64 数学函数（使用 x87 FPU）
+# ============================================================================
+
+# f32.abs: 取绝对值
+do_f32_abs:
+    call    _stack_pop
+    push    eax
+    fld     dword ptr [esp]      # st0 = value
+    fabs                        # st0 = |value|
+    fstp    dword ptr [esp]      # store result
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.neg: 取负值
+do_f32_neg:
+    call    _stack_pop
+    push    eax
+    fld     dword ptr [esp]
+    fchs                        # change sign
+    fstp    dword ptr [esp]
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.sqrt: 平方根
+do_f32_sqrt:
+    call    _stack_pop
+    push    eax
+    fld     dword ptr [esp]
+    fsqrt                       # square root
+    fstp    dword ptr [esp]
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.abs: 64位绝对值
+do_f64_abs:
+    call    _stack_pop           # low
+    push    eax
+    call    _stack_pop           # high
+    push    eax
+    # [esp] = high, [esp+4] = low
+    fld     qword ptr [esp]      # st0 = value
+    fabs
+    fstp    qword ptr [esp]      # store result
+    pop     eax                  # result_high
+    call    _stack_push
+    pop     eax                  # result_low
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.neg: 64位取负
+do_f64_neg:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp]
+    fchs
+    fstp    qword ptr [esp]
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.sqrt: 64位平方根
+do_f64_sqrt:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp]
+    fsqrt
+    fstp    qword ptr [esp]
+    pop     eax
+    call    _stack_push
+    pop     eax
     call    _stack_push
     jmp     dispatch_done
 
