@@ -175,6 +175,20 @@ OP_I32_TRUNC_F64_S = 0xAA
 OP_I32_TRUNC_F64_U = 0xAB
 OP_I64_EXTEND_I32_S = 0xAC
 OP_I64_EXTEND_I32_U = 0xAD
+OP_I64_TRUNC_F32_S = 0xAE
+OP_I64_TRUNC_F32_U = 0xAF
+OP_I64_TRUNC_F64_S = 0xB0
+OP_I64_TRUNC_F64_U = 0xB1
+OP_F32_CONVERT_I32_S = 0xB2
+OP_F32_CONVERT_I32_U = 0xB3
+OP_F32_CONVERT_I64_S = 0xB4
+OP_F32_CONVERT_I64_U = 0xB5
+OP_F32_DEMOTE_F64   = 0xB6
+OP_F64_CONVERT_I32_S = 0xB7
+OP_F64_CONVERT_I32_U = 0xB8
+OP_F64_CONVERT_I64_S = 0xB9
+OP_F64_CONVERT_I64_U = 0xBA
+OP_F64_PROMOTE_F32  = 0xBB
 
 # ============================================================================
 # WASM 宿主函数 ID（与 wasm_syscall.asm 保持一致）
@@ -785,6 +799,44 @@ _dispatch_opcode:
     je      do_i64_extend_i32_s
     cmp     ebx, OP_I64_EXTEND_I32_U
     je      do_i64_extend_i32_u
+
+    # f32/f64 转换
+    cmp     ebx, OP_I32_TRUNC_F32_S
+    je      do_i32_trunc_f32_s
+    cmp     ebx, OP_I32_TRUNC_F32_U
+    je      do_i32_trunc_f32_u
+    cmp     ebx, OP_I32_TRUNC_F64_S
+    je      do_i32_trunc_f64_s
+    cmp     ebx, OP_I32_TRUNC_F64_U
+    je      do_i32_trunc_f64_u
+    cmp     ebx, OP_I64_TRUNC_F32_S
+    je      do_i64_trunc_f32_s
+    cmp     ebx, OP_I64_TRUNC_F32_U
+    je      do_i64_trunc_f32_u
+    cmp     ebx, OP_I64_TRUNC_F64_S
+    je      do_i64_trunc_f64_s
+    cmp     ebx, OP_I64_TRUNC_F64_U
+    je      do_i64_trunc_f64_u
+    cmp     ebx, OP_F32_CONVERT_I32_S
+    je      do_f32_convert_i32_s
+    cmp     ebx, OP_F32_CONVERT_I32_U
+    je      do_f32_convert_i32_u
+    cmp     ebx, OP_F32_CONVERT_I64_S
+    je      do_f32_convert_i64_s
+    cmp     ebx, OP_F32_CONVERT_I64_U
+    je      do_f32_convert_i64_u
+    cmp     ebx, OP_F32_DEMOTE_F64
+    je      do_f32_demote_f64
+    cmp     ebx, OP_F64_CONVERT_I32_S
+    je      do_f64_convert_i32_s
+    cmp     ebx, OP_F64_CONVERT_I32_U
+    je      do_f64_convert_i32_u
+    cmp     ebx, OP_F64_CONVERT_I64_S
+    je      do_f64_convert_i64_s
+    cmp     ebx, OP_F64_CONVERT_I64_U
+    je      do_f64_convert_i64_u
+    cmp     ebx, OP_F64_PROMOTE_F32
+    je      do_f64_promote_f32
 
     # 未知操作码
     jmp     do_unknown
@@ -3731,6 +3783,317 @@ do_f64_copysign:
     pop     eax
     call    _stack_push
     pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# f32/f64 转换操作
+# ============================================================================
+
+# i32.trunc_f32_s: 截断 f32 到有符号 i32
+do_i32_trunc_f32_s:
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00             # trunc mode (toward zero)
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    fistp   dword ptr [esp + 6]    # store as integer
+    fldcw   word ptr [esp]         # restore FCW
+    add     esp, 6
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.trunc_f32_u: 截断 f32 到无符号 i32
+do_i32_trunc_f32_u:
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    fistp   dword ptr [esp + 6]
+    fldcw   word ptr [esp]
+    add     esp, 6
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.trunc_f64_s: 截断 f64 到有符号 i32
+do_i32_trunc_f64_s:
+    call    _stack_pop           # low
+    push    eax
+    call    _stack_pop           # high
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    fistp   dword ptr [esp + 8]   # store as 32-bit integer
+    fldcw   word ptr [esp]
+    add     esp, 6                # cleanup FCW + high
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.trunc_f64_u: 截断 f64 到无符号 i32
+do_i32_trunc_f64_u:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    fistp   dword ptr [esp + 8]
+    fldcw   word ptr [esp]
+    add     esp, 6
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.trunc_f32_s: 截断 f32 到有符号 i64
+do_i64_trunc_f32_s:
+    call    _stack_pop           # f32 value
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    # i64 result: push high then low
+    sub     esp, 4               # space for 64-bit integer
+    fistp   qword ptr [esp]      # store 64-bit integer
+    fldcw   word ptr [esp + 8]   # restore FCW (original location)
+    add     esp, 8               # cleanup FCW + original value
+    pop     eax                  # i64 high
+    call    _stack_push
+    pop     eax                  # i64 low
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.trunc_f32_u: 截断 f32 到无符号 i64
+do_i64_trunc_f32_u:
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    sub     esp, 4
+    fistp   qword ptr [esp]
+    fldcw   word ptr [esp + 8]
+    add     esp, 8
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.trunc_f64_s: 截断 f64 到有符号 i64
+do_i64_trunc_f64_s:
+    call    _stack_pop           # f64 low
+    push    eax
+    call    _stack_pop           # f64 high
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    sub     esp, 4
+    fistp   qword ptr [esp]
+    fldcw   word ptr [esp + 10]
+    add     esp, 10
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.trunc_f64_u: 截断 f64 到无符号 i64
+do_i64_trunc_f64_u:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    sub     esp, 4
+    fistp   qword ptr [esp]
+    fldcw   word ptr [esp + 10]
+    add     esp, 10
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.convert_i32_s: 有符号 i32 转 f32
+do_f32_convert_i32_s:
+    call    _stack_pop           # i32
+    push    eax
+    fild    dword ptr [esp]       # load integer to FPU
+    fstp    dword ptr [esp]       # store as f32
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.convert_i32_u: 无符号 i32 转 f32
+do_f32_convert_i32_u:
+    call    _stack_pop
+    push    eax
+    fild    dword ptr [esp]
+    fstp    dword ptr [esp]
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.convert_i64_s: 有符号 i64 转 f32
+do_f32_convert_i64_s:
+    call    _stack_pop           # i64 low
+    push    eax
+    call    _stack_pop           # i64 high
+    push    eax
+    fild    qword ptr [esp]       # load 64-bit integer
+    fstp    dword ptr [esp + 4]   # store as f32 (in low slot)
+    add     esp, 4                # cleanup high
+    pop     eax                   # f32 result
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.convert_i64_u: 无符号 i64 转 f32
+do_f32_convert_i64_u:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fild    qword ptr [esp]
+    fstp    dword ptr [esp + 4]
+    add     esp, 4
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.demote_f64: f64 降级为 f32
+do_f32_demote_f64:
+    call    _stack_pop           # f64 low
+    push    eax
+    call    _stack_pop           # f64 high
+    push    eax
+    fld     qword ptr [esp]       # load f64
+    fstp    dword ptr [esp + 4]   # store as f32 (precision loss)
+    add     esp, 4                # cleanup high
+    pop     eax                   # f32 result
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.convert_i32_s: 有符号 i32 转 f64
+do_f64_convert_i32_s:
+    call    _stack_pop           # i32
+    push    eax
+    push    eax                   # space for f64 result
+    fild    dword ptr [esp + 4]   # load integer
+    fstp    qword ptr [esp]       # store as f64
+    pop     eax                   # f64 high
+    call    _stack_push
+    pop     eax                   # f64 low
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.convert_i32_u: 无符号 i32 转 f64
+do_f64_convert_i32_u:
+    call    _stack_pop
+    push    eax
+    push    eax
+    fild    dword ptr [esp + 4]
+    fstp    qword ptr [esp]
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.convert_i64_s: 有符号 i64 转 f64
+do_f64_convert_i64_s:
+    call    _stack_pop           # i64 low
+    push    eax
+    call    _stack_pop           # i64 high
+    push    eax
+    fild    qword ptr [esp]       # load 64-bit integer
+    fstp    qword ptr [esp]       # store as f64
+    pop     eax                   # f64 high
+    call    _stack_push
+    pop     eax                   # f64 low
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.convert_i64_u: 无符号 i64 转 f64
+do_f64_convert_i64_u:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fild    qword ptr [esp]
+    fstp    qword ptr [esp]
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.promote_f32: f32 升级为 f64
+do_f64_promote_f32:
+    call    _stack_pop           # f32
+    push    eax
+    push    eax                   # space for f64 result
+    fld     dword ptr [esp + 4]   # load f32
+    fstp    qword ptr [esp]       # store as f64 (extended precision)
+    pop     eax                   # f64 high
+    call    _stack_push
+    pop     eax                   # f64 low
     call    _stack_push
     jmp     dispatch_done
 
