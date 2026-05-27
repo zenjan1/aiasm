@@ -56,7 +56,17 @@
 
 ---
 
-## 当前项目状态（v0.17）
+## 当前项目状态（v0.26）
+
+### ✅ v0.26 新增
+
+#### i64/f32/f64 内存操作 (wasm_vm.asm)
+- i64.load/store: 64 位整数内存读写（2 栈槽）
+- i64.load8_s/u, i64.load16_s/u, i64.load32_s/u: 扩展加载
+- i64.store8/16/32: 截断存储
+- f32.load/store: 32 位浮点内存读写
+- f64.load/store: 64 位浮点内存读写（2 栈槽）
+- 所有内存操作解析 align/offset 参数（对齐提示已解析）
 
 ### ✅ v0.25 新增
 
@@ -169,7 +179,7 @@
 - 控制流: unreachable, nop, block, loop, if, else, end, br, br_if, br_table, return, call, call_indirect
 - 参数: drop, select
 - 变量: local.get, local.set, local.tee, global.get, global.set
-- 内存: i32.load, i32.store, i32.load8_s/u, i32.load16_s/u, i32.store8, i32.store16, memory.size, memory.grow
+- 内存: i32.load, i32.store, i32.load8_s/u, i32.load16_s/u, i32.store8, i32.store16, i64.load, i64.store, i64.load8_s/u, i64.load16_s/u, i64.load32_s/u, i64.store8, i64.store16, i64.store32, f32.load, f32.store, f64.load, f64.store, memory.size, memory.grow
 - 常量: i32.const, i64.const, f32.const, f64.const
 - i32比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
 - i64比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
@@ -210,16 +220,16 @@
 
 ## 优先任务列表
 
-### v0.26 优先任务
+### v0.27 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | 对齐内存操作 | wasm_vm.asm | 内存访问正确性 |
+| P3 | 更多 WASM 测试用例 | examples/ | 验证新指令 |
 
 ---
 
-## 当前版本：v0.25
+## 当前版本：v0.26
 
 **下一步**:
-1. 对齐内存操作实现
-2. UPDATE=0
+1. 添加 i64/f32/f64 内存操作测试用例
+2. UPDATE=1
