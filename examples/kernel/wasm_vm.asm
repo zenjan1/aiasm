@@ -764,6 +764,20 @@ _dispatch_opcode:
     cmp     ebx, OP_F64_NEAREST
     je      do_f64_nearest
 
+    # f32/f64 min/max/copysign
+    cmp     ebx, OP_F32_MIN
+    je      do_f32_min
+    cmp     ebx, OP_F32_MAX
+    je      do_f32_max
+    cmp     ebx, OP_F32_COPYSIGN
+    je      do_f32_copysign
+    cmp     ebx, OP_F64_MIN
+    je      do_f64_min
+    cmp     ebx, OP_F64_MAX
+    je      do_f64_max
+    cmp     ebx, OP_F64_COPYSIGN
+    je      do_f64_copysign
+
     # i32/i64 转换
     cmp     ebx, OP_I32_WRAP_I64
     je      do_i32_wrap_i64
@@ -3565,6 +3579,155 @@ do_f64_nearest:
     fstp    qword ptr [esp + 8]
     fldcw   word ptr [esp]
     add     esp, 2
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# f32/f64 min/max/copysign
+# ============================================================================
+
+# f32.min: 弹出 a, b，返回 min(a, b)
+do_f32_min:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    push    eax
+    # [esp] = a, [esp+4] = b
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # compare a with b, pop
+    fstsw   ax
+    sahf
+    jbe     .f32min_return_a     # a <= b -> return a
+    pop     eax                  # discard a
+    pop     eax                  # eax = b
+    call    _stack_push
+    jmp     dispatch_done
+.f32min_return_a:
+    pop     eax                  # eax = b (discard)
+    pop     eax                  # eax = a
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.max: 弹出 a, b，返回 max(a, b)
+do_f32_max:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    push    eax
+    fld     dword ptr [esp]
+    fcomp   dword ptr [esp + 4]
+    fstsw   ax
+    sahf
+    jae     .f32max_return_a     # a >= b -> return a
+    pop     eax
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+.f32max_return_a:
+    pop     eax
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.copysign: 弹出 a, b，返回 a with sign of b
+do_f32_copysign:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    push    eax
+    # Extract sign of b (bit 31), magnitude of a (bits 0-30)
+    mov     eax, [esp + 4]       # b
+    and     eax, 0x80000000      # sign bit of b
+    mov     edx, [esp]           # a
+    and     edx, 0x7FFFFFFF      # magnitude of a
+    or      eax, edx             # combine
+    mov     [esp], eax           # store result
+    add     esp, 4
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.min: 弹出两个 f64，返回 min
+do_f64_min:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    # Stack: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
+    fld     qword ptr [esp]      # st0 = a
+    fcomp   qword ptr [esp + 8]  # compare a with b
+    fstsw   ax
+    sahf
+    jbe     .f64min_return_a
+    add     esp, 8               # discard a
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+.f64min_return_a:
+    add     esp, 8               # discard b
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.max: 弹出两个 f64，返回 max
+do_f64_max:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp]
+    fcomp   qword ptr [esp + 8]
+    fstsw   ax
+    sahf
+    jae     .f64max_return_a
+    add     esp, 8
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+.f64max_return_a:
+    add     esp, 8
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.copysign: 弹出 a, b，返回 a with sign of b
+do_f64_copysign:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    # [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
+    # Sign bit of f64 is bit 63 = bit 31 of high 32 bits
+    mov     eax, [esp + 8]       # b_high
+    and     eax, 0x80000000      # sign bit of b
+    mov     edx, [esp]           # a_high
+    and     edx, 0x7FFFFFFF      # magnitude of a
+    or      eax, edx
+    mov     [esp], eax           # new a_high
+    add     esp, 8               # discard b
     pop     eax
     call    _stack_push
     pop     eax
