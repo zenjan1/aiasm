@@ -134,6 +134,11 @@ wasm_elem_count:
 wasm_table_entries:
     .space  256                 # 表条目（最多64个函数索引，每个4字节）
 
+    # 类型签名存储（用于 call_indirect 全签名比较）
+    .globl  wasm_type_sigs
+wasm_type_sigs:
+    .space  256                 # 类型签名字节（最多64个类型，每个最多4字节：param_cnt + 1 param + ret_cnt + 1 ret）
+
     # 解析状态
     .globl  wasm_parse_error
 wasm_parse_error:
@@ -385,14 +390,17 @@ _parse_type_section:
     push    ebx
     push    ecx
     push    edi
+    push    ebp               # save ebp (callee-saved)
 
     # 读取类型数量
     call    _read_leb128_u32
     mov     [wasm_type_count], eax
     mov     ecx, eax              # ecx = 类型数量
 
-    # edi = 类型表指针
+    # edi = 类型表指针 (param_count, result_count)
     mov     edi, offset wasm_type_table
+    # ebp = 类型签名存储指针
+    mov     ebp, offset wasm_type_sigs
 
 type_entry_loop:
     test    ecx, ecx
@@ -407,10 +415,20 @@ type_entry_loop:
     # 读取参数数量
     call    _read_leb128_u32
     mov     [edi], eax            # 存储参数数量
-    add     edi, 4
+    mov     edx, eax              # edx = param_count
 
-    # 跳过参数类型（假设都是 i32）
+    # 存储 param_count 到签名区（1字节）
+    mov     [ebp], edx
+
+    # 读取并存储参数类型（最多存第一个）
     mov     ebx, eax
+    test    ebx, ebx
+    jz      read_results_cnt
+    # 存储第一个参数类型
+    movzx   eax, byte ptr [esi]
+    mov     [ebp + 1], al
+    inc     esi
+    dec     ebx
 skip_params_loop:
     test    ebx, ebx
     jz      read_results_cnt
@@ -421,11 +439,21 @@ skip_params_loop:
 read_results_cnt:
     # 读取结果数量
     call    _read_leb128_u32
-    mov     [edi], eax            # 存储结果数量
-    add     edi, 4
+    mov     [edi + 4], eax        # 存储结果数量
+    mov     edx, eax              # edx = result_count
 
-    # 跳过结果类型
+    # 存储 result_count 到签名区
+    mov     [ebp + 2], edx
+
+    # 读取并存储结果类型（最多存第一个）
     mov     ebx, eax
+    test    ebx, ebx
+    jz      next_type_entry
+    # 存储第一个结果类型
+    movzx   eax, byte ptr [esi]
+    mov     [ebp + 3], al
+    inc     esi
+    dec     ebx
 skip_results_loop:
     test    ebx, ebx
     jz      next_type_entry
@@ -434,6 +462,8 @@ skip_results_loop:
     jmp     skip_results_loop
 
 next_type_entry:
+    add     edi, 8                # 每个类型条目 8 字节
+    add     ebp, 4                # 每个签名 4 字节
     dec     ecx
     jmp     type_entry_loop
 
@@ -446,6 +476,7 @@ type_err_magic:
     jmp     type_section_ret
 
 type_section_ret:
+    pop     ebp
     pop     edi
     pop     ecx
     pop     ebx
@@ -947,6 +978,47 @@ get_export_func_done:
     pop     edx
     pop     ecx
     pop     ebx
+    ret
+
+# ============================================================================
+# wasm_type_sig_match: 比较两个类型签名是否匹配
+# 输入：eax = 期望的 type_index, ebx = 实际的 type_index
+# 输出：eax = 0 (匹配), 1 (不匹配)
+# 签名格式 (wasm_type_sigs + type_index * 4):
+#   [0] = param_count, [1] = first_param_type, [2] = result_count, [3] = first_result_type
+# ============================================================================
+    .globl  wasm_type_sig_match
+wasm_type_sig_match:
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    # 计算签名指针
+    mov     ecx, eax              # ecx = expected type_index
+    mov     edx, ebx              # edx = actual type_index
+    shl     ecx, 2                # * 4
+    shl     edx, 2                # * 4
+    lea     esi, [wasm_type_sigs + ecx]   # esi = expected sig
+    lea     edi, [wasm_type_sigs + edx]   # edi = actual sig
+
+    # 比较 4 字节签名
+    mov     eax, [esi]
+    cmp     eax, [edi]
+    jne     .sig_mismatch
+
+    # 匹配
+    xor     eax, eax
+    jmp     .sig_match_done
+
+.sig_mismatch:
+    mov     eax, 1
+
+.sig_match_done:
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
     ret
 
 # ============================================================================

@@ -1024,14 +1024,17 @@ do_call_indirect:
     cmp     eax, [wasm_func_count]
     jae     .call_indirect_host
 
-    # ===== 类型检查（index compare） =====
+    # ===== 类型签名检查 =====
     # 获取函数的类型索引：wasm_func_table[func_idx * 4]
     mov     ebx, eax
     shl     ebx, 2
     mov     ecx, [wasm_func_table + ebx]  # ecx = 函数的 type_index
-    # 比较 type_index
-    cmp     ebp, ecx
-    jne     .call_indirect_type_mismatch
+    # 全签名比较：期望 type_index (ebp) vs 实际 type_index (ecx)
+    mov     eax, ebp              # eax = expected type_index
+    mov     ebx, ecx              # ebx = actual type_index
+    call    wasm_type_sig_match
+    test    eax, eax
+    jnz     .call_indirect_type_mismatch
 
     # 类型匹配，直接调用函数
     push    edx                  # 保存函数索引
