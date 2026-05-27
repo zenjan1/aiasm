@@ -177,7 +177,7 @@ wasm_host_call:
     add     eax, ebx              # eax = 新的末尾
     shr     eax, 16               # 新页数
     inc     eax                   # 向上取整到页边界
-    cmp     eax, 65536
+    cmp     eax, 4               # 最大 4 页 = 256KB
     ja      .alloc_fail
     mov     [wasm_memory_pages], eax
 
