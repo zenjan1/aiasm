@@ -60,16 +60,25 @@
 
 ### ✅ v0.15 新增/修复
 
+#### i64.div_u 64/64 除法 (wasm_vm.asm Line ~1996)
+- 完整二进制长除法实现，支持大除数 (b_high != 0)
+- 算法：64次迭代，每次shift后compare/subtract，商位累积在edi
+- 结果：esi:edi = quotient
+
+#### i64.rem_u 64/64 取余 (wasm_vm.asm Line ~2128)
+- 完整64位取余实现：remainder = dividend - quotient * divisor
+- 先做除法获取quotient，再用乘法计算remainder
+- 支持被除数小于除数的快速路径
+
+#### i64.rem_s 64/64 有符号取余 (wasm_vm.asm Line ~2073)
+- 完整64位有符号取余实现
+- 处理符号：保存被除数符号，转绝对值做无符号运算，最后恢复符号
+- 余数符号与被除数相同（符合WASM规范）
+
 #### i64.mul 进位修复 (wasm_vm.asm Line ~1760)
 - 移除步骤 2/3 中错误的 `adc edi, edx`（溢出位 [95:64] 不应加回 result_high）
 - 移除步骤 4（a_high*b_high 只影响位 [127:64]，完全丢弃）
 - 3 个 mul 指令 + 低 32 位交叉项加法，正确计算 64 位结果
-
-#### i64.div_u 64/64 除法 (wasm_vm.asm Line ~1954)
-- 使用二进制恢复法实现完整 64/64 无符号除法
-- 除数保存到栈上，循环中使用
-- 余数: esi(high):eax(low)，商: ebp(high):edi(low)
-- 32/32 和 64/64 两条路径
 
 ### ✅ v0.13-v0.14 已修复
 

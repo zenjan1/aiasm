@@ -2071,10 +2071,106 @@ do_i64_rem_s:
     call    _stack_push
     jmp     dispatch_done
 .rem_s_big_divisor:
-    add     esp, 4
-    xor     eax, eax
-    call    _stack_push
-    call    _stack_push
+    # 64/64 有符号取余：余数符号与被除数相同
+    # 栈：[esp] = a_high，ebx = a_low，edx = b_high，ecx = b_low
+    # 保存 dividend 符号，转为绝对值
+    push    ebx                  # [esp+4] = a_low
+    push    edx                  # [esp+8] = b_high
+    push    ecx                  # [esp+12] = b_low
+    # 判断被除数符号
+    mov     eax, [esp+16]        # eax = a_high
+    xor     ebp, ebp             # ebp = 0 (sign flag)
+    test    eax, eax
+    jns     .rem_s_dividend_pos
+    # 被除数为负，取绝对值
+    not     ebx                  # a_low
+    not     eax                  # a_high
+    add     ebx, 1
+    adc     eax, 0
+    mov     ebp, 1               # sign = negative
+    mov     [esp+16], eax        # 更新 a_high
+    mov     [esp+4], ebx         # 更新 a_low
+.rem_s_dividend_pos:
+    # 判断除数符号，转为绝对值
+    mov     eax, [esp+8]         # b_high
+    test    eax, eax
+    jns     .rem_s_divisor_pos
+    not     ecx                  # b_low
+    not     eax                  # b_high
+    add     ecx, 1
+    adc     eax, 0
+    mov     [esp+8], eax
+    mov     [esp+12], ecx
+.rem_s_divisor_pos:
+    # 检查被除数是否小于除数（此时余数=被除数）
+    mov     eax, [esp+16]        # a_high
+    cmp     eax, [esp+8]         # a_high vs b_high
+    jb      .rem_s_result_is_dividend_abs
+    ja      .rem_s_do_unsigned
+    mov     eax, [esp+4]         # a_low
+    cmp     eax, [esp+12]        # a_low vs b_low
+    jb      .rem_s_result_is_dividend_abs
+.rem_s_do_unsigned:
+    # 运行无符号除法获取 quotient
+    mov     esi, [esp+16]        # esi = a_high
+    mov     edi, [esp+4]         # edi = a_low
+    mov     ebp, 64
+.rem_s_64_loop:
+    shl     edi, 1
+    rcl     esi, 1
+    mov     eax, edi
+    sub     eax, [esp+12]        # divisor_low
+    mov     ebx, esi
+    sbb     ebx, [esp+8]         # divisor_high
+    jnc     .rem_s_64_sub
+    jmp     .rem_s_64_next
+.rem_s_64_sub:
+    mov     edi, eax
+    mov     esi, ebx
+    or      edi, 1
+.rem_s_64_next:
+    dec     ebp
+    jnz     .rem_s_64_loop
+    # esi:edi = quotient，计算 remainder = dividend - quotient * divisor
+    mov     eax, edi
+    mul     dword ptr [esp+12]
+    mov     ebx, eax
+    mov     ecx, edx
+    mov     eax, edi
+    mul     dword ptr [esp+8]
+    add     ecx, eax
+    mov     eax, esi
+    mul     dword ptr [esp+12]
+    add     ecx, eax
+    # remainder = dividend - product
+    mov     eax, [esp+4]         # dividend_low
+    sub     eax, ebx
+    mov     ebx, eax
+    mov     eax, [esp+16]        # dividend_high
+    sbb     eax, ecx
+    mov     ecx, eax             # ecx = remainder_high, ebx = remainder_low
+    jmp     .rem_s_apply_sign
+.rem_s_result_is_dividend_abs:
+    mov     ebx, [esp+4]         # remainder_low = a_low
+    mov     ecx, [esp+16]        # remainder_high = a_high
+.rem_s_apply_sign:
+    # 检查原始被除数符号（保存在栈底标记位）
+    # 恢复栈并应用符号
+    add     esp, 16              # 清理所有 push (但少了原来的 a_high push)
+    mov     eax, [esp]           # 原始 a_high (用于判断符号)
+    test    eax, eax             # 原始被除数符号
+    jns     .rem_s_result_pos
+    # 被除数为负，余数也需要为负
+    not     ebx
+    not     ecx
+    add     ebx, 1
+    adc     ecx, 0
+.rem_s_result_pos:
+    add     esp, 4               # 清理原始 a_high push
+    mov     eax, ecx
+    call    _stack_push          # remainder_high
+    mov     eax, ebx
+    call    _stack_push          # remainder_low
     jmp     dispatch_done
 .rem_s_zero:
     add     esp, 4
@@ -2126,103 +2222,73 @@ do_i64_rem_u:
     call    _stack_push
     jmp     dispatch_done
 .rem_u_big_divisor:
-    # 完整 64/64 无符号取余（二进制长除法，返回余数）
-    # 被除数: [esp]:ebx (a_high:a_low), 除数: edx:ecx (b_high:b_low)
-    # 先保存被除数，用于计算余数 = dividend - quotient * divisor
+    # 完整 64/64 无符号取余：remainder = dividend - quotient * divisor
+    # 栈：[esp] = a_high (已push)，ebx = a_low，edx = b_high，ecx = b_low
+    # 检查被除数是否小于除数（此时余数=被除数）
+    mov     eax, [esp]           # eax = a_high
+    cmp     eax, edx             # a_high vs b_high
+    jb      .rem_u_result_is_dividend
+    ja      .rem_u_do_full_div
+    cmp     ebx, ecx             # a_low vs b_low
+    jb      .rem_u_result_is_dividend
+.rem_u_do_full_div:
+    # 被除数 >= 除数，需要做完整除法
+    # 保存原始被除数和除数
     push    ebx                  # [esp+4] = a_low
-    push    eax                  # [esp] = a_high (之前已push)
-    # 等等，之前已经push了eax，所以栈布局是: [esp]=a_high_old, [esp+4]=ebx=a_low
-    # 但我们刚才又push了ebx，所以现在: [esp]=a_low, [esp+4]=a_high_old
-    # 让我重新整理
-    add     esp, 8               # 清理之前push的两个值，直接用寄存器
-    # 保存被除数到栈
-    push    esi                  # 保存esi
-    push    edi                  # 保存edi
-    push    ebx                  # 保存 a_low
-    push    eax                  # 保存 a_high (从[esp+20]取，但esp变了)
-    # 实际上从最开始栈上有: eax(a_high), ebx(a_low), edx(b_high), ecx(b_low)
-    # 让我重新计算栈布局
-
-    # 简化：直接运行除法算法，保存原始被除数，然后用乘法计算余数
-    # 栈布局：[esp] = a_high (之前push), ebx = a_low, edx:ecx = divisor
-    mov     esi, [esp]           # esi = a_high
+    push    edx                  # [esp+8] = b_high
+    push    ecx                  # [esp+12] = b_low
+    # 运行二进制长除法
+    mov     esi, [esp+16]        # esi = a_high
     mov     edi, ebx             # edi = a_low
-    # 保存原始被除数用于计算余数
-    push    esi                  # [esp+4] = a_high
-    push    edi                  # [esp] = a_low (现在栈: a_low, a_high)
-    add     esp, 8               # 不，这会破坏栈
-
-    # 重写：简化实现
-    # 对于 64/64 余数，当除数大于被除数时余数=被除数
-    # 否则用减法迭代
-    add     esp, 4               # 清理原来的 a_high push
-    mov     esi, eax             # esi = a_high (原始)
-    mov     edi, ebx             # edi = a_low (原始)
-    # 检查被除数是否小于除数
-    cmp     esi, edx             # a_high vs b_high
-    jb      .rem_u_dividend_smaller
-    ja      .rem_u_do_division
-    cmp     edi, ecx             # a_low vs b_low
-    jb      .rem_u_dividend_smaller
-    # 被除数 >= 除数，需要做除法
-.rem_u_do_division:
-    push    esi                  # 保存 dividend_high
-    push    edi                  # 保存 dividend_low
-    # 运行二进制长除法，得到 quotient in esi:edi
     mov     ebp, 64
 .rem_u_64_loop:
     shl     edi, 1
     rcl     esi, 1
     mov     eax, edi
-    sub     eax, ecx
+    sub     eax, [esp+12]        # compare with divisor_low
     mov     ebx, esi
-    sbb     ebx, edx
-    jnc     .rem_u_sub
-    jmp     .rem_u_next
-.rem_u_sub:
+    sbb     ebx, [esp+8]         # compare with divisor_high
+    jnc     .rem_u_64_sub
+    jmp     .rem_u_64_next
+.rem_u_64_sub:
     mov     edi, eax
     mov     esi, ebx
-    or      edi, 1
-.rem_u_next:
+    or      edi, 1               # quotient bit
+.rem_u_64_next:
     dec     ebp
     jnz     .rem_u_64_loop
-    # esi:edi = quotient
-    # 计算 remainder = original_dividend - quotient * divisor
-    pop     ebx                  # ebx = original dividend_low
-    pop     eax                  # eax = original dividend_high
-    # 保存 quotient 和 divisor
-    push    edi                  # quotient_low
-    push    esi                  # quotient_high
-    push    ecx                  # divisor_low
-    push    edx                  # divisor_high
-    # 计算 quotient * divisor (64位乘法)
-    # 结果在 edi:esi (low:high)
-    mov     eax, [esp + 8]       # quotient_low
-    mul     dword ptr [esp]      # quotient_low * divisor_low → edx:eax
-    mov     edi, eax             # product_low
-    mov     esi, edx             # product_high_partial
-    mov     eax, [esp + 8]       # quotient_low
-    mul     dword ptr [esp + 4]  # quotient_low * divisor_high
-    add     esi, eax
-    mov     eax, [esp + 12]      # quotient_high
-    mul     dword ptr [esp]      # quotient_high * divisor_low
-    add     esi, eax
-    # 清理乘法用的栈
-    add     esp, 16
-    # 计算 remainder = dividend - product
-    sub     ebx, edi             # remainder_low = dividend_low - product_low
-    sbb     eax, esi             # remainder_high = dividend_high - product_high
+    # esi:edi = quotient，计算 remainder = dividend - quotient * divisor
+    # quotient * divisor (简化：只算低64位，因为余数必定小于除数)
+    mov     eax, edi             # quotient_low
+    mul     dword ptr [esp+12]   # * divisor_low → edx:eax
+    mov     ebx, eax             # product_low
+    mov     ecx, edx             # product_high_partial
+    mov     eax, edi             # quotient_low
+    mul     dword ptr [esp+8]    # * divisor_high
+    add     ecx, eax
+    mov     eax, esi             # quotient_high
+    mul     dword ptr [esp+12]   # * divisor_low
+    add     ecx, eax
+    # ecx:ebx = product
+    # remainder = dividend - product
+    mov     eax, [esp+4]         # dividend_low
+    sub     eax, ebx
+    mov     ebx, eax             # remainder_low
+    mov     eax, [esp+16]        # dividend_high
+    sbb     eax, ecx             # remainder_high
+    add     esp, 16              # 清理 a_high,a_low,b_high,b_low push
     xor     edx, edx
-    call    _stack_push          # push remainder_high
+    call    _stack_push          # remainder_high
     mov     eax, ebx
-    call    _stack_push          # push remainder_low
+    call    _stack_push          # remainder_low
     jmp     dispatch_done
-.rem_u_dividend_smaller:
-    # 余数 = 被除数
+.rem_u_result_is_dividend:
+    # 被除数 < 除数，余数 = 被除数
+    add     esp, 4               # 清理 a_high push
     xor     edx, edx
-    call    _stack_push          # push remainder_high
-    mov     eax, edi
-    call    _stack_push          # push remainder_low
+    call    _stack_push          # remainder_high (0)
+    mov     eax, ebx             # remainder_low = a_low
+    call    _stack_push
     jmp     dispatch_done
 .rem_u_zero:
     add     esp, 4
