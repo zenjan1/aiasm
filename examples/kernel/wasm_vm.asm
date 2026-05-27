@@ -1484,69 +1484,114 @@ do_i32_store16:
     mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
-# i64 内存操作
+# i64 内存操作（含对齐检查）
 do_i64_load:
     mov     esi, [wasm_pc]
-    call    _read_leb128_vm  # align
+    call    _read_leb128_vm  # align (log2)
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
-    mov     ebx, eax             # ebx = offset
-    call    _stack_pop           # eax = address
+    mov     ebx, eax
+    call    _stack_pop
     add     eax, ebx
-    # 读取 64 位值（低 32 位在高地址，高 32 位在低地址 - 小端序）
-    mov     edx, [wasm_linear_memory + eax]      # edx = high (内存低地址)
-    mov     eax, [wasm_linear_memory + eax + 4]  # eax = low (内存高地址)
-    # 推送: 先 low 后 high
-    call    _stack_push          # push low
+    test    ecx, ecx
+    jz      .i64l_skip_align
+    cmp     ecx, 3
+    jb      .i64l_skip_align
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l_align_fail
+.i64l_skip_align:
+    mov     edx, [wasm_linear_memory + eax]
+    mov     eax, [wasm_linear_memory + eax + 4]
+    call    _stack_push
     mov     eax, edx
-    call    _stack_push          # push high
+    call    _stack_push
+    jmp     dispatch_done
+.i64l_align_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_load8_s:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # address
+    call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64l8s_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l8s_fail
+.i64l8s_skip:
     movzx   eax, byte ptr [wasm_linear_memory + eax]
-    # sign extend to 64-bit
     test    eax, 0x80
     jz      .i64l8s_ok
     or      eax, 0xFFFFFF00
 .i64l8s_ok:
-    xor     edx, edx             # edx:eax = 64-bit, high=0 or -1
+    xor     edx, edx
     test    eax, eax
     jns     .i64l8s_pos
-    mov     edx, -1              # sign extend high
+    mov     edx, -1
 .i64l8s_pos:
-    call    _stack_push          # push low
+    call    _stack_push
     mov     eax, edx
-    call    _stack_push          # push high
+    call    _stack_push
+    jmp     dispatch_done
+.i64l8s_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_load8_u:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64l8u_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l8u_fail
+.i64l8u_skip:
     movzx   eax, byte ptr [wasm_linear_memory + eax]
-    xor     edx, edx             # high = 0
-    call    _stack_push          # push low
+    xor     edx, edx
+    call    _stack_push
     mov     eax, edx
-    call    _stack_push          # push high
+    call    _stack_push
+    jmp     dispatch_done
+.i64l8u_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_load16_s:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64l16s_skip
+    cmp     ecx, 1
+    jb      .i64l16s_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l16s_fail
+.i64l16s_skip:
     movzx   eax, word ptr [wasm_linear_memory + eax]
-    # sign extend to 64-bit
     test    eax, 0x8000
     jz      .i64l16s_ok
     or      eax, 0xFFFF0000
@@ -1556,171 +1601,323 @@ do_i64_load16_s:
     jns     .i64l16s_pos
     mov     edx, -1
 .i64l16s_pos:
-    call    _stack_push          # push low
+    call    _stack_push
     mov     eax, edx
-    call    _stack_push          # push high
+    call    _stack_push
+    jmp     dispatch_done
+.i64l16s_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_load16_u:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64l16u_skip
+    cmp     ecx, 1
+    jb      .i64l16u_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l16u_fail
+.i64l16u_skip:
     movzx   eax, word ptr [wasm_linear_memory + eax]
     xor     edx, edx
     call    _stack_push
     mov     eax, edx
     call    _stack_push
     jmp     dispatch_done
+.i64l16u_fail:
+    mov     dword ptr [wasm_exec_error], 4
+    jmp     dispatch_done
 
 do_i64_load32_s:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64l32s_skip
+    cmp     ecx, 2
+    jb      .i64l32s_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l32s_fail
+.i64l32s_skip:
     mov     eax, [wasm_linear_memory + eax]
-    # sign extend 32-bit to 64-bit
     xor     edx, edx
     test    eax, eax
     jns     .i64l32s_pos
     mov     edx, -1
 .i64l32s_pos:
-    call    _stack_push          # push low
+    call    _stack_push
     mov     eax, edx
-    call    _stack_push          # push high
+    call    _stack_push
+    jmp     dispatch_done
+.i64l32s_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_load32_u:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64l32u_skip
+    cmp     ecx, 2
+    jb      .i64l32u_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .i64l32u_fail
+.i64l32u_skip:
     mov     eax, [wasm_linear_memory + eax]
-    xor     edx, edx             # high = 0
+    xor     edx, edx
     call    _stack_push
     mov     eax, edx
     call    _stack_push
+    jmp     dispatch_done
+.i64l32u_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_store:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
-    mov     ebx, eax             # ebx = offset
-    call    _stack_pop           # eax = value_high
-    push    eax                  # save high
-    call    _stack_pop           # eax = value_low
-    mov     edx, eax             # edx = low
-    pop     eax                  # eax = high
-    push    edx                  # save low
-    call    _stack_pop           # eax = address
+    mov     ebx, eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    mov     edx, eax
+    pop     eax
+    push    edx
+    call    _stack_pop
     add     eax, ebx
-    pop     edx                  # edx = value_low
-    # 存储 64 位（小端序：低地址存 high，高地址存 low）
-    mov     [wasm_linear_memory + eax], eax      # store high at low addr
-    mov     [wasm_linear_memory + eax + 4], edx  # store low at high addr
+    pop     edx
+    test    ecx, ecx
+    jz      .i64s_skip
+    cmp     ecx, 3
+    jb      .i64s_skip
+    mov     esi, 1
+    shl     esi, cl
+    dec     esi
+    test    eax, esi
+    jnz     .i64s_fail
+.i64s_skip:
+    mov     [wasm_linear_memory + eax], eax
+    mov     [wasm_linear_memory + eax + 4], edx
+    jmp     dispatch_done
+.i64s_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_store8:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # high (discard)
-    call    _stack_pop           # eax = low
-    mov     edx, eax             # value in dl
-    call    _stack_pop           # address
+    call    _stack_pop
+    call    _stack_pop
+    mov     edx, eax
+    call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64s8_skip
+    mov     esi, 1
+    shl     esi, cl
+    dec     esi
+    test    eax, esi
+    jnz     .i64s8_fail
+.i64s8_skip:
     mov     [wasm_linear_memory + eax], dl
+    jmp     dispatch_done
+.i64s8_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_store16:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # high (discard)
-    call    _stack_pop           # eax = low
+    call    _stack_pop
+    call    _stack_pop
     mov     edx, eax
-    call    _stack_pop           # address
+    call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64s16_skip
+    cmp     ecx, 1
+    jb      .i64s16_skip
+    mov     esi, 1
+    shl     esi, cl
+    dec     esi
+    test    eax, esi
+    jnz     .i64s16_fail
+.i64s16_skip:
     mov     [wasm_linear_memory + eax], dx
+    jmp     dispatch_done
+.i64s16_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_i64_store32:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # high (discard)
-    call    _stack_pop           # eax = low (value to store)
+    call    _stack_pop
+    call    _stack_pop
     mov     edx, eax
-    call    _stack_pop           # address
+    call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .i64s32_skip
+    cmp     ecx, 2
+    jb      .i64s32_skip
+    mov     esi, 1
+    shl     esi, cl
+    dec     esi
+    test    eax, esi
+    jnz     .i64s32_fail
+.i64s32_skip:
     mov     [wasm_linear_memory + eax], edx
     jmp     dispatch_done
+.i64s32_fail:
+    mov     dword ptr [wasm_exec_error], 4
+    jmp     dispatch_done
 
-# f32/f64 内存操作
+# f32/f64 内存操作（含对齐检查）
 do_f32_load:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # address
+    call    _stack_pop
     add     eax, ebx
-    mov     eax, [wasm_linear_memory + eax]  # load f32 bits
+    test    ecx, ecx
+    jz      .f32l_skip
+    cmp     ecx, 2
+    jb      .f32l_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .f32l_fail
+.f32l_skip:
+    mov     eax, [wasm_linear_memory + eax]
     call    _stack_push
+    jmp     dispatch_done
+.f32l_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_f32_store:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # value (f32 bits)
+    call    _stack_pop
     mov     edx, eax
-    call    _stack_pop           # address
+    call    _stack_pop
     add     eax, ebx
+    test    ecx, ecx
+    jz      .f32s_skip
+    cmp     ecx, 2
+    jb      .f32s_skip
+    mov     esi, 1
+    shl     esi, cl
+    dec     esi
+    test    eax, esi
+    jnz     .f32s_fail
+.f32s_skip:
     mov     [wasm_linear_memory + eax], edx
+    jmp     dispatch_done
+.f32s_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_f64_load:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # address
+    call    _stack_pop
     add     eax, ebx
-    # load 64-bit (2 slots: high:low)
-    mov     edx, [wasm_linear_memory + eax]      # high
-    mov     eax, [wasm_linear_memory + eax + 4]  # low
-    call    _stack_push          # push low
+    test    ecx, ecx
+    jz      .f64l_skip
+    cmp     ecx, 3
+    jb      .f64l_skip
+    mov     edx, 1
+    shl     edx, cl
+    dec     edx
+    test    eax, edx
+    jnz     .f64l_fail
+.f64l_skip:
+    mov     edx, [wasm_linear_memory + eax]
+    mov     eax, [wasm_linear_memory + eax + 4]
+    call    _stack_push
     mov     eax, edx
-    call    _stack_push          # push high
+    call    _stack_push
+    jmp     dispatch_done
+.f64l_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_f64_store:
     mov     esi, [wasm_pc]
     call    _read_leb128_vm  # align
+    mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop           # value_high
+    call    _stack_pop
     push    eax
-    call    _stack_pop           # value_low
+    call    _stack_pop
     mov     edx, eax
-    pop     eax                  # eax = high
-    push    edx                  # save low
-    call    _stack_pop           # address
+    pop     eax
+    push    edx
+    call    _stack_pop
     add     eax, ebx
     pop     edx
-    mov     [wasm_linear_memory + eax], eax      # store high
-    mov     [wasm_linear_memory + eax + 4], edx  # store low
+    test    ecx, ecx
+    jz      .f64s_skip
+    cmp     ecx, 3
+    jb      .f64s_skip
+    mov     esi, 1
+    shl     esi, cl
+    dec     esi
+    test    eax, esi
+    jnz     .f64s_fail
+.f64s_skip:
+    mov     [wasm_linear_memory + eax], eax
+    mov     [wasm_linear_memory + eax + 4], edx
+    jmp     dispatch_done
+.f64s_fail:
+    mov     dword ptr [wasm_exec_error], 4
     jmp     dispatch_done
 
 do_memory_size:
