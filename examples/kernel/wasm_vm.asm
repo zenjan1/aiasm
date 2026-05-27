@@ -746,6 +746,24 @@ _dispatch_opcode:
     cmp     ebx, OP_F64_SQRT
     je      do_f64_sqrt
 
+    # f32/f64 舍入函数
+    cmp     ebx, OP_F32_CEIL
+    je      do_f32_ceil
+    cmp     ebx, OP_F32_FLOOR
+    je      do_f32_floor
+    cmp     ebx, OP_F32_TRUNC
+    je      do_f32_trunc
+    cmp     ebx, OP_F32_NEAREST
+    je      do_f32_nearest
+    cmp     ebx, OP_F64_CEIL
+    je      do_f64_ceil
+    cmp     ebx, OP_F64_FLOOR
+    je      do_f64_floor
+    cmp     ebx, OP_F64_TRUNC
+    je      do_f64_trunc
+    cmp     ebx, OP_F64_NEAREST
+    je      do_f64_nearest
+
     # i32/i64 转换
     cmp     ebx, OP_I32_WRAP_I64
     je      do_i32_wrap_i64
@@ -3364,6 +3382,189 @@ do_f64_sqrt:
     fld     qword ptr [esp]
     fsqrt
     fstp    qword ptr [esp]
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# f32/f64 舍入函数（使用 x87 FPU frndint + 控制字）
+# FCW rounding mode bits 10-11: 00=nearest, 01=down, 10=up, 11=toward-zero
+# ============================================================================
+
+# f32.ceil: 向上舍入（向 +∞）
+do_f32_ceil:
+    call    _stack_pop
+    push    eax
+    # 保存并修改 FPU 控制字
+    sub     esp, 2                 # 空间存放 FCW
+    fstcw   word ptr [esp]         # 保存当前 FCW
+    mov     ax, [esp]
+    and     ax, 0xF3FF             # 清除 rounding mode 位
+    or      ax, 0x0800             # 设置 ceil 模式 (10 = round up)
+    mov     [esp + 4], ax          # 临时存放新 FCW（在 eax 原来的位置）
+    fldcw   word ptr [esp + 4]     # 加载新 FCW
+    # 执行舍入
+    fld     dword ptr [esp + 6]    # 加载操作数（原栈位置 +6）
+    frndint                      # 舍入到整数
+    fstp    dword ptr [esp + 6]    # 存储结果
+    # 恢复 FCW
+    fldcw   word ptr [esp]         # 恢复原 FCW
+    add     esp, 6                 # 清理 FCW + 操作数
+    pop     eax                    # 结果
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.floor: 向下舍入（向 -∞）
+do_f32_floor:
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0400             # floor 模式 (01 = round down)
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    fstp    dword ptr [esp + 6]
+    fldcw   word ptr [esp]
+    add     esp, 6
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.trunc: 向零舍入（截断）
+do_f32_trunc:
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00             # trunc 模式 (11 = toward zero)
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    fstp    dword ptr [esp + 6]
+    fldcw   word ptr [esp]
+    add     esp, 6
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.nearest: 舍入到最近整数
+do_f32_nearest:
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF             # nearest 模式 (00 = round to nearest)
+    mov     [esp + 4], ax
+    fldcw   word ptr [esp + 4]
+    fld     dword ptr [esp + 6]
+    frndint
+    fstp    dword ptr [esp + 6]
+    fldcw   word ptr [esp]
+    add     esp, 6
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.ceil: 64位向上舍入
+do_f64_ceil:
+    call    _stack_pop           # low
+    push    eax
+    call    _stack_pop           # high
+    push    eax
+    # 栈: [esp]=high, [esp+4]=low
+    sub     esp, 2               # FCW 空间
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0800
+    mov     [esp + 6], ax        # 新 FCW 在 [esp+6]
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]  # 加载 64 位操作数
+    frndint
+    fstp    qword ptr [esp + 8]
+    fldcw   word ptr [esp]       # 恢复 FCW
+    add     esp, 2               # 清理 FCW 空间
+    pop     eax                  # result_high
+    call    _stack_push
+    pop     eax                  # result_low
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.floor: 64位向下舍入
+do_f64_floor:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0400
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    fstp    qword ptr [esp + 8]
+    fldcw   word ptr [esp]
+    add     esp, 2
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.trunc: 64位向零舍入
+do_f64_trunc:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF
+    or      ax, 0x0C00
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    fstp    qword ptr [esp + 8]
+    fldcw   word ptr [esp]
+    add     esp, 2
+    pop     eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.nearest: 64位舍入到最近
+do_f64_nearest:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    sub     esp, 2
+    fstcw   word ptr [esp]
+    mov     ax, [esp]
+    and     ax, 0xF3FF           # nearest (00)
+    mov     [esp + 6], ax
+    fldcw   word ptr [esp + 6]
+    fld     qword ptr [esp + 8]
+    frndint
+    fstp    qword ptr [esp + 8]
+    fldcw   word ptr [esp]
+    add     esp, 2
     pop     eax
     call    _stack_push
     pop     eax
