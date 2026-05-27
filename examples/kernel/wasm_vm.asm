@@ -497,6 +497,8 @@ _dispatch_opcode:
     je      do_return
     cmp     ebx, OP_CALL
     je      do_call
+    cmp     ebx, OP_CALL_INDIRECT
+    je      do_call_indirect
 
     # 参数
     cmp     ebx, OP_DROP
@@ -924,6 +926,80 @@ do_call_host:
     push    eax
     call    _stack_push
     pop     eax
+    jmp     dispatch_done
+
+# ============================================================================
+# call_indirect: 通过表间接调用函数
+# 格式: call_indirect type_index table_index
+# 执行: pop index, table[index] -> func_idx, call func_idx
+# ============================================================================
+do_call_indirect:
+    push    ebx
+    push    ecx
+    push    edx
+
+    # 读取 type index（暂时忽略类型检查）
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm
+
+    # 读取 table index（暂时只支持 table 0）
+    mov     esi, [wasm_pc]
+    call    _read_leb128_vm
+    # eax = table index (should be 0)
+
+    # 弹出表索引（函数索引在表中的位置）
+    call    _stack_pop           # eax = 表内索引
+
+    # 检查索引是否在表范围内
+    cmp     eax, [wasm_table_size]
+    jae     .call_indirect_out_of_range
+
+    # 从 wasm_table_entries 获取函数索引
+    mov     ebx, eax
+    shl     ebx, 2               # * 4
+    mov     eax, [wasm_table_entries + ebx]
+
+    # 检查是否为有效函数索引
+    cmp     eax, [wasm_func_count]
+    jae     .call_indirect_host
+
+    # 直接调用函数
+    push    eax                  # 保存函数索引
+    mov     esi, [wasm_pc]       # esi = 返回地址
+    call    _call_frame_push
+    pop     eax
+    call    wasm_exec_func_body
+    push    eax
+    call    _stack_push
+    pop     eax
+    jmp     .call_indirect_done
+
+.call_indirect_host:
+    # 间接调用宿主函数
+    sub     eax, [wasm_func_count]    # eax = host slot
+    mov     ecx, eax
+    push    eax
+    # 宿主函数参数处理（简化：假设 1 个参数）
+    call    _stack_pop
+    mov     ebx, eax
+    xor     ecx, ecx
+    xor     edx, edx
+    pop     eax
+    call    wasm_host_call
+    push    eax
+    call    _stack_push
+    pop     eax
+    jmp     .call_indirect_done
+
+.call_indirect_out_of_range:
+    # 表索引超出范围，返回错误
+    mov     eax, -1
+    call    _stack_push
+
+.call_indirect_done:
+    pop     edx
+    pop     ecx
+    pop     ebx
     jmp     dispatch_done
 
 # 参数操作
@@ -1681,7 +1757,7 @@ do_i64_sub:
     call    _stack_push
     jmp     dispatch_done
 
-# i64.mul: a * b (64-bit × 64-bit → 64-bit 结果)
+# i64.mul: a * b (64-bit × 64-bit → 64-bit 完整实现)
 do_i64_mul:
     call    _stack_pop           # b_low
     mov     ecx, eax
@@ -1690,7 +1766,7 @@ do_i64_mul:
     call    _stack_pop           # a_low
     mov     ebx, eax
     call    _stack_pop           # a_high (eax)
-    # 立即保存所有 4 个操作数到栈（mul 会破坏 eax/edx）
+    # 保存所有 4 个操作数到栈
     push    eax                  # [esp]    = a_high
     push    ebx                  # [esp+4]  = a_low
     push    ecx                  # [esp+8]  = b_low
@@ -1699,18 +1775,23 @@ do_i64_mul:
     mov     eax, [esp + 4]
     mul     dword ptr [esp + 8]  # edx:eax = a_low * b_low
     mov     esi, eax             # esi = result_low
-    mov     edi, edx             # edi = result_high (初始)
-    # Step 2: a_low * b_high → eax (低32位加到高位)
-    mov     eax, [esp + 4]       # eax = a_low
-    mul     dword ptr [esp + 12] # edx:eax = a_low * b_high, 只需 eax
-    add     edi, eax             # edi += (a_low * b_high)低32位
-    # Step 3: a_high * b_low → eax (低32位加到高位)
-    mov     eax, [esp]           # eax = a_high
-    mul     dword ptr [esp + 8]  # edx:eax = a_high * b_low, 只需 eax
-    add     edi, eax             # edi += (a_high * b_low)低32位
+    mov     edi, edx             # edi = result_high
+    # Step 2: a_low * b_high → edx:eax
+    mov     eax, [esp + 4]
+    mul     dword ptr [esp + 12] # edx:eax = a_low * b_high
+    add     edi, eax             # add low part, may carry
+    adc     edi, edx             # add high part + carry
+    # Step 3: a_high * b_low → edx:eax
+    mov     eax, [esp]
+    mul     dword ptr [esp + 8]  # edx:eax = a_high * b_low
+    add     edi, eax
+    adc     edi, edx
+    # Step 4: a_high * b_high → edx:eax (只加低32位，高32位超出64位)
+    mov     eax, [esp]
+    mul     dword ptr [esp + 12] # edx:eax = a_high * b_high
+    add     edi, eax
     # 清理栈
     add     esp, 16
-    # 推入结果: {result_high, result_low}
     mov     eax, esi
     call    _stack_push          # push result_low
     mov     eax, edi
@@ -1751,31 +1832,115 @@ do_i64_div_s:
     jmp     dispatch_done
 .div_s_full:
     # 完整 64 位有符号除法
-    # 检查除数是否为 0
-    test    edx, edx             # b_high
-    jz      .div_s_check_low
-    # 除数高 32 位非 0 — 简化处理，返回 0
-    add     esp, 4
-    xor     eax, eax
-    call    _stack_push
-    call    _stack_push
-    jmp     dispatch_done
-.div_s_check_low:
+    # 保存符号，取绝对值，用无符号除法，最后恢复符号
+    mov     esi, [esp]           # esi = a_high (被除数高)
+    mov     edi, ebx             # edi = a_low (被除数低)
+    # 检查被除数符号
+    test    esi, esi
+    jns     .div_s_pos_dividend
+    # 被除数为负，取反
+    not     edi
+    not     esi
+    add     edi, 1
+    adc     esi, 0
+    mov     byte ptr [esp + 4], 1  # 标记被除数为负（复用栈上 b_high 位置）
+    jmp     .div_s_check_dvsign
+.div_s_pos_dividend:
+    mov     byte ptr [esp + 4], 0  # 被除数为正
+.div_s_check_dvsign:
+    # 检查除数符号
+    mov     eax, edx             # eax = b_high
+    test    eax, eax
+    jns     .div_s_pos_divisor
+    # 除数为负，取反
+    not     ecx
+    not     eax
+    add     ecx, 1
+    adc     eax, 0
+    xor     edx, edx             # edx = 0 (divisor high now)
+    mov     byte ptr [esp + 5], 1  # 除数为负
+    jmp     .div_s_do_unsigned
+.div_s_pos_divisor:
+    mov     byte ptr [esp + 5], 0  # 除数为正
+.div_s_do_unsigned:
+    # 现在：被除数 {esi, edi} >= 0, 除数 {edx, ecx} >= 0
+    # 如果除数高 32 位为 0，用 64/32 idiv
+    test    edx, edx
+    jnz     .div_s_64_64
+    # 64/32 除法
     test    ecx, ecx
     jz      .div_s_zero
-.div_s_do:
-    # 64/32 有符号除法: (a_high:a_low) / b_low
-    mov     eax, ebx             # eax = a_low
-    mov     edx, [esp]           # edx = a_high
-    idiv    ecx                  # eax = 商, edx = 余数
-    cdq                          # 符号扩展到 edx:eax
-    add     esp, 4               # 清理保存的 a_high
-    push    edx                  # 保存 high
-    mov     eax, eax             # low
-    push    eax
-    call    _stack_push          # high
-    pop     eax
-    call    _stack_push          # low
+    mov     eax, edi             # eax = dividend_low
+    mov     edx, esi             # edx = dividend_high
+    div     ecx                  # eax = quotient, edx = remainder
+    xor     esi, esi             # quotient_high = 0
+    mov     edi, eax             # quotient_low = eax
+    jmp     .div_s_apply_sign
+.div_s_64_64:
+    # 完整 64/64 无符号除法（二进制长除法）
+    # 被除数: esi:edi, 除数: edx:ecx
+    # 商: edi (结果), 余数: esi
+    # 先对齐除数到被除数的最高位
+    mov     ebp, 64              # 循环 64 位
+    xor     edi, edi             # 商清零
+    # 检查除数高 32 位是否为 0（优化路径）
+    test    edx, edx
+    jz      .div_s_64_32_loop
+    # 完整 64 位除数路径
+.div_s_64_loop:
+    # 被除数左移 1 位（esi:edi），CF 来自最低位
+    shl     edi, 1
+    rcl     esi, 1
+    # 尝试减去除数
+    mov     eax, edi
+    sub     eax, ecx
+    mov     ebx, esi
+    sbb     ebx, edx
+    # 如果够减
+    jnc     .div_s_64_sub
+    # 不够减，商位 0
+    jmp     .div_s_64_next
+.div_s_64_sub:
+    mov     edi, eax
+    mov     esi, ebx
+    or      edi, 1               # 商位 1
+.div_s_64_next:
+    dec     ebp
+    jnz     .div_s_64_loop
+    jmp     .div_s_apply_sign
+.div_s_64_32_loop:
+    # 除数高 32 位为 0，只有低 32 位 (ecx)
+    mov     ebp, 64
+    xor     edi, edi
+.div_s_64_32_iter:
+    shl     edi, 1
+    rcl     esi, 1
+    cmp     esi, ecx
+    jb      .div_s_64_32_no_sub
+    sub     esi, ecx
+    or      edi, 1
+.div_s_64_32_no_sub:
+    dec     ebp
+    jnz     .div_s_64_32_iter
+.div_s_apply_sign:
+    # esi:edi = 商（无符号）
+    # 应用符号：如果被除数和除数符号不同，商为负
+    mov     al, [esp + 4]
+    mov     bl, [esp + 5]
+    xor     al, bl
+    test    al, al
+    jz      .div_s_pos_result
+    # 商为负
+    not     edi
+    not     esi
+    add     edi, 1
+    adc     esi, 0
+.div_s_pos_result:
+    add     esp, 8               # 清理保存的 a_high 和符号标记
+    mov     eax, edi
+    call    _stack_push          # push quotient_low
+    mov     eax, esi
+    call    _stack_push          # push quotient_high
     jmp     dispatch_done
 .div_s_zero:
     add     esp, 4               # 清理保存的 a_high

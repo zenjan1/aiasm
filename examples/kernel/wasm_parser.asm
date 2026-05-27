@@ -116,6 +116,24 @@ wasm_memory_min:
 wasm_memory_max:
     .space  4                   # 最大页数（0表示无限制）
 
+    # Table 段信息（用于 call_indirect）
+    .globl  wasm_table_count
+wasm_table_count:
+    .space  4                   # 表数量
+
+    .globl  wasm_table_size
+wasm_table_size:
+    .space  4                   # 表大小（元素数量）
+
+    # Element 段信息（表初始化）
+    .globl  wasm_elem_count
+wasm_elem_count:
+    .space  4                   # 元素段数量
+
+    .globl  wasm_table_entries
+wasm_table_entries:
+    .space  256                 # 表条目（最多64个函数索引，每个4字节）
+
     # 解析状态
     .globl  wasm_parse_error
 wasm_parse_error:
@@ -282,6 +300,10 @@ _parse_section_header:
     je      handle_code_sec
     cmp     ebx, SEC_DATA
     je      handle_data_sec
+    cmp     ebx, SEC_TABLE
+    je      handle_table_sec
+    cmp     ebx, SEC_ELEMENT
+    je      handle_element_sec
 
     # 未处理的 section，跳过
     jmp     skip_section
@@ -312,6 +334,14 @@ handle_code_sec:
 
 handle_data_sec:
     call    _parse_data_section
+    jmp     section_done_ok
+
+handle_table_sec:
+    call    _parse_table_section
+    jmp     section_done_ok
+
+handle_element_sec:
+    call    _parse_element_section
     jmp     section_done_ok
 
 skip_section:
@@ -715,6 +745,125 @@ read_leb128_byte:
 read_leb128_done:
     pop     ecx
     pop     ebx
+    ret
+
+# ============================================================================
+# _parse_table_section: 解析 table section
+# 输入：esi = section 内容, edx = section 大小
+# ============================================================================
+_parse_table_section:
+    push    eax
+    push    ebx
+
+    # 读取表数量
+    call    _read_leb128_u32
+    mov     [wasm_table_count], eax
+
+    # 检查是否只有一个表
+    cmp     eax, 1
+    jne     table_section_done
+
+    # 读取元素类型 (0x70 = funcref)
+    movzx   ebx, byte ptr [esi]
+    inc     esi
+
+    # 读取 limits: flags + min
+    movzx   ebx, byte ptr [esi]
+    inc     esi
+
+    # 读取最小大小
+    call    _read_leb128_u32
+    mov     [wasm_table_size], eax
+
+    # 如果 flags & 1，读取最大值（忽略）
+    test    ebx, 1
+    jz      table_section_done
+    call    _read_leb128_u32
+
+table_section_done:
+    xor     eax, eax
+    pop     ebx
+    pop     eax
+    ret
+
+# ============================================================================
+# _parse_element_section: 解析 element section
+# 输入：esi = section 内容, edx = section 大小
+# ============================================================================
+_parse_element_section:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edi
+
+    # 读取元素段数量
+    call    _read_leb128_u32
+    mov     [wasm_elem_count], eax
+    mov     ecx, eax
+
+    # edi = 表条目指针
+    mov     edi, offset wasm_table_entries
+
+element_entry_loop:
+    test    ecx, ecx
+    jz      element_section_done
+
+    # 读取 table index（应为 0）
+    call    _read_leb128_u32
+
+    # 读取 offset 表达式：i32.const N, end
+    cmp     byte ptr [esi], 0x41    # i32.const
+    jne     element_skip
+    inc     esi
+    call    _read_leb128_u32        # 基址偏移（存储到 edi）
+    push    eax                     # 保存基址偏移
+
+    # 跳过 end (0x0B)
+    cmp     byte ptr [esi], 0x0B
+    jne     element_skip_end
+    inc     esi
+
+    # 读取元素数量
+    call    _read_leb128_u32
+    mov     ebx, eax                # ebx = 函数索引数量
+
+    # 读取函数索引并填入表
+    pop     edx                     # edx = 基址偏移
+element_fill_loop:
+    test    ebx, ebx
+    jz      element_next
+
+    call    _read_leb128_u32        # eax = 函数索引
+
+    # 计算存储位置：wasm_table_entries + (edx + ebx-1) * 4
+    push    ebx
+    mov     ebx, edx
+    add     ebx, [esp + 4]          # 偏移 + 当前索引
+    dec     ebx                     # 从 0 开始
+    shl     ebx, 2                  # * 4
+    mov     [edi + ebx], eax        # 存储函数索引
+    pop     ebx
+
+    dec     ebx
+    jmp     element_fill_loop
+
+element_next:
+    dec     ecx
+    jmp     element_entry_loop
+
+element_skip:
+    pop     eax                     # 清理栈
+element_skip_end:
+    # 简化：跳过无法解析的元素段
+    dec     ecx
+    jmp     element_entry_loop
+
+element_section_done:
+    xor     eax, eax
+    pop     edi
+    pop     ecx
+    pop     ebx
+    pop     eax
     ret
 
 # ============================================================================
