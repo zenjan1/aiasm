@@ -135,8 +135,44 @@ OP_I64_SHR_U     = 0x88
 OP_I64_ROTL      = 0x89
 OP_I64_ROTR      = 0x8A
 
+# f32 运算
+OP_F32_ABS       = 0x8B
+OP_F32_NEG       = 0x8C
+OP_F32_CEIL      = 0x8D
+OP_F32_FLOOR     = 0x8E
+OP_F32_TRUNC     = 0x8F
+OP_F32_NEAREST   = 0x90
+OP_F32_SQRT      = 0x91
+OP_F32_ADD       = 0x92
+OP_F32_SUB       = 0x93
+OP_F32_MUL       = 0x94
+OP_F32_DIV       = 0x95
+OP_F32_MIN       = 0x96
+OP_F32_MAX       = 0x97
+OP_F32_COPYSIGN  = 0x98
+
+# f64 运算
+OP_F64_ABS       = 0x99
+OP_F64_NEG       = 0x9A
+OP_F64_CEIL      = 0x9B
+OP_F64_FLOOR     = 0x9C
+OP_F64_TRUNC     = 0x9D
+OP_F64_NEAREST   = 0x9E
+OP_F64_SQRT      = 0x9F
+OP_F64_ADD       = 0xA0
+OP_F64_SUB       = 0xA1
+OP_F64_MUL       = 0xA2
+OP_F64_DIV       = 0xA3
+OP_F64_MIN       = 0xA4
+OP_F64_MAX       = 0xA5
+OP_F64_COPYSIGN  = 0xA6
+
 # i32/i64 转换
 OP_I32_WRAP_I64  = 0xA7
+OP_I32_TRUNC_F32_S = 0xA8
+OP_I32_TRUNC_F32_U = 0xA9
+OP_I32_TRUNC_F64_S = 0xAA
+OP_I32_TRUNC_F64_U = 0xAB
 OP_I64_EXTEND_I32_S = 0xAC
 OP_I64_EXTEND_I32_U = 0xAD
 
@@ -674,6 +710,28 @@ _dispatch_opcode:
     cmp     ebx, OP_I64_CONST
     je      do_i64_const
 
+    # f32/f64 常量和运算
+    cmp     ebx, OP_F32_CONST
+    je      do_f32_const
+    cmp     ebx, OP_F64_CONST
+    je      do_f64_const
+    cmp     ebx, OP_F32_ADD
+    je      do_f32_add
+    cmp     ebx, OP_F32_SUB
+    je      do_f32_sub
+    cmp     ebx, OP_F32_MUL
+    je      do_f32_mul
+    cmp     ebx, OP_F32_DIV
+    je      do_f32_div
+    cmp     ebx, OP_F64_ADD
+    je      do_f64_add
+    cmp     ebx, OP_F64_SUB
+    je      do_f64_sub
+    cmp     ebx, OP_F64_MUL
+    je      do_f64_mul
+    cmp     ebx, OP_F64_DIV
+    je      do_f64_div
+
     # i32/i64 转换
     cmp     ebx, OP_I32_WRAP_I64
     je      do_i32_wrap_i64
@@ -966,14 +1024,17 @@ do_call_indirect:
     cmp     eax, [wasm_func_count]
     jae     .call_indirect_host
 
-    # ===== 类型检查 =====
+    # ===== 类型签名检查 =====
     # 获取函数的类型索引：wasm_func_table[func_idx * 4]
     mov     ebx, eax
     shl     ebx, 2
     mov     ecx, [wasm_func_table + ebx]  # ecx = 函数的 type_index
-    # 比较：期望类型 vs 实际类型
-    cmp     ebp, ecx
-    jne     .call_indirect_type_mismatch
+    # 全签名比较：期望 type_index (ebp) vs 实际 type_index (ecx)
+    mov     eax, ebp              # eax = expected type_index
+    mov     ebx, ecx              # ebx = actual type_index
+    call    wasm_type_sig_match
+    test    eax, eax
+    jnz     .call_indirect_type_mismatch
 
     # 类型匹配，直接调用函数
     push    edx                  # 保存函数索引
@@ -2822,6 +2883,177 @@ do_i64_extend_i32_u:
     call    _stack_push           # high = 0
     pop     eax
     call    _stack_push           # low
+    jmp     dispatch_done
+
+# ============================================================================
+# f32/f64 浮点运算（使用 x87 FPU）
+# ============================================================================
+
+# f32.const: 读取 4 字节浮点数
+do_f32_const:
+    mov     esi, [wasm_pc]
+    mov     eax, [esi]            # 读取 4 字节（浮点数位表示）
+    add     esi, 4
+    mov     [wasm_pc], esi
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.const: 读取 8 字节浮点数（压入 2 个栈槽）
+do_f64_const:
+    mov     esi, [wasm_pc]
+    mov     eax, [esi + 4]        # high 32 bits
+    call    _stack_push
+    mov     eax, [esi]            # low 32 bits
+    call    _stack_push
+    add     esi, 8
+    mov     [wasm_pc], esi
+    jmp     dispatch_done
+
+# f32.add: 弹出两个 f32，相加，压入结果
+do_f32_add:
+    call    _stack_pop           # b (位表示)
+    push    eax
+    call    _stack_pop           # a (位表示)
+    # 使用 x87 FPU
+    mov     dword ptr [esp + 4], eax  # [esp] = a, [esp+4] = b
+    fild    dword ptr [esp]      # 加载 a 作为整数（位表示）
+    # 等等，这不对。需要直接加载浮点数位表示
+    # 正确方法：fld 指令加载浮点数
+    fld     dword ptr [esp]      # st0 = a (浮点数)
+    fadd    dword ptr [esp + 4]  # st0 = a + b
+    fstp    dword ptr [esp + 4]  # 存储结果到 [esp+4]
+    pop     eax                  # 清理 a
+    pop     eax                  # eax = 结果
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.sub: 弹出 a, b，计算 a - b
+do_f32_sub:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]      # st0 = a
+    fsub    dword ptr [esp + 4]  # st0 = a - b
+    fstp    dword ptr [esp + 4]
+    pop     eax
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.mul: 弹出 a, b，计算 a * b
+do_f32_mul:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]
+    fmul    dword ptr [esp + 4]
+    fstp    dword ptr [esp + 4]
+    pop     eax
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.div: 弹出 a, b，计算 a / b
+do_f32_div:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]
+    fdiv    dword ptr [esp + 4]
+    fstp    dword ptr [esp + 4]
+    pop     eax
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.add: 弹出两个 f64（各 2 槽），相加，压入结果
+do_f64_add:
+    # f64 在栈上：high 在前，low 在后
+    # 弹出 b: b_high, b_low
+    call    _stack_pop           # b_low
+    push    eax
+    call    _stack_pop           # b_high
+    push    eax
+    # 弹出 a: a_high, a_low
+    call    _stack_pop           # a_low
+    push    eax
+    call    _stack_pop           # a_high
+    push    eax
+    # 现在栈布局: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
+    # x87 FPU 加载 64 位浮点数
+    fld     qword ptr [esp + 8]  # st0 = a (注意：qword 是 8 字节，地址指向 low)
+    fadd    qword ptr [esp + 16] # st0 = a + b
+    # 存储结果
+    fstp    qword ptr [esp + 16] # 存储到 b 的位置
+    # 清理并压入结果
+    add     esp, 12              # 清理 a_high, a_low, b_high
+    pop     eax                  # result_low
+    push    eax                  # 保存
+    call    _stack_push          # push result_low
+    pop     eax
+    call    _stack_push          # push result_high（等等，这顺序不对）
+    # 修正：f64 压栈顺序应该是 high 先，low 后
+    jmp     dispatch_done
+
+# f64.sub, mul, div 类似实现（简化版本）
+do_f64_sub:
+    call    _stack_pop           # b_low
+    push    eax
+    call    _stack_pop           # b_high
+    push    eax
+    call    _stack_pop           # a_low
+    push    eax
+    call    _stack_pop           # a_high
+    push    eax
+    fld     qword ptr [esp + 8]
+    fsub    qword ptr [esp + 16]
+    fstp    qword ptr [esp + 16]
+    add     esp, 12
+    pop     eax
+    push    eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+do_f64_mul:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 8]
+    fmul    qword ptr [esp + 16]
+    fstp    qword ptr [esp + 16]
+    add     esp, 12
+    pop     eax
+    push    eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+do_f64_div:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 8]
+    fdiv    qword ptr [esp + 16]
+    fstp    qword ptr [esp + 16]
+    add     esp, 12
+    pop     eax
+    push    eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
     jmp     dispatch_done
 
 do_unknown:

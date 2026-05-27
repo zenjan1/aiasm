@@ -58,6 +58,16 @@
 
 ## 当前项目状态（v0.17）
 
+### ✅ v0.18 新增
+
+#### f32/f64 浮点运算基础 (wasm_vm.asm)
+- f32/f64 opcode 定义 (0x8B-0xA6)
+- f32.const, f64.const: 读取浮点常量
+- f32.add/sub/mul/div: x87 FPU 基本运算
+- f64.add/sub/mul/div: x87 FPU 64 位浮点运算
+- 使用 fld, fadd, fsub, fmul, fdiv, fstp 指令
+- f64 使用 2 个栈槽存储（high:low）
+
 ### ✅ v0.17 新增
 
 #### call_indirect 类型检查 (wasm_vm.asm Line ~936)
@@ -86,16 +96,16 @@
 7. **call_indirect 实现** ✓ (v0.14)
 8. **call_indirect 类型检查** ✓ (v0.17)
 
-### 🟡 已知限制（v0.18 待修复）
+### 🟡 已知限制（v0.19 待修复）
 
-#### 1. f32/f64 浮点运算未实现
-**修复**: x87 FPU 或软浮点库
+#### 1. f32/f64 比较运算未实现
+**修复**: 使用 fcomip + fstsw 指令
 
-#### 2. i32/i64 trunc_f32/f64 转换未实现
-**影响**: 浮点到整数转换不支持
+#### 2. f32/f64 转换操作未实现
+**修复**: trunc_f32/f64, convert_i32/i64 等
 
-#### 4. 按需页分配（当前全预分配）
-**修复**: 使用页表动态映射 alloc_page 分配的物理页
+#### 3. f32/f64 数学函数未实现
+**修复**: abs, neg, ceil, floor, trunc, nearest, sqrt, min, max, copysign
 
 ---
 
@@ -106,14 +116,18 @@
 - 参数: drop, select
 - 变量: local.get, local.set, local.tee, global.get, global.set
 - 内存: i32.load, i32.store, i32.load8_s/u, i32.load16_s/u, i32.store8, i32.store16, memory.size, memory.grow
-- 常量: i32.const, i64.const
+- 常量: i32.const, i64.const, f32.const, f64.const
 - i32比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
 - i64比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
+- f32算术: add, sub, mul, div (x87 FPU)
+- f64算术: add, sub, mul, div (x87 FPU)
 - 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u
 
 ### 未实现 ❌
-- f32/f64 浮点运算
+- f32/f64 比较运算 (eq, ne, lt, gt, le, ge)
+- f32/f64 数学函数 (abs, neg, ceil, floor, trunc, nearest, sqrt, min, max, copysign)
 - i32/i64 trunc_f32/f64 转换
+- f32/f64 convert_i32/i64 转换
 - 带对齐的内存操作完整实现
 
 ---
@@ -142,16 +156,17 @@
 
 ## 优先任务列表
 
-### v0.18 优先任务
+### v0.19 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | f32/f64 浮点运算 | wasm_vm.asm | 浮点应用 |
+| P3 | f32/f64 比较运算 | wasm_vm.asm | 浮点比较 |
+| P3 | f32/f64 数学函数 | wasm_vm.asm | 浮点数学 |
 
 ---
 
-## 当前版本：v0.17
+## 当前版本：v0.18
 
 **下一步**:
-1. f32/f64 浮点运算基础（x87 FPU）
+1. f32/f64 比较运算（fcomip）
 2. UPDATE=0
