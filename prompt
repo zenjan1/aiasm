@@ -58,6 +58,14 @@
 
 ## 当前项目状态（v0.17）
 
+### ✅ v0.24 新增
+
+#### f32/f64 NaN 处理改进 (wasm_vm.asm)
+- f64.min/max: 添加 NaN 处理，与 f32 版本一致
+- IEEE 754-2019 minNum/maxNum 语义: 一个操作数是 NaN 时返回另一个
+- 检测 NaN: 值与自身比较 unordered (jp 跳转)
+- 两个操作数都是 NaN 时返回 NaN
+
 ### ✅ v0.23 新增
 
 #### f32/f64 转换操作 (wasm_vm.asm)
@@ -140,10 +148,10 @@
 7. **call_indirect 实现** ✓ (v0.14)
 8. **call_indirect 类型检查** ✓ (v0.17)
 
-### 🟡 已知限制（v0.24 待修复）
+### 🟡 已知限制（v0.25 待修复）
 
-#### 1. f32/f64 NaN 特殊处理简化
-**修复**: min/max 应正确处理 NaN（当前简化实现）
+#### 1. f32/f64 NaN payload 保留
+**修复**: min/max 应返回第一个操作数的 NaN（当前返回非 NaN 操作数或任意 NaN）
 
 ---
 
@@ -161,8 +169,8 @@
 - f64算术: add, sub, mul, div (x87 FPU)
 - f32比较: eq, ne, lt, gt, le, ge (x87 FPU fcomp)
 - f64比较: eq, ne, lt, gt, le, ge (x87 FPU fcomp)
-- f32数学: abs, neg, sqrt, ceil, floor, trunc, nearest, min, max, copysign (x87 FPU)
-- f64数学: abs, neg, sqrt, ceil, floor, trunc, nearest, min, max, copysign (x87 FPU)
+- f32数学: abs, neg, sqrt, ceil, floor, trunc, nearest, min, max, copysign (x87 FPU, NaN aware)
+- f64数学: abs, neg, sqrt, ceil, floor, trunc, nearest, min, max, copysign (x87 FPU, NaN aware)
 - 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u, i32.trunc_f32_s/u, i32.trunc_f64_s/u, i64.trunc_f32_s/u, i64.trunc_f64_s/u, f32.convert_i32_s/u, f32.convert_i64_s/u, f64.convert_i32_s/u, f64.convert_i64_s/u, f32.demote_f64, f64.promote_f32
 
 ### 未实现 ❌
@@ -194,16 +202,16 @@
 
 ## 优先任务列表
 
-### v0.24 优先任务
+### v0.25 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | f32/f64 NaN 处理 | wasm_vm.asm | 浮点正确性 |
+| P3 | f32/f64 NaN payload 保留 | wasm_vm.asm | 浮点正确性 |
 
 ---
 
-## 当前版本：v0.23
+## 当前版本：v0.24
 
 **下一步**:
-1. f32/f64 NaN 处理改进
+1. f32/f64 NaN payload 保留改进
 2. UPDATE=0
