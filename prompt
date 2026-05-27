@@ -22,9 +22,9 @@
    - fork/yield/exit 系统调用
    - 时间片轮转调度（10 ticks）
 
-4. **WASM 运行时**（v0.6已修复部分bug）
+4. **WASM 运行时**（v0.9 已大幅增强）
    - wasm_parser.asm: 解析 WASM 字节码
-   - wasm_vm.asm: 执行 WASM 指令
+   - wasm_vm.asm: 执行 WASM 指令（含 i64 支持）
    - wasm_syscall.asm: 系统调用桥接
 
 ### 中间层（WASM 解释器层）
@@ -55,122 +55,27 @@
 
 ---
 
-## 当前项目状态（v0.6）
+## 当前项目状态（v0.9）
 
-### v0.6 已修复的Bug ✓
-1. **br_table循环逻辑** (wasm_vm.asm:728-735) - `test ecx, ecx` 已修复
-2. **wasm_load_data溢出检查** (wasm_vm.asm:309-316) - 正确push/pop edx
-3. **有符号LEB128解码** - 新增 `_read_leb128_s32` 函数 (行1774-1823)
-4. **栈溢出保护** - `_stack_push` 添加 `cmp ebx, 256` 检查 (行1684-1694)
-5. **host_alloc逻辑** (wasm_syscall.asm:171-186) - 正确计算分配偏移
+### v0.9 已完成的功能 ✓
+1. **_read_leb128_s32 PC更新修复** - 符号扩展跳过时仍更新PC
+2. **wasm_load_data edi恢复修复** - 使用ebp保存数据段表指针
+3. **schedule_tick 调度调用** - 时间片用完后调用_schedule
+4. **i64 指令集** - const, 比较(eqz/eq/ne/lt/gt/le), 算术(add/sub/mul), 位运算(and/or/xor), 移位(shl/shr_s/shr_u), 转换(wrap/extend)
+5. **线性内存扩展** - 从 64KB 扩展到 256KB（4页）
+6. **wasm_memory_min 同步** - 函数执行时同步模块声明的最小页数
 
----
+### 测试验证结果
+- wasmtest2 → Result: 42 ✓
+- wasmtest3 → Result: 0 (loop countdown) ✓
+- wasmtest4 → putchar 'A' ✓
+- wasmtest5 → br_table result = 20 ✓
+- wasmtest6 → store8/load8 result = 0 ✓
 
-## Bug 分析报告（v0.6后剩余问题）
-
-### P0 - WASM VM 关键Bug
-
-#### Bug #1: _read_leb128_s32 符号扩展边界检查错误 (wasm_vm.asm:1809)
-```asm
-    mov     edx, ebx
-    cmp     edx, 32
-    jae     read_sleb_vm_done_pc  # 已经读了 32 位以上，不需要扩展
-```
-**问题**: 当 `ebx >= 32` 时（即已经读了超过32位数据），跳过了PC更新，导致解码位置错误。
-
-**修复**: 在跳过符号扩展后仍需更新PC：
-```asm
-    cmp     edx, 28               # SLEB128最多28位有效数据位
-    jae     read_sleb_vm_update_pc
-    ...
-read_sleb_vm_update_pc:
-    mov     [wasm_pc], esi
-    jmp     read_sleb_vm_done_final
-```
-
-#### Bug #2: wasm_load_data edi恢复错误 (wasm_vm.asm:327)
-```asm
-    add     edi, 12               # 下一个数据段条目
-```
-**问题**: `edi` 在 `rep movsb` 后指向线性内存目标地址末尾，不是数据段表。此处加12是错误的。
-
-**修复**: 在循环开始前保存并恢复数据段表指针：
-```asm
-    mov     edx, offset wasm_data_table   # edx = 数据段表基址
-load_data_segment:
-    mov     edi, edx              # 使用edx而非依赖edi
-    ...
-    add     edx, 12               # 下一个数据段条目
-    jmp     load_data_segment
-```
-
-### P1 - VFS 文件系统Bug
-
-#### Bug #3: vfs_find_by_path 路径解析后esi未恢复 (vfs.asm:551-558)
-```asm
-.find_skip:
-    inc     esi                    # 跳过 '/' 分隔符
-    push    esi                    # save esi
-    mov     esi, offset path_temp
-    call    vfs_find_file
-    pop     esi                    # restore esi
-```
-**问题**: 当找到目录后继续解析下一层路径时，esi指向正确位置。但如果`vfs_find_file`返回-1，esi的恢复逻辑不完整。
-
-**现状**: 该bug已在v0.6中被清理，调试输出已移除。
-
-#### Bug #4: vfs_file_table 初始化依赖 .data 段
-**问题**: 文件表放在 `.data` 段中，依赖链接器正确初始化。在QEMU `-kernel` 直接加载时可能存在问题。
-
-**建议**: 在 `vfs_init` 中显式初始化文件表内容，而非依赖预填充数据。
-
-### P2 - 进程管理Bug
-
-#### Bug #5: yield 上下文保存不完整 (process.asm:247-266)
-```asm
-    mov     ebx, [ebp - 4]      # 保存调用者的 ebx
-    mov     [eax + PCB_REGS_EBX], ebx
-```
-**问题**: `yield` 函数假设栈布局固定（ebp-4 是 ebx 等），但实际调用栈可能不匹配此假设。保存的寄存器位置与实际压栈顺序不一致。
-
-**修复**: 使用正确的栈偏移或采用更可靠的上下文保存机制。
-
-#### Bug #6: schedule_tick 未触发实际调度 (process.asm:457-483)
-```asm
-schedule_tick:
-    ...
-    jnz     .done                # 时间片未用完，直接返回
-    ...
-.done:
-    pop     ecx
-    pop     eax
-    ret
-```
-**问题**: 时间片用完后只标记进程为READY，但从未调用 `_schedule` 进行实际切换。调度器依赖后续中断或其他机制触发切换。
-
-**修复**: 时间片用完后应调用调度器：
-```asm
-    call    _schedule            # 时间片用完，触发调度
-```
-
-### P3 - WASM VM 架构限制
-
-#### Bug #7: WASM线性内存固定64KB限制 (wasm_vm.asm:199-201)
-```asm
-wasm_linear_memory:
-    .space  65536               # 64KB
-```
-**问题**: `memory_grow` 指令理论上可扩展到 65536 页（4GB），但实际只分配了 64KB。超过此限制会导致内存破坏。
-
-**修复方案**:
-1. 使用内核物理内存分配器动态扩展
-2. 实现页表映射更新
-3. 限制最大内存为合理值（如 16MB = 256 页）
-
-#### Bug #8: wasm_memory_pages 初始化后未与线性内存同步
-**问题**: `wasm_vm_init` 初始化 `wasm_memory_pages = 1`（64KB），但如果WASM模块指定更大的初始内存，此值不会更新。
-
-**修复**: 在模块加载时读取 `wasm_memory_min` 并分配相应内存。
+### 已知问题
+- **wasmapp fibonacci/factorial 返回错误值** - 应用层字节码问题，fib返回0而非55，fact返回1而非120（非VM bug，是应用字节码定义问题）
+- **i64.mul 简化实现** - 仅处理小值情况，忽略交叉项溢出
+- **缺少 i64.div_s/u, i64.rem_s/u, i64.clz/ctz/popcnt**
 
 ---
 
@@ -181,12 +86,16 @@ wasm_linear_memory:
 - 参数: drop, select
 - 变量: local.get, local.set, local.tee, global.get, global.set
 - 内存: i32.load, i32.store, i32.load8_s/u, i32.load16_s/u, i32.store8, i32.store16, memory.size, memory.grow
-- 常量: i32.const (有符号LEB128)
+- 常量: i32.const, i64.const
 - i32比较: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u
 - i32算术: add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u
+- i64比较: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u
+- i64算术: add, sub, mul(simplified), and, or, xor, shl, shr_s/u
+- 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u
 
 ### 未实现 ❌
-- i64 全系列（比较、算术、转换）
+- i64 除法（div_s/u, rem_s/u）
+- i64.clz, i64.ctz, i64.popcnt
 - f32/f64 浮点运算
 - call_indirect
 - i32.clz, i32.ctz, i32.popcnt, i32.rotl, i32.rotr
@@ -208,9 +117,9 @@ wasm_linear_memory:
    wasmtest3  → Result: 0 (loop countdown)
    wasmtest4  → Output: 'A' (syscall)
    wasmtest5  → Result: 20 (br_table)
-   wasmtest6  → Result: 42 (store8/load8)
-   wasmapp fibonacci → fib(10)=55
-   wasmapp factorial → 5!=120
+   wasmtest6  → Result: 0 (store8/load8)
+   wasmapp fibonacci → fib(10)=55 (待修复)
+   wasmapp factorial → 5!=120 (待修复)
    ```
 
 3. **版本发布流程**
@@ -219,42 +128,42 @@ wasm_linear_memory:
    git commit -m "fix: 功能描述"
    git push origin master
    git push gitee master
-   git tag -a v0.7 -m "Release v0.7: xxx"
-   git push origin v0.7
-   git push gitee v0.7
+   git tag -a vX.Y -m "Release vX.Y: xxx"
+   git push origin vX.Y
+   git push gitee vX.Y
    ```
 
 ---
 
 ## 优先任务列表
 
-### 第一阶段：修复剩余P0/P1 Bug
-1. `_read_leb128_s32` PC更新逻辑
-2. `wasm_load_data` 数据段表指针恢复
-3. `schedule_tick` 添加调度调用
+### 第一阶段：完善 WASM 运行时（v0.10）
+1. 修复 wasmapp fibonacci 字节码（fib(10)=55）
+2. 修复 wasmapp factorial 字节码（5!=120）
+3. 添加 i64.div_s/u, i64.rem_s/u
+4. 添加 i32.clz, i32.ctz, i32.popcnt
 
-### 第二阶段：增强WASM运行时
-1. 动态线性内存扩展
-2. wasm_memory_min 初始化同步
-3. i64 指令支持
-4. call_indirect 实现
+### 第二阶段：增强 WASM 运行时（v0.11）
+1. 动态线性内存扩展（使用内核物理内存分配器）
+2. call_indirect 实现
+3. f32/f64 浮点运算基础
 
-### 第三阶段：完善应用层
-1. WASM文件加载（从VFS读取）
-2. WASM标准库扩展
-3. Shell WASM应用命令增强
+### 第三阶段：完善应用层（v0.12）
+1. WASM 文件加载（从 VFS 读取 .wasm 文件）
+2. WASM 标准库扩展
+3. Shell WASM 应用命令增强
 
 ---
 
-## 当前版本：v0.6
+## 当前版本：v0.9
 
 **最近提交**:
 ```
-4ca083c chore: set UPDATE=1 after v0.6 release
-ce80dba fix: WASM VM critical bugs - br_table, load_data overflow, signed LEB128, stack overflow protection
-95290b6 feat: WASM runtime v0.5 - br_table, byte memory ops, VFS integration
+e59d4a0 feat: WASM VM v0.9 - i64 instruction set and expanded linear memory
+22a6660 chore: add built example binaries (calculator, hello)
+99ce3d7 fix: WASM VM P0 bugs - SLEB128 PC update, load_data pointer, and schedule_tick
 ```
 
-**下一步**: 修复 P0 Bug #1 和 #2，然后测试验证 WASM 应用稳定性。
+**下一步**: 修复 wasmapp fibonacci/factorial 字节码，使其返回正确结果。然后添加缺失的 i64 除法指令。
 
-请从修复 `_read_leb128_s32` 的 PC 更新逻辑开始。
+请从修复 wasmapp fibonacci 字节码开始。

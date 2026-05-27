@@ -454,6 +454,7 @@ exec_code_done:
     pop     edx
     pop     ecx
     pop     ebx
+    mov     eax, [wasm_return_value]  # 加载返回值到 eax
     ret
 
 exec_func_err:
@@ -2441,6 +2442,8 @@ read_sleb_vm_skip_extend:
     mov     [wasm_pc], esi
 
 read_sleb_vm_no_extend:
+    # Ensure wasm_pc is always updated (fix: was skipped when sign bit not set)
+    mov     [wasm_pc], esi
     pop     ecx
     pop     ebx
     ret

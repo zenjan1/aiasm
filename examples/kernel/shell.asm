@@ -1888,121 +1888,85 @@ wasm_app_hello:
 wasm_app_hello_size = . - wasm_app_hello
 
 # WASM 应用 4：Fibonacci - 计算 fib(10) = 55
-# locals: $a(i32), $b(i32), $i(i32), $temp(i32)
-# a=0, b=1, for i=0..9: (a,b) = (b, a+b)
+# locals: $a(i32), $b(i32), $n(i32), $temp(i32)
+# a=0, b=1, n=10; loop: temp=a; a=b; b=temp+b; n--; br_if(n)
 wasm_app_fib:
-    .byte   0x00, 0x61, 0x73, 0x6D  # magic
-    .byte   0x01, 0x00, 0x00, 0x00  # version
-    # type section (id=1, size=4): () -> i32
-    .byte   0x01                   # section id
-    .byte   0x04                   # section size
-    .byte   0x01                   # num types
-    .byte   0x60                   # func type
-    .byte   0x00                   # num params
-    .byte   0x01                   # num results
-    .byte   0x7F                   # i32
-    # function section (id=3, size=2): 1 func, type 0
-    .byte   0x03                   # section id
-    .byte   0x02                   # section size
-    .byte   0x01                   # num functions
-    .byte   0x00                   # type index 0
-    # code section (id=10, size=51)
-    .byte   0x0A                   # section id
-    .byte   0x33                   # section size = 51
-    .byte   0x01                   # num codes
-    .byte   0x31                   # code size = 49
-    .byte   0x01                   # 1 local entry
-    .byte   0x04, 0x7F             # 4 locals of type i32
-    # 初始化: a=0, b=1, i=0
-    .byte   0x41, 0x00             # i32.const 0
-    .byte   0x21, 0x00             # local.set 0 (a=0)
-    .byte   0x41, 0x01             # i32.const 1
-    .byte   0x21, 0x01             # local.set 1 (b=1)
-    .byte   0x41, 0x00             # i32.const 0
-    .byte   0x21, 0x02             # local.set 2 (i=0)
-    # loop {
-    .byte   0x03, 0x40             # loop void
-    #   temp = a
-    .byte   0x20, 0x00             # local.get 0
-    .byte   0x21, 0x03             # local.set 3
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section id
+    .byte   0x04                   # size
+    .byte   0x01, 0x60, 0x00, 0x01, 0x7F  # 1 type: ()->i32
+    .byte   0x03                   # function section id
+    .byte   0x02                   # size
+    .byte   0x01, 0x00             # 1 func, type 0
+    .byte   0x0A                   # code section id
+    .byte   0x31                   # size = 49
+    .byte   0x01                   # 1 code body
+    .byte   0x2F                   # code size = 47
+    .byte   0x01                   # 1 local decl
+    .byte   0x04, 0x7F             # 4 locals i32
+    # a=0 (local 0)
+    .byte   0x41, 0x00, 0x21, 0x00
+    # b=1 (local 1)
+    .byte   0x41, 0x01, 0x21, 0x01
+    # n=10 (local 2)
+    .byte   0x41, 0x0A, 0x21, 0x02
+    # loop (label 0 = loop top)
+    .byte   0x03, 0x40
+    #   temp = a  (local 3)
+    .byte   0x20, 0x00, 0x21, 0x03
     #   a = b
-    .byte   0x20, 0x01             # local.get 1
-    .byte   0x21, 0x00             # local.set 0
+    .byte   0x20, 0x01, 0x21, 0x00
     #   b = temp + b
-    .byte   0x20, 0x03             # local.get 3
-    .byte   0x20, 0x01             # local.get 1
-    .byte   0x6A                   # i32.add
-    .byte   0x21, 0x01             # local.set 1
-    #   i++
-    .byte   0x20, 0x02             # local.get 2
-    .byte   0x41, 0x01             # i32.const 1
-    .byte   0x6A                   # i32.add
-    .byte   0x21, 0x02             # local.set 2
-    #   if i < 10, continue
-    .byte   0x20, 0x02             # local.get 2
-    .byte   0x41, 0x0A             # i32.const 10
-    .byte   0x48                   # i32.lt_s
-    .byte   0x0D, 0x00             # br_if 0
-    # }
+    .byte   0x20, 0x03, 0x20, 0x01, 0x6A, 0x21, 0x01
+    #   n--
+    .byte   0x20, 0x02, 0x41, 0x01, 0x6B, 0x21, 0x02
+    #   if n!=0, br 0 (loop back)
+    .byte   0x20, 0x02, 0x0D, 0x00
+    # end loop
+    .byte   0x0B
     # return a
-    .byte   0x20, 0x00             # local.get 0
-    .byte   0x0B                   # end
+    .byte   0x20, 0x00
+    # end function
+    .byte   0x0B
 wasm_app_fib_size = . - wasm_app_fib
 
 # WASM 应用 5：Factorial - 计算 5! = 120
-# locals: $result(i32), $i(i32)
-# result = 1, i = 1, while i <= 5: result *= i, i++
-# 使用 local.tee 保持 result 在栈上作为循环的返回值
+# locals: $result(i32), $counter(i32)
+# result=1, counter=5; while counter>0: result*=counter; counter--
 wasm_app_factorial:
-    .byte   0x00, 0x61, 0x73, 0x6D  # magic
-    .byte   0x01, 0x00, 0x00, 0x00  # version
-    # type section (id=1, size=4): () -> i32
-    .byte   0x01                   # section id
-    .byte   0x04                   # section size
-    .byte   0x01                   # num types
-    .byte   0x60                   # func type
-    .byte   0x00                   # num params
-    .byte   0x01                   # num results
-    .byte   0x7F                   # i32
-    # function section (id=3, size=2): 1 func, type 0
-    .byte   0x03                   # section id
-    .byte   0x02                   # section size
-    .byte   0x01                   # num functions
-    .byte   0x00                   # type index 0
-    # code section (id=10)
-    .byte   0x0A                   # section id
-    .byte   0x27                   # section size = 39 (1 + 1 + 37)
-    .byte   0x01                   # num codes
-    .byte   0x25                   # code size = 37
-    .byte   0x01                   # 1 local entry
-    .byte   0x02, 0x7F             # 2 locals of type i32
-    # result = 1
-    .byte   0x41, 0x01             # i32.const 1
-    .byte   0x21, 0x00             # local.set 0 (result=1)
-    # i = 1
-    .byte   0x41, 0x01             # i32.const 1
-    .byte   0x21, 0x01             # local.set 1 (i=1)
-    # loop {
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section id
+    .byte   0x04                   # size
+    .byte   0x01, 0x60, 0x00, 0x01, 0x7F  # 1 type: ()->i32
+    .byte   0x03                   # function section id
+    .byte   0x02                   # size
+    .byte   0x01, 0x00             # 1 func, type 0
+    .byte   0x0A                   # code section id
+    .byte   0x25                   # size = 37
+    .byte   0x01                   # 1 code body
+    .byte   0x23                   # code size = 35
+    .byte   0x01                   # 1 local decl
+    .byte   0x02, 0x7F             # 2 locals i32
+    # result = 1 (local 0)
+    .byte   0x41, 0x01, 0x21, 0x00
+    # counter = 5 (local 1)
+    .byte   0x41, 0x05, 0x21, 0x01
+    # loop:
     .byte   0x03, 0x40             # loop void
-    #   result = result * i
-    .byte   0x20, 0x00             # local.get 0 (result)
-    .byte   0x20, 0x01             # local.get 1 (i)
-    .byte   0x6C                   # i32.mul
-    .byte   0x21, 0x00             # local.set 0 (result=result*i)
-    #   i = i + 1
-    .byte   0x20, 0x01             # local.get 1 (i)
-    .byte   0x41, 0x01             # i32.const 1
-    .byte   0x6A                   # i32.add
-    .byte   0x21, 0x01             # local.set 1 (i=i+1)
-    #   if i <= 5, continue loop
-    .byte   0x20, 0x01             # local.get 1 (i)
-    .byte   0x41, 0x05             # i32.const 5
-    .byte   0x4D                   # i32.le_s
-    .byte   0x0D, 0x00             # br_if 0 (jump to loop start)
-    # }
-    # return result (after loop exits, push result to stack)
-    .byte   0x20, 0x00             # local.get 0
-    .byte   0x0B                   # end (function)
+    #   result *= counter
+    .byte   0x20, 0x00, 0x20, 0x01, 0x6C, 0x21, 0x00
+    #   counter--
+    .byte   0x20, 0x01, 0x41, 0x01, 0x6B, 0x21, 0x01
+    #   if counter>0, br_if 0 (loop back)
+    .byte   0x20, 0x01, 0x0D, 0x00
+    # end loop
+    .byte   0x0B
+    # return result
+    .byte   0x20, 0x00
+    # end function
+    .byte   0x0B
 wasm_app_factorial_size = . - wasm_app_factorial
 
 # WASM 应用 6：Multiply - 计算 7 * 8 = 56
