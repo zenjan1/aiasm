@@ -381,6 +381,18 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest9
 
+    # "wasmtest10" - WASM rotl test
+    mov     edi, offset cmd_wasmtest10
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest10
+
+    # "wasmtest11" - WASM rotr test
+    mov     edi, offset cmd_wasmtest11
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest11
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -997,6 +1009,66 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_wasmtest10:
+    # rotl test: rotl(0x80000000, 1) = 1
+    mov     esi, offset msg_wasm_test10
+    call    uart_puts
+    mov     esi, offset wasm_test_rotl_module
+    mov     ecx, offset wasm_test_rotl_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_rotl_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest11:
+    # rotr test: rotr(8, 1) = 4
+    mov     esi, offset msg_wasm_test11
+    call    uart_puts
+    mov     esi, offset wasm_test_rotr_module
+    mov     ecx, offset wasm_test_rotr_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_rotr_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -1554,6 +1626,10 @@ cmd_wasmtest8:
     .asciz  "wasmtest8"
 cmd_wasmtest9:
     .asciz  "wasmtest9"
+cmd_wasmtest10:
+    .asciz  "wasmtest10"
+cmd_wasmtest11:
+    .asciz  "wasmtest11"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -1731,6 +1807,14 @@ msg_ctz_result:
     .asciz  "ctz(8) = "
 msg_popcnt_result:
     .asciz  "popcnt(0xFF) = "
+msg_wasm_test10:
+    .asciz  "Running WASM test10 (i32.rotl: rotl(1, 1)=2)...\r\n"
+msg_wasm_test11:
+    .asciz  "Running WASM test11 (i32.rotr: rotr(8, 1)=4)...\r\n"
+msg_rotl_result:
+    .asciz  "rotl(1, 1) = "
+msg_rotr_result:
+    .asciz  "rotr(8, 1) = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -2277,3 +2361,37 @@ wasm_test_popcnt_module:
     .byte   0x69                   # i32.popcnt
     .byte   0x0B                   # end
 wasm_test_popcnt_size = . - wasm_test_popcnt_module
+
+# WASM 测试模块 10：rotl(1, 1) = 2
+wasm_test_rotl_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x03, 0x02, 0x01, 0x00  # function
+    .byte   0x0A                   # code section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num codes
+    .byte   0x06                   # code size = 6
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x01             # i32.const 1 (value)
+    .byte   0x41, 0x01             # i32.const 1 (count)
+    .byte   0x77                   # i32.rotl
+    .byte   0x0B                   # end
+wasm_test_rotl_size = . - wasm_test_rotl_module
+
+# WASM 测试模块 11：rotr(8, 1) = 4
+wasm_test_rotr_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x03, 0x02, 0x01, 0x00  # function
+    .byte   0x0A                   # code section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num codes
+    .byte   0x06                   # code size = 6
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x08             # i32.const 8 (value)
+    .byte   0x41, 0x01             # i32.const 1 (count)
+    .byte   0x78                   # i32.rotr
+    .byte   0x0B                   # end
+wasm_test_rotr_size = . - wasm_test_rotr_module

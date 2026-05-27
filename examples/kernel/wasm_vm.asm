@@ -601,6 +601,10 @@ _dispatch_opcode:
     je      do_i32_ctz
     cmp     ebx, OP_I32_POPCNT
     je      do_i32_popcnt
+    cmp     ebx, OP_I32_ROTL
+    je      do_i32_rotl
+    cmp     ebx, OP_I32_ROTR
+    je      do_i32_rotr
 
     # i64 比较
     cmp     ebx, OP_I64_EQZ
@@ -653,6 +657,12 @@ _dispatch_opcode:
     je      do_i64_shr_s
     cmp     ebx, OP_I64_SHR_U
     je      do_i64_shr_u
+    cmp     ebx, OP_I64_CLZ
+    je      do_i64_clz
+    cmp     ebx, OP_I64_CTZ
+    je      do_i64_ctz
+    cmp     ebx, OP_I64_POPCNT
+    je      do_i64_popcnt
 
     # i64 常量
     cmp     ebx, OP_I64_CONST
@@ -1943,6 +1953,26 @@ do_i32_popcnt:
     call    _stack_push
     jmp     dispatch_done
 
+# i32.rotl: 左旋 (value <<< count)
+do_i32_rotl:
+    call    _stack_pop           # count
+    mov     ecx, eax
+    and     ecx, 31
+    call    _stack_pop           # value
+    rol     eax, cl
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.rotr: 右旋 (value >>> count)
+do_i32_rotr:
+    call    _stack_pop           # count
+    mov     ecx, eax
+    and     ecx, 31
+    call    _stack_pop           # value
+    ror     eax, cl
+    call    _stack_push
+    jmp     dispatch_done
+
 # i64.and
 do_i64_and:
     call    _stack_pop
@@ -2119,6 +2149,101 @@ do_i64_shr_u:
     call    _stack_push
     pop     eax
     mov     eax, ebx
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.clz: 计算 64 位前导零
+do_i64_clz:
+    call    _stack_pop           # low
+    mov     ecx, eax
+    call    _stack_pop           # high
+    test    eax, eax
+    jnz     .i64clz_high
+    # 高 32 位为 0，检查低 32 位
+    bsr     edx, ecx
+    jz      .i64clz_low_zero
+    mov     eax, 63
+    sub     eax, edx
+    call    _stack_push
+    xor     eax, eax
+    call    _stack_push
+    jmp     dispatch_done
+.i64clz_low_zero:
+    mov     eax, 64              # 全部为 0
+    call    _stack_push
+    xor     eax, eax
+    call    _stack_push
+    jmp     dispatch_done
+.i64clz_high:
+    # 高 32 位非 0，找到最高位
+    bsr     edx, eax
+    mov     eax, 31
+    sub     eax, edx
+    call    _stack_push
+    xor     eax, eax             # high = 0
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.ctz: 计算 64 位尾随零
+do_i64_ctz:
+    call    _stack_pop           # low
+    mov     ecx, eax
+    call    _stack_pop           # high
+    test    ecx, ecx
+    jnz     .i64ctz_low
+    # 低 32 位为 0，检查高 32 位
+    test    eax, eax
+    jnz     .i64ctz_high
+    # 全部为 0
+    xor     eax, eax
+    call    _stack_push
+    mov     eax, 64
+    call    _stack_push
+    jmp     dispatch_done
+.i64ctz_low:
+    bsf     edx, ecx
+    xor     eax, eax             # high = 0
+    mov     eax, edx
+    call    _stack_push
+    xor     eax, eax
+    call    _stack_push
+    jmp     dispatch_done
+.i64ctz_high:
+    bsf     edx, eax
+    add     edx, 32
+    xor     eax, eax
+    mov     eax, edx
+    call    _stack_push
+    xor     eax, eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.popcnt: 计算 64 位中 1 的个数
+do_i64_popcnt:
+    call    _stack_pop           # low
+    mov     ecx, eax
+    call    _stack_pop           # high
+    xor     edx, edx
+    # 计算高 32 位 popcnt
+    test    eax, eax
+    jz      .i64popcnt_low
+.i64popcnt_high:
+    shr     eax, 1
+    adc     edx, 0
+    test    eax, eax
+    jnz     .i64popcnt_high
+.i64popcnt_low:
+    test    ecx, ecx
+    jz      .i64popcnt_done
+    shr     ecx, 1
+    adc     edx, 0
+    test    ecx, ecx
+    jnz     .i64popcnt_low
+.i64popcnt_done:
+    xor     eax, eax             # high = 0
+    mov     eax, edx
+    call    _stack_push
+    xor     eax, eax
     call    _stack_push
     jmp     dispatch_done
 
