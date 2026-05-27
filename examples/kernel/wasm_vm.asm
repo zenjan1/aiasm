@@ -937,10 +937,12 @@ do_call_indirect:
     push    ebx
     push    ecx
     push    edx
+    push    ebp                   # 保存 ebp 用于临时存储
 
-    # 读取 type index（暂时忽略类型检查）
+    # 读取 type index（用于类型检查）
     mov     esi, [wasm_pc]
     call    _read_leb128_vm
+    mov     ebp, eax              # ebp = 期望的 type_index
 
     # 读取 table index（暂时只支持 table 0）
     mov     esi, [wasm_pc]
@@ -958,13 +960,23 @@ do_call_indirect:
     mov     ebx, eax
     shl     ebx, 2               # * 4
     mov     eax, [wasm_table_entries + ebx]
+    mov     edx, eax             # edx = 函数索引（保存）
 
-    # 检查是否为有效函数索引
+    # 检查是否为有效函数索引（WASM 函数）
     cmp     eax, [wasm_func_count]
     jae     .call_indirect_host
 
-    # 直接调用函数
-    push    eax                  # 保存函数索引
+    # ===== 类型检查 =====
+    # 获取函数的类型索引：wasm_func_table[func_idx * 4]
+    mov     ebx, eax
+    shl     ebx, 2
+    mov     ecx, [wasm_func_table + ebx]  # ecx = 函数的 type_index
+    # 比较：期望类型 vs 实际类型
+    cmp     ebp, ecx
+    jne     .call_indirect_type_mismatch
+
+    # 类型匹配，直接调用函数
+    push    edx                  # 保存函数索引
     mov     esi, [wasm_pc]       # esi = 返回地址
     call    _call_frame_push
     pop     eax
@@ -995,8 +1007,15 @@ do_call_indirect:
     # 表索引超出范围，返回错误
     mov     eax, -1
     call    _stack_push
+    jmp     .call_indirect_done
+
+.call_indirect_type_mismatch:
+    # 类型不匹配，触发 unreachable trap
+    mov     dword ptr [wasm_exec_error], 1
+    jmp     .call_indirect_done
 
 .call_indirect_done:
+    pop     ebp
     pop     edx
     pop     ecx
     pop     ebx
