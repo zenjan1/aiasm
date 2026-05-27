@@ -363,6 +363,24 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest6
 
+    # "wasmtest7" - WASM clz test
+    mov     edi, offset cmd_wasmtest7
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest7
+
+    # "wasmtest8" - WASM ctz test
+    mov     edi, offset cmd_wasmtest8
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest8
+
+    # "wasmtest9" - WASM popcnt test
+    mov     edi, offset cmd_wasmtest9
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest9
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -872,6 +890,96 @@ shell_dispatch:
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_mem8_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest7:
+    # clz test: clz(1) = 31
+    mov     esi, offset msg_wasm_test7
+    call    uart_puts
+    mov     esi, offset wasm_test_clz_module
+    mov     ecx, offset wasm_test_clz_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_clz_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest8:
+    # ctz test: ctz(8) = 3
+    mov     esi, offset msg_wasm_test8
+    call    uart_puts
+    mov     esi, offset wasm_test_ctz_module
+    mov     ecx, offset wasm_test_ctz_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_ctz_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest9:
+    # popcnt test: popcnt(0xFF) = 8
+    mov     esi, offset msg_wasm_test9
+    call    uart_puts
+    mov     esi, offset wasm_test_popcnt_module
+    mov     ecx, offset wasm_test_popcnt_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_popcnt_result
     call    uart_puts
     push    eax
     mov     edi, offset shell_cmd_buf
@@ -1440,6 +1548,12 @@ cmd_wasmtest5:
     .asciz  "wasmtest5"
 cmd_wasmtest6:
     .asciz  "wasmtest6"
+cmd_wasmtest7:
+    .asciz  "wasmtest7"
+cmd_wasmtest8:
+    .asciz  "wasmtest8"
+cmd_wasmtest9:
+    .asciz  "wasmtest9"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -1565,6 +1679,12 @@ msg_wasm_test5:
     .asciz  "Running WASM test5 (br_table: switch-case)...\r\n"
 msg_wasm_test6:
     .asciz  "Running WASM test6 (store8/load8: byte ops)...\r\n"
+msg_wasm_test7:
+    .asciz  "Running WASM test7 (i32.clz: clz(1)=31)...\r\n"
+msg_wasm_test8:
+    .asciz  "Running WASM test8 (i32.ctz: ctz(8)=3)...\r\n"
+msg_wasm_test9:
+    .asciz  "Running WASM test9 (i32.popcnt: popcnt(0xFF)=8)...\r\n"
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasm_parse_err:
@@ -1605,6 +1725,12 @@ msg_brtable_result:
     .asciz  "br_table result = "
 msg_mem8_result:
     .asciz  "store8/load8 result = "
+msg_clz_result:
+    .asciz  "clz(1) = "
+msg_ctz_result:
+    .asciz  "ctz(8) = "
+msg_popcnt_result:
+    .asciz  "popcnt(0xFF) = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -2103,3 +2229,51 @@ wasm_test_mem8_module:
     .byte   0x2D, 0x00, 0x00       # i32.load8_u
     .byte   0x0B                   # end
 wasm_test_mem8_size = . - wasm_test_mem8_module
+
+# WASM 测试模块 7：clz(1) = 31
+wasm_test_clz_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x03, 0x02, 0x01, 0x00  # function
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # code size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x67                   # i32.clz
+    .byte   0x0B                   # end
+wasm_test_clz_size = . - wasm_test_clz_module
+
+# WASM 测试模块 8：ctz(8) = 3
+wasm_test_ctz_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x03, 0x02, 0x01, 0x00  # function
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # code size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x08             # i32.const 8
+    .byte   0x68                   # i32.ctz
+    .byte   0x0B                   # end
+wasm_test_ctz_size = . - wasm_test_ctz_module
+
+# WASM 测试模块 9：popcnt(0xFF) = 8
+wasm_test_popcnt_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x03, 0x02, 0x01, 0x00  # function
+    .byte   0x0A                   # code section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num codes
+    .byte   0x06                   # code size = 6
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFF, 0x01       # i32.const 255 (SLEB128: 0x7F + 0x01 << 7)
+    .byte   0x69                   # i32.popcnt
+    .byte   0x0B                   # end
+wasm_test_popcnt_size = . - wasm_test_popcnt_module

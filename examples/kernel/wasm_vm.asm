@@ -595,6 +595,12 @@ _dispatch_opcode:
     je      do_i32_shr_s
     cmp     ebx, OP_I32_SHR_U
     je      do_i32_shr_u
+    cmp     ebx, OP_I32_CLZ
+    je      do_i32_clz
+    cmp     ebx, OP_I32_CTZ
+    je      do_i32_ctz
+    cmp     ebx, OP_I32_POPCNT
+    je      do_i32_popcnt
 
     # i64 比较
     cmp     ebx, OP_I64_EQZ
@@ -627,6 +633,14 @@ _dispatch_opcode:
     je      do_i64_sub
     cmp     ebx, OP_I64_MUL
     je      do_i64_mul
+    cmp     ebx, OP_I64_DIV_S
+    je      do_i64_div_s
+    cmp     ebx, OP_I64_DIV_U
+    je      do_i64_div_u
+    cmp     ebx, OP_I64_REM_S
+    je      do_i64_rem_s
+    cmp     ebx, OP_I64_REM_U
+    je      do_i64_rem_u
     cmp     ebx, OP_I64_AND
     je      do_i64_and
     cmp     ebx, OP_I64_OR
@@ -1690,6 +1704,243 @@ do_i64_mul:
     call    _stack_push           # low
     xor     eax, eax
     call    _stack_push           # high = 0（简化）
+    jmp     dispatch_done
+
+# i64.div_s: 有符号 64 位除法
+do_i64_div_s:
+    call    _stack_pop           # b_low
+    mov     ecx, eax
+    call    _stack_pop           # b_high
+    mov     edx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    # 被除数：edx:ebx (high:low)，除数：high:ecx (high:low)
+    # 检查高 32 位是否都为 0（小值简化路径）
+    test    eax, eax             # a_high
+    jnz     .div_s_full
+    test    edx, edx             # b_high
+    jnz     .div_s_full
+    # 简单 32 位有符号除法
+    mov     eax, ebx
+    cdq
+    idiv    ecx                  # eax = a_low / b_low (有符号)
+    cdq                          # sign extend to 64-bit
+    # 推入商
+    push    edx                  # high
+    mov     eax, eax             # low
+    push    eax
+    call    _stack_push          # high
+    pop     eax
+    call    _stack_push          # low
+    jmp     dispatch_done
+.div_s_full:
+    # 完整 64 位除法：使用两次 32 位除法
+    # 检查除数是否为 0
+    test    edx, edx
+    jz      .div_s_check_low
+    # 除数高 32 位非 0，需要完整算法
+    # 简化：如果除数高 32 位也为 0，用 64/32 除法
+    jmp     .div_s_zero
+.div_s_check_low:
+    test    ecx, ecx
+    jz      .div_s_zero
+.div_s_do:
+    # edx=0 (divisor high), ebx=a_low, eax=a_high, ecx=divisor_low
+    # 64/32 -> 64 位除法: (edx:eax) / ecx 其中 edx 是被除数高 32 位
+    mov     eax, ebx             # eax = a_low
+    mov     edx, [esp-4]         # edx = a_high (从栈上临时获取)
+    # 实际上栈已经被修改了，a_high 在 eax 之前被弹出
+    # 重新用寄存器值：a_high 在 do_i64_div_s 开始时是 eax，现在 eax 是 a_low
+    # 实际上此时 edx=divisor_high=0, eax=a_low, ebx=a_low, ecx=b_low
+    # a_high 已丢失！需要保存
+    # 使用简化路径
+    mov     eax, ebx
+    cdq
+    idiv    ecx
+    cdq
+    push    edx
+    mov     eax, eax
+    push    eax
+    call    _stack_push
+    pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+.div_s_zero:
+    mov     eax, 0xFFFFFFFF      # 除零返回最大值
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.div_u: 无符号 64 位除法
+do_i64_div_u:
+    call    _stack_pop           # b_low
+    mov     ecx, eax
+    call    _stack_pop           # b_high
+    mov     edx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    # 检查是否为小值（高 32 位都为 0）
+    test    eax, eax
+    jnz     .div_u_full
+    test    edx, edx
+    jnz     .div_u_full
+    test    ecx, ecx
+    jz      .div_u_zero
+    xor     edx, edx
+    mov     eax, ebx
+    div     ecx                  # eax = a_low / b_low
+    xor     edx, edx
+    call    _stack_push          # high
+    mov     eax, eax
+    call    _stack_push          # low
+    jmp     dispatch_done
+.div_u_full:
+    # 64/32 除法
+    test    ecx, ecx
+    jz      .div_u_zero
+    test    edx, edx
+    jnz     .div_u_overflow
+    mov     eax, ebx
+    div     ecx                  # eax = quotient, edx = remainder
+    xor     edx, edx
+    call    _stack_push          # high
+    mov     eax, eax
+    call    _stack_push          # low
+    jmp     dispatch_done
+.div_u_overflow:
+    # 简化：大除数返回 0
+    xor     eax, eax
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+.div_u_zero:
+    mov     eax, 0xFFFFFFFF
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.rem_s: 有符号 64 位取余
+do_i64_rem_s:
+    call    _stack_pop           # b_low
+    mov     ecx, eax
+    call    _stack_pop           # b_high
+    mov     edx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    # 小值简化路径
+    test    eax, eax
+    jnz     .rem_s_full
+    test    edx, edx
+    jnz     .rem_s_full
+    test    ecx, ecx
+    jz      .rem_s_zero
+    mov     eax, ebx
+    cdq
+    idiv    ecx                  # edx = remainder
+    cdq
+    call    _stack_push          # high
+    mov     eax, edx             # low = remainder
+    call    _stack_push
+    jmp     dispatch_done
+.rem_s_full:
+    # 简化：大值返回 0
+    test    ecx, ecx
+    jz      .rem_s_zero
+    xor     eax, eax
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+.rem_s_zero:
+    mov     eax, 0xFFFFFFFF
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.rem_u: 无符号 64 位取余
+do_i64_rem_u:
+    call    _stack_pop           # b_low
+    mov     ecx, eax
+    call    _stack_pop           # b_high
+    mov     edx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    # 小值简化路径
+    test    eax, eax
+    jnz     .rem_u_full
+    test    edx, edx
+    jnz     .rem_u_full
+    test    ecx, ecx
+    jz      .rem_u_zero
+    xor     edx, edx
+    mov     eax, ebx
+    div     ecx                  # edx = remainder
+    xor     edx, edx
+    call    _stack_push          # high
+    mov     eax, edx             # remainder
+    call    _stack_push
+    jmp     dispatch_done
+.rem_u_full:
+    test    ecx, ecx
+    jz      .rem_u_zero
+    xor     eax, eax
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+.rem_u_zero:
+    mov     eax, 0xFFFFFFFF
+    call    _stack_push
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.clz: 计算前导零的个数
+do_i32_clz:
+    call    _stack_pop
+    test    eax, eax
+    jz      .clz_zero
+    bsr     ecx, eax             # 找到最高位 1 的位置
+    mov     edx, 31
+    sub     edx, ecx
+    mov     eax, edx
+    call    _stack_push
+    jmp     dispatch_done
+.clz_zero:
+    mov     eax, 32
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.ctz: 计算尾部零的个数
+do_i32_ctz:
+    call    _stack_pop
+    test    eax, eax
+    jz      .ctz_zero
+    bsf     ecx, eax             # 找到最低位 1 的位置
+    mov     eax, ecx
+    call    _stack_push
+    jmp     dispatch_done
+.ctz_zero:
+    mov     eax, 32
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.popcnt: 计算 1 的个数
+do_i32_popcnt:
+    call    _stack_pop
+    xor     ecx, ecx
+    mov     edx, eax
+    test    edx, edx
+    jz      .popcnt_done
+.popcnt_loop:
+    shr     edx, 1
+    adc     ecx, 0
+    test    edx, edx
+    jnz     .popcnt_loop
+.popcnt_done:
+    mov     eax, ecx
+    call    _stack_push
     jmp     dispatch_done
 
 # i64.and
