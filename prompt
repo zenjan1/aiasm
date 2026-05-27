@@ -60,11 +60,11 @@
 
 ### ✅ v0.25 新增
 
-#### f32/f64 NaN payload 验证 (wasm_vm.asm)
-- min/max: x87 fld/fstp 保留 NaN payload（尾数位模式）
-- 两个 NaN 时返回第一个操作数的 NaN（完整 payload）
-- 一个 NaN 时返回非 NaN 操作数（IEEE 754-2019 minNum/maxNum）
-- 所有浮点运算（abs/neg/sqrt/trunc/ceil/floor/nearest）均正确传播 NaN
+#### f32/f64 min/max WASM NaN 语义修正 (wasm_vm.asm)
+- WASM spec: if either operand is NaN, return NaN (IEEE 754-2008)
+- 简化实现: unordered (jp) 时直接返回 a 的 NaN
+- 删除复杂的 minNum/maxNum 逻辑，符合 WASM 规范
+- x87 fld/fstp 自动保留 NaN payload（尾数位模式）
 
 ### ✅ v0.24 新增
 

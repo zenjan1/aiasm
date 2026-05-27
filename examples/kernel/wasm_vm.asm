@@ -3648,48 +3648,19 @@ do_f32_min:
     call    _stack_pop           # a
     push    eax
     # [esp] = a, [esp+4] = b
+    # WASM spec: if either NaN, return NaN (IEEE 754-2008, not minNum)
     fld     dword ptr [esp]      # st0 = a
     fcomp   dword ptr [esp + 4]  # compare a with b, pop
     fstsw   ax
     sahf
-    jp      .f32min_nan_check    # unordered -> NaN involved
+    jp      .f32min_return_a     # unordered -> NaN, return a
     jbe     .f32min_return_a     # a <= b -> return a
     pop     eax                  # discard a
     pop     eax                  # eax = b
     call    _stack_push
     jmp     dispatch_done
-.f32min_nan_check:
-    # IEEE 754-2019 minNum: return non-NaN if one is NaN
-    fld     dword ptr [esp + 4]  # st0 = b
-    fcomp   dword ptr [esp + 4]  # compare b with b
-    fstsw   ax
-    sahf
-    jp      .f32min_b_is_nan     # b is NaN (unordered with itself)
-    # b is not NaN, so a is NaN -> return b
-    pop     eax                  # discard a
-    pop     eax                  # eax = b
-    call    _stack_push
-    jmp     dispatch_done
-.f32min_b_is_nan:
-    # b is NaN, check if a is also NaN
-    fld     dword ptr [esp]      # st0 = a
-    fcomp   dword ptr [esp]      # compare a with a
-    fstsw   ax
-    sahf
-    jp      .f32min_both_nan     # a is also NaN
-    # a is not NaN, return a
-    pop     eax                  # discard b
-    pop     eax                  # eax = a
-    call    _stack_push
-    jmp     dispatch_done
-.f32min_both_nan:
-    # both NaN, return NaN (a)
-    pop     eax                  # discard b
-    pop     eax                  # eax = a (NaN)
-    call    _stack_push
-    jmp     dispatch_done
 .f32min_return_a:
-    pop     eax                  # eax = b (discard)
+    pop     eax                  # discard b
     pop     eax                  # eax = a
     call    _stack_push
     jmp     dispatch_done
@@ -3700,44 +3671,15 @@ do_f32_max:
     push    eax
     call    _stack_pop           # a
     push    eax
+    # WASM spec: if either NaN, return NaN (IEEE 754-2008, not maxNum)
     fld     dword ptr [esp]
     fcomp   dword ptr [esp + 4]
     fstsw   ax
     sahf
-    jp      .f32max_nan_check    # unordered -> NaN involved
+    jp      .f32max_return_a     # unordered -> NaN, return a
     jae     .f32max_return_a     # a >= b -> return a
     pop     eax
     pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f32max_nan_check:
-    # IEEE 754-2019 maxNum: return non-NaN if one is NaN
-    fld     dword ptr [esp + 4]  # st0 = b
-    fcomp   dword ptr [esp + 4]  # compare b with b
-    fstsw   ax
-    sahf
-    jp      .f32max_b_is_nan     # b is NaN
-    # b is not NaN, return b
-    pop     eax                  # discard a
-    pop     eax                  # eax = b
-    call    _stack_push
-    jmp     dispatch_done
-.f32max_b_is_nan:
-    # b is NaN, check a
-    fld     dword ptr [esp]      # st0 = a
-    fcomp   dword ptr [esp]      # compare a with a
-    fstsw   ax
-    sahf
-    jp      .f32max_both_nan     # a is also NaN
-    # a is not NaN, return a
-    pop     eax                  # discard b
-    pop     eax                  # eax = a
-    call    _stack_push
-    jmp     dispatch_done
-.f32max_both_nan:
-    # both NaN, return NaN (a)
-    pop     eax                  # discard b
-    pop     eax                  # eax = a (NaN)
     call    _stack_push
     jmp     dispatch_done
 .f32max_return_a:
@@ -3775,50 +3717,15 @@ do_f64_min:
     call    _stack_pop
     push    eax
     # Stack: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
+    # WASM spec: if either NaN, return NaN (IEEE 754-2008)
     fld     qword ptr [esp]      # st0 = a
     fcomp   qword ptr [esp + 8]  # compare a with b
     fstsw   ax
     sahf
-    jp      .f64min_nan_check    # unordered -> NaN involved
+    jp      .f64min_return_a     # unordered -> NaN, return a
     jbe     .f64min_return_a     # a <= b -> return a
     add     esp, 8               # discard a
     pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f64min_nan_check:
-    # IEEE 754-2019 minNum: return non-NaN if one is NaN
-    fld     qword ptr [esp + 8]  # st0 = b
-    fcomp   qword ptr [esp + 8]  # compare b with b
-    fstsw   ax
-    sahf
-    jp      .f64min_b_is_nan     # b is NaN (unordered with itself)
-    # b is not NaN, so a is NaN -> return b
-    add     esp, 8               # discard a
-    pop     eax                  # eax = b
-    call    _stack_push
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f64min_b_is_nan:
-    # b is NaN, check if a is also NaN
-    fld     qword ptr [esp]      # st0 = a
-    fcomp   qword ptr [esp]      # compare a with a
-    fstsw   ax
-    sahf
-    jp      .f64min_both_nan     # a is also NaN
-    # a is not NaN, return a
-    add     esp, 8               # discard b
-    pop     eax                  # eax = a
-    call    _stack_push
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f64min_both_nan:
-    # both NaN, return NaN (a)
-    add     esp, 8               # discard b
-    pop     eax                  # eax = a (NaN)
     call    _stack_push
     pop     eax
     call    _stack_push
@@ -3841,50 +3748,15 @@ do_f64_max:
     push    eax
     call    _stack_pop
     push    eax
+    # WASM spec: if either NaN, return NaN (IEEE 754-2008)
     fld     qword ptr [esp]
     fcomp   qword ptr [esp + 8]
     fstsw   ax
     sahf
-    jp      .f64max_nan_check    # unordered -> NaN involved
+    jp      .f64max_return_a     # unordered -> NaN, return a
     jae     .f64max_return_a     # a >= b -> return a
     add     esp, 8
     pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f64max_nan_check:
-    # IEEE 754-2019 maxNum: return non-NaN if one is NaN
-    fld     qword ptr [esp + 8]  # st0 = b
-    fcomp   qword ptr [esp + 8]  # compare b with b
-    fstsw   ax
-    sahf
-    jp      .f64max_b_is_nan     # b is NaN
-    # b is not NaN, return b
-    add     esp, 8               # discard a
-    pop     eax                  # eax = b
-    call    _stack_push
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f64max_b_is_nan:
-    # b is NaN, check a
-    fld     qword ptr [esp]      # st0 = a
-    fcomp   qword ptr [esp]      # compare a with a
-    fstsw   ax
-    sahf
-    jp      .f64max_both_nan     # a is also NaN
-    # a is not NaN, return a
-    add     esp, 8               # discard b
-    pop     eax                  # eax = a
-    call    _stack_push
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
-.f64max_both_nan:
-    # both NaN, return NaN (a)
-    add     esp, 8               # discard b
-    pop     eax                  # eax = a (NaN)
     call    _stack_push
     pop     eax
     call    _stack_push
