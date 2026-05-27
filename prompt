@@ -58,6 +58,14 @@
 
 ## 当前项目状态（v0.17）
 
+### ✅ v0.19 新增
+
+#### f32/f64 比较运算 (wasm_vm.asm)
+- f32/f64 比较 opcode 定义 (0x5B-0x66)
+- f32.eq/ne/lt/gt/le/ge: 使用 fcomp + fstsw + sahf + setcc
+- f64.eq/ne/lt/gt/le/ge: 64 位浮点比较
+- 使用 x87 FPU 状态字转换到 CPU flags
+
 ### ✅ v0.18 新增
 
 #### f32/f64 浮点运算基础 (wasm_vm.asm)
@@ -96,16 +104,13 @@
 7. **call_indirect 实现** ✓ (v0.14)
 8. **call_indirect 类型检查** ✓ (v0.17)
 
-### 🟡 已知限制（v0.19 待修复）
+### 🟡 已知限制（v0.20 待修复）
 
-#### 1. f32/f64 比较运算未实现
-**修复**: 使用 fcomip + fstsw 指令
+#### 1. f32/f64 数学函数未实现
+**修复**: abs, neg, ceil, floor, trunc, nearest, sqrt, min, max, copysign
 
 #### 2. f32/f64 转换操作未实现
 **修复**: trunc_f32/f64, convert_i32/i64 等
-
-#### 3. f32/f64 数学函数未实现
-**修复**: abs, neg, ceil, floor, trunc, nearest, sqrt, min, max, copysign
 
 ---
 
@@ -121,10 +126,11 @@
 - i64比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
 - f32算术: add, sub, mul, div (x87 FPU)
 - f64算术: add, sub, mul, div (x87 FPU)
+- f32比较: eq, ne, lt, gt, le, ge (x87 FPU fcomp)
+- f64比较: eq, ne, lt, gt, le, ge (x87 FPU fcomp)
 - 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u
 
 ### 未实现 ❌
-- f32/f64 比较运算 (eq, ne, lt, gt, le, ge)
 - f32/f64 数学函数 (abs, neg, ceil, floor, trunc, nearest, sqrt, min, max, copysign)
 - i32/i64 trunc_f32/f64 转换
 - f32/f64 convert_i32/i64 转换
@@ -156,17 +162,16 @@
 
 ## 优先任务列表
 
-### v0.19 优先任务
+### v0.20 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | f32/f64 比较运算 | wasm_vm.asm | 浮点比较 |
 | P3 | f32/f64 数学函数 | wasm_vm.asm | 浮点数学 |
 
 ---
 
-## 当前版本：v0.18
+## 当前版本：v0.19
 
 **下一步**:
-1. f32/f64 比较运算（fcomip）
+1. f32/f64 数学函数（abs, neg, sqrt, etc.）
 2. UPDATE=0

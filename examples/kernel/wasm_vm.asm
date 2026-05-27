@@ -1024,17 +1024,14 @@ do_call_indirect:
     cmp     eax, [wasm_func_count]
     jae     .call_indirect_host
 
-    # ===== 类型签名检查 =====
+    # ===== 类型检查（index compare） =====
     # 获取函数的类型索引：wasm_func_table[func_idx * 4]
     mov     ebx, eax
     shl     ebx, 2
     mov     ecx, [wasm_func_table + ebx]  # ecx = 函数的 type_index
-    # 全签名比较：期望 type_index (ebp) vs 实际 type_index (ecx)
-    mov     eax, ebp              # eax = expected type_index
-    mov     ebx, ecx              # ebx = actual type_index
-    call    wasm_type_sig_match
-    test    eax, eax
-    jnz     .call_indirect_type_mismatch
+    # 比较 type_index
+    cmp     ebp, ecx
+    jne     .call_indirect_type_mismatch
 
     # 类型匹配，直接调用函数
     push    edx                  # 保存函数索引
@@ -3053,6 +3050,223 @@ do_f64_div:
     push    eax
     call    _stack_push
     pop     eax
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# f32/f64 比较运算（使用 x87 FPU fcomip + fstsw）
+# ============================================================================
+
+# f32.eq: 比较两个 f32，返回 i32 (0 或 1)
+do_f32_eq:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # 比较 a 和 b，弹出 st0
+    fstsw   ax                   # ax = FPU 状态字
+    sahf                        # 将 ah 存入 CPU flags
+    sete    al                   # al = 1 if equal
+    movzx   eax, al
+    add     esp, 8               # 清理栈
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.ne: 比较两个 f32，返回 i32 (不相等为 1)
+do_f32_ne:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]
+    fcomp   dword ptr [esp + 4]
+    fstsw   ax
+    sahf
+    setne   al                   # not equal
+    movzx   eax, al
+    add     esp, 8
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.lt: 比较两个 f32，a < b 返回 1
+do_f32_lt:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # compare a, b
+    fstsw   ax
+    sahf
+    setb    al                   # below (a < b)
+    movzx   eax, al
+    add     esp, 8
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.gt: 比较两个 f32，a > b 返回 1
+do_f32_gt:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]
+    fcomp   dword ptr [esp + 4]
+    fstsw   ax
+    sahf
+    seta    al                   # above (a > b)
+    movzx   eax, al
+    add     esp, 8
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.le: 比较两个 f32，a <= b 返回 1
+do_f32_le:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]
+    fcomp   dword ptr [esp + 4]
+    fstsw   ax
+    sahf
+    setbe   al                   # below or equal
+    movzx   eax, al
+    add     esp, 8
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.ge: 比较两个 f32，a >= b 返回 1
+do_f32_ge:
+    call    _stack_pop           # b
+    push    eax
+    call    _stack_pop           # a
+    fld     dword ptr [esp]
+    fcomp   dword ptr [esp + 4]
+    fstsw   ax
+    sahf
+    setae   al                   # above or equal
+    movzx   eax, al
+    add     esp, 8
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.eq: 比较两个 f64（各 2 栈槽），返回 i32
+do_f64_eq:
+    # 弹出 b: b_low, b_high
+    call    _stack_pop           # b_low
+    push    eax
+    call    _stack_pop           # b_high
+    push    eax
+    # 弹出 a: a_low, a_high
+    call    _stack_pop           # a_low
+    push    eax
+    call    _stack_pop           # a_high
+    push    eax
+    # 栈布局: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
+    fld     qword ptr [esp + 4]  # st0 = a (qword from a_low addr)
+    fcomp   qword ptr [esp + 12] # compare with b
+    fstsw   ax
+    sahf
+    sete    al
+    movzx   eax, al
+    add     esp, 16              # 清理所有 push
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.ne
+do_f64_ne:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 4]
+    fcomp   qword ptr [esp + 12]
+    fstsw   ax
+    sahf
+    setne   al
+    movzx   eax, al
+    add     esp, 16
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.lt
+do_f64_lt:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 4]
+    fcomp   qword ptr [esp + 12]
+    fstsw   ax
+    sahf
+    setb    al
+    movzx   eax, al
+    add     esp, 16
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.gt
+do_f64_gt:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 4]
+    fcomp   qword ptr [esp + 12]
+    fstsw   ax
+    sahf
+    seta    al
+    movzx   eax, al
+    add     esp, 16
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.le
+do_f64_le:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 4]
+    fcomp   qword ptr [esp + 12]
+    fstsw   ax
+    sahf
+    setbe   al
+    movzx   eax, al
+    add     esp, 16
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.ge
+do_f64_ge:
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    call    _stack_pop
+    push    eax
+    fld     qword ptr [esp + 4]
+    fcomp   qword ptr [esp + 12]
+    fstsw   ax
+    sahf
+    setae   al
+    movzx   eax, al
+    add     esp, 16
     call    _stack_push
     jmp     dispatch_done
 
