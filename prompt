@@ -75,10 +75,10 @@
 - 处理符号：保存被除数符号，转绝对值做无符号运算，最后恢复符号
 - 余数符号与被除数相同（符合WASM规范）
 
-#### i64.mul 进位修复 (wasm_vm.asm Line ~1760)
-- 移除步骤 2/3 中错误的 `adc edi, edx`（溢出位 [95:64] 不应加回 result_high）
-- 移除步骤 4（a_high*b_high 只影响位 [127:64]，完全丢弃）
-- 3 个 mul 指令 + 低 32 位交叉项加法，正确计算 64 位结果
+#### 动态内存扩展 v0.16 (wasm_vm.asm + wasm_syscall.asm)
+- memory.grow 限制从 4 页提升到 16 页（256KB → 1MB）
+- host_alloc 修复页数保存 bug（之前保存物理地址而非页数）
+- wasm_linear_memory BSS 预分配 1MB（16 WASM 页）
 
 ### ✅ v0.13-v0.14 已修复
 

@@ -170,35 +170,39 @@ wasm_host_call:
 
 .host_alloc:
     # ebx = size
-    # 从 WASM 线性内存末尾分配（最大 1MB = 16 页）
+    # 从 WASM 线性内存末尾分配（最大 1MB = 16 WASM 页）
     mov     eax, [wasm_memory_pages]
     shl     eax, 16               # eax = 当前内存总大小（字节）
-    mov     ecx, eax              # 保存分配起始偏移
-    add     eax, ebx              # eax = 新的末尾
-    shr     eax, 16               # 新页数
+    mov     ecx, eax              # 保存分配起始偏移（返回值）
+    add     eax, ebx              # eax = 新的末尾（字节）
+    shr     eax, 16               # 新页数（WASM 页）
     inc     eax                   # 向上取整到页边界
-    cmp     eax, 16              # 最大 16 页 = 1MB
+    cmp     eax, 16              # 最大 16 WASM 页 = 1MB
     ja      .alloc_fail
-    # 检查是否有足够的物理内存
-    mov     edx, eax
-    sub     edx, [wasm_memory_pages]
-    # 为每个新页调用 alloc_page
+    # 计算需要分配的新页数
+    mov     edx, eax              # edx = 新页数
+    sub     edx, [wasm_memory_pages]  # edx = 新增页数
+    # 保存新页数到栈（alloc_page 会破坏 eax）
+    push    eax                   # [esp] = 新页数
     mov     esi, edx
     test    esi, esi
     jz      .alloc_skip_pages
 .alloc_page_loop:
-    call    alloc_page
+    call    alloc_page            # eax = 物理页地址
     test    eax, eax
-    jz      .alloc_fail
+    jz      .alloc_fail_pop
     dec     esi
     jnz     .alloc_page_loop
 .alloc_skip_pages:
+    pop     eax                   # eax = 新页数
     mov     [wasm_memory_pages], eax
 
     # 返回分配的偏移（旧末尾）
     mov     eax, ecx
     jmp     .done
 
+.alloc_fail_pop:
+    add     esp, 4               # 清理新页数 push
 .alloc_fail:
     mov     eax, -1
     jmp     .done

@@ -262,7 +262,7 @@ wasm_vm_init:
     rep     stosd
 
     mov     edi, offset wasm_linear_memory
-    mov     ecx, 262144 / 4
+    mov     ecx, 1048576 / 4
     rep     stosd
 
     # 初始化指针
@@ -1182,7 +1182,7 @@ do_memory_grow:
     mov     eax, [wasm_memory_pages]
     mov     ecx, eax             # 保存旧页数
     add     eax, ebx
-    cmp     eax, 4               # 最大 4 页 = 256KB（静态分配限制）
+    cmp     eax, 16               # 最大 4 页 = 1MB（静态分配限制）
     ja      grow_fail
     mov     [wasm_memory_pages], eax
     # 返回旧页数
