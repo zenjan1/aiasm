@@ -170,15 +170,29 @@ wasm_host_call:
 
 .host_alloc:
     # ebx = size
-    # 简化实现：从 WASM 线性内存末尾分配
+    # 从 WASM 线性内存末尾分配（最大 1MB = 16 页）
     mov     eax, [wasm_memory_pages]
     shl     eax, 16               # eax = 当前内存总大小（字节）
     mov     ecx, eax              # 保存分配起始偏移
     add     eax, ebx              # eax = 新的末尾
     shr     eax, 16               # 新页数
     inc     eax                   # 向上取整到页边界
-    cmp     eax, 4               # 最大 4 页 = 256KB
+    cmp     eax, 16              # 最大 16 页 = 1MB
     ja      .alloc_fail
+    # 检查是否有足够的物理内存
+    mov     edx, eax
+    sub     edx, [wasm_memory_pages]
+    # 为每个新页调用 alloc_page
+    mov     esi, edx
+    test    esi, esi
+    jz      .alloc_skip_pages
+.alloc_page_loop:
+    call    alloc_page
+    test    eax, eax
+    jz      .alloc_fail
+    dec     esi
+    jnz     .alloc_page_loop
+.alloc_skip_pages:
     mov     [wasm_memory_pages], eax
 
     # 返回分配的偏移（旧末尾）

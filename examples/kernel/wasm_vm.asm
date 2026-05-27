@@ -195,10 +195,10 @@ wasm_locals:
 wasm_globals:
     .space  256                 # 64 * 4 字节
 
-    # 线性内存（256KB = 4 页，最大可扩展）
+    # 线性内存（1MB = 16 页，支持动态扩展）
     .globl  wasm_linear_memory
 wasm_linear_memory:
-    .space  262144              # 256KB
+    .space  1048576             # 1MB
 
     .globl  wasm_memory_pages
 wasm_memory_pages:
@@ -269,7 +269,7 @@ wasm_vm_init:
     mov     dword ptr [wasm_stack_top], 0
     mov     dword ptr [wasm_control_top], 0
     mov     dword ptr [wasm_call_top], 0
-    mov     dword ptr [wasm_memory_pages], 1    # 1 页 = 64KB
+    mov     dword ptr [wasm_memory_pages], 16   # 16 页 = 1MB
     mov     byte ptr [wasm_running], 0
     mov     dword ptr [wasm_exec_error], 0
 
