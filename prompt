@@ -56,35 +56,55 @@
 
 ---
 
-## 当前项目状态（v0.33）
+## 当前项目状态（v0.36）
+
+### 🔄 v0.36 Bug分析
+
+#### Virtio-net PCI 检测修复
+- **修复内容**: pci_find_virtio_net 从 offset 0 提取 Device ID
+  - 原错误: 读取 offset 2 获取 Device ID（实际是 Class Code）
+  - 正确方法: offset 0 的高16位是 Device ID，低16位是 Vendor ID
+- **添加 Vendor ID 检查**: 检查 Vendor ID == 0x1AF4 (Red Hat)
+- **使用 esi 寄存器保存完整值**，避免多次 PCI 读取
+- **WASM 测试通过**: wasmtest2=42, wasmtest3=0
+
+#### 待解决问题
+- **virtio-net 设备仍显示 "not found"**
+  - QEMU info pci 显示 virtio-net-pci 在 bus 0, device 3, function 0
+  - Vendor ID=0x1AF4, Device ID=0x1000
+  - 代码逻辑正确但检测失败，可能原因：
+    1. QEMU virtio-net-pci 配置问题
+    2. PCI 配置空间读取时机问题
+    3. 需要使用 QEMU 特定参数测试
+
+### ✅ v0.35 Bug分析
+
+#### 项目完整性检查
+- **无新发现bug**: WASM VM v0.34 稳定运行
+- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
+- **PCI扫描正常**: pciscan命令正确显示QEMU设备
+- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
+- **代码统计**: 20个内核文件，14238行汇编
+- **下一步方向**: Virtio-net驱动完善 + TCP/IP协议栈
+
+### ✅ v0.34 新增
+
+#### PCI 扫描命令修复
+- 使用BSS变量存储循环计数器，避免寄存器冲突
+- pciscan正确检测QEMU PCI设备：
+  - Intel 440FX PCI桥接器 (8086:1237)
+  - Intel PIIX4 ISA/IDE/ACPI桥接器 (8086:7000/7010/7113)
+  - QEMU VGA (1234:1111)
+  - Intel网络设备 (8086:100E)
+- **状态**: PCI设备枚举完全正常
 
 ### ✅ v0.33 Bug分析
 
 #### 项目完整性检查
 - **无新发现bug**: WASM VM v0.32 稳定运行
 - **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
-- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
 - **virtio-net**: 基础框架完成，pciscan调试命令已添加
 - **PCI检测**: 待进一步调试（当前返回FFFF值）
-- **代码统计**: 20个内核文件，14249行汇编
-- **下一步方向**: PCI设备检测修复 + TCP/IP协议栈
-
-### ✅ v0.32 新增
-
-#### PCI 扫描调试命令
-- pciscan shell 命令：扫描并显示 PCI 设备（B:D:F + Vendor/Device ID）
-- pci_read_config 导出为全局函数供 shell 使用
-- PCI 配置空间读取逻辑验证
-- **状态**: pciscan 输出待修复（寄存器传递问题）
-
-### ✅ v0.31 Bug分析
-
-#### 项目完整性检查
-- **无新发现bug**: WASM VM v0.30 稳定运行
-- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
-- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
-- **virtio-net**: 基础框架完成，PCI检测待完善
-- **下一步方向**: PCI设备检测调试 + TCP/IP协议栈
 
 ### ✅ v0.30 新增
 
@@ -294,17 +314,17 @@
 
 ## 优先任务列表
 
-### v0.34 优先任务
+### v0.36 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | PCI寄存器传递修复 | shell.asm, virtio_net.asm | 网络基础 |
+| P3 | Virtio-net驱动完善 | virtio_net.asm | 网络基础 |
 | P3 | TCP/IP协议栈 | kernel/ | 网络服务 |
 
 ---
 
-## 当前版本：v0.33
+## 当前版本：v0.35
 
 **下一步**:
-1. PCI设备检测修复（调试pciscan寄存器传递问题）
+1. Virtio-net驱动完善（使用pciscan检测到的网络设备）
 2. UPDATE=1
