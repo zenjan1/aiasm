@@ -24,6 +24,10 @@ shell_history_buf:
 shell_date_ticks:
     .space  4
 
+# Network
+ping_target_ip:
+    .space  4                   # target IP for ping command
+
 # PCI 扫描计数器
 pciscan_bus:
     .space  4
@@ -509,6 +513,12 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_netinit
+
+    # "ping" - send ICMP Echo Request
+    mov     edi, offset cmd_ping
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_ping
 
     # "pciscan" - scan PCI devices
     mov     edi, offset cmd_pciscan
@@ -1913,6 +1923,184 @@ shell_dispatch:
     pop     esi
     ret
 
+# ============================================================================
+# shell_parse_ip: Parse dotted-decimal IP address string to 32-bit value
+# Input: esi = pointer to string "X.X.X.X"
+# Output: eax = IP in network byte order (LE stored as-is), 0 = bad
+# ============================================================================
+shell_parse_ip:
+    push    ebx
+    push    ecx
+    push    edx
+    xor     eax, eax             # result = 0
+
+    # Parse first octet
+    call    shell_parse_octet
+    cmp     edx, -1
+    je      .parse_fail
+    mov     ebx, edx             # ebx = octet 1
+    mov     dl, [esi]
+    cmp     dl, '.'
+    jne     .parse_fail
+    inc     esi                  # skip '.'
+
+    # Parse second octet
+    call    shell_parse_octet
+    cmp     edx, -1
+    je      .parse_fail
+    shl     ebx, 8
+    or      ebx, edx             # ebx = octet1.octet2
+    mov     dl, [esi]
+    cmp     dl, '.'
+    jne     .parse_fail
+    inc     esi
+
+    # Parse third octet
+    call    shell_parse_octet
+    cmp     edx, -1
+    je      .parse_fail
+    shl     ebx, 8
+    or      ebx, edx             # ebx = octet1.octet2.octet3
+    mov     dl, [esi]
+    cmp     dl, '.'
+    jne     .parse_fail
+    inc     esi
+
+    # Parse fourth octet
+    call    shell_parse_octet
+    cmp     edx, -1
+    je      .parse_fail
+    shl     ebx, 8
+    or      ebx, edx             # ebx = full IP
+
+    mov     eax, ebx             # return in eax
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+.parse_fail:
+    xor     eax, eax             # return 0 = failure
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# shell_parse_octet: Parse decimal number at esi, update esi past digits
+# Input: esi = pointer to digits
+# Output: edx = value (0-255), -1 on error
+shell_parse_octet:
+    push    eax
+    push    ecx
+    xor     edx, edx
+    xor     ecx, ecx             # digit count
+
+.parse_oct_loop:
+    movzx   eax, byte ptr [esi]
+    cmp     al, '0'
+    jb      .oct_done
+    cmp     al, '9'
+    ja      .oct_done
+    sub     al, '0'
+    imul    edx, edx, 10
+    add     edx, eax
+    inc     esi
+    inc     ecx
+    cmp     ecx, 3               # max 3 digits
+    jbe     .parse_oct_loop
+
+    cmp     edx, 255
+    ja      .oct_fail
+    test    ecx, ecx
+    jz      .oct_fail
+    pop     ecx
+    pop     eax
+    ret
+
+.oct_fail:
+    mov     edx, -1
+    pop     ecx
+    pop     eax
+    ret
+
+.oct_done:
+    test    ecx, ecx
+    jz      .oct_fail
+    cmp     edx, 255
+    ja      .oct_fail
+    pop     ecx
+    pop     eax
+    ret
+
+# ============================================================================
+# shell_print_ip: Print IP address from 32-bit value
+# Input: eax = IP address (little-endian stored)
+# ============================================================================
+shell_print_ip:
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    mov     ebx, eax             # save IP
+    mov     ecx, 4
+.print_octet:
+    mov     eax, ebx
+    and     eax, 0xFF            # extract one byte
+    call    shell_print_dec_byte
+    mov     al, '.'
+    call    uart_putc
+    shr     ebx, 8
+    loop    .print_octet
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    # Remove trailing dot by overwriting with newline
+    ret
+
+# shell_print_dec_byte: Print a byte (0-255) as decimal
+# Input: eax (low byte = value)
+shell_print_dec_byte:
+    push    ebx
+    push    ecx
+    push    edx
+    xor     ebx, ebx
+    mov     bl, al               # value in ebx
+
+    # Extract hundreds
+    xor     ecx, ecx
+.print_hundreds:
+    cmp     ebx, 100
+    jb      .print_tens
+    sub     ebx, 100
+    inc     ecx
+    jmp     .print_hundreds
+.print_tens:
+    test    ecx, ecx
+    jz      .print_tens_loop
+    add     ecx, '0'
+    mov     al, cl
+    call    uart_putc
+
+.print_tens_loop:
+    xor     ecx, ecx
+.print_tens_again:
+    cmp     ebx, 10
+    jb      .print_ones
+    sub     ebx, 10
+    inc     ecx
+    jmp     .print_tens_again
+.print_ones:
+    add     ebx, '0'
+    mov     al, bl
+    call    uart_putc
+
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# ============================================================================
 .do_netpoll:
     mov     esi, offset msg_netpoll_polling
     call    uart_puts
@@ -1932,6 +2120,186 @@ shell_dispatch:
     mov     esi, offset msg_netpoll_none
     call    uart_puts
 .netpoll_done:
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_ping:
+    # Parse IP address from "ping X.X.X.X" (skip "ping " = 5 chars)
+    lea     esi, [shell_cmd_buf + 5]
+    call    shell_parse_ip
+    test    eax, eax
+    jz      .ping_bad_ip
+    mov     [ping_target_ip], eax
+
+    # Print "Sending ICMP Echo Request to ..."
+    mov     esi, offset msg_ping_sending
+    call    uart_puts
+    mov     eax, [ping_target_ip]
+    call    shell_print_ip
+    mov     al, 0x0a
+    call    uart_putc
+
+    # Build ICMP Echo Request packet in e1000_tx_buf
+    # Ethernet header (14 bytes)
+    # Destination MAC: broadcast (FF:FF:FF:FF:FF:FF) for ARP-less mode
+    mov     edi, offset e1000_tx_buf
+    mov     dword ptr [edi], 0xFFFFFFFF
+    mov     word ptr [edi + 4], 0xFFFF
+
+    # Source MAC: our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = IPv4
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header (20 bytes) at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45          # Version=4, IHL=5
+    mov     byte ptr [edi + 1], 0         # TOS
+    mov     word ptr [edi + 2], 60        # Total length = 20+8+32 = 60
+    mov     word ptr [edi + 4], 0x1234    # Identification
+    mov     word ptr [edi + 6], 0x4000    # Flags: Don't fragment
+    mov     byte ptr [edi + 8], 64        # TTL
+    mov     byte ptr [edi + 9], 1         # Protocol = ICMP
+    mov     word ptr [edi + 10], 0        # Checksum (to calc)
+
+    # Source IP: 10.0.2.15 (QEMU user net)
+    mov     dword ptr [edi + 12], 0x02000A0F  # 10.0.2.15 little-endian... actually host order
+    # 10.0.2.15 = 0x0A00020F in network byte order
+    # But x86 is little-endian, so store as bytes: 0A 00 02 0F
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15 in LE
+
+    # Dest IP: target
+    mov     eax, [ping_target_ip]
+    mov     [edi + 16], eax
+
+    # Calculate IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10             # 10 words
+.ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .ip_cksum
+.fold_ip:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .ip_fold_done
+    add     eax, 1
+.ip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # ICMP header (8 bytes) at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     byte ptr [edi], 8         # Type = Echo Request
+    mov     byte ptr [edi + 1], 0     # Code
+    mov     word ptr [edi + 2], 0     # Checksum (to calc)
+    mov     word ptr [edi + 4], 0x0001  # Identifier
+    mov     word ptr [edi + 6], 1     # Sequence
+
+    # ICMP payload: 32 bytes of pattern
+    mov     edi, offset e1000_tx_buf + 42
+    mov     ecx, 8
+    mov     eax, 0x01020304
+.fill_payload:
+    mov     [edi], eax
+    add     edi, 4
+    add     eax, 0x04040404
+    loop    .fill_payload
+
+    # Calculate ICMP checksum (ICMP header + payload = 40 bytes = 20 words)
+    mov     edi, offset e1000_tx_buf + 34
+    xor     edx, edx
+    mov     ecx, 20
+.icmp_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .icmp_cksum
+.fold_icmp:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .icmp_fold_done
+    add     eax, 1
+.icmp_fold_done:
+    not     ax
+    mov     edi, offset e1000_tx_buf + 36
+    mov     [edi], ax
+
+    # Send packet (60 bytes total: 14 eth + 20 IP + 8 ICMP + 32 payload)
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 60
+    call    e1000_transmit
+    test    eax, eax
+    jnz     .ping_send_fail
+
+    mov     esi, offset msg_ping_sent
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Wait a bit for reply, then poll
+    mov     ecx, 5000000
+.ping_wait:
+    dec     ecx
+    jnz     .ping_wait
+
+    call    e1000_poll
+    test    eax, eax
+    jz      .ping_no_reply
+
+    mov     esi, offset msg_ping_reply
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    jmp     .ping_done
+
+.ping_no_reply:
+    mov     esi, offset msg_ping_noreply
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    jmp     .ping_done
+
+.ping_send_fail:
+    mov     esi, offset msg_ping_sendfail
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+.ping_done:
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.ping_bad_ip:
+    mov     esi, offset msg_ping_badip
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
     pop     ecx
     pop     edi
     pop     esi
@@ -2269,6 +2637,8 @@ cmd_netinit:
     .asciz  "netinit"
 cmd_netpoll:
     .asciz  "netpoll"
+cmd_ping:
+    .asciz  "ping"
 cmd_pciscan:
     .asciz  "pciscan"
 
@@ -2318,8 +2688,27 @@ msg_netpoll_none:
     .ascii  "  No packets received"
     .byte   13, 10, 0
 
+msg_ping_sending:
+    .ascii  "ICMP Echo Request -> "
+    .byte   0
+msg_ping_sent:
+    .ascii  "  Sent (waiting reply...)"
+    .byte   0
+msg_ping_reply:
+    .ascii  "  ICMP Echo Reply received!"
+    .byte   0
+msg_ping_noreply:
+    .ascii  "  No reply received (timeout)"
+    .byte   13, 10, 0
+msg_ping_sendfail:
+    .ascii  "  Send failed"
+    .byte   13, 10, 0
+msg_ping_badip:
+    .ascii  "  Usage: ping <ip> (e.g. ping 10.0.2.2)"
+    .byte   13, 10, 0
+
 version_text:
-    .ascii  "AI-ASM Kernel v0.38"
+    .ascii  "AI-ASM Kernel v0.39"
     .byte   13, 10, 0
 
 help_text:
@@ -2364,6 +2753,10 @@ help_text:
     .ascii  "  wasmtest4     - Run WASM syscall test (putchar 'A')"
     .byte   13, 10
     .ascii  "  wasmapp <app> - Run WASM app (uptime, sum, hello, fibonacci, factorial, multiply, countdown)"
+    .byte   13, 10
+    .ascii  "  ping <ip>     - Send ICMP Echo Request"
+    .byte   13, 10
+    .ascii  "  netpoll       - Poll for received packets"
     .byte   13, 10, 0
 
 tick_prefix:

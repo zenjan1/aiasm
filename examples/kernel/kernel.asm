@@ -672,16 +672,19 @@ virtio_pci_temp2:
 virtio_pci_temp3:
     .space  4
 e1000_mmio_base:
+    .globl  e1000_mmio_base
     .space  4
 e1000_rx_buf:
     .space  2048               # shared RX buffer for demo
 e1000_tx_buf:
+    .globl  e1000_tx_buf
     .space  2048
 e1000_rx_desc:
     .space  128                # 8 descriptors * 16 bytes
 e1000_tx_desc:
     .space  128                # 8 descriptors * 16 bytes
 e1000_mac:
+    .globl  e1000_mac
     .space  6
 e1000_rx_idx:
     .globl  e1000_rx_idx
@@ -699,7 +702,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.38 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.39 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

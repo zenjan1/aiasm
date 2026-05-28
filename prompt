@@ -325,8 +325,56 @@
 
 ---
 
-## 当前版本：v0.35
+## 当前版本：v0.37
+
+### ✅ v0.37 新增
+
+#### e1000 (Intel 82540EM) 网络驱动
+- PCI设备检测（Vendor=0x8086, Device=0x100E）
+- BAR0 MMIO映射（0xFEB80000 - 高地址可访问）
+- 设备复位（CTRL寄存器RST位）
+- 链路设置（SLU=1, 100Mbps）
+- EEPROM MAC地址读取
+- RX/TX描述符环初始化（8描述符）
+- RXEN/TXEN使能
+
+#### virtio-net MMIO分析
+- 确认 virtio-net BAR0=0xC000 位于ISA内存空洞
+- 无法直接MMIO访问（需要分页映射）
+- virtio_net.asm 寄存器访问已从in/out改为MMIO
+- 结论：在无分页的内核中需使用e1000而非virtio-net
+
+#### 代码统计
+- kernel.asm: +150行（e1000驱动）
+- virtio_net.asm: +20行（MMIO修复）
+
+---
+
+## 当前版本：v0.38
+
+### ✅ v0.38 新增
+
+#### e1000 ICMP Echo Reply 支持
+- e1000_poll: 检查RX描述符DD位，检测收到数据包
+- e1000_handle_icmp: 构建并发送ICMP Echo Reply
+  - 交换MAC/IP地址
+  - 复制ICMP payload（identifier + sequence + 数据）
+  - IP头部checksum计算（one's complement）
+  - ICMP checksum计算
+- e1000_transmit: TX描述符设置 + EOP|RS|IFCS标志
+- netpoll shell命令: 轮询网络并显示收到的包数
+- 导出e1000_rx_idx和print_hex8供shell.asm使用
+
+#### QEMU测试结果
+- e1000 PCI检测: Vendor=0x8086, Device=0x100E ✓
+- BAR0 MMIO: 0xFEB80000 ✓
+- e1000初始化成功 ✓
+- Shell正常运行 ✓
+
+---
 
 **下一步**:
-1. Virtio-net驱动完善（使用pciscan检测到的网络设备）
-2. UPDATE=1
+1. e1000 IRQ中断处理完善（当前poll模式）
+2. UDP/TCP协议栈实现
+3. ping命令（主动发送ICMP Echo Request）
+4. UPDATE=1
