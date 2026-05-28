@@ -56,7 +56,26 @@
 
 ---
 
-## 当前项目状态（v0.31）
+## 当前项目状态（v0.33）
+
+### ✅ v0.33 Bug分析
+
+#### 项目完整性检查
+- **无新发现bug**: WASM VM v0.32 稳定运行
+- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
+- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
+- **virtio-net**: 基础框架完成，pciscan调试命令已添加
+- **PCI检测**: 待进一步调试（当前返回FFFF值）
+- **代码统计**: 20个内核文件，14249行汇编
+- **下一步方向**: PCI设备检测修复 + TCP/IP协议栈
+
+### ✅ v0.32 新增
+
+#### PCI 扫描调试命令
+- pciscan shell 命令：扫描并显示 PCI 设备（B:D:F + Vendor/Device ID）
+- pci_read_config 导出为全局函数供 shell 使用
+- PCI 配置空间读取逻辑验证
+- **状态**: pciscan 输出待修复（寄存器传递问题）
 
 ### ✅ v0.31 Bug分析
 
@@ -65,7 +84,6 @@
 - **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
 - **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
 - **virtio-net**: 基础框架完成，PCI检测待完善
-- **代码统计**: 20个内核文件，13694行汇编
 - **下一步方向**: PCI设备检测调试 + TCP/IP协议栈
 
 ### ✅ v0.30 新增
@@ -276,17 +294,17 @@
 
 ## 优先任务列表
 
-### v0.32 优先任务
+### v0.34 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | PCI设备检测调试 | virtio_net.asm | 网络基础 |
+| P3 | PCI寄存器传递修复 | shell.asm, virtio_net.asm | 网络基础 |
 | P3 | TCP/IP协议栈 | kernel/ | 网络服务 |
 
 ---
 
-## 当前版本：v0.31
+## 当前版本：v0.33
 
 **下一步**:
-1. PCI设备检测调试（修复virtio-net-pci设备枚举）
+1. PCI设备检测修复（调试pciscan寄存器传递问题）
 2. UPDATE=1

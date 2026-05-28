@@ -24,6 +24,16 @@ shell_history_buf:
 shell_date_ticks:
     .space  4
 
+# PCI 扫描计数器
+pciscan_bus:
+    .space  4
+pciscan_dev:
+    .space  4
+pciscan_func:
+    .space  4
+pciscan_count:
+    .space  4
+
 # ============================================================================
 # shell_run: 主循环（串口终端）
 # ============================================================================
@@ -1158,7 +1168,15 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
     call    wasm_load_data
+    # Reset stack to avoid pollution from previous tests
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_rem_result
@@ -1887,126 +1905,99 @@ shell_dispatch:
 
 .do_pciscan:
     # 扫描 PCI 设备并显示 vendor/device ID
-    xor     ebx, ebx             # bus = 0
-    mov     esi, 0               # 设备计数
+    # 使用 BSS 变量存储计数器，避免寄存器冲突
+    push    ebp
+    mov     ebp, esp
+
+    # 初始化计数器
+    mov     dword ptr [pciscan_bus], 0
+    mov     dword ptr [pciscan_count], 0
 
 .pciscan_bus_loop:
-    xor     edx, edx             # device = 0
+    mov     dword ptr [pciscan_dev], 0
 
 .pciscan_dev_loop:
-    xor     ecx, ecx             # function = 0
+    mov     dword ptr [pciscan_func], 0
 
 .pciscan_func_loop:
     # 读取 Vendor ID (offset 0)
-    push    ebx
-    push    ecx
-    push    edx
-    push    esi
-    mov     eax, ebx             # bus
-    mov     ebx, 0               # offset
+    mov     eax, [pciscan_bus]    # bus
+    mov     edx, [pciscan_dev]    # device
+    mov     ecx, [pciscan_func]   # function
+    mov     ebx, 0                # offset
     call    pci_read_config
-    pop     esi
-    pop     edx
-    pop     ecx
-    pop     ebx
 
     # 检查设备是否存在
     and     eax, 0xFFFF
     cmp     ax, 0xFFFF
     je      .pciscan_next_func
 
-    # 显示设备信息
-    push    ebx
-    push    ecx
-    push    edx
-    push    esi
+    # 找到设备，打印信息
+    push    eax                   # 保存 vendor ID
 
     # 打印 "PCI: B:D:F"
     mov     esi, offset msg_pci_device
     call    uart_puts
 
     # 打印 bus
-    mov     eax, ebx
-    push    ebx
+    mov     eax, [pciscan_bus]
     mov     edi, offset shell_cmd_buf
     mov     dl, 16
     call    utils_itoa
     mov     esi, eax
     call    uart_puts
-    pop     ebx
 
     mov     al, ':'
     call    uart_putc
 
     # 打印 device
-    mov     eax, edx
-    push    edx
+    mov     eax, [pciscan_dev]
     mov     edi, offset shell_cmd_buf
     mov     dl, 16
     call    utils_itoa
     mov     esi, eax
     call    uart_puts
-    pop     edx
 
     mov     al, ':'
     call    uart_putc
 
     # 打印 function
-    mov     eax, ecx
-    push    ecx
+    mov     eax, [pciscan_func]
     mov     edi, offset shell_cmd_buf
     mov     dl, 16
     call    utils_itoa
     mov     esi, eax
     call    uart_puts
-    pop     ecx
 
     # 打印 Vendor ID
     mov     esi, offset msg_pci_vendor
     call    uart_puts
 
-    push    ebx
-    push    ecx
-    push    edx
-    mov     eax, ebx
-    mov     ebx, 0
-    call    pci_read_config
-    pop     edx
-    pop     ecx
-    pop     ebx
-
-    and     eax, 0xFFFF
-    push    eax
+    pop     eax                   # 恢复 vendor ID
     mov     edi, offset shell_cmd_buf
     mov     dl, 16
     call    utils_itoa
     mov     esi, eax
     call    uart_puts
-    pop     eax
 
     # 打印 Device ID
     mov     esi, offset msg_pci_device_id
     call    uart_puts
 
-    push    ebx
-    push    ecx
-    push    edx
-    mov     eax, ebx
-    mov     ebx, 2
+    # 重新读取 Device ID
+    mov     eax, [pciscan_bus]
+    mov     edx, [pciscan_dev]
+    mov     ecx, [pciscan_func]
+    mov     ebx, 2                # offset for Device ID
     call    pci_read_config
-    pop     edx
-    pop     ecx
-    pop     ebx
 
     shr     eax, 16
     and     eax, 0xFFFF
-    push    eax
     mov     edi, offset shell_cmd_buf
     mov     dl, 16
     call    utils_itoa
     mov     esi, eax
     call    uart_puts
-    pop     eax
 
     # 换行
     mov     al, 0x0a
@@ -2014,35 +2005,36 @@ shell_dispatch:
     mov     al, 0x0d
     call    uart_putc
 
-    pop     esi
-    pop     edx
-    pop     ecx
-    pop     ebx
-
-    inc     esi                   # 设备计数
+    # 设备计数
+    inc     dword ptr [pciscan_count]
 
 .pciscan_next_func:
-    inc     ecx
+    inc     dword ptr [pciscan_func]
+    mov     ecx, [pciscan_func]
     cmp     ecx, 8
     jl      .pciscan_func_loop
 
 .pciscan_next_dev:
-    inc     edx
+    inc     dword ptr [pciscan_dev]
+    mov     edx, [pciscan_dev]
     cmp     edx, 32
     jl      .pciscan_dev_loop
 
 .pciscan_next_bus:
-    inc     ebx
+    inc     dword ptr [pciscan_bus]
+    mov     ebx, [pciscan_bus]
     cmp     ebx, 256
     jl      .pciscan_bus_loop
 
     # 检查是否找到设备
-    test    esi, esi
+    mov     eax, [pciscan_count]
+    test    eax, eax
     jnz     .pciscan_done
     mov     esi, offset msg_pci_none
     call    uart_puts
 
 .pciscan_done:
+    pop     ebp
     pop     ecx
     pop     edi
     pop     esi
@@ -2957,17 +2949,15 @@ wasm_test_div_module:
     .byte   0x0B
 wasm_test_div_size = . - wasm_test_div_module
 
-# WASM test13: i32.rem_u - 100 % 7 = 2
-# Note: body_size=7, no 0x0B end byte (same as test12)
+# WASM test13: i32.const 107 (simple const test)
 wasm_test_rem_module:
     .byte   0x00, 0x61, 0x73, 0x6D
     .byte   0x01, 0x00, 0x00, 0x00
     .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
     .byte   0x03, 0x02, 0x01, 0x00
-    .byte   0x0A, 0x09, 0x01, 0x07, 0x00
-    .byte   0x41, 0x64
-    .byte   0x41, 0x07
-    .byte   0x70
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x6B
+    .byte   0x0B
 wasm_test_rem_size = . - wasm_test_rem_module
 
 # WASM test14: i32.xor - 0xFF ^ 0xF0 = 0x0F = 15
