@@ -58,24 +58,26 @@
 
 ## 当前项目状态（v0.36）
 
-### 🔄 v0.36 Bug分析
+### 🔄 v0.36 Bug分析（更新）
 
-#### Virtio-net PCI 检测修复
-- **修复内容**: pci_find_virtio_net 从 offset 0 提取 Device ID
-  - 原错误: 读取 offset 2 获取 Device ID（实际是 Class Code）
-  - 正确方法: offset 0 的高16位是 Device ID，低16位是 Vendor ID
-- **添加 Vendor ID 检查**: 检查 Vendor ID == 0x1AF4 (Red Hat)
-- **使用 esi 寄存器保存完整值**，避免多次 PCI 读取
-- **WASM 测试通过**: wasmtest2=42, wasmtest3=0
+#### Virtio-net PCI 检测修复状态
+- **virtio_net.asm 修复已完成**: 从 offset 0 直接提取 Device ID 和 Vendor ID
+- **shell.asm pciscan 正常工作**: 正确显示 virtio-net 设备 (0:3:0 Vendor=1AF4 Device=1000)
+- **WASM 测试通过**: wasmtest2=42, wasmtest3=0, wasmtest4=0
 
-#### 待解决问题
-- **virtio-net 设备仍显示 "not found"**
-  - QEMU info pci 显示 virtio-net-pci 在 bus 0, device 3, function 0
-  - Vendor ID=0x1AF4, Device ID=0x1000
-  - 代码逻辑正确但检测失败，可能原因：
-    1. QEMU virtio-net-pci 配置问题
-    2. PCI 配置空间读取时机问题
-    3. 需要使用 QEMU 特定参数测试
+#### 发现的问题
+- **kernel.asm 中 virtio_net_init 调用被注释掉**: 导致启动时显示 "device not found"
+  - 需要取消注释：`call virtio_net_init`
+  - virtio_net.asm 的 PCI 检测逻辑已正确修复
+- **shell.asm netinfo 显示 "No network device found"**:
+  - virtio_net_status 未被正确设置
+  - 因为 virtio_net_init 未被调用，所以 virtio_net_status 保持为 0
+
+#### 下一步行动
+1. 取消 kernel.asm 中 virtio_net_init 调用的注释
+2. 测试 virtio-net 设备检测和初始化
+3. 验证 WASM 测试正常通过
+4. 发布 v0.37 并推送
 
 ### ✅ v0.35 Bug分析
 
