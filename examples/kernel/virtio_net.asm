@@ -103,6 +103,7 @@ virtq_tx_used_idx:
 # pci_read_config: 读取PCI配置空间
 # 输入: eax = bus, edx = device, ecx = function, ebx = offset
 # 输出: eax = 32位配置值
+    .globl  pci_read_config
 pci_read_config:
     push    edx
     push    ecx

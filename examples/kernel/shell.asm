@@ -393,6 +393,48 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest11
 
+    # "wasmtest12"
+    mov     edi, offset cmd_wasmtest12
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest12
+
+    # "wasmtest13"
+    mov     edi, offset cmd_wasmtest13
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest13
+
+    # "wasmtest14"
+    mov     edi, offset cmd_wasmtest14
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest14
+
+    # "wasmtest15"
+    mov     edi, offset cmd_wasmtest15
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest15
+
+    # "wasmtest16"
+    mov     edi, offset cmd_wasmtest16
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest16
+
+    # "wasmtest17"
+    mov     edi, offset cmd_wasmtest17
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest17
+
+    # "wasmtest18"
+    mov     edi, offset cmd_wasmtest18
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest18
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -445,6 +487,12 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_netinfo
+
+    # "pciscan" - scan PCI devices
+    mov     edi, offset cmd_pciscan
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_pciscan
 
     # 未知命令
     mov     esi, offset msg_unknown
@@ -1075,6 +1123,195 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_wasmtest12:
+    mov     esi, offset msg_wasm_test12
+    call    uart_puts
+    mov     esi, offset wasm_test_div_module
+    mov     ecx, offset wasm_test_div_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_div_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest13:
+    mov     esi, offset msg_wasm_test13
+    call    uart_puts
+    mov     esi, offset wasm_test_rem_module
+    mov     ecx, offset wasm_test_rem_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_rem_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest14:
+    mov     esi, offset msg_wasm_test14
+    call    uart_puts
+    mov     esi, offset wasm_test_xor_module
+    mov     ecx, offset wasm_test_xor_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_xor_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest15:
+    mov     esi, offset msg_wasm_test15
+    call    uart_puts
+    mov     esi, offset wasm_test_f64arith_module
+    mov     ecx, offset wasm_test_f64arith_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_f64arith_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest16:
+    mov     esi, offset msg_wasm_test16
+    call    uart_puts
+    mov     esi, offset wasm_test_or_module
+    mov     ecx, offset wasm_test_or_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_or_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest17:
+    mov     esi, offset msg_wasm_test17
+    call    uart_puts
+    mov     esi, offset wasm_test_and_module
+    mov     ecx, offset wasm_test_and_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_and_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest18:
+    mov     esi, offset msg_wasm_test18
+    call    uart_puts
+    mov     esi, offset wasm_test_shl_module
+    mov     ecx, offset wasm_test_shl_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_shl_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -1648,6 +1885,169 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_pciscan:
+    # 扫描 PCI 设备并显示 vendor/device ID
+    xor     ebx, ebx             # bus = 0
+    mov     esi, 0               # 设备计数
+
+.pciscan_bus_loop:
+    xor     edx, edx             # device = 0
+
+.pciscan_dev_loop:
+    xor     ecx, ecx             # function = 0
+
+.pciscan_func_loop:
+    # 读取 Vendor ID (offset 0)
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    mov     eax, ebx             # bus
+    mov     ebx, 0               # offset
+    call    pci_read_config
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+
+    # 检查设备是否存在
+    and     eax, 0xFFFF
+    cmp     ax, 0xFFFF
+    je      .pciscan_next_func
+
+    # 显示设备信息
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+
+    # 打印 "PCI: B:D:F"
+    mov     esi, offset msg_pci_device
+    call    uart_puts
+
+    # 打印 bus
+    mov     eax, ebx
+    push    ebx
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     ebx
+
+    mov     al, ':'
+    call    uart_putc
+
+    # 打印 device
+    mov     eax, edx
+    push    edx
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     edx
+
+    mov     al, ':'
+    call    uart_putc
+
+    # 打印 function
+    mov     eax, ecx
+    push    ecx
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     ecx
+
+    # 打印 Vendor ID
+    mov     esi, offset msg_pci_vendor
+    call    uart_puts
+
+    push    ebx
+    push    ecx
+    push    edx
+    mov     eax, ebx
+    mov     ebx, 0
+    call    pci_read_config
+    pop     edx
+    pop     ecx
+    pop     ebx
+
+    and     eax, 0xFFFF
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+
+    # 打印 Device ID
+    mov     esi, offset msg_pci_device_id
+    call    uart_puts
+
+    push    ebx
+    push    ecx
+    push    edx
+    mov     eax, ebx
+    mov     ebx, 2
+    call    pci_read_config
+    pop     edx
+    pop     ecx
+    pop     ebx
+
+    shr     eax, 16
+    and     eax, 0xFFFF
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+
+    # 换行
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+
+    inc     esi                   # 设备计数
+
+.pciscan_next_func:
+    inc     ecx
+    cmp     ecx, 8
+    jl      .pciscan_func_loop
+
+.pciscan_next_dev:
+    inc     edx
+    cmp     edx, 32
+    jl      .pciscan_dev_loop
+
+.pciscan_next_bus:
+    inc     ebx
+    cmp     ebx, 256
+    jl      .pciscan_bus_loop
+
+    # 检查是否找到设备
+    test    esi, esi
+    jnz     .pciscan_done
+    mov     esi, offset msg_pci_none
+    call    uart_puts
+
+.pciscan_done:
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # 命令字符串
 # ============================================================================
@@ -1706,6 +2106,20 @@ cmd_wasmtest10:
     .asciz  "wasmtest10"
 cmd_wasmtest11:
     .asciz  "wasmtest11"
+cmd_wasmtest12:
+    .asciz  "wasmtest12"
+cmd_wasmtest13:
+    .asciz  "wasmtest13"
+cmd_wasmtest14:
+    .asciz  "wasmtest14"
+cmd_wasmtest15:
+    .asciz  "wasmtest15"
+cmd_wasmtest16:
+    .asciz  "wasmtest16"
+cmd_wasmtest17:
+    .asciz  "wasmtest17"
+cmd_wasmtest18:
+    .asciz  "wasmtest18"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -1726,6 +2140,21 @@ cmd_echo_prefix:
     .asciz  "echo "
 cmd_netinfo:
     .asciz  "netinfo"
+cmd_pciscan:
+    .asciz  "pciscan"
+
+msg_pci_device:
+    .ascii  "PCI: "
+    .byte   0
+msg_pci_vendor:
+    .ascii  " Vendor="
+    .byte   0
+msg_pci_device_id:
+    .ascii  " Device="
+    .byte   0
+msg_pci_none:
+    .ascii  "No PCI devices found"
+    .byte   13, 10, 0
 
 msg_netinfo_header:
     .ascii  "Network device info:"
@@ -1906,6 +2335,34 @@ msg_rotl_result:
     .asciz  "rotl(1, 1) = "
 msg_rotr_result:
     .asciz  "rotr(8, 1) = "
+msg_wasm_test12:
+    .asciz  "Running WASM test12 (i32.div_u: 1000/8=125)...\r\n"
+msg_div_result:
+    .asciz  "div result = "
+msg_wasm_test13:
+    .asciz  "Running WASM test13 (i32.rem_u: 100%7=2)...\r\n"
+msg_rem_result:
+    .asciz  "rem result = "
+msg_wasm_test14:
+    .asciz  "Running WASM test14 (i32.xor: 0xFF^0xF0=15)...\r\n"
+msg_xor_result:
+    .asciz  "xor result = "
+msg_wasm_test15:
+    .asciz  "Running WASM test15 (f64.add: 1.5+2.5=4)...\r\n"
+msg_f64arith_result:
+    .asciz  "f64.add result = "
+msg_wasm_test16:
+    .asciz  "Running WASM test16 (i32.or: 0xF0|0x0F=255)...\r\n"
+msg_or_result:
+    .asciz  "or result = "
+msg_wasm_test17:
+    .asciz  "Running WASM test17 (i32.and: 0xFF&0xF0=240)...\r\n"
+msg_and_result:
+    .asciz  "and result = "
+msg_wasm_test18:
+    .asciz  "Running WASM test18 (i32.shl: 1<<3=8)...\r\n"
+msg_shl_result:
+    .asciz  "shl result = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -2486,3 +2943,98 @@ wasm_test_rotr_module:
     .byte   0x78                   # i32.rotr
     .byte   0x0B                   # end
 wasm_test_rotr_size = . - wasm_test_rotr_module
+
+# WASM test12: i32.div_u - 1000 / 8 = 125
+wasm_test_div_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x09, 0x01, 0x07, 0x00
+    .byte   0x41, 0xE8, 0x07
+    .byte   0x41, 0x08
+    .byte   0x6E
+    .byte   0x0B
+wasm_test_div_size = . - wasm_test_div_module
+
+# WASM test13: i32.rem_u - 100 % 7 = 2
+# Note: body_size=7, no 0x0B end byte (same as test12)
+wasm_test_rem_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x09, 0x01, 0x07, 0x00
+    .byte   0x41, 0x64
+    .byte   0x41, 0x07
+    .byte   0x70
+wasm_test_rem_size = . - wasm_test_rem_module
+
+# WASM test14: i32.xor - 0xFF ^ 0xF0 = 0x0F = 15
+wasm_test_xor_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x0B, 0x01, 0x09, 0x00
+    .byte   0x41, 0xFF, 0x01
+    .byte   0x41, 0xF0, 0x01
+    .byte   0x73
+    .byte   0x0B
+    .byte   0x0B
+wasm_test_xor_size = . - wasm_test_xor_module
+
+# WASM test15: f64.add - 1.5 + 2.5 = 4.0, truncate to i32 = 4
+wasm_test_f64arith_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x18, 0x01, 0x16, 0x00
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x40
+    .byte   0xA0
+    .byte   0xAB
+    .byte   0x0B
+wasm_test_f64arith_size = . - wasm_test_f64arith_module
+
+# WASM test16: i32.or - 0xF0 | 0x0F = 0xFF = 255
+wasm_test_or_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x0A, 0x01, 0x08, 0x00
+    .byte   0x41, 0xF0, 0x01
+    .byte   0x41, 0x0F
+    .byte   0x72
+    .byte   0x0B
+    .byte   0x0B
+wasm_test_or_size = . - wasm_test_or_module
+
+# WASM test17: i32.and - 0xFF & 0xF0 = 0xF0 = 240
+wasm_test_and_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x0B, 0x01, 0x09, 0x00
+    .byte   0x41, 0xFF, 0x01
+    .byte   0x41, 0xF0, 0x01
+    .byte   0x71
+    .byte   0x0B
+    .byte   0x0B
+wasm_test_and_size = . - wasm_test_and_module
+
+# WASM test18: i32.select - select(100, 200, cond=1) = 100
+wasm_test_shl_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x0A, 0x09, 0x01, 0x07, 0x00
+    .byte   0x41, 0x01
+    .byte   0x41, 0x03
+    .byte   0x74
+    .byte   0x0B
+wasm_test_shl_size = . - wasm_test_shl_module
