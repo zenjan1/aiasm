@@ -47,7 +47,7 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
     examples/kernel/memory.asm examples/kernel/paging.asm examples/kernel/process.asm \
     examples/kernel/syscall.asm examples/kernel/vfs.asm \
     examples/kernel/wasm_parser.asm examples/kernel/wasm_vm.asm \
-    examples/kernel/wasm_syscall.asm examples/kernel/linker.ld
+    examples/kernel/wasm_syscall.asm examples/kernel/virtio_net.asm examples/kernel/linker.ld
 	@echo "Building interactive kernel..."
 	as --32 -o /tmp/ikernel_kernel.o examples/kernel/kernel.asm
 	as --32 -o /tmp/ikernel_gdt.o examples/kernel/gdt.asm
@@ -68,6 +68,7 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
 	as --32 -o /tmp/ikernel_wasm_parser.o examples/kernel/wasm_parser.asm
 	as --32 -o /tmp/ikernel_wasm_vm.o examples/kernel/wasm_vm.asm
 	as --32 -o /tmp/ikernel_wasm_syscall.o examples/kernel/wasm_syscall.asm
+	as --32 -o /tmp/ikernel_virtio_net.o examples/kernel/virtio_net.asm
 	ld -m elf_i386 -T examples/kernel/linker.ld -o examples/kernel/interactive \
 		/tmp/ikernel_kernel.o /tmp/ikernel_gdt.o /tmp/ikernel_idt.o \
 		/tmp/ikernel_pic.o /tmp/ikernel_pit.o /tmp/ikernel_vga.o \
@@ -76,7 +77,7 @@ examples/kernel/interactive: examples/kernel/kernel.asm examples/kernel/gdt.asm 
 		/tmp/ikernel_memory.o /tmp/ikernel_paging.o \
 		/tmp/ikernel_process.o /tmp/ikernel_syscall.o /tmp/ikernel_vfs.o \
 		/tmp/ikernel_wasm_parser.o /tmp/ikernel_wasm_vm.o \
-		/tmp/ikernel_wasm_syscall.o
+		/tmp/ikernel_wasm_syscall.o /tmp/ikernel_virtio_net.o
 	rm -f /tmp/ikernel_*.o
 	@echo "Interactive kernel ready: examples/kernel/interactive"
 

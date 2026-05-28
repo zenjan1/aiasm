@@ -125,6 +125,12 @@ _start:
     mov     edi, 1
     call    log_print
 
+    # 初始化 Virtio-net 网络驱动
+    call    virtio_net_init
+    mov     esi, offset msg_net
+    mov     edi, 1
+    call    log_print
+
     # 开中断
     sti
 
@@ -200,3 +206,5 @@ msg_vfs:
     .asciz  "  Virtual filesystem initialized"
 msg_wasm:
     .asciz  "  WASM runtime initialized"
+msg_net:
+    .asciz  "  Virtio-net driver initialized"

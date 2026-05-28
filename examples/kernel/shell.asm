@@ -440,6 +440,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_echo
 
+    # "netinfo" - show network info
+    mov     edi, offset cmd_netinfo
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_netinfo
+
     # 未知命令
     mov     esi, offset msg_unknown
     call    uart_puts
@@ -1572,6 +1578,76 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_netinfo:
+    # 检查网络状态
+    mov     eax, [virtio_net_status]
+    test    eax, eax
+    jz      .netinfo_not_found
+
+    # 打印网络信息标题
+    mov     esi, offset msg_netinfo_header
+    call    uart_puts
+
+    # 打印MAC地址
+    mov     esi, offset msg_netinfo_mac
+    call    uart_puts
+
+    call    virtio_net_get_mac
+    mov     ecx, 6
+    mov     ebx, esi
+.netinfo_mac_loop:
+    movzx   eax, byte ptr [ebx]
+    push    ebx
+    push    ecx
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     ecx
+    pop     ebx
+    inc     ebx
+    dec     ecx
+    jz      .netinfo_mac_done
+    mov     al, ':'
+    call    uart_putc
+    jmp     .netinfo_mac_loop
+
+.netinfo_mac_done:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 打印IRQ线号
+    mov     esi, offset msg_netinfo_irq
+    call    uart_puts
+    mov     eax, [virtio_irq_line]
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.netinfo_not_found:
+    mov     esi, offset msg_netinfo_none
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # 命令字符串
 # ============================================================================
@@ -1648,6 +1724,21 @@ cmd_wasmapp_count:
     .asciz  "countdown"
 cmd_echo_prefix:
     .asciz  "echo "
+cmd_netinfo:
+    .asciz  "netinfo"
+
+msg_netinfo_header:
+    .ascii  "Network device info:"
+    .byte   13, 10, 0
+msg_netinfo_mac:
+    .ascii  "  MAC: "
+    .byte   0
+msg_netinfo_irq:
+    .ascii  "  IRQ: "
+    .byte   0
+msg_netinfo_none:
+    .ascii  "No network device found"
+    .byte   13, 10, 0
 
 version_text:
     .ascii  "AI-ASM Kernel v0.4"

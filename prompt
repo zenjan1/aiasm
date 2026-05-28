@@ -56,7 +56,34 @@
 
 ---
 
-## 当前项目状态（v0.28）
+## 当前项目状态（v0.30）
+
+### ✅ v0.30 新增
+
+#### Virtio-net 网络驱动基础框架 (virtio_net.asm)
+- PCI 配置空间访问（IO端口 0xCF8-0xCFF）
+- PCI 设备枚举（扫描 bus/device/function）
+- Virtio-net 设备检测（Vendor ID 0x1AF4, Device ID 0x1000/0x1041）
+- Virtio legacy mode 初始化流程
+- Virtqueue 数据结构（描述符表、可用环、已用环）
+- 基本收发缓冲区管理
+- IRQ 中断处理框架
+- Shell 命令：netinfo（显示 MAC 地址和 IRQ 线号）
+- **状态**: 基础框架完成，PCI 设备检测待完善
+
+#### 代码统计
+- virtio_net.asm: ~730 行（新增）
+- shell.asm: +50 行（netinfo 命令）
+- kernel.asm: +3 行（virtio_net_init 调用）
+- 总计: ~14000 行汇编
+
+### ✅ v0.29 Bug分析
+
+#### 项目完整性检查
+- **无新发现bug**: WASM VM v0.28 稳定运行
+- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
+- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
+- **下一步方向**: TCP/IP网络服务开发
 
 ### ✅ v0.28 项目分析
 
@@ -239,16 +266,17 @@
 
 ## 优先任务列表
 
-### v0.29 优先任务
+### v0.31 优先任务
 
 | 优先级 | 任务 | 文件 | 影响 |
 |--------|------|------|------|
-| P3 | 网络服务基础 | kernel/ | TCP/IP 初步实现 |
+| P3 | PCI设备检测完善 | virtio_net.asm | 网络基础 |
+| P3 | TCP/IP协议栈 | kernel/ | 网络服务 |
 
 ---
 
-## 当前版本：v0.28
+## 当前版本：v0.30
 
 **下一步**:
-1. 网络服务基础开发（TCP/IP）
+1. PCI设备检测完善（调试virtio-net-pci设备枚举）
 2. UPDATE=1
