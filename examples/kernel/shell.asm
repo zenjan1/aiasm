@@ -498,6 +498,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_netinfo
 
+    # "netpoll" - poll network for received packets
+    mov     edi, offset cmd_netpoll
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_netpoll
+
     # "netinit" - initialize virtio-net driver
     mov     edi, offset cmd_netinit
     call    utils_strcmp
@@ -1907,6 +1913,30 @@ shell_dispatch:
     pop     esi
     ret
 
+.do_netpoll:
+    mov     esi, offset msg_netpoll_polling
+    call    uart_puts
+    call    e1000_poll
+    test    eax, eax
+    jz      .netpoll_none
+    mov     esi, offset msg_netpoll_packets
+    call    uart_puts
+    mov     eax, [e1000_rx_idx]
+    call    print_hex8
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    jmp     .netpoll_done
+.netpoll_none:
+    mov     esi, offset msg_netpoll_none
+    call    uart_puts
+.netpoll_done:
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_netinit:
     mov     esi, offset msg_netinit_start
     call    uart_puts
@@ -2237,6 +2267,8 @@ cmd_netinfo:
     .asciz  "netinfo"
 cmd_netinit:
     .asciz  "netinit"
+cmd_netpoll:
+    .asciz  "netpoll"
 cmd_pciscan:
     .asciz  "pciscan"
 
@@ -2276,8 +2308,18 @@ msg_netinit_fail:
     .ascii  "  virtio-net init failed (device not found)"
     .byte   13, 10, 0
 
+msg_netpoll_polling:
+    .ascii  "Polling network..."
+    .byte   13, 10, 0
+msg_netpoll_packets:
+    .ascii  "  Packets received: "
+    .byte   0
+msg_netpoll_none:
+    .ascii  "  No packets received"
+    .byte   13, 10, 0
+
 version_text:
-    .ascii  "AI-ASM Kernel v0.4"
+    .ascii  "AI-ASM Kernel v0.38"
     .byte   13, 10, 0
 
 help_text:

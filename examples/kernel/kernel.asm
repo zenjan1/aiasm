@@ -331,6 +331,273 @@ e1000_init:
     popad
     ret
 
+# ============================================================================
+# e1000_transmit: Send a packet via e1000
+# Input: esi = packet address, ecx = packet length
+# Output: eax = 0 success, 1 failure
+# ============================================================================
+    .globl  e1000_transmit
+e1000_transmit:
+    pushad
+    mov     ebx, [e1000_mmio_base]
+
+    # Copy packet data to TX buffer
+    mov     edi, offset e1000_tx_buf
+    mov     eax, ecx             # save length
+    shr     ecx, 2               # dword count
+    cld
+    rep     movsd
+    mov     ecx, eax
+    and     ecx, 3               # remaining bytes
+    rep     movsb
+    mov     ecx, eax             # restore length
+
+    # Set TX descriptor 0
+    mov     edi, offset e1000_tx_desc
+    mov     eax, offset e1000_tx_buf
+    mov     [edi], eax           # buffer address low
+    mov     dword ptr [edi + 4], 0  # buffer address high
+    mov     word ptr [edi + 8], cx    # length
+    mov     word ptr [edi + 10], 0    # clear status
+
+    # Set EOP|RS|IFCS (bit 0 | bit 3 | bit 4) in status/cmd
+    mov     word ptr [edi + 14], 0x000B  # EOP=1, RS=1, IFCS=1
+
+    # Send: write TDT=0 (notify hardware)
+    mov     dword ptr [ebx + 0x3818], 0
+
+    # Wait for completion (RS=1 means report status)
+    mov     edx, 100000
+    dec     edx
+    jz      .tx_timeout
+
+    # Check descriptor status for DD bit (bit 0)
+    cmp     word ptr [edi + 12], 0
+    je      .tx_wait
+
+    mov     [e1000_tx_len], ecx
+    xor     eax, eax             # success
+    jmp     .tx_done
+
+.tx_timeout:
+    mov     eax, 1               # failure
+
+.tx_done:
+    popad
+    ret
+
+.tx_wait:
+    mov     eax, [ebx + 0x3818]  # check TDT
+    test    eax, eax
+    jz      .tx_wait2
+    jmp     .tx_done
+
+.tx_wait2:
+    cmp     word ptr [edi + 12], 0
+    je      .tx_wait
+    jmp     .tx_done
+
+# ============================================================================
+# e1000_poll: Check for received packets, process ICMP
+# Output: eax = number of packets received
+# ============================================================================
+    .globl  e1000_poll
+e1000_poll:
+    pushad
+    mov     ebx, [e1000_mmio_base]
+
+    # Read RDT (Receive Descriptor Tail)
+    mov     eax, [ebx + 0x2818]
+    mov     [e1000_rx_idx], eax
+
+    # Check if hardware has written to descriptor (DD bit)
+    # Get current RDH
+    mov     eax, [ebx + 0x2810]
+    cmp     eax, [e1000_rx_idx]
+    je      .poll_none          # no new packets
+
+    # There are packets to process
+    # For simplicity, process one packet at a time from the shared buffer
+    mov     esi, offset e1000_rx_buf
+
+    # Check Ethernet type (offset 12-13: 0x0800 = IPv4)
+    cmp     word ptr [esi + 12], 0x0008  # little-endian 0x0800
+    jne     .poll_next
+
+    # Check IP protocol (offset 23: 1 = ICMP)
+    cmp     byte ptr [esi + 23], 1
+    jne     .poll_next
+
+    # This is an ICMP packet, handle it
+    call    e1000_handle_icmp
+
+.poll_next:
+    # Reset the descriptor and update RDT
+    # Re-give all descriptors to hardware
+    mov     dword ptr [ebx + 0x2818], 7
+
+    mov     eax, 1               # 1 packet processed
+    jmp     .poll_done
+
+.poll_none:
+    xor     eax, eax
+
+.poll_done:
+    popad
+    ret
+
+# ============================================================================
+# e1000_handle_icmp: Handle ICMP Echo Request, send Echo Reply
+# Input: esi = packet buffer address (RX buffer)
+# Uses: e1000_tx_buf for reply
+# ============================================================================
+e1000_handle_icmp:
+    pushad
+
+    # Build Ethernet frame in TX buffer
+    # Swap source/dest MAC
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = source MAC of received packet (offset 6 in RX)
+    mov     eax, [esi]
+    mov     [edi], eax
+    mov     ax, [esi + 4]
+    mov     [edi + 4], ax
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = IPv4 (0x0800)
+    mov     word ptr [edi + 12], 0x0800
+
+    # Build IP header
+    mov     edi, offset e1000_tx_buf + 14
+
+    # Version + IHL = 0x45
+    mov     byte ptr [edi], 0x45
+    # TOS = 0
+    mov     byte ptr [edi + 1], 0
+    # Total length = 20 (IP) + 8 (ICMP) + payload
+    # Copy from received packet
+    mov     eax, [esi + 16]     # received total length
+    mov     [edi + 2], ax
+
+    # Identification
+    mov     ax, [esi + 4]
+    mov     [edi + 4], ax
+
+    # Flags + Fragment offset
+    mov     ax, [esi + 6]
+    mov     [edi + 6], ax
+
+    # TTL = 64
+    mov     byte ptr [edi + 8], 64
+    # Protocol = ICMP (1)
+    mov     byte ptr [edi + 9], 1
+
+    # Swap source/dest IP
+    mov     eax, [esi + 26]     # dest IP (was target)
+    mov     [edi + 12], eax     # becomes source IP
+    mov     eax, [esi + 30]     # source IP (was sender)
+    mov     [edi + 16], eax     # becomes dest IP
+
+    # Checksum = 0 for calculation
+    mov     word ptr [edi + 10], 0
+
+    # Calculate IP checksum
+    mov     ecx, 10             # 10 words
+    xor     edx, edx            # sum
+    mov     esi_temp, edi       # save edi pointer
+.ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .ip_cksum
+
+    # Fold sum
+.fold_cksum:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .fold_done
+    add     eax, 1
+.fold_done:
+    not     ax
+    mov     edi, esi_temp
+    add     edi, 10
+    mov     [edi], ax
+
+    # Build ICMP Echo Reply (type 0, code 0)
+    mov     edi, esi_temp
+    add     edi, 20             # skip IP header
+    mov     byte ptr [edi], 0   # type = Echo Reply
+    mov     byte ptr [edi + 1], 0  # code = 0
+
+    # ICMP checksum = 0 for calc
+    mov     word ptr [edi + 2], 0
+
+    # Copy identifier + sequence from request
+    mov     eax, [esi + 34]
+    mov     [edi + 4], eax
+
+    # Copy ICMP payload
+    mov     eax, [esi + 18]     # IP total length
+    sub     eax, 28             # subtract IP(20) + ICMP(8)
+    mov     ecx, eax
+    shr     ecx, 2
+    mov     esi, offset e1000_rx_buf + 38
+    mov     edi, offset e1000_tx_buf + 38
+    rep     movsd
+
+    # Calculate ICMP checksum
+    mov     eax, [esi + 18]     # IP total length
+    sub     eax, 20             # IP header only
+    mov     ecx, eax
+    shr     ecx, 1              # word count
+    mov     edi, esi_temp
+    add     edi, 20             # start of ICMP
+    xor     edx, edx
+.icmp_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .icmp_cksum
+
+    # Fold
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .icmp_fold_done
+    add     eax, 1
+.icmp_fold_done:
+    not     ax
+    mov     edi, esi_temp
+    add     edi, 22
+    mov     [edi], ax
+
+    # Calculate packet length and transmit
+    mov     eax, [esi + 18]     # IP total length
+    add     eax, 14             # + Ethernet header
+
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, eax
+    call    e1000_transmit
+
+    # Print "ICMP reply sent"
+    mov     esi, offset msg_icmp_sent
+    call    uart_puts
+
+    popad
+    ret
+
+esi_temp:
+    .space  4
+
 # print_hex2: print a byte as 2 hex digits (eax = byte)
 print_hex2:
     push    eax
@@ -368,6 +635,7 @@ print_hex_byte:
     call    uart_putc
     pop     edx; pop    ecx; pop    eax; ret
 
+    .globl  print_hex8
 print_hex8:
     push    ecx; push    edx; push    esi
     mov     esi, eax; mov     ecx, 8
@@ -406,7 +674,7 @@ virtio_pci_temp3:
 e1000_mmio_base:
     .space  4
 e1000_rx_buf:
-    .space  2048
+    .space  2048               # shared RX buffer for demo
 e1000_tx_buf:
     .space  2048
 e1000_rx_desc:
@@ -415,6 +683,11 @@ e1000_tx_desc:
     .space  128                # 8 descriptors * 16 bytes
 e1000_mac:
     .space  6
+e1000_rx_idx:
+    .globl  e1000_rx_idx
+    .space  4                  # current RX descriptor index
+e1000_tx_len:
+    .space  4                  # last TX length
 
     .section .rodata
 msg_bar:    .asciz  "BAR0 = "
@@ -425,7 +698,8 @@ msg_e100mac:.asciz "  MAC = "
 msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.5 booting..."
+msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
+msg_boot:    .asciz  "AI-ASM Kernel v0.38 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
