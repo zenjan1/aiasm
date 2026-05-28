@@ -41,6 +41,7 @@ VIRTIO_NET_HDR_SIZE       = 12        # 包头大小
 virtio_net_status:
     .space  4                    # 0=未初始化, 1=已初始化
 
+    .globl  virtio_pci_io_base
 virtio_pci_io_base:
     .space  4                    # PCI IO基地址
 
@@ -48,6 +49,7 @@ virtio_pci_io_base:
 virtio_irq_line:
     .space  4                    # IRQ线号
 
+    .globl  virtio_irq_mask
 virtio_irq_mask:
     .space  4                    # IRQ mask for PIC
 
@@ -329,21 +331,19 @@ VIRTIO_REG_CONFIG_VECTOR   = 0x1C
 VIRTIO_REG_DEVICE_CONFIG   = 0x20
 VIRTIO_REG_ISR_STATUS      = 0x100
 
-# virtio_read_reg: 读取 Virtio 寄存器
+# virtio_read_reg: 读取 Virtio 寄存器 (MMIO)
 # 输入: ecx = 寄存器偏移
 # 输出: eax = 值
 virtio_read_reg:
     mov     edx, [virtio_pci_io_base]
-    add     edx, ecx
-    in      eax, dx
+    mov     eax, [edx + ecx]
     ret
 
-# virtio_write_reg: 写入 Virtio 寄存器
+# virtio_write_reg: 写入 Virtio 寄存器 (MMIO)
 # 输入: ecx = 寄存器偏移, eax = 值
 virtio_write_reg:
     mov     edx, [virtio_pci_io_base]
-    add     edx, ecx
-    out     dx, eax
+    mov     [edx + ecx], eax
     ret
 
 # ============================================================================
@@ -392,10 +392,9 @@ virtio_net_init:
     add     edx, VIRTIO_REG_DEVICE_CONFIG
     xor     ecx, ecx
 .vnet_read_mac:
-    in      al, dx
+    mov     al, [edx + ecx]
     mov     [virtio_net_mac + ecx], al
     inc     ecx
-    inc     edx
     cmp     ecx, 6
     jl      .vnet_read_mac
 
@@ -572,10 +571,10 @@ virtio_net_irq_handler:
     push    ecx
     push    edx
 
-    # 读取 ISR 状态
+    # 读取 ISR 状态 (MMIO)
     mov     edx, [virtio_pci_io_base]
     add     edx, VIRTIO_REG_ISR_STATUS
-    in      al, dx
+    mov     al, [edx]
 
     # 检查是否有已用缓冲区
     test    al, 1                # Used buffer notification
