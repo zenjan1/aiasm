@@ -498,6 +498,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_netinfo
 
+    # "netinit" - initialize virtio-net driver
+    mov     edi, offset cmd_netinit
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_netinit
+
     # "pciscan" - scan PCI devices
     mov     edi, offset cmd_pciscan
     call    utils_strcmp
@@ -993,6 +999,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_clz_result
@@ -1023,6 +1033,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_ctz_result
@@ -1053,6 +1067,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_popcnt_result
@@ -1083,6 +1101,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_rotl_result
@@ -1113,6 +1135,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_rotr_result
@@ -1142,6 +1168,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_div_result
@@ -1168,15 +1198,11 @@ shell_dispatch:
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
-    call    wasm_print_info
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
     call    wasm_load_data
-    # Reset stack to avoid pollution from previous tests
+    # Reset VM state before execution
     mov     dword ptr [wasm_stack_top], 0
     mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_rem_result
@@ -1204,6 +1230,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_xor_result
@@ -1231,6 +1261,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_f64arith_result
@@ -1258,6 +1292,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_or_result
@@ -1285,6 +1323,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_and_result
@@ -1312,6 +1354,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_shl_result
@@ -1416,6 +1462,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     # eax = tick count
@@ -1444,6 +1494,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_sum_result
@@ -1473,6 +1527,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     pop     ecx
@@ -1489,6 +1547,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_fib_result
@@ -1518,6 +1580,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_fact_result
@@ -1547,6 +1613,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_mul_result
@@ -1576,6 +1646,10 @@ shell_dispatch:
     test    eax, eax
     jnz     .wasm_parse_err
     call    wasm_load_data
+    # Reset VM state before execution
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_count_result
@@ -1824,6 +1898,35 @@ shell_dispatch:
     pop     esi
 
 .echo_done:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_netinit:
+    mov     esi, offset msg_netinit_start
+    call    uart_puts
+    call    virtio_net_init
+    test    eax, eax
+    jnz     .netinit_fail
+    mov     esi, offset msg_netinit_ok
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.netinit_fail:
+    mov     esi, offset msg_netinit_fail
+    call    uart_puts
     mov     al, 0x0a
     call    uart_putc
     mov     al, 0x0d
@@ -2132,6 +2235,8 @@ cmd_echo_prefix:
     .asciz  "echo "
 cmd_netinfo:
     .asciz  "netinfo"
+cmd_netinit:
+    .asciz  "netinit"
 cmd_pciscan:
     .asciz  "pciscan"
 
@@ -2159,6 +2264,16 @@ msg_netinfo_irq:
     .byte   0
 msg_netinfo_none:
     .ascii  "No network device found"
+    .byte   13, 10, 0
+
+msg_netinit_start:
+    .ascii  "Initializing virtio-net..."
+    .byte   13, 10, 0
+msg_netinit_ok:
+    .ascii  "  virtio-net initialized successfully"
+    .byte   13, 10, 0
+msg_netinit_fail:
+    .ascii  "  virtio-net init failed (device not found)"
     .byte   13, 10, 0
 
 version_text:
@@ -2835,7 +2950,7 @@ wasm_test_mem8_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
     # type section
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
     # function section
     .byte   0x03, 0x02, 0x01, 0x00
     # code section
@@ -2858,7 +2973,7 @@ wasm_test_mem8_size = . - wasm_test_mem8_module
 wasm_test_clz_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
     .byte   0x03, 0x02, 0x01, 0x00  # function
     .byte   0x0A                   # code section
     .byte   0x07                   # section size = 7
@@ -2874,7 +2989,7 @@ wasm_test_clz_size = . - wasm_test_clz_module
 wasm_test_ctz_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
     .byte   0x03, 0x02, 0x01, 0x00  # function
     .byte   0x0A                   # code section
     .byte   0x07                   # section size = 7
@@ -2890,7 +3005,7 @@ wasm_test_ctz_size = . - wasm_test_ctz_module
 wasm_test_popcnt_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
     .byte   0x03, 0x02, 0x01, 0x00  # function
     .byte   0x0A                   # code section
     .byte   0x08                   # section size = 8
@@ -2906,7 +3021,7 @@ wasm_test_popcnt_size = . - wasm_test_popcnt_module
 wasm_test_rotl_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
     .byte   0x03, 0x02, 0x01, 0x00  # function
     .byte   0x0A                   # code section
     .byte   0x08                   # section size = 8
@@ -2923,7 +3038,7 @@ wasm_test_rotl_size = . - wasm_test_rotl_module
 wasm_test_rotr_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F  # type
     .byte   0x03, 0x02, 0x01, 0x00  # function
     .byte   0x0A                   # code section
     .byte   0x08                   # section size = 8
@@ -2940,7 +3055,7 @@ wasm_test_rotr_size = . - wasm_test_rotr_module
 wasm_test_div_module:
     .byte   0x00, 0x61, 0x73, 0x6D
     .byte   0x01, 0x00, 0x00, 0x00
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
     .byte   0x03, 0x02, 0x01, 0x00
     .byte   0x0A, 0x09, 0x01, 0x07, 0x00
     .byte   0x41, 0xE8, 0x07
@@ -2949,14 +3064,16 @@ wasm_test_div_module:
     .byte   0x0B
 wasm_test_div_size = . - wasm_test_div_module
 
-# WASM test13: i32.const 107 (simple const test)
+# WASM test13: i32.add - 100 + 7 = 107
 wasm_test_rem_module:
     .byte   0x00, 0x61, 0x73, 0x6D
     .byte   0x01, 0x00, 0x00, 0x00
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
     .byte   0x03, 0x02, 0x01, 0x00
-    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
-    .byte   0x41, 0x6B
+    .byte   0x0A, 0x09, 0x01, 0x07, 0x00
+    .byte   0x41, 0x64
+    .byte   0x41, 0x07
+    .byte   0x6A
     .byte   0x0B
 wasm_test_rem_size = . - wasm_test_rem_module
 
@@ -2978,7 +3095,7 @@ wasm_test_xor_size = . - wasm_test_xor_module
 wasm_test_f64arith_module:
     .byte   0x00, 0x61, 0x73, 0x6D
     .byte   0x01, 0x00, 0x00, 0x00
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
     .byte   0x03, 0x02, 0x01, 0x00
     .byte   0x0A, 0x18, 0x01, 0x16, 0x00
     .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F
@@ -3020,7 +3137,7 @@ wasm_test_and_size = . - wasm_test_and_module
 wasm_test_shl_module:
     .byte   0x00, 0x61, 0x73, 0x6D
     .byte   0x01, 0x00, 0x00, 0x00
-    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7F
     .byte   0x03, 0x02, 0x01, 0x00
     .byte   0x0A, 0x09, 0x01, 0x07, 0x00
     .byte   0x41, 0x01

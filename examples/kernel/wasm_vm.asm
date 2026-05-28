@@ -3584,10 +3584,7 @@ do_f32_add:
     push    eax
     call    _stack_pop           # a (位表示)
     # 使用 x87 FPU
-    mov     dword ptr [esp + 4], eax  # [esp] = a, [esp+4] = b
-    fild    dword ptr [esp]      # 加载 a 作为整数（位表示）
-    # 等等，这不对。需要直接加载浮点数位表示
-    # 正确方法：fld 指令加载浮点数
+    mov     dword ptr [esp + 4], eax  # [esp+4] = b
     fld     dword ptr [esp]      # st0 = a (浮点数)
     fadd    dword ptr [esp + 4]  # st0 = a + b
     fstp    dword ptr [esp + 4]  # 存储结果到 [esp+4]
@@ -3650,21 +3647,20 @@ do_f64_add:
     push    eax
     # 现在栈布局: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
     # x87 FPU 加载 64 位浮点数
-    fld     qword ptr [esp + 8]  # st0 = a (注意：qword 是 8 字节，地址指向 low)
-    fadd    qword ptr [esp + 16] # st0 = a + b
+    fld     qword ptr [esp]      # st0 = a
+    fadd    qword ptr [esp + 8]  # st0 = a + b
     # 存储结果
-    fstp    qword ptr [esp + 16] # 存储到 b 的位置
+    fstp    qword ptr [esp]      # 存储到 a 的位置
     # 清理并压入结果
     add     esp, 12              # 清理 a_high, a_low, b_high
     pop     eax                  # result_low
     push    eax                  # 保存
     call    _stack_push          # push result_low
     pop     eax
-    call    _stack_push          # push result_high（等等，这顺序不对）
-    # 修正：f64 压栈顺序应该是 high 先，low 后
+    call    _stack_push          # push result_high
     jmp     dispatch_done
 
-# f64.sub, mul, div 类似实现（简化版本）
+# f64.sub, mul, div 类似实现
 do_f64_sub:
     call    _stack_pop           # b_low
     push    eax
@@ -3674,9 +3670,9 @@ do_f64_sub:
     push    eax
     call    _stack_pop           # a_high
     push    eax
-    fld     qword ptr [esp + 8]
-    fsub    qword ptr [esp + 16]
-    fstp    qword ptr [esp + 16]
+    fld     qword ptr [esp]
+    fsub    qword ptr [esp + 8]
+    fstp    qword ptr [esp]
     add     esp, 12
     pop     eax
     push    eax
@@ -3694,9 +3690,9 @@ do_f64_mul:
     push    eax
     call    _stack_pop
     push    eax
-    fld     qword ptr [esp + 8]
-    fmul    qword ptr [esp + 16]
-    fstp    qword ptr [esp + 16]
+    fld     qword ptr [esp]
+    fmul    qword ptr [esp + 8]
+    fstp    qword ptr [esp]
     add     esp, 12
     pop     eax
     push    eax
@@ -3714,9 +3710,9 @@ do_f64_div:
     push    eax
     call    _stack_pop
     push    eax
-    fld     qword ptr [esp + 8]
-    fdiv    qword ptr [esp + 16]
-    fstp    qword ptr [esp + 16]
+    fld     qword ptr [esp]
+    fdiv    qword ptr [esp + 8]
+    fstp    qword ptr [esp]
     add     esp, 12
     pop     eax
     push    eax
@@ -4378,11 +4374,11 @@ do_i32_trunc_f32_s:
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0C00             # trunc mode (toward zero)
-    mov     [esp + 4], ax
-    fldcw   word ptr [esp + 4]
-    fld     dword ptr [esp + 6]
+    mov     [esp + 2], ax
+    fldcw   word ptr [esp + 2]
+    fld     dword ptr [esp + 4]
     frndint
-    fistp   dword ptr [esp + 6]    # store as integer
+    fistp   dword ptr [esp + 4]    # store as integer
     fldcw   word ptr [esp]         # restore FCW
     add     esp, 6
     pop     eax
@@ -4398,11 +4394,11 @@ do_i32_trunc_f32_u:
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0C00
-    mov     [esp + 4], ax
-    fldcw   word ptr [esp + 4]
-    fld     dword ptr [esp + 6]
+    mov     [esp + 2], ax
+    fldcw   word ptr [esp + 2]
+    fld     dword ptr [esp + 4]
     frndint
-    fistp   dword ptr [esp + 6]
+    fistp   dword ptr [esp + 4]
     fldcw   word ptr [esp]
     add     esp, 6
     pop     eax
@@ -4420,11 +4416,11 @@ do_i32_trunc_f64_s:
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0C00
-    mov     [esp + 6], ax
-    fldcw   word ptr [esp + 6]
-    fld     qword ptr [esp + 8]
+    mov     [esp + 2], ax
+    fldcw   word ptr [esp + 2]
+    fld     qword ptr [esp + 4]
     frndint
-    fistp   dword ptr [esp + 8]   # store as 32-bit integer
+    fistp   dword ptr [esp + 4]   # store as 32-bit integer
     fldcw   word ptr [esp]
     add     esp, 6                # cleanup FCW + high
     pop     eax
@@ -4442,11 +4438,11 @@ do_i32_trunc_f64_u:
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0C00
-    mov     [esp + 6], ax
-    fldcw   word ptr [esp + 6]
-    fld     qword ptr [esp + 8]
+    mov     [esp + 2], ax
+    fldcw   word ptr [esp + 2]
+    fld     qword ptr [esp + 4]
     frndint
-    fistp   dword ptr [esp + 8]
+    fistp   dword ptr [esp + 4]
     fldcw   word ptr [esp]
     add     esp, 6
     pop     eax

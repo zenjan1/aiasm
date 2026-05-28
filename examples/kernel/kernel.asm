@@ -126,11 +126,24 @@ _start:
     call    log_print
 
     # 初始化 Virtio-net 网络驱动
-    call    virtio_net_init
+    # Skip virtio_net_init for now - will test via shell command
+    # call    virtio_net_init
+    # test    eax, eax
+    # jnz     .virtio_not_found
+    # jmp     .virtio_found
+
+.virtio_not_found:
+    mov     esi, offset msg_net_fail
+    mov     edi, 1
+    call    log_print
+    jmp     .virtio_done
+
+.virtio_found:
     mov     esi, offset msg_net
     mov     edi, 1
     call    log_print
 
+.virtio_done:
     # 开中断
     sti
 
@@ -208,3 +221,7 @@ msg_wasm:
     .asciz  "  WASM runtime initialized"
 msg_net:
     .asciz  "  Virtio-net driver initialized"
+msg_net_fail:
+    .asciz  "  Virtio-net device not found"
+msg_net_debug:
+    .asciz  "  Net: PCI scan starting..."

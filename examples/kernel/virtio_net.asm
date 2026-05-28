@@ -184,43 +184,43 @@ pci_find_virtio_net:
     xor     ecx, ecx             # function = 0
 
 .pci_func_loop:
-    # 读取 Vendor ID (offset 0)
+    # 读取 Vendor ID + Device ID (offset 0)
+    # eax = (Device ID << 16) | Vendor ID
     push    ebx
     push    ecx
     push    edx
-    mov     eax, ebx
-    mov     ebx, 0               # offset = 0
+    mov     eax, ebx              # bus
+    mov     ebx, 0                # offset = 0
     call    pci_read_config
-    pop     edx
-    pop     ecx
-    pop     ebx
+    pop     edx                   # 恢复 device
+    pop     ecx                   # 恢复 function
+    pop     ebx                   # 恢复 bus
 
     # 检查设备是否存在 (Vendor ID != 0xFFFF)
-    and     eax, 0xFFFF
+    mov     esi, eax              # esi = 完整值 (Vendor ID + Device ID)
+    and     eax, 0xFFFF           # Vendor ID 在低16位
     cmp     ax, 0xFFFF
     je      .pci_next_func
 
-    # 读取 Device ID (offset 2)
-    push    ebx
-    push    ecx
-    push    edx
-    mov     eax, ebx
-    mov     ebx, 2
-    call    pci_read_config
-    pop     edx
-    pop     ecx
-    pop     ebx
+    # 提取 Device ID (高16位)
+    mov     eax, esi              # 恢复完整值
+    shr     eax, 16               # Device ID 在高16位
 
-    shr     eax, 16              # Device ID在高16位
-    and     eax, 0xFFFF
-
-    # 检查是否是 Virtio-net
+    # 检查是否是 Virtio-net Device ID
     cmp     ax, VIRTIO_NET_DEVICE_ID
-    je      .pci_found_legacy
+    je      .pci_check_vendor
     cmp     ax, VIRTIO_NET_MODERN_DEVICE_ID
-    je      .pci_found_modern
+    jne     .pci_next_func
 
-    jmp     .pci_next_func
+.pci_check_vendor:
+    # 检查 Vendor ID (esi 中保存的完整值的低16位)
+    mov     eax, esi
+    and     eax, 0xFFFF
+    cmp     ax, VIRTIO_NET_VENDOR_ID
+    jne     .pci_next_func
+
+    # Vendor ID 和 Device ID 都匹配，找到设备！
+    jmp     .pci_found_legacy
 
 .pci_found_legacy:
     # 读取 BAR0 (offset 16) - IO基地址
