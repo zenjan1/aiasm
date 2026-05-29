@@ -373,32 +373,42 @@
 
 ---
 
-## 当前版本：v0.40
+## 当前版本：v0.41
 
-### ✅ v0.40 新增
+### ✅ v0.41 新增
 
-#### ARP 协议支持
-- e1000_send_arp: 发送ARP请求并等待回复（2秒超时）
-  - 构建ARP请求包（广播以太网）
-  - 轮询接收包等待ARP回复
-  - 解析到的MAC存入e1000_arp_mac缓存
-- e1000_handle_arp: 处理ARP请求和回复
-  - ARP请求：如果目标IP匹配我们的IP则回复
-  - ARP回复：缓存发送方MAC并设置ready标志
-- e1000_poll修改：分发ARP包（EtherType 0x0806）
-  - 先检查ARP，再检查IPv4/ICMP
-- ping命令更新：通过ARP解析MAC后再发送ICMP
-  - ARP超时时使用广播MAC回退
-- 新增BSS：e1000_arp_ip（我们的IP）, e1000_arp_mac（解析的MAC）, e1000_arp_ready
+#### UDP 协议栈
+- e1000_send_udp: 发送UDP包（Ethernet+IPv4+UDP完整头部）
+  - IP checksum计算
+  - ARP解析后发送
+  - Payload拷贝到TX缓冲区
+- e1000_handle_udp: 接收解析UDP包
+  - 提取源/目的IP和端口
+  - 拷贝payload到udp_recv_buf（最大1500字节）
+  - 通过udp_recv_ready标志通知数据就绪
+- e1000_poll: 添加UDP（协议17）分发
+
+#### e1000 IRQ中断处理
+- e1000_irq_handler: 处理RX/TX中断
+  - 读取ICR寄存器，调用e1000_poll处理RX
+  - 通过pic_send_eoi发送EOI
+- IRQ注册: 从PCI配置空间读取IRQ线号，注册IDT处理程序
+  - 设置IMS寄存器启用RX|TX|LSC中断
+
+#### Shell命令
+- udpsend <ip> <port> <data>: 发送UDP数据包
+- udprecv: 检查并显示接收到的UDP数据
+- shell_parse_dec: 十进制数字解析函数
+- help文本新增udpsend和udprecv命令
 
 #### QEMU测试结果
 - 内核正常启动 ✓
 - e1000初始化成功 ✓
-- ARP协议框架完成 ✓
+- IRQ中断注册完成 ✓
 
 ---
 
 **下一步**:
-1. e1000 IRQ中断处理完善（当前poll模式）
-2. UDP协议栈实现
+1. UDP echo server测试
+2. TCP协议栈实现
 3. UPDATE=1
