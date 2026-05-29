@@ -83,6 +83,11 @@ _start:
     mov     [e1000_mmio_base], edx
     call    e1000_init
 
+    # Initialize static IP (DHCP will override if used)
+    mov     dword ptr [e1000_our_ip], 0x0F02000A  # 10.0.2.15
+    mov     dword ptr [e1000_arp_ip], 0x0F02000A
+    mov     dword ptr [e1000_our_ip_ready], 1
+
     # Read IRQ line from PCI config (offset 60)
     mov     dx, 0xCF8
     mov     eax, 0x8000183C      # bus=0, dev=3, func=0, offset=0x3C
@@ -1027,7 +1032,8 @@ e1000_send_icmp_echo:
     mov     byte ptr [edi + 8], 64     # TTL
     mov     byte ptr [edi + 9], 1      # Protocol = ICMP
     mov     word ptr [edi + 10], 0     # Checksum (placeholder)
-    mov     dword ptr [edi + 12], 0x0F02000A  # Source IP: 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # Source IP: 10.0.2.15
     mov     eax, [e1000_ping_target_ip]
     mov     [edi + 16], eax
 
@@ -1773,7 +1779,8 @@ e1000_send_udp:
     mov     word ptr [edi + 10], 0        # Checksum (to calc)
 
     # Source IP: 10.0.2.15
-    mov     dword ptr [edi + 12], 0x0F02000A
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax
 
     # Dest IP
     mov     eax, [udp_send_dest_ip]
@@ -1934,7 +1941,8 @@ tcp_checksum:
 
     # Build pseudo-header:
     # Source IP (4 bytes) - our IP is 10.0.2.15 = 0x0F02000A
-    mov     dword ptr [edi], 0x0F02000A
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi], eax
     # Dest IP (4 bytes) - remote IP from tcp_recv_src_ip
     mov     eax, [tcp_recv_src_ip]
     mov     [edi + 4], eax
@@ -1991,7 +1999,8 @@ udp_checksum:
 
     # Build pseudo-header:
     # Source IP (4 bytes) - 10.0.2.15
-    mov     dword ptr [edi], 0x0F02000A
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi], eax
     # Dest IP (4 bytes) - from udp_send_dest_ip
     mov     eax, [udp_send_dest_ip]
     mov     [edi + 4], eax
@@ -2623,7 +2632,8 @@ e1000_send_synack:
     mov     byte ptr [edi + 8], 64         # TTL
     mov     byte ptr [edi + 9], 6          # TCP
     mov     word ptr [edi + 10], 0         # Checksum
-    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # 10.0.2.15
     mov     eax, [tcp_recv_src_ip]
     mov     [edi + 16], eax
 
@@ -2725,7 +2735,8 @@ e1000_send_tcp_ack:
     mov     byte ptr [edi + 8], 64
     mov     byte ptr [edi + 9], 6          # TCP
     mov     word ptr [edi + 10], 0
-    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # 10.0.2.15
     mov     eax, [tcp_recv_src_ip]
     mov     [edi + 16], eax
 
@@ -2826,7 +2837,8 @@ e1000_send_tcp_data:
     mov     byte ptr [edi + 8], 64
     mov     byte ptr [edi + 9], 6          # TCP
     mov     word ptr [edi + 10], 0
-    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # 10.0.2.15
     mov     eax, [tcp_recv_src_ip]
     mov     [edi + 16], eax
 
@@ -3017,7 +3029,8 @@ e1000_send_fin_ack:
     mov     byte ptr [edi + 8], 64
     mov     byte ptr [edi + 9], 6          # TCP
     mov     word ptr [edi + 10], 0
-    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # 10.0.2.15
     mov     eax, [tcp_recv_src_ip]
     mov     [edi + 16], eax
 
@@ -3118,7 +3131,8 @@ e1000_send_rst:
     mov     byte ptr [edi + 8], 64
     mov     byte ptr [edi + 9], 6          # TCP
     mov     word ptr [edi + 10], 0
-    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # 10.0.2.15
     mov     eax, [tcp_recv_src_ip]
     mov     [edi + 16], eax
 
@@ -3209,7 +3223,8 @@ e1000_echo_server:
     mov     word ptr [edi + 10], 0        # Checksum (to calc)
 
     # Source IP = our IP
-    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [e1000_our_ip]
+    mov     dword ptr [edi + 12], eax  # 10.0.2.15
 
     # Dest IP = source IP of received packet
     mov     eax, [esi + 26]
@@ -3582,7 +3597,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.51"
+    .ascii  "Server: aiasm/v0.52"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3591,7 +3606,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.51!"
+    .ascii  "Hello from AI-ASM Kernel v0.52!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3608,7 +3623,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.51"
+    .ascii  "AI-ASM Kernel v0.52"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3655,7 +3670,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.51 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.52 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

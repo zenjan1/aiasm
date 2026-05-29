@@ -563,8 +563,152 @@
 
 ---
 
+## 当前版本：v0.46
+
+### ✅ v0.46 新增
+
+#### TCP连接表与发送函数集成
+- 每连接独立序列号跟踪（连接条目 local_seq/remote_seq/remote_ack）
+- e1000_handle_tcp 在找到/分配连接后，从连接条目加载 local_seq 到全局变量
+- send_synack 完成后更新连接条目 local_seq（SYN消耗1个序号）
+- send_tcp_data 完成后更新连接条目 local_seq 和 remote_seq（数据长度）
+- send_fin_ack 完成后更新连接条目 local_seq（FIN消耗1个序号）
+- tcp_conn_slot_ptr 指向当前连接条目，供发送函数使用
+
+#### 连接状态追踪增强
+- SYN_RECV(3): 收到SYN后设置
+- ESTABLISHED(4): 收到PSH-ACK数据后设置
+- FIN_WAIT(5): 发送FIN后设置
+- CLOSE_WAIT(6): 收到远端FIN后设置
+- FIN处理更新连接条目状态（不再仅依赖全局tcp_state）
+
+#### QEMU测试结果
+- 内核正常启动 v0.46 ✓
+- e1000初始化成功 ✓
+- TCP连接表与发送函数集成完成 ✓
+
+---
+
+---
+
+## 当前版本：v0.47
+
+### ✅ v0.47 新增
+
+#### HTTP URL路由
+- URL路由分发：/ → hello响应，/status → 内核状态，/version → 版本信息，
+  /tcpstatus → TCP连接表状态，其他路径 → 404
+- 动态HTTP头：Content-Length在运行时从body长度动态计算
+- print_dec5辅助函数：5位零填充十进制格式化
+- http_body_tmp BSS缓冲区：用于HTTP头构造
+- 各路由专属响应文本（.rodata区）
+- /status和/tcpstatus包含实时连接计数
+
+#### QEMU测试结果
+- 内核正常启动 v0.47 ✓
+- e1000初始化成功 ✓
+- HTTP路由框架完成 ✓
+
+---
+
+---
+
+## 当前版本：v0.48
+
+### ✅ v0.48 新增
+
+#### ARP缓存集成到所有发送路径
+- 所有UDP/TCP发送函数在构建以太网帧前调用arp_cache_lookup
+- 7个发送路径集成ARP缓存查询：udp, synack, tcp_ack, tcp_data,
+  fin_ack, rst, arp回复处理
+- 网关(10.0.2.2)查询优先使用缓存MAC，减少ARP请求延迟
+- 缓存未命中时回退到最后已知的MAC地址
+
+#### QEMU测试结果
+- 内核正常启动 v0.48 ✓
+- e1000初始化成功 ✓
+- ARP缓存集成完成 ✓
+
+---
+
+---
+
+## 当前版本：v0.49
+
+### ✅ v0.49 新增
+
+#### IP/TCP/UDP校验和正确实现
+- ip_checksum辅助函数：标准的one's complement校验和计算
+- tcp_checksum：带伪头部的TCP校验和（源IP + 目的IP + 协议号 +
+  长度 + TCP段）
+- udp_checksum：带伪头部的UDP校验和（源IP + 目的IP + 协议号 +
+  长度 + UDP段）
+- 所有TCP发送路径计算正确校验和：synack, tcp_ack, tcp_data（含payload）,
+  fin_ack, rst
+- UDP发送路径计算包含payload的正确校验和
+- tcp_cksum_buf（2KB）和udp_cksum_buf BSS工作区
+
+#### QEMU测试结果
+- 内核正常启动 v0.49 ✓
+- e1000初始化成功 ✓
+- 校验和实现完成 ✓
+
+---
+
+---
+
+## 当前版本：v0.50
+
+### ✅ v0.50 新增
+
+#### ICMP Echo Request（ping）与回复检测
+- e1000_send_icmp_echo：发送ICMP Echo Request，正确计算IP/ICMP校验和
+- 标识符0x5555，序列号跟踪
+- e1000_handle_icmp中的Echo Reply检测：检查type=0和identifier
+- e1000_poll_delay：带~10ms延迟的轮询辅助函数
+- ping BSS状态变量：目标IP、回复就绪标志、RTT、序列号
+- Shell已有ping命令：解析IP、发送ARP、构建ICMP请求、等待回复
+- UART消息：ping超时和带RTT的回复显示
+
+#### QEMU测试结果
+- 内核正常启动 v0.50 ✓
+- e1000初始化成功 ✓
+- ping框架完成 ✓
+
+---
+
+---
+
+## 当前版本：v0.51
+
+### ✅ v0.51 新增
+
+#### DHCP客户端框架
+- e1000_send_dhcp_discover：构建并发送DHCP Discover（UDP 68->67，
+  广播MAC，xid来自tick_count）
+- e1000_send_dhcp_request：收到Offer后发送DHCP Request
+- e1000_handle_dhcp：解析DHCP响应，通过消息类型选项检测Offer/ACK，
+  验证xid匹配
+- DHCP选项解析：从ACK中提取子网掩码(opt 1)、网关(opt 3)、DNS(opt 6)
+- DHCP状态机：0=idle, 1=sent_discover, 2=got_offer, 3=bound
+- BSS变量：e1000_our_ip, e1000_gateway_ip, e1000_subnet_mask,
+  e1000_dns_ip, e1000_dhcp_state, e1000_dhcp_xid, e1000_offer_ip,
+  e1000_our_ip_ready
+- Shell dhcp命令：发送Discover，轮询Offer，发送Request，轮询ACK，
+  显示分配的IP和网关
+- print_ip_uart和print_dec_byte_uart辅助函数
+- e1000_handle_udp将端口68分发给DHCP处理器
+
+#### QEMU测试结果
+- 内核正常启动 v0.51 ✓
+- e1000初始化成功 ✓
+- DHCP客户端框架完成 ✓
+
+---
+
 **下一步**:
-1. TCP连接表与发送函数集成（每连接独立序列号）
-2. HTTP路由（根据URL返回不同响应）
-3. ARP缓存用于UDP/TCP发送（减少ARP查询延迟）
+1. 多TCP连接并发端到端测试
+2. TCP连接表与e1000_send_synack集成验证
+3. DHCP成功后自动使用动态IP替换硬编码IP
 4. UPDATE=1
+
