@@ -1369,7 +1369,49 @@ e1000_handle_tcp:
     cmp     ax, 80
     jne     .tcp_not_our
 
-    # Connection tracking
+    # Connection tracking: look up or allocate connection slot
+    mov     eax, [esi + 26]               # remote IP
+    movzx   ecx, word ptr [esi + ebp]      # remote port
+    push    esi
+    push    ebp
+    call    tcp_conn_lookup
+    pop     ebp
+    pop     esi
+    cmp     eax, -1
+    jne     .tcp_conn_found
+
+    # New connection: allocate slot (only on SYN)
+    movzx   eax, byte ptr [tcp_flags_tmp]
+    test    al, 0x02                       # SYN flag
+    jz      .tcp_no_data                   # non-SYN to unknown conn, ignore
+
+    mov     eax, [esi + 26]               # remote IP
+    movzx   ecx, word ptr [esi + ebp]      # remote port
+    push    esi
+    push    ebp
+    call    tcp_conn_alloc
+    pop     ebp
+    pop     esi
+    cmp     eax, -1
+    je      .tcp_conn_full                 # no free slots
+
+    # Save the slot index and pointer
+    mov     [tcp_conn_slot_idx], eax
+    mov     [tcp_conn_slot_ptr], ebx
+
+.tcp_conn_found:
+    mov     [tcp_conn_slot_idx], eax
+    mov     [tcp_conn_slot_ptr], ebx
+
+    # Load per-connection state into globals for send functions
+    test    ebx, ebx
+    jz      .conn_skip_load
+    mov     eax, [ebx + 12]               # local_seq from entry
+    mov     [tcp_local_seq], eax
+    mov     eax, [ebx + 20]               # remote_ack from entry
+    mov     [tcp_remote_ack], eax
+
+.conn_skip_load:
     mov     eax, [tcp_conn_count]
     inc     eax
     mov     [tcp_conn_count], eax
@@ -1395,20 +1437,46 @@ e1000_handle_tcp:
 
     # SYN received - send SYN-ACK
     mov     dword ptr [tcp_state], 3       # SYN_RECV
+    # Update connection entry state
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .syn_skip_state
+    mov     byte ptr [ebx], 3              # SYN_RECV
 
+.syn_skip_state:
     # Set our initial sequence number
     mov     dword ptr [tcp_local_seq], 0x00001234
+    # Also store in connection entry
+    test    ebx, ebx
+    jz      .syn_skip_seq
+    mov     dword ptr [ebx + 12], 0x00001234
+    # Store remote seq
+    mov     eax, [tcp_remote_seq]
+    mov     [ebx + 16], eax
 
-    # Save source IP for reply
-    mov     eax, [esi + 26]
-    mov     [tcp_recv_src_ip], eax
-
+.syn_skip_seq:
     call    e1000_send_synack
     jmp     .tcp_done
 
 .tcp_synack_recv:
     # This shouldn't happen as server, but handle gracefully
     mov     dword ptr [tcp_state], 4       # ESTABLISHED
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .synack_skip
+    mov     byte ptr [ebx], 4              # ESTABLISHED
+.synack_skip:
+    jmp     .tcp_done
+
+.tcp_conn_full:
+    # Connection table full, send RST
+    mov     eax, [esi + 26]
+    mov     [tcp_recv_src_ip], eax
+    movzx   eax, word ptr [esi + ebp]
+    mov     [tcp_recv_src_port], ax
+    movzx   eax, word ptr [esi + ebp + 2]
+    mov     [tcp_recv_dst_port], ax
+    call    e1000_send_rst
     jmp     .tcp_done
 
 .tcp_check_ack:
@@ -1481,6 +1549,12 @@ e1000_handle_tcp:
     test    al, 0x01                       # FIN flag
     jz      .tcp_done
     mov     dword ptr [tcp_fin_received], 1
+    # Update connection entry state
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .fin_skip_entry
+    mov     byte ptr [ebx], 6              # state = CLOSE_WAIT
+.fin_skip_entry:
     mov     dword ptr [tcp_state], 0       # CLOSED
     # Send FIN-ACK back for graceful close
     call    e1000_send_fin_ack
@@ -1583,6 +1657,16 @@ e1000_send_synack:
     mov     ecx, 54
     call    e1000_transmit
 
+    # SYN consumes 1 sequence number - update globals and connection entry
+    mov     eax, [tcp_local_seq]
+    inc     eax
+    mov     [tcp_local_seq], eax
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .synack_skip_sync
+    mov     [ebx + 12], eax                # update entry local_seq
+
+.synack_skip_sync:
     popad
     ret
 
@@ -1780,6 +1864,17 @@ e1000_send_tcp_data:
     add     eax, [tcp_recv_len]
     mov     [tcp_local_seq], eax
 
+    # Also update connection entry's local_seq
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .send_data_skip_sync
+    mov     [ebx + 12], eax                # update entry local_seq
+    mov     eax, [tcp_remote_seq]
+    add     eax, [tcp_recv_len]
+    mov     [ebx + 16], eax                # update entry remote_seq
+
+.send_data_skip_sync:
+
     popad
     ret
 
@@ -1885,6 +1980,17 @@ e1000_send_fin_ack:
     mov     ecx, 54
     call    e1000_transmit
 
+    # FIN consumes 1 sequence number - update entry
+    mov     eax, [tcp_local_seq]
+    inc     eax
+    mov     [tcp_local_seq], eax
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .finack_skip_sync
+    mov     [ebx + 12], eax                # update entry local_seq
+    mov     byte ptr [ebx], 5              # state = FIN_WAIT
+
+.finack_skip_sync:
     mov     dword ptr [tcp_fin_sent], 1
 
     popad
@@ -2308,6 +2414,11 @@ tcp_http_enabled:
 tcp_flags_tmp:
     .space  1                  # Temporary storage for TCP flags byte
 
+tcp_conn_slot_idx:
+    .space  4                  # Current connection slot index
+tcp_conn_slot_ptr:
+    .space  4                  # Pointer to current connection entry
+
 # HTTP request parsing
 http_method:
     .space  5                  # "GET\0" or "POST\0"
@@ -2328,11 +2439,11 @@ http_response_text:
     .byte   13, 10
     .ascii  "Content-Length: 29"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.45"
+    .ascii  "Server: aiasm/v0.46"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
-    .ascii  "Hello from AI-ASM Kernel v0.45!"
+    .ascii  "Hello from AI-ASM Kernel v0.46!"
     .byte   13, 10
 http_response_end:
 http_response_len = http_response_end - http_response_text
@@ -2345,7 +2456,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.45 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.46 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
