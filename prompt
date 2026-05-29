@@ -408,7 +408,33 @@
 
 ---
 
+## 当前版本：v0.42
+
+### ✅ v0.42 新增
+
+#### TCP 协议栈
+- e1000_handle_tcp: 解析TCP数据包
+  - 提取TCP头部（处理可变IHL）
+  - 解析源/目的端口、序列号/确认号、标志位
+  - 支持SYN/ACK/PSH/FIN标志
+  - 自动响应端口80的SYN请求（发送SYN-ACK）
+  - 复制PSH数据到tcp_recv_buf，通知就绪
+- e1000_send_synack: 发送TCP SYN-ACK响应
+  - 构建Ethernet+IPv4+TCP完整头部
+  - 设置SYN+ACK标志，递增序列号
+- TCP状态机: CLOSED/LISTEN/SYN_SENT/SYN_RECV/ESTABLISHED
+- e1000_poll: 添加TCP（协议6）分发
+- Shell命令: tcpstatus - 显示TCP连接状态和接收数据
+
+#### QEMU测试结果
+- 内核正常启动 ✓
+- e1000初始化成功 ✓
+- TCP协议栈框架完成 ✓
+
+---
+
 **下一步**:
-1. UDP echo server测试
-2. TCP协议栈实现
-3. UPDATE=1
+1. TCP ACK响应完善（PSH-ACK数据处理）
+2. TCP数据回显服务器
+3. HTTP服务器基础框架
+4. UPDATE=1
