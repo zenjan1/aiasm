@@ -548,6 +548,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_tcpstatus
 
+    # "httpserver" - toggle HTTP server
+    mov     edi, offset cmd_httpserver
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_httpserver
+
     # "pciscan" - scan PCI devices
     mov     edi, offset cmd_pciscan
     call    utils_strcmp
@@ -2632,6 +2638,101 @@ shell_print_dec_byte:
     pop     esi
     ret
 
+.do_httpserver:
+    # Check for "on" or "off" argument after "httpserver" (10 chars)
+    lea     esi, [shell_cmd_buf + 10]
+    lodsb
+    test    al, al
+    jz      .http_show_status
+    cmp     al, ' '
+    je      .http_check_args
+    jmp     .http_done
+
+.http_check_args:
+    # Skip spaces
+    lodsb
+    cmp     al, ' '
+    je      .http_check_args
+    cmp     al, 0
+    je      .http_show_status
+    dec     esi
+
+    # Check if "on"
+    cmp     byte ptr [esi], 'o'
+    jne     .http_check_off
+    cmp     byte ptr [esi + 1], 'n'
+    jne     .http_check_off
+    mov     dword ptr [tcp_http_enabled], 1
+    mov     esi, offset msg_http_on
+    call    uart_puts
+    jmp     .http_done
+
+.http_check_off:
+    # Check if "off"
+    cmp     byte ptr [esi], 'o'
+    jne     .http_show_status
+    cmp     byte ptr [esi + 1], 'f'
+    jne     .http_show_status
+    cmp     byte ptr [esi + 2], 'f'
+    jne     .http_show_status
+    mov     dword ptr [tcp_http_enabled], 0
+    mov     esi, offset msg_http_off
+    call    uart_puts
+    jmp     .http_done
+
+.http_show_status:
+    cmp     dword ptr [tcp_http_enabled], 0
+    je      .http_is_off
+    mov     esi, offset msg_http_enabled
+    call    uart_puts
+    jmp     .http_done
+.http_is_off:
+    mov     esi, offset msg_http_disabled
+    call    uart_puts
+
+.http_done:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Print connection stats
+    mov     esi, offset msg_tcp_conn_count
+    call    uart_puts
+    mov     eax, [tcp_conn_count]
+    call    shell_print_dec_byte
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Print RST received
+    cmp     dword ptr [tcp_rst_received], 0
+    je      .http_no_rst
+    mov     esi, offset msg_tcp_rst_recv
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+.http_no_rst:
+
+    # Print FIN received
+    cmp     dword ptr [tcp_fin_received], 0
+    je      .http_no_fin
+    mov     esi, offset msg_tcp_fin_recv
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+.http_no_fin:
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_netinit:
     mov     esi, offset msg_netinit_start
     call    uart_puts
@@ -2972,6 +3073,8 @@ cmd_udprecv:
     .asciz  "udprecv"
 cmd_tcpstatus:
     .asciz  "tcpstatus"
+cmd_httpserver:
+    .asciz  "httpserver"
 cmd_pciscan:
     .asciz  "pciscan"
 
@@ -3086,9 +3189,30 @@ msg_tcp_data:
 msg_tcp_data_len:
     .ascii  " bytes): "
     .byte   0
+msg_tcp_conn_count:
+    .ascii  "  Connections: "
+    .byte   0
+msg_tcp_rst_recv:
+    .ascii  "  RST received"
+    .byte   0
+msg_tcp_fin_recv:
+    .ascii  "  FIN received"
+    .byte   0
+msg_http_on:
+    .ascii  "HTTP server enabled"
+    .byte   0
+msg_http_off:
+    .ascii  "HTTP server disabled"
+    .byte   0
+msg_http_enabled:
+    .ascii  "HTTP server: ON"
+    .byte   0
+msg_http_disabled:
+    .ascii  "HTTP server: OFF"
+    .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.43"
+    .ascii  "AI-ASM Kernel v0.44"
     .byte   13, 10, 0
 
 help_text:
@@ -3141,6 +3265,8 @@ help_text:
     .ascii  "  udprecv       - Check received UDP data"
     .byte   13, 10
     .ascii  "  tcpstatus     - Show TCP connection state"
+    .byte   13, 10
+    .ascii  "  httpserver    - Toggle HTTP server (on/off/status)"
     .byte   13, 10
     .ascii  "  netpoll       - Poll for received packets"
     .byte   13, 10, 0

@@ -163,6 +163,9 @@ e1000_init:
     pushad
     mov     ebx, [e1000_mmio_base]   # MMIO base in ebx
 
+    # Initialize TCP HTTP server enabled by default
+    mov     dword ptr [tcp_http_enabled], 1
+
     # Step 1: Device Reset
     # Set RST bit (bit 26) in CTRL register
     mov     eax, [ebx]               # Read CTRL
@@ -1004,9 +1007,32 @@ e1000_handle_tcp:
     movzx   eax, word ptr [esi + ebp + 2]  # Dest port
     mov     [tcp_recv_dst_port], ax
 
+    # Get TCP flags (offset 13 in TCP header)
+    movzx   eax, byte ptr [esi + ebp + 13]
+
+    # Check for RST first (highest priority)
+    test    al, 0x04                       # RST flag
+    jz      .tcp_check_port
+    mov     dword ptr [tcp_rst_received], 1
+    mov     dword ptr [tcp_state], 0       # CLOSED
+    jmp     .tcp_done
+
+.tcp_check_port:
+    # Save flags for later use (al gets overwritten below)
+    mov     byte ptr [tcp_flags_tmp], al
+
     # Check if dest port matches our listen port (80)
     cmp     ax, 80
     jne     .tcp_not_our
+
+    # Connection tracking
+    mov     eax, [tcp_conn_count]
+    inc     eax
+    mov     [tcp_conn_count], eax
+
+    # Save source IP for reply
+    mov     eax, [esi + 26]
+    mov     [tcp_recv_src_ip], eax
 
     # Get sequence and ack numbers
     mov     eax, [esi + ebp + 4]
@@ -1014,10 +1040,8 @@ e1000_handle_tcp:
     mov     eax, [esi + ebp + 8]
     mov     [tcp_remote_ack], eax
 
-    # Get TCP flags (offset 13 in TCP header)
-    movzx   eax, byte ptr [esi + ebp + 13]
-
     # Check for SYN
+    movzx   eax, byte ptr [tcp_flags_tmp]
     test    al, 0x02                       # SYN flag
     jz      .tcp_check_ack
 
@@ -1045,6 +1069,7 @@ e1000_handle_tcp:
 
 .tcp_check_ack:
     # Check for ACK flag
+    movzx   eax, byte ptr [tcp_flags_tmp]
     test    al, 0x10
     jz      .tcp_check_fin
 
@@ -1108,14 +1133,28 @@ e1000_handle_tcp:
 .tcp_no_data:
     # Check for FIN
 .tcp_check_fin:
-    movzx   eax, byte ptr [esi + ebp + 13]
+    movzx   eax, byte ptr [tcp_flags_tmp]
     test    al, 0x01                       # FIN flag
     jz      .tcp_done
+    mov     dword ptr [tcp_fin_received], 1
     mov     dword ptr [tcp_state], 0       # CLOSED
+    # Send FIN-ACK back for graceful close
+    call    e1000_send_fin_ack
     jmp     .tcp_done
 
 .tcp_not_our:
-    # Not our port, ignore
+    # Not our port, send RST if SYN received
+    movzx   eax, byte ptr [tcp_flags_tmp]
+    test    al, 0x02                       # SYN flag
+    jz      .tcp_done
+    # Save info for RST
+    mov     eax, [esi + 26]
+    mov     [tcp_recv_src_ip], eax
+    movzx   eax, word ptr [esi + ebp]
+    mov     [tcp_recv_src_port], ax
+    movzx   eax, word ptr [esi + ebp + 2]
+    mov     [tcp_recv_dst_port], ax
+    call    e1000_send_rst
 
 .tcp_done:
     popad
@@ -1429,6 +1468,160 @@ e1000_send_http_response:
     ret
 
 # ============================================================================
+# e1000_send_fin_ack: Send TCP FIN-ACK for graceful connection close
+# ============================================================================
+e1000_send_fin_ack:
+    pushad
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45
+    mov     byte ptr [edi + 1], 0
+    mov     word ptr [edi + 2], 40         # 20(IP) + 20(TCP)
+    mov     word ptr [edi + 4], 0x5682
+    mov     word ptr [edi + 6], 0x4000
+    mov     byte ptr [edi + 8], 64
+    mov     byte ptr [edi + 9], 6          # TCP
+    mov     word ptr [edi + 10], 0
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [tcp_recv_src_ip]
+    mov     [edi + 16], eax
+
+    # IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.finack_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .finack_ip_cksum
+.finack_ip_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .finack_ip_fold_done
+    add     eax, 1
+.finack_ip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # TCP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 80             # Source port = 80
+    mov     ax, [tcp_recv_src_port]
+    mov     [edi + 2], ax                  # Dest port
+    mov     eax, [tcp_local_seq]
+    mov     [edi + 4], eax                 # Seq number
+    mov     eax, [tcp_remote_seq]
+    add     eax, [tcp_recv_len]            # ACK = remote seq + data len
+    mov     [edi + 8], eax                 # Ack number
+    mov     byte ptr [edi + 12], 0x50      # Data offset: 5
+    mov     byte ptr [edi + 13], 0x11      # Flags: FIN + ACK
+    mov     word ptr [edi + 14], 65535     # Window size
+    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 18], 0
+
+    # Send: 14 + 20 + 20 = 54 bytes
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 54
+    call    e1000_transmit
+
+    mov     dword ptr [tcp_fin_sent], 1
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_rst: Send TCP RST packet
+# ============================================================================
+e1000_send_rst:
+    pushad
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45
+    mov     byte ptr [edi + 1], 0
+    mov     word ptr [edi + 2], 40         # 20(IP) + 20(TCP)
+    mov     word ptr [edi + 4], 0x5683
+    mov     word ptr [edi + 6], 0x4000
+    mov     byte ptr [edi + 8], 64
+    mov     byte ptr [edi + 9], 6          # TCP
+    mov     word ptr [edi + 10], 0
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [tcp_recv_src_ip]
+    mov     [edi + 16], eax
+
+    # IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.rst_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .rst_ip_cksum
+.rst_ip_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .rst_ip_fold_done
+    add     eax, 1
+.rst_ip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # TCP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 80             # Source port = 80
+    mov     ax, [tcp_recv_src_port]
+    mov     [edi + 2], ax                  # Dest port
+    xor     eax, eax
+    mov     [edi + 4], eax                 # Seq = 0
+    mov     [edi + 8], eax                 # Ack = 0
+    mov     byte ptr [edi + 12], 0x50      # Data offset: 5
+    mov     byte ptr [edi + 13], 0x04      # Flags: RST
+    mov     word ptr [edi + 14], 0         # Window = 0 (RST)
+    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 18], 0
+
+    # Send: 14 + 20 + 20 = 54 bytes
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 54
+    call    e1000_transmit
+
+    popad
+    ret
+
+# ============================================================================
 # e1000_echo_server: Echo UDP packet back to sender (port 7)
 # Input: esi = RX buffer (Ethernet header)
 # ============================================================================
@@ -1732,6 +1925,22 @@ tcp_tx_total_len:
     .space  2                  # Total IP+TCP payload length for TX
 tcp_http_body:
     .space  1024               # HTTP response body buffer
+tcp_conn_count:
+    .globl  tcp_conn_count
+    .space  4                  # Total connections received
+tcp_rst_received:
+    .globl  tcp_rst_received
+    .space  4                  # 1 = RST received
+tcp_fin_received:
+    .globl  tcp_fin_received
+    .space  4                  # 1 = FIN received
+tcp_fin_sent:
+    .space  4                  # 1 = FIN sent
+tcp_http_enabled:
+    .globl  tcp_http_enabled
+    .space  4                  # 1 = HTTP server enabled (default on)
+tcp_flags_tmp:
+    .space  1                  # Temporary storage for TCP flags byte
 
     .section .rodata
 http_response_text:
@@ -1739,11 +1948,13 @@ http_response_text:
     .byte   13, 10
     .ascii  "Content-Type: text/plain"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.43"
+    .ascii  "Content-Length: 29"
+    .byte   13, 10
+    .ascii  "Server: aiasm/v0.44"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
-    .ascii  "Hello from AI-ASM Kernel v0.43!"
+    .ascii  "Hello from AI-ASM Kernel v0.44!"
     .byte   13, 10
 http_response_end:
 http_response_len = http_response_end - http_response_text
@@ -1756,7 +1967,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.43 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.44 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
