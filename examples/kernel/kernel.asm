@@ -1152,6 +1152,51 @@ e1000_send_udp:
     popad
     ret
 
+# print_dec5: Write 5 zero-padded decimal digits of eax to [edi]
+# Input: eax = value, edi = output buffer
+print_dec5:
+    push    ebx
+    push    edx
+    mov     ebx, 10000
+    xor     edx, edx
+    div     ebx                          # eax = value/10000, edx = rem
+    add     al, '0'
+    mov     [edi], al
+    inc     edi
+    mov     eax, edx
+
+    mov     ebx, 1000
+    xor     edx, edx
+    div     ebx                          # eax = value/1000
+    add     al, '0'
+    mov     [edi], al
+    inc     edi
+    mov     eax, edx
+
+    mov     ebx, 100
+    xor     edx, edx
+    div     ebx                          # eax = value/100
+    add     al, '0'
+    mov     [edi], al
+    inc     edi
+    mov     eax, edx
+
+    mov     ebx, 10
+    xor     edx, edx
+    div     ebx                          # eax = value/10
+    add     al, '0'
+    mov     [edi], al
+    inc     edi
+    mov     eax, edx
+
+    add     al, '0'
+    mov     [edi], al
+    inc     edi
+
+    pop     edx
+    pop     ebx
+    ret
+
 # ============================================================================
 # http_parse_request: Parse HTTP request from tcp_recv_buf
 # Extracts method (GET/POST), URL path, and Host header
@@ -1539,7 +1584,115 @@ e1000_handle_tcp:
     jmp     .tcp_no_data
 
 .tcp_http_request:
-    # Send HTTP response
+    # Parse HTTP request to extract URL
+    call    http_parse_request
+
+    # Route based on http_url
+    lea     esi, [http_url]
+
+    # Check "/" (root)
+    mov     al, [esi]
+    test    al, al
+    jz      .http_route_root             # empty URL = root
+    cmp     al, '/'
+    jne     .http_route_notfound
+    mov     al, [esi + 1]
+    test    al, al
+    jz      .http_route_root             # "/" alone = root
+
+    # Check "/status"
+    cmp     dword ptr [esi], 0x75746174  # "stat"
+    je      .http_route_status
+    cmp     dword ptr [esi], 0x69726576  # "veri"
+    je      .http_route_version
+    cmp     dword ptr [esi], 0x70637074  # "tcp"
+    je      .http_route_tcpstatus
+    jmp     .http_route_notfound
+
+.http_route_root:
+    # Body: hello message
+    mov     edi, offset tcp_http_body
+    mov     esi, offset http_body_hello
+    mov     ecx, http_body_hello_len
+    jmp     .http_send
+
+.http_route_status:
+    # Build status body with live connection count
+    mov     edi, offset tcp_http_body
+    # Copy static part (up to "TCP connections: ")
+    mov     esi, offset http_body_status
+    mov     ecx, 17                     # "Kernel Status: OK\nTCP connections: "
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    # Append connection count as 5-digit decimal
+    mov     eax, [tcp_conn_count]
+    mov     edi, offset tcp_http_body + 32   # after the prefix
+    call    print_dec5
+    # Copy the rest of status body (network info line)
+    mov     esi, offset http_body_status + 37  # skip prefix + count area
+    mov     edi, offset tcp_http_body + 38
+    mov     ecx, http_body_status_len - 38
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    mov     eax, http_body_status_len
+    jmp     .http_send
+
+.http_route_version:
+    mov     edi, offset tcp_http_body
+    mov     esi, offset http_body_version
+    mov     ecx, http_body_version_len
+    jmp     .http_send
+
+.http_route_tcpstatus:
+    # Build TCP status body
+    mov     edi, offset tcp_http_body
+    mov     esi, offset http_body_tcpstatus
+    mov     ecx, 21                     # "TCP Connection Status:\n"
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    # Append "Active: X, Total: Y" with live values
+    mov     eax, [tcp_conn_active_count]
+    mov     edi, offset tcp_http_body + 21
+    call    print_dec5
+    mov     eax, [tcp_conn_count]
+    mov     edi, offset tcp_http_body + 34
+    call    print_dec5
+    # Copy the rest
+    mov     esi, offset http_body_tcpstatus + 43
+    mov     edi, offset tcp_http_body + 46
+    mov     ecx, http_body_tcpstatus_len - 46
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    mov     eax, http_body_tcpstatus_len
+    jmp     .http_send
+
+.http_route_notfound:
+    mov     edi, offset tcp_http_body
+    mov     esi, offset http_body_notfound
+    mov     ecx, http_body_notfound_len
+
+.http_send:
+    mov     [tcp_recv_len], eax          # payload length for send_http_response
     call    e1000_send_http_response
 
 .tcp_no_data:
@@ -1880,14 +2033,30 @@ e1000_send_tcp_data:
 
 # ============================================================================
 # e1000_send_http_response: Send HTTP 200 OK response
+# Input: tcp_http_body already contains the response body
+#        tcp_recv_len contains body length
 # ============================================================================
 e1000_send_http_response:
     pushad
 
-    # Build HTTP response body
+    # Build full HTTP response in tcp_http_body (prepend headers)
+    # First, save body content to a temp location
+    mov     esi, offset tcp_http_body
+    mov     edi, offset http_body_tmp
+    mov     ecx, [tcp_recv_len]
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    mov     ebx, [tcp_recv_len]              # save body length
+
+    # Copy HTTP header to tcp_http_body
+    mov     esi, offset http_response_header
     mov     edi, offset tcp_http_body
-    mov     esi, offset http_response_text
-    mov     ecx, http_response_len
+    mov     ecx, http_response_header_len
     push    ecx
     shr     ecx, 2
     cld
@@ -1896,8 +2065,29 @@ e1000_send_http_response:
     and     ecx, 3
     rep     movsb
 
-    # Set payload length
-    mov     eax, http_response_len
+    # Patch Content-Length: find "XXXXX" at offset 58 (after "Content-Length: ")
+    # "HTTP/1.1 200 OK\r\n" = 17, "Content-Type: text/plain\r\n" = 26
+    # "Content-Length: XXXXX\r\n" - XXXX starts at offset 43+16 = offset 59
+    mov     eax, ebx                          # body length
+    mov     edi, offset tcp_http_body + 59    # Content-Length value position
+    call    print_dec5
+
+    # Copy saved body after header
+    mov     esi, offset http_body_tmp
+    mov     edi, offset tcp_http_body
+    add     edi, http_response_header_len
+    mov     ecx, ebx                          # body length
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Total payload = header + body
+    mov     eax, ebx
+    add     eax, http_response_header_len
     mov     [tcp_recv_len], eax
 
     # Reuse send_tcp_data path
@@ -2430,23 +2620,70 @@ http_url_len:
     .space  4                  # URL length
 http_active_conn:
     .space  4                  # current connection slot index
+http_body_tmp:
+    .space  1024               # Temporary buffer for HTTP body during header construction
 
     .section .rodata
-http_response_text:
+
+# HTTP response header template (no body, dynamic Content-Length)
+http_response_header:
     .ascii  "HTTP/1.1 200 OK"
     .byte   13, 10
     .ascii  "Content-Type: text/plain"
     .byte   13, 10
-    .ascii  "Content-Length: 29"
+    .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.46"
+    .ascii  "Server: aiasm/v0.47"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
-    .ascii  "Hello from AI-ASM Kernel v0.46!"
+http_response_header_end:
+http_response_header_len = http_response_header_end - http_response_header
+
+# Route response bodies
+http_body_hello:
+    .ascii  "Hello from AI-ASM Kernel v0.47!"
     .byte   13, 10
-http_response_end:
-http_response_len = http_response_end - http_response_text
+http_body_hello_end:
+http_body_hello_len = http_body_hello_end - http_body_hello
+
+http_body_status:
+    .ascii  "Kernel Status: OK"
+    .byte   13, 10
+    .ascii  "TCP connections: "
+    .ascii  "00000"
+    .byte   13, 10
+    .ascii  "Network: e1000 (Intel 82540EM)"
+    .byte   13, 10
+http_body_status_end:
+http_body_status_len = http_body_status_end - http_body_status
+
+http_body_version:
+    .ascii  "AI-ASM Kernel v0.47"
+    .byte   13, 10
+    .ascii  "x86 32-bit + WASM runtime"
+    .byte   13, 10
+http_body_version_end:
+http_body_version_len = http_body_version_end - http_body_version
+
+http_body_notfound:
+    .ascii  "404 Not Found"
+    .byte   13, 10
+    .ascii  "Try: / /status /version /tcpstatus"
+    .byte   13, 10
+http_body_notfound_end:
+http_body_notfound_len = http_body_notfound_end - http_body_notfound
+
+http_body_tcpstatus:
+    .ascii  "TCP Connection Status:"
+    .byte   13, 10
+    .ascii  "Active: 0, Total: 00000"
+    .byte   13, 10
+    .ascii  "Listen port: 80"
+    .byte   13, 10
+http_body_tcpstatus_end:
+http_body_tcpstatus_len = http_body_tcpstatus_end - http_body_tcpstatus
+
 msg_bar:    .asciz  "BAR0 = "
 msg_vfound: .asciz "\n  virtio-net found (MMIO in ISA hole - not accessible)\n"
 msg_vfail:  .asciz  "  Skipping virtio (needs MMIO mapping)\n"
@@ -2456,7 +2693,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.46 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.47 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
