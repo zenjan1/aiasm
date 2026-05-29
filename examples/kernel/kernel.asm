@@ -1053,15 +1053,15 @@ e1000_handle_tcp:
     jz      .tcp_no_data
 
     # TCP data received - save for processing
-    mov     edx, [esi + ebp + 8]           # Ack number
     # Calculate data length: TCP segment length - header length
     movzx   ecx, byte ptr [esi + ebp + 12] # Data offset (upper 4 bits)
     shr     ecx, 4
     shl     ecx, 2                         # * 4 = TCP header length
+    mov     [tcp_hdr_len], cx
     # IP total length at offset 2
     movzx   edx, word ptr [esi + 2]
-    sub     dx, 20                         # - IP header
-    sub     dx, cx                         # - TCP header = payload
+    sub     dx, cx                         # - TCP header
+    sub     dx, 20                         # - IP header = payload
     movzx   eax, dx
     cmp     eax, 0
     jle     .tcp_no_data
@@ -1084,6 +1084,26 @@ e1000_handle_tcp:
     rep     movsb
     mov     dword ptr [tcp_recv_ready], 1
     mov     dword ptr [tcp_state], 4       # ESTABLISHED
+
+    # Send ACK for received data
+    call    e1000_send_tcp_ack
+
+    # Check if HTTP request (starts with "GET " or "POST ")
+    mov     esi, offset tcp_recv_buf
+    mov     eax, [esi]
+    cmp     eax, 0x20544547                # "GET " (little-endian)
+    je      .tcp_http_request
+    mov     eax, [esi]
+    cmp     eax, 0x54534f50                # "POST" (little-endian)
+    je      .tcp_http_request
+
+    # Otherwise, echo the data back (TCP echo server)
+    call    e1000_send_tcp_data
+    jmp     .tcp_no_data
+
+.tcp_http_request:
+    # Send HTTP response
+    call    e1000_send_http_response
 
 .tcp_no_data:
     # Check for FIN
@@ -1179,6 +1199,231 @@ e1000_send_synack:
     mov     esi, offset e1000_tx_buf
     mov     ecx, 54
     call    e1000_transmit
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_tcp_ack: Send TCP ACK for received data
+# Acknowledges the received data (seq = remote_seq + data_len)
+# ============================================================================
+e1000_send_tcp_ack:
+    pushad
+
+    # Save payload length for sequence update
+    mov     edx, [tcp_recv_len]
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45
+    mov     byte ptr [edi + 1], 0
+    mov     word ptr [edi + 2], 40         # 20(IP) + 20(TCP)
+    mov     word ptr [edi + 4], 0x5680
+    mov     word ptr [edi + 6], 0x4000
+    mov     byte ptr [edi + 8], 64
+    mov     byte ptr [edi + 9], 6          # TCP
+    mov     word ptr [edi + 10], 0
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [tcp_recv_src_ip]
+    mov     [edi + 16], eax
+
+    # IP checksum
+    push    edi
+    push    edx
+    xor     edx, edx
+    mov     ecx, 10
+.ack_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .ack_ip_cksum
+.ack_ip_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .ack_ip_fold_done
+    add     eax, 1
+.ack_ip_fold_done:
+    not     ax
+    pop     edx
+    pop     edi
+    mov     [edi + 10], ax
+
+    # TCP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 80             # Source port = 80
+    mov     ax, [tcp_recv_src_port]
+    mov     [edi + 2], ax                  # Dest port
+
+    # Seq = our initial seq + data length we're acknowledging
+    mov     eax, [tcp_local_seq]
+    mov     [edi + 4], eax                 # Seq number
+
+    # Ack = remote seq + data length + 1 (for PSH)
+    mov     eax, [tcp_remote_seq]
+    add     eax, edx                       # + data length
+    mov     [edi + 8], eax                 # Ack number
+
+    mov     byte ptr [edi + 12], 0x50      # Data offset: 5
+    mov     byte ptr [edi + 13], 0x10      # Flags: ACK
+    mov     word ptr [edi + 14], 65535     # Window size
+    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 18], 0
+
+    # Send: 14 + 20 + 20 = 54 bytes
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 54
+    call    e1000_transmit
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_tcp_data: Send TCP data with PSH-ACK (echo server)
+# Input: uses tcp_recv_buf as data source, tcp_recv_len as length
+# ============================================================================
+e1000_send_tcp_data:
+    pushad
+
+    mov     edx, [tcp_recv_len]            # payload length
+    add     edx, 40                        # + 20(IP) + 20(TCP)
+    mov     [tcp_tx_total_len], dx
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45
+    mov     byte ptr [edi + 1], 0
+    mov     ax, [tcp_tx_total_len]
+    mov     [edi + 2], ax
+    mov     word ptr [edi + 4], 0x5681
+    mov     word ptr [edi + 6], 0x4000
+    mov     byte ptr [edi + 8], 64
+    mov     byte ptr [edi + 9], 6          # TCP
+    mov     word ptr [edi + 10], 0
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [tcp_recv_src_ip]
+    mov     [edi + 16], eax
+
+    # IP checksum
+    push    edi
+    push    edx
+    xor     edx, edx
+    mov     ecx, 10
+.data_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .data_ip_cksum
+.data_ip_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .data_ip_fold_done
+    add     eax, 1
+.data_ip_fold_done:
+    not     ax
+    pop     edx
+    pop     edi
+    mov     [edi + 10], ax
+
+    # TCP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 80             # Source port = 80
+    mov     ax, [tcp_recv_src_port]
+    mov     [edi + 2], ax                  # Dest port
+
+    # Seq = our seq
+    mov     eax, [tcp_local_seq]
+    mov     [edi + 4], eax
+
+    # Ack = remote seq + their data len + 1
+    mov     eax, [tcp_remote_seq]
+    add     eax, [tcp_recv_len]
+    mov     [edi + 8], eax
+
+    mov     byte ptr [edi + 12], 0x50      # Data offset: 5
+    mov     byte ptr [edi + 13], 0x18      # Flags: PSH + ACK
+    mov     word ptr [edi + 14], 65535     # Window size
+    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 18], 0
+
+    # Copy payload (echo data back)
+    mov     edi, offset e1000_tx_buf + 54
+    mov     esi, offset tcp_recv_buf
+    mov     ecx, [tcp_recv_len]
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Send
+    mov     eax, [tcp_tx_total_len]
+    add     eax, 14                        # + Ethernet
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, eax
+    call    e1000_transmit
+
+    # Update our seq
+    mov     eax, [tcp_local_seq]
+    add     eax, [tcp_recv_len]
+    mov     [tcp_local_seq], eax
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_http_response: Send HTTP 200 OK response
+# ============================================================================
+e1000_send_http_response:
+    pushad
+
+    # Build HTTP response body
+    mov     edi, offset tcp_http_body
+    mov     esi, offset http_response_text
+    mov     ecx, http_response_len
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Set payload length
+    mov     eax, http_response_len
+    mov     [tcp_recv_len], eax
+
+    # Reuse send_tcp_data path
+    call    e1000_send_tcp_data
 
     popad
     ret
@@ -1481,8 +1726,27 @@ tcp_recv_ready:
 tcp_listen_port:
     .globl  tcp_listen_port
     .space  2                  # port we're listening on (default 80)
+tcp_hdr_len:
+    .space  2                  # TCP header length
+tcp_tx_total_len:
+    .space  2                  # Total IP+TCP payload length for TX
+tcp_http_body:
+    .space  1024               # HTTP response body buffer
 
     .section .rodata
+http_response_text:
+    .ascii  "HTTP/1.1 200 OK"
+    .byte   13, 10
+    .ascii  "Content-Type: text/plain"
+    .byte   13, 10
+    .ascii  "Server: aiasm/v0.43"
+    .byte   13, 10
+    .ascii  "Connection: close"
+    .byte   13, 10, 13, 10
+    .ascii  "Hello from AI-ASM Kernel v0.43!"
+    .byte   13, 10
+http_response_end:
+http_response_len = http_response_end - http_response_text
 msg_bar:    .asciz  "BAR0 = "
 msg_vfound: .asciz "\n  virtio-net found (MMIO in ISA hole - not accessible)\n"
 msg_vfail:  .asciz  "  Skipping virtio (needs MMIO mapping)\n"
@@ -1492,7 +1756,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.42 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.43 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

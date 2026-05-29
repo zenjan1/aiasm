@@ -3088,7 +3088,7 @@ msg_tcp_data_len:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.42"
+    .ascii  "AI-ASM Kernel v0.43"
     .byte   13, 10, 0
 
 help_text:
