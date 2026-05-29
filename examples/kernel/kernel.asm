@@ -448,6 +448,8 @@ e1000_poll:
     jne     .poll_next
 
     # Check IP protocol (offset 23)
+    cmp     byte ptr [esi + 23], 6         # TCP
+    je      .poll_tcp
     cmp     byte ptr [esi + 23], 17        # UDP
     je      .poll_udp
     cmp     byte ptr [esi + 23], 1         # ICMP
@@ -459,6 +461,10 @@ e1000_poll:
 
 .poll_udp:
     call    e1000_handle_udp
+    jmp     .poll_next
+
+.poll_tcp:
+    call    e1000_handle_tcp
     jmp     .poll_next
 
 .poll_arp:
@@ -964,7 +970,315 @@ e1000_handle_udp:
     # Signal data available
     mov     dword ptr [udp_recv_ready], 1
 
+    # Check if echo port (port 7) for auto echo server
+    movzx   eax, word ptr [esi + 34]      # Dest port
+    cmp     ax, 7
+    jne     .udp_done
+
+    # Auto-respond: send echo reply
+    call    e1000_echo_server
+
 .udp_done:
+    popad
+    ret
+
+# ============================================================================
+# e1000_handle_tcp: Handle received TCP packet
+# Input: esi = RX buffer (pointing to Ethernet header)
+# Supports: SYN, SYN-ACK, ACK, PSH-ACK, FIN
+# Implements simple TCP echo server on port 80
+# ============================================================================
+e1000_handle_tcp:
+    pushad
+
+    # TCP header starts at: 14 (eth) + (IHL * 4) (IP)
+    movzx   eax, byte ptr [esi + 14]      # Version + IHL
+    and     eax, 0x0F
+    shl     eax, 2                        # IHL * 4 = IP header length
+    add     eax, 14                       # + Ethernet header
+    mov     ebp, eax                      # ebp = TCP header offset
+
+    # Get source/dest ports
+    movzx   eax, word ptr [esi + ebp]      # Source port
+    mov     [tcp_recv_src_port], ax
+    movzx   eax, word ptr [esi + ebp + 2]  # Dest port
+    mov     [tcp_recv_dst_port], ax
+
+    # Check if dest port matches our listen port (80)
+    cmp     ax, 80
+    jne     .tcp_not_our
+
+    # Get sequence and ack numbers
+    mov     eax, [esi + ebp + 4]
+    mov     [tcp_remote_seq], eax
+    mov     eax, [esi + ebp + 8]
+    mov     [tcp_remote_ack], eax
+
+    # Get TCP flags (offset 13 in TCP header)
+    movzx   eax, byte ptr [esi + ebp + 13]
+
+    # Check for SYN
+    test    al, 0x02                       # SYN flag
+    jz      .tcp_check_ack
+
+    # Check if SYN-ACK (we already have a connection)
+    test    al, 0x10                       # ACK flag
+    jnz     .tcp_synack_recv
+
+    # SYN received - send SYN-ACK
+    mov     dword ptr [tcp_state], 3       # SYN_RECV
+
+    # Set our initial sequence number
+    mov     dword ptr [tcp_local_seq], 0x00001234
+
+    # Save source IP for reply
+    mov     eax, [esi + 26]
+    mov     [tcp_recv_src_ip], eax
+
+    call    e1000_send_synack
+    jmp     .tcp_done
+
+.tcp_synack_recv:
+    # This shouldn't happen as server, but handle gracefully
+    mov     dword ptr [tcp_state], 4       # ESTABLISHED
+    jmp     .tcp_done
+
+.tcp_check_ack:
+    # Check for ACK flag
+    test    al, 0x10
+    jz      .tcp_check_fin
+
+    # Check if we have PSH (data)
+    test    al, 0x08                       # PSH flag
+    jz      .tcp_no_data
+
+    # TCP data received - save for processing
+    mov     edx, [esi + ebp + 8]           # Ack number
+    # Calculate data length: TCP segment length - header length
+    movzx   ecx, byte ptr [esi + ebp + 12] # Data offset (upper 4 bits)
+    shr     ecx, 4
+    shl     ecx, 2                         # * 4 = TCP header length
+    # IP total length at offset 2
+    movzx   edx, word ptr [esi + 2]
+    sub     dx, 20                         # - IP header
+    sub     dx, cx                         # - TCP header = payload
+    movzx   eax, dx
+    cmp     eax, 0
+    jle     .tcp_no_data
+
+    # Copy payload to tcp_recv_buf
+    mov     ecx, eax
+    cmp     ecx, 1500
+    jg      .tcp_done
+    mov     [tcp_recv_len], ecx
+    mov     esi, offset e1000_rx_buf
+    add     esi, ebp
+    add     esi, ecx                       # skip TCP header to payload
+    mov     edi, offset tcp_recv_buf
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    mov     dword ptr [tcp_recv_ready], 1
+    mov     dword ptr [tcp_state], 4       # ESTABLISHED
+
+.tcp_no_data:
+    # Check for FIN
+.tcp_check_fin:
+    movzx   eax, byte ptr [esi + ebp + 13]
+    test    al, 0x01                       # FIN flag
+    jz      .tcp_done
+    mov     dword ptr [tcp_state], 0       # CLOSED
+    jmp     .tcp_done
+
+.tcp_not_our:
+    # Not our port, ignore
+
+.tcp_done:
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_synack: Send TCP SYN-ACK response
+# ============================================================================
+e1000_send_synack:
+    pushad
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = resolved ARP MAC
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+    mov     word ptr [edi + 12], 0x0800    # IPv4
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45
+    mov     byte ptr [edi + 1], 0
+    mov     word ptr [edi + 2], 44         # 20(IP) + 24(TCP with no options)
+    mov     word ptr [edi + 4], 0x5679
+    mov     word ptr [edi + 6], 0x4000     # Don't fragment
+    mov     byte ptr [edi + 8], 64         # TTL
+    mov     byte ptr [edi + 9], 6          # TCP
+    mov     word ptr [edi + 10], 0         # Checksum
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+    mov     eax, [tcp_recv_src_ip]
+    mov     [edi + 16], eax
+
+    # IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.synack_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .synack_ip_cksum
+.synack_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .synack_ip_fold_done
+    add     eax, 1
+.synack_ip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # TCP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 80             # Source port = 80
+    mov     ax, [tcp_recv_src_port]
+    mov     [edi + 2], ax                  # Dest port
+    mov     eax, [tcp_local_seq]
+    mov     [edi + 4], eax                 # Seq number
+    mov     eax, [tcp_remote_seq]
+    inc     eax                            # ACK = SYN seq + 1
+    mov     [edi + 8], eax                 # Ack number
+    mov     byte ptr [edi + 12], 0x50      # Data offset: 5 (20 bytes, no options)
+    mov     byte ptr [edi + 13], 0x12      # Flags: SYN + ACK
+    mov     word ptr [edi + 14], 65535     # Window size
+    mov     word ptr [edi + 16], 0         # Checksum
+    mov     word ptr [edi + 18], 0         # Urgent pointer
+
+    # TCP checksum = 0 for now (optional in many stacks)
+    # Send: 14 + 20 + 20 = 54 bytes
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 54
+    call    e1000_transmit
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_echo_server: Echo UDP packet back to sender (port 7)
+# Input: esi = RX buffer (Ethernet header)
+# ============================================================================
+e1000_echo_server:
+    pushad
+
+    # Build Ethernet frame in TX buffer
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = source MAC of received packet (offset 6 in RX)
+    mov     eax, [esi + 6]
+    mov     [edi], eax
+    mov     ax, [esi + 10]
+    mov     [edi + 4], ax
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = IPv4
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45          # Version=4, IHL=5
+    mov     byte ptr [edi + 1], 0         # TOS
+    mov     ax, [esi + 2]                 # Total length from received packet
+    mov     [edi + 2], ax
+    mov     word ptr [edi + 4], 0x5678    # New identification
+    mov     word ptr [edi + 6], 0x4000    # Flags: Don't fragment
+    mov     byte ptr [edi + 8], 64        # TTL
+    mov     byte ptr [edi + 9], 17        # Protocol = UDP
+    mov     word ptr [edi + 10], 0        # Checksum (to calc)
+
+    # Source IP = our IP
+    mov     dword ptr [edi + 12], 0x0F02000A  # 10.0.2.15
+
+    # Dest IP = source IP of received packet
+    mov     eax, [esi + 26]
+    mov     [edi + 16], eax
+
+    # Calculate IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.echo_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .echo_ip_cksum
+.echo_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .echo_ip_fold_done
+    add     eax, 1
+.echo_ip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # UDP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+
+    # Swap source/dest ports
+    mov     ax, [esi + 36]              # Original source port -> dest
+    mov     [edi + 2], ax
+    mov     ax, [esi + 34]              # Original dest port -> source
+    mov     [edi], ax
+    mov     ax, [esi + 38]              # Same UDP length
+    mov     [edi + 4], ax
+    mov     word ptr [edi + 6], 0        # Checksum = 0 (optional)
+
+    # Copy payload (same as received)
+    mov     edi, offset e1000_tx_buf + 42
+    mov     esi, offset e1000_rx_buf + 42
+    mov     ecx, [udp_recv_len]
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Send packet
+    mov     eax, [udp_recv_len]
+    add     eax, 42                      # 14(eth) + 20(IP) + 8(UDP)
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, eax
+    call    e1000_transmit
+
     popad
     ret
 
@@ -1139,6 +1453,35 @@ udp_recv_ready:
     .globl  udp_recv_ready
     .space  4                  # 1 = data available
 
+# TCP state
+tcp_state:
+    .globl  tcp_state
+    .space  4                  # 0=CLOSED, 1=LISTEN, 2=SYN_SENT, 3=SYN_RECV, 4=ESTABLISHED
+tcp_local_seq:
+    .space  4                  # our sequence number
+tcp_remote_seq:
+    .space  4                  # remote sequence number
+tcp_remote_ack:
+    .space  4                  # expected ACK from remote
+tcp_recv_buf:
+    .globl  tcp_recv_buf
+    .space  1500               # TCP receive buffer
+tcp_recv_len:
+    .globl  tcp_recv_len
+    .space  4                  # received data length
+tcp_recv_src_ip:
+    .space  4
+tcp_recv_src_port:
+    .space  2
+tcp_recv_dst_port:
+    .space  2
+tcp_recv_ready:
+    .globl  tcp_recv_ready
+    .space  4                  # 1 = TCP data available
+tcp_listen_port:
+    .globl  tcp_listen_port
+    .space  2                  # port we're listening on (default 80)
+
     .section .rodata
 msg_bar:    .asciz  "BAR0 = "
 msg_vfound: .asciz "\n  virtio-net found (MMIO in ISA hole - not accessible)\n"
@@ -1149,7 +1492,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.41 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.42 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

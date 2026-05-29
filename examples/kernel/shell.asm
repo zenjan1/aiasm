@@ -542,6 +542,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_udprecv
 
+    # "tcpstatus" - check TCP connection state
+    mov     edi, offset cmd_tcpstatus
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_tcpstatus
+
     # "pciscan" - scan PCI devices
     mov     edi, offset cmd_pciscan
     call    utils_strcmp
@@ -2544,6 +2550,88 @@ shell_print_dec_byte:
     pop     esi
     ret
 
+.do_tcpstatus:
+    mov     esi, offset msg_tcp_header
+    call    uart_puts
+
+    # Print TCP state
+    mov     eax, [tcp_state]
+    cmp     eax, 0
+    je      .tcp_closed
+    cmp     eax, 1
+    je      .tcp_listen
+    cmp     eax, 2
+    je      .tcp_synsent
+    cmp     eax, 3
+    je      .tcp_synrecv
+    cmp     eax, 4
+    je      .tcp_established
+
+.tcp_closed:
+    mov     esi, offset msg_tcp_closed
+    call    uart_puts
+    jmp     .tcp_state_done
+.tcp_listen:
+    mov     esi, offset msg_tcp_listen
+    call    uart_puts
+    jmp     .tcp_state_done
+.tcp_synsent:
+    mov     esi, offset msg_tcp_synsent
+    call    uart_puts
+    jmp     .tcp_state_done
+.tcp_synrecv:
+    mov     esi, offset msg_tcp_synrecv
+    call    uart_puts
+    jmp     .tcp_state_done
+.tcp_established:
+    mov     esi, offset msg_tcp_established
+    call    uart_puts
+.tcp_state_done:
+    mov     al, 0x0a
+    call    uart_putc
+
+    # Print listen port
+    mov     esi, offset msg_tcp_port
+    call    uart_puts
+    movzx   eax, word ptr [tcp_listen_port]
+    call    shell_print_dec_byte
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Check for received data
+    cmp     dword ptr [tcp_recv_ready], 1
+    jne     .tcp_no_data
+
+    mov     esi, offset msg_tcp_data
+    call    uart_puts
+    mov     eax, [tcp_recv_len]
+    call    shell_print_dec_byte
+    mov     esi, offset msg_tcp_data_len
+    call    uart_puts
+
+    # Print data (limit 64)
+    mov     esi, offset tcp_recv_buf
+    mov     ecx, [tcp_recv_len]
+    cmp     ecx, 64
+    jle     .tcp_print_data
+    mov     ecx, 64
+.tcp_print_data:
+    test    ecx, ecx
+    jz      .tcp_no_data
+    movzx   eax, byte ptr [esi]
+    call    uart_putc
+    inc     esi
+    dec     ecx
+    jmp     .tcp_print_data
+
+.tcp_no_data:
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_netinit:
     mov     esi, offset msg_netinit_start
     call    uart_puts
@@ -2882,6 +2970,8 @@ cmd_udpsend:
     .asciz  "udpsend"
 cmd_udprecv:
     .asciz  "udprecv"
+cmd_tcpstatus:
+    .asciz  "tcpstatus"
 cmd_pciscan:
     .asciz  "pciscan"
 
@@ -2969,8 +3059,36 @@ msg_udprecv_none:
     .ascii  "  No UDP data received"
     .byte   13, 10, 0
 
+msg_tcp_header:
+    .ascii  "TCP Status:"
+    .byte   13, 10, 0
+msg_tcp_closed:
+    .ascii  "  State: CLOSED"
+    .byte   0
+msg_tcp_listen:
+    .ascii  "  State: LISTEN"
+    .byte   0
+msg_tcp_synsent:
+    .ascii  "  State: SYN_SENT"
+    .byte   0
+msg_tcp_synrecv:
+    .ascii  "  State: SYN_RECV"
+    .byte   0
+msg_tcp_established:
+    .ascii  "  State: ESTABLISHED"
+    .byte   0
+msg_tcp_port:
+    .ascii  "  Listen port: "
+    .byte   0
+msg_tcp_data:
+    .ascii  "  Data received ("
+    .byte   0
+msg_tcp_data_len:
+    .ascii  " bytes): "
+    .byte   0
+
 version_text:
-    .ascii  "AI-ASM Kernel v0.41"
+    .ascii  "AI-ASM Kernel v0.42"
     .byte   13, 10, 0
 
 help_text:
@@ -3021,6 +3139,8 @@ help_text:
     .ascii  "  udpsend <ip> <port> <data> - Send UDP packet"
     .byte   13, 10
     .ascii  "  udprecv       - Check received UDP data"
+    .byte   13, 10
+    .ascii  "  tcpstatus     - Show TCP connection state"
     .byte   13, 10
     .ascii  "  netpoll       - Poll for received packets"
     .byte   13, 10, 0
