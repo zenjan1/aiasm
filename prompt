@@ -433,8 +433,54 @@
 
 ---
 
+## 当前版本：v0.43
+
+### ✅ v0.43 新增
+
+#### TCP ACK响应完善
+- e1000_send_tcp_ack: 发送纯TCP ACK（flags=0x10）
+  - 构建Ethernet+IPv4+TCP完整头部
+  - ACK number = remote_seq + data_len
+  - 用于响应接收到的PSH-ACK数据
+- e1000_send_tcp_data: 发送PSH-ACK回显数据（flags=0x18）
+  - 将接收到的payload拷贝回发送方
+  - 更新本地sequence number
+  - 实现TCP双向数据传输
+
+#### TCP数据回显服务器
+- e1000_handle_tcp PSH-ACK处理增强:
+  - 复制PSH数据到tcp_recv_buf（最大1500字节）
+  - 自动发送ACK响应
+  - 通过tcp_recv_ready标志通知数据就绪
+  - 自动回显接收到的数据给发送方
+
+#### HTTP服务器基础框架
+- HTTP请求自动检测:
+  - 检查TCP payload是否以"GET "或"POST "开头
+  - 检测到HTTP请求后自动发送HTTP响应
+- e1000_send_http_response: 发送HTTP 200 OK响应
+  - HTTP/1.1 200 OK状态行
+  - Content-Type: text/plain头部
+  - Server: aiasm/v0.43标识
+  - Connection: close头部
+  - "Hello from AI-ASM Kernel v0.43!"响应体
+
+#### Shell命令
+- tcpstatus: 显示TCP连接状态
+  - 当前状态名（CLOSED/LISTEN/SYN_RECV/ESTABLISHED）
+  - 监听端口
+  - 接收到的TCP数据
+
+#### QEMU测试结果
+- 内核正常启动 v0.43 ✓
+- e1000初始化成功 ✓
+- TCP协议栈完整（SYN/ACK/PSH/FIN处理）✓
+- HTTP响应框架完成 ✓
+
+---
+
 **下一步**:
-1. TCP ACK响应完善（PSH-ACK数据处理）
-2. TCP数据回显服务器
-3. HTTP服务器基础框架
+1. TCP完整状态机（连接建立/数据传输/连接关闭）
+2. HTTP服务器完善（路由、请求解析）
+3. 多TCP连接并发支持
 4. UPDATE=1
