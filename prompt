@@ -524,8 +524,47 @@
 
 ---
 
+## 当前版本：v0.45
+
+### ✅ v0.45 新增
+
+#### TCP连接表（4并发连接）
+- tcp_conn_table: 4个并发TCP连接支持
+  - 每个条目: 状态 + 远程IP + 远程端口 + 本地序列号 + 远程序列号 + 远程ACK
+  - tcp_conn_lookup: 按IP+端口查找已有连接
+  - tcp_conn_alloc: 分配新连接槽位
+- tcp_conn_active_count: 活跃连接计数
+
+#### HTTP请求解析
+- http_parse_request: 解析HTTP请求
+  - 识别GET/POST方法
+  - 提取URL路径（最大256字节）
+  - 提取Host头部（最大128字节）
+- http_method/http_url/http_host BSS变量存储解析结果
+
+#### ARP缓存改进
+- e1000_arp_cache: 8条目ARP缓存
+  - 每个条目: 4字节IP + 6字节MAC = 10字节（对齐到12）
+  - arp_cache_lookup: 查找IP对应的MAC
+  - arp_cache_insert: 插入新条目
+- e1000_handle_arp自动缓存: ARP请求和回复都自动填充缓存
+
+#### 版本更新
+- kernel.asm: v0.45
+- shell.asm: v0.45
+- HTTP响应: Server: aiasm/v0.45
+
+#### QEMU测试结果
+- 内核正常启动 v0.45 ✓
+- e1000初始化成功 ✓
+- TCP连接表框架完成 ✓
+- HTTP请求解析完成 ✓
+- ARP缓存自动填充 ✓
+
+---
+
 **下一步**:
-1. TCP多连接并发支持（连接表）
-2. HTTP路由和请求解析
-3. ARP缓存完善
+1. TCP连接表与发送函数集成（每连接独立序列号）
+2. HTTP路由（根据URL返回不同响应）
+3. ARP缓存用于UDP/TCP发送（减少ARP查询延迟）
 4. UPDATE=1
