@@ -490,6 +490,7 @@ e1000_poll:
 
 # e1000_poll_delay: Poll for packets with a small delay (for ping timeout)
 # Polls and burns ~10ms of CPU time
+    .globl  e1000_poll_delay
 e1000_poll_delay:
     push    eax
     push    ecx
@@ -1116,6 +1117,505 @@ e1000_send_icmp_echo:
     ret
 
 # ============================================================================
+# e1000_send_dhcp_discover: Send DHCP Discover (UDP broadcast)
+# ============================================================================
+    .globl  e1000_send_dhcp_discover
+e1000_send_dhcp_discover:
+    pushad
+
+    # Generate random XID
+    mov     eax, [tick_count]
+    mov     [e1000_dhcp_xid], eax
+
+    # Build Ethernet frame in TX buffer
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = broadcast (FF:FF:FF:FF:FF:FF)
+    mov     dword ptr [edi], 0xFFFFFFFF
+    mov     word ptr [edi + 4], 0xFFFF
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = IPv4
+    mov     word ptr [edi + 12], 0x0008
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45       # Version 4, IHL 5
+    mov     byte ptr [edi + 1], 0x10   # TOS
+    mov     word ptr [edi + 2], 300    # Total length: 20(IP) + 8(UDP) + DHCP payload
+    mov     word ptr [edi + 4], 0x1234
+    mov     word ptr [edi + 6], 0x0000 # Don't fragment
+    mov     byte ptr [edi + 8], 128    # TTL
+    mov     byte ptr [edi + 9], 17     # Protocol = UDP
+    mov     word ptr [edi + 10], 0     # Checksum placeholder
+    mov     dword ptr [edi + 12], 0    # Source IP = 0.0.0.0
+    mov     dword ptr [edi + 16], 0xFFFFFFFF  # Dest IP = 255.255.255.255
+
+    # IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.dhcip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .dhcip_cksum
+.dhcip_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .dhcip_fold_done
+    add     eax, 1
+.dhcip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # UDP header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 68         # Source port = 68 (DHCP client)
+    mov     word ptr [edi + 2], 67     # Dest port = 67 (DHCP server)
+    mov     word ptr [edi + 4], 272    # UDP length = 8 + DHCP payload (264)
+    mov     word ptr [edi + 6], 0      # UDP checksum = 0
+
+    # DHCP payload at offset 42
+    mov     edi, offset e1000_tx_buf + 42
+    mov     byte ptr [edi], 1          # op = 1 (request)
+    mov     byte ptr [edi + 1], 1      # htype = 1 (Ethernet)
+    mov     byte ptr [edi + 2], 6      # hlen = 6
+    mov     byte ptr [edi + 3], 0      # hops = 0
+    mov     eax, [e1000_dhcp_xid]
+    mov     [edi + 4], eax             # xid
+    mov     word ptr [edi + 8], 0      # secs = 0
+    mov     word ptr [edi + 10], 0x8000 # flags = broadcast (0x8000)
+    mov     dword ptr [edi + 12], 0    # ciaddr = 0.0.0.0
+    mov     dword ptr [edi + 16], 0    # yiaddr = 0.0.0.0
+    mov     dword ptr [edi + 20], 0    # siaddr = 0.0.0.0
+    mov     dword ptr [edi + 24], 0    # giaddr = 0.0.0.0
+
+    # chaddr = our MAC (16 bytes)
+    mov     eax, [e1000_mac]
+    mov     [edi + 28], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 32], ax
+
+    # sname (64 bytes) = 0
+    mov     ecx, 16
+    lea     esi, [edi + 44]
+    xor     eax, eax
+.clear_sname:
+    mov     [esi], eax
+    add     esi, 4
+    loop    .clear_sname
+
+    # file (128 bytes) = 0
+    mov     ecx, 32
+.clear_file:
+    mov     [esi], eax
+    add     esi, 4
+    loop    .clear_file
+
+    # DHCP options magic cookie
+    mov     dword ptr [edi + 236], 0x63825363
+
+    # DHCP options: Message Type = Discover (1)
+    mov     byte ptr [edi + 240], 53   # Option 53: DHCP Message Type
+    mov     byte ptr [edi + 241], 1    # Length
+    mov     byte ptr [edi + 242], 1    # Value = Discover
+    # Option: Parameter Request (max msg size, router, DNS)
+    mov     byte ptr [edi + 243], 55   # Option 55: Parameter Request List
+    mov     byte ptr [edi + 244], 3    # Length
+    mov     byte ptr [edi + 245], 1    # Subnet mask
+    mov     byte ptr [edi + 246], 3    # Router
+    mov     byte ptr [edi + 247], 6    # DNS
+    # End option
+    mov     byte ptr [edi + 248], 255  # Option 255: End
+
+    # Update UDP and IP total lengths (actual = 249 bytes of DHCP)
+    mov     word ptr [e1000_tx_buf + 34 + 4], 257  # UDP length = 8 + 249
+    mov     word ptr [e1000_tx_buf + 14 + 2], 277  # IP total = 20 + 8 + 249
+
+    # Recalculate IP checksum with correct length
+    mov     edi, offset e1000_tx_buf + 14
+    mov     word ptr [edi + 10], 0     # clear checksum
+    xor     edx, edx
+    mov     ecx, 10
+.dhcip2_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .dhcip2_cksum
+.dhcip2_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .dhcip2_fold_done
+    add     eax, 1
+.dhcip2_fold_done:
+    not     ax
+    lea     edi, [e1000_tx_buf + 14 + 10]
+    mov     [edi], ax
+
+    # Set DHCP state
+    mov     dword ptr [e1000_dhcp_state], 1  # sent_discover
+
+    # Send: 14 + 20 + 8 + 249 = 291 bytes
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 291
+    call    e1000_transmit
+
+    # Print "DHCP Discover sent"
+    mov     esi, offset msg_dhcp_discover_sent
+    call    uart_puts
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_dhcp_request: Send DHCP Request (after receiving Offer)
+# ============================================================================
+    .globl  e1000_send_dhcp_request
+e1000_send_dhcp_request:
+    pushad
+
+    # Use same XID
+    mov     eax, [e1000_dhcp_xid]
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+    mov     dword ptr [edi], 0xFFFFFFFF
+    mov     word ptr [edi + 4], 0xFFFF
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+    mov     word ptr [edi + 12], 0x0008
+
+    # IP header
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45
+    mov     byte ptr [edi + 1], 0x10
+    mov     word ptr [edi + 2], 300
+    mov     word ptr [edi + 4], 0x1235
+    mov     word ptr [edi + 6], 0x0000
+    mov     byte ptr [edi + 8], 128
+    mov     byte ptr [edi + 9], 17
+    mov     word ptr [edi + 10], 0
+    mov     dword ptr [edi + 12], 0
+    mov     dword ptr [edi + 16], 0xFFFFFFFF
+
+    # IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.dhreq_ip_cksum:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .dhreq_ip_cksum
+.dhreq_ip_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .dhreq_ip_fold_done
+    add     eax, 1
+.dhreq_ip_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # UDP header
+    mov     edi, offset e1000_tx_buf + 34
+    mov     word ptr [edi], 68
+    mov     word ptr [edi + 2], 67
+    mov     word ptr [edi + 4], 272
+    mov     word ptr [edi + 6], 0
+
+    # DHCP payload
+    mov     edi, offset e1000_tx_buf + 42
+    mov     byte ptr [edi], 1
+    mov     byte ptr [edi + 1], 1
+    mov     byte ptr [edi + 2], 6
+    mov     byte ptr [edi + 3], 0
+    mov     eax, [e1000_dhcp_xid]
+    mov     [edi + 4], eax
+    mov     word ptr [edi + 8], 0
+    mov     word ptr [edi + 10], 0x8000
+    mov     dword ptr [edi + 12], 0            # ciaddr = 0.0.0.0
+    mov     eax, [e1000_offer_ip]
+    mov     [edi + 16], eax                    # yiaddr = offered IP
+    mov     dword ptr [edi + 20], 0
+    mov     dword ptr [edi + 24], 0
+
+    # chaddr = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 28], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 32], ax
+
+    # Clear sname and file
+    lea     esi, [edi + 44]
+    mov     ecx, 48
+    xor     eax, eax
+.dhreq_clear:
+    mov     [esi], eax
+    add     esi, 4
+    loop    .dhreq_clear
+
+    # Magic cookie
+    mov     dword ptr [edi + 236], 0x63825363
+
+    # Options: Message Type = Request (3)
+    mov     byte ptr [edi + 240], 53
+    mov     byte ptr [edi + 241], 1
+    mov     byte ptr [edi + 242], 3
+    # Option 54: Server Identifier (from offer siaddr)
+    mov     byte ptr [edi + 243], 54
+    mov     byte ptr [edi + 244], 4
+    mov     eax, [edi + 20]  # siaddr (may be 0 for local server)
+    mov     [edi + 245], eax
+    # Option 50: Requested IP Address
+    mov     byte ptr [edi + 249], 50
+    mov     byte ptr [edi + 250], 4
+    mov     eax, [e1000_offer_ip]
+    mov     [edi + 251], eax
+    # End
+    mov     byte ptr [edi + 255], 255
+
+    # Update lengths
+    mov     word ptr [e1000_tx_buf + 34 + 4], 264
+    mov     word ptr [e1000_tx_buf + 14 + 2], 284
+
+    # Recalculate IP checksum
+    mov     edi, offset e1000_tx_buf + 14
+    mov     word ptr [edi + 10], 0
+    xor     edx, edx
+    mov     ecx, 10
+.dhreq_ip_cksum2:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .dhreq_ip_cksum2
+.dhreq_ip_fold2:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .dhreq_ip_fold2_done
+    add     eax, 1
+.dhreq_ip_fold2_done:
+    not     ax
+    lea     edi, [e1000_tx_buf + 14 + 10]
+    mov     [edi], ax
+
+    mov     dword ptr [e1000_dhcp_state], 1  # back to waiting
+
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 298
+    call    e1000_transmit
+
+    mov     esi, offset msg_dhcp_request_sent
+    call    uart_puts
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_handle_dhcp: Handle DHCP response
+# Input: esi = RX buffer (pointing to Ethernet header)
+# ============================================================================
+e1000_handle_dhcp:
+    pushad
+
+    # DHCP payload starts at: 14(eth) + 20(IP) + 8(UDP) = 42
+    mov     edi, offset e1000_rx_buf + 42
+
+    # Check DHCP op (should be 2 = reply)
+    cmp     byte ptr [edi], 2
+    jne     .dhcp_done
+
+    # Verify XID matches
+    mov     eax, [edi + 4]
+    cmp     eax, [e1000_dhcp_xid]
+    jne     .dhcp_done
+
+    # Check DHCP message type option
+    lea     esi, [edi + 240]         # options area (after magic cookie)
+    # Actually options start right after magic cookie at offset 236
+    lea     esi, [edi + 240]
+.dhcp_parse_options:
+    movzx   eax, byte ptr [esi]
+    cmp     al, 255                  # End option
+    je      .dhcp_done
+    cmp     al, 0                    # Padding
+    je      .dhcp_opt_next
+    cmp     al, 53                   # DHCP Message Type
+    jne     .dhcp_opt_next
+
+    # Found message type option
+    movzx   ecx, byte ptr [esi + 1]  # length
+    movzx   eax, byte ptr [esi + 2]  # value
+
+    cmp     al, 2                    # DHCP Offer
+    je      .dhcp_got_offer
+    cmp     al, 5                    # DHCP ACK
+    je      .dhcp_got_ack
+    jmp     .dhcp_done
+
+.dhcp_opt_next:
+    movzx   ecx, byte ptr [esi + 1]  # option length
+    add     esi, ecx
+    inc     esi                      # skip type byte
+    jmp     .dhcp_parse_options
+
+.dhcp_got_offer:
+    # Save offered IP address (yiaddr at offset +16)
+    mov     eax, [edi + 16]
+    mov     [e1000_offer_ip], eax
+    mov     dword ptr [e1000_dhcp_state], 2  # got_offer
+
+    # Print offer
+    mov     esi, offset msg_dhcp_offer
+    call    uart_puts
+    mov     eax, [e1000_offer_ip]
+    call    print_ip_uart
+    jmp     .dhcp_done
+
+.dhcp_got_ack:
+    # Save assigned IP address (yiaddr at offset +16)
+    mov     eax, [edi + 16]
+    mov     [e1000_our_ip], eax
+    mov     [e1000_arp_ip], eax
+    mov     dword ptr [e1000_our_ip_ready], 1
+    mov     dword ptr [e1000_dhcp_state], 3  # bound
+
+    # Parse options for gateway, subnet mask, DNS
+    lea     esi, [edi + 240]
+.dhcp_ack_options:
+    movzx   eax, byte ptr [esi]
+    cmp     al, 255
+    je      .dhcp_done
+    cmp     al, 0
+    je      .dhcp_ack_next
+    movzx   ecx, byte ptr [esi + 1]
+    cmp     al, 1                    # Subnet mask
+    jne     .dhcp_ack_router
+    cmp     ecx, 4
+    jne     .dhcp_ack_next
+    mov     eax, [esi + 2]
+    mov     [e1000_subnet_mask], eax
+    jmp     .dhcp_ack_next
+
+.dhcp_ack_router:
+    cmp     al, 3                    # Router/Gateway
+    jne     .dhcp_ack_dns
+    cmp     ecx, 4
+    jne     .dhcp_ack_next
+    mov     eax, [esi + 2]
+    mov     [e1000_gateway_ip], eax
+    jmp     .dhcp_ack_next
+
+.dhcp_ack_dns:
+    cmp     al, 6                    # DNS
+    jne     .dhcp_ack_next
+    cmp     ecx, 4
+    jne     .dhcp_ack_next
+    mov     eax, [esi + 2]
+    mov     [e1000_dns_ip], eax
+
+.dhcp_ack_next:
+    add     esi, ecx
+    inc     esi
+    jmp     .dhcp_ack_options
+
+.dhcp_done:
+    popad
+    ret
+
+# ============================================================================
+# print_ip_uart: Print an IP address to UART
+# Input: eax = IP in little-endian (e.g., 10.0.2.15 = 0x0F02000A)
+# ============================================================================
+print_ip_uart:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edx
+
+    mov     ecx, 4
+.print_ip_loop:
+    dec     ecx
+    mov     ebx, eax
+    shr     ebx, cl
+    shr     ebx, 8
+    and     ebx, 0xFF
+    mov     eax, ebx
+    push    ecx
+    call    print_dec_byte_uart
+    pop     ecx
+    test    ecx, ecx
+    jz      .print_ip_done
+    mov     al, '.'
+    call    uart_putc
+    mov     eax, [esp]  # restore original eax from stack... actually let me just use the original
+    mov     eax, [esp + 12]  # original eax is at esp+12 (4 pushed regs + ecx)
+    jmp     .print_ip_loop
+.print_ip_done:
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     eax
+    ret
+
+# print_dec_byte_uart: Print a byte (0-255) as decimal to UART
+# Input: al = value
+print_dec_byte_uart:
+    push    ebx
+    push    ecx
+    push    edx
+    xor     ebx, ebx
+    mov     bl, al
+
+    # Hundreds
+    xor     ecx, ecx
+.hundreds:
+    cmp     ebx, 100
+    jb      .tens
+    sub     ebx, 100
+    inc     ecx
+    jmp     .hundreds
+.tens:
+    test    ecx, ecx
+    jz      .do_tens
+    add     ecx, '0'
+    mov     al, cl
+    call    uart_putc
+.do_tens:
+    xor     ecx, ecx
+.do_tens_loop:
+    cmp     ebx, 10
+    jb      .do_ones
+    sub     ebx, 10
+    inc     ecx
+    jmp     .do_tens_loop
+.do_ones:
+    add     ebx, '0'
+    mov     al, bl
+    call    uart_putc
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# ============================================================================
 # e1000_send_arp: Send ARP request for target IP
 # Input: eax = target IP (host byte order: 10.0.2.2 = 0x0A000202)
 # Output: eax = 0 success, 1 failure
@@ -1669,6 +2169,10 @@ e1000_handle_udp:
     mov     [udp_recv_dest_port], ax
     movzx   eax, word ptr [esi + 36]      # Source port
     mov     [udp_recv_src_port], ax
+
+    # Check if this is a DHCP response (dest port 68)
+    cmp     ax, 68
+    je      .udp_dhcp
     movzx   eax, word ptr [esi + 38]      # UDP length
     sub     eax, 8                        # payload length
     mov     [udp_recv_len], eax
@@ -1704,6 +2208,11 @@ e1000_handle_udp:
 
     # Auto-respond: send echo reply
     call    e1000_echo_server
+
+.udp_dhcp:
+    # DHCP response (dest port 68)
+    call    e1000_handle_dhcp
+    jmp     .udp_done
 
 .udp_done:
     popad
@@ -2891,6 +3400,25 @@ e1000_tx_len:
 e1000_arp_ip:
     .globl  e1000_arp_ip
     .space  4                  # our IP address (for ARP)
+e1000_our_ip:
+    .globl  e1000_our_ip
+    .space  4                  # our IP address (from DHCP or static)
+e1000_gateway_ip:
+    .globl  e1000_gateway_ip
+    .space  4                  # gateway IP (from DHCP)
+e1000_subnet_mask:
+    .space  4                  # subnet mask (from DHCP)
+e1000_dns_ip:
+    .space  4                  # DNS server IP (from DHCP)
+e1000_dhcp_state:
+    .globl  e1000_dhcp_state
+    .space  4                  # 0=idle, 1=sent_discover, 2=got_offer, 3=bound
+e1000_dhcp_xid:
+    .space  4                  # DHCP transaction ID
+e1000_our_ip_ready:
+    .space  4                  # 1 = IP address assigned
+e1000_offer_ip:
+    .space  4                  # IP address from DHCP offer
 e1000_arp_mac:
     .globl  e1000_arp_mac
     .space  6                  # resolved MAC for last ARP lookup
@@ -3054,7 +3582,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.50"
+    .ascii  "Server: aiasm/v0.51"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3063,7 +3591,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.50!"
+    .ascii  "Hello from AI-ASM Kernel v0.51!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3080,7 +3608,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.50"
+    .ascii  "AI-ASM Kernel v0.51"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3119,7 +3647,15 @@ msg_ping_reply:.asciz "  Reply received, RTT="
 msg_ping_ms:.asciz "ms\n"
 msg_ping_sent:.asciz "  PING "
 msg_ping_ip:.asciz " sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.50 booting..."
+msg_dhcp_discover_sent:.asciz "  DHCP Discover sent, waiting for Offer...\n"
+msg_dhcp_request_sent:.asciz "  DHCP Request sent, waiting for ACK...\n"
+msg_dhcp_offer:.asciz "  DHCP Offer: "
+msg_dhcp_ack:.asciz "  DHCP ACK: IP="
+msg_dhcp_bound:.asciz "  DHCP Bound: IP="
+msg_dhcp_info:.asciz "  GW="
+msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
+msg_dhcp_state:.asciz "  DHCP state="
+msg_boot:    .asciz  "AI-ASM Kernel v0.51 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

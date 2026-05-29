@@ -554,6 +554,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_httpserver
 
+    # "dhcp" - run DHCP client
+    mov     edi, offset cmd_dhcp
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_dhcp
+
     # "pciscan" - scan PCI devices
     mov     edi, offset cmd_pciscan
     call    utils_strcmp
@@ -2832,6 +2838,59 @@ shell_print_dec_byte:
     pop     esi
     ret
 
+.do_dhcp:
+    # Run DHCP client: send Discover and wait for Offer/ACK
+    call    e1000_send_dhcp_discover
+
+    # Poll for DHCP responses (~5 seconds)
+    mov     ecx, 50
+.dhcp_poll_loop:
+    call    e1000_poll_delay
+    cmp     dword ptr [e1000_dhcp_state], 3  # bound
+    je      .dhcp_bound
+    cmp     dword ptr [e1000_dhcp_state], 2  # got_offer
+    je      .dhcp_send_request
+    dec     ecx
+    jnz     .dhcp_poll_loop
+    jmp     .dhcp_timeout
+
+.dhcp_send_request:
+    # Got offer, now send DHCP Request
+    call    e1000_send_dhcp_request
+    mov     ecx, 30
+.dhcp_poll2:
+    call    e1000_poll_delay
+    cmp     dword ptr [e1000_dhcp_state], 3  # bound
+    je      .dhcp_bound
+    dec     ecx
+    jnz     .dhcp_poll2
+    jmp     .dhcp_timeout
+
+.dhcp_bound:
+    # Print our assigned IP
+    mov     esi, offset msg_dhcp_bound
+    call    uart_puts
+    mov     eax, [e1000_our_ip]
+    call    shell_print_ip
+    mov     al, 0x0a
+    call    uart_putc
+
+    # Print gateway
+    mov     esi, offset msg_dhcp_gw
+    call    uart_puts
+    mov     eax, [e1000_gateway_ip]
+    call    shell_print_ip
+    mov     al, 0x0a
+    call    uart_putc
+    jmp     .dhcp_done
+
+.dhcp_timeout:
+    mov     esi, offset msg_dhcp_timeout
+    call    uart_puts
+
+.dhcp_done:
+    ret
+
 .do_pciscan:
     # 扫描 PCI 设备并显示 vendor/device ID
     # 使用 BSS 变量存储计数器，避免寄存器冲突
@@ -3075,8 +3134,20 @@ cmd_tcpstatus:
     .asciz  "tcpstatus"
 cmd_httpserver:
     .asciz  "httpserver"
+cmd_dhcp:
+    .asciz  "dhcp"
 cmd_pciscan:
     .asciz  "pciscan"
+
+msg_dhcp_bound:
+    .ascii  "DHCP Bound: IP="
+    .byte   0
+msg_dhcp_gw:
+    .ascii  "  GW="
+    .byte   0
+msg_dhcp_timeout:
+    .ascii  "DHCP timeout, no response\n"
+    .byte   0
 
 msg_pci_device:
     .ascii  "PCI: "
@@ -3267,6 +3338,8 @@ help_text:
     .ascii  "  tcpstatus     - Show TCP connection state"
     .byte   13, 10
     .ascii  "  httpserver    - Toggle HTTP server (on/off/status)"
+    .byte   13, 10
+    .ascii  "  dhcp          - Run DHCP client (auto-configure IP)"
     .byte   13, 10
     .ascii  "  netpoll       - Poll for received packets"
     .byte   13, 10, 0
