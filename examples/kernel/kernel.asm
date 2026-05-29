@@ -3330,9 +3330,8 @@ e1000_echo_server:
 
     # Calculate UDP checksum (with pseudo-header)
     mov     dword ptr [udp_cksum_src], offset e1000_tx_buf + 34
-    mov     ecx, [udp_recv_len]
-    mov     cx, 8
-    add     cx, [udp_recv_len]
+    mov     ecx, 8
+    add     ecx, [udp_recv_len]          # UDP header + payload length
     call    udp_checksum
     mov     [e1000_tx_buf + 34 + 6], ax  # store checksum
 
