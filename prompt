@@ -836,6 +836,29 @@
 
 ---
 
+## 当前版本：v0.60
+
+### ✅ v0.60 更新
+
+#### Shell版本一致性
+- version命令显示"AI-ASM Kernel v0.59"
+- 之前显示过时的v0.50
+
+#### QEMU测试结果
+- 内核正常启动 v0.58 ✓
+- version命令显示v0.59 ✓
+- 所有28个shell命令正常 ✓
+- WASM测试2-11全部通过 ✓
+- WASM应用fibonacci/factorial/multiply/sum通过 ✓
+
+---
+
+**项目完整度统计**:
+- 代码总量: 20个内核文件, ~19,300行汇编
+- Shell命令: 28个
+- WASM指令: 238条
+- 网络协议: ARP/ICMP/UDP/TCP/DHCP/HTTP
+
 **下一步**:
 1. 持续稳定性测试
 2. UPDATE=1
