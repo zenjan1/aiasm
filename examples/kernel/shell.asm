@@ -3736,6 +3736,8 @@ help_text:
     .ascii  "  netpoll       - Poll for received packets"
     .byte   13, 10
     .ascii  "  netstat       - Show TCP connection table"
+    .byte   13, 10
+    .ascii  "  arp           - Show ARP cache table"
     .byte   13, 10, 0
 
 tick_prefix:
