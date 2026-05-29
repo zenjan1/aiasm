@@ -2776,6 +2776,9 @@ shell_print_dec_byte:
     cmp     byte ptr [esi], 0
     je      .netstat_skip
 
+    # Save connection table pointer in ebx
+    mov     ebx, esi
+
     # Print slot index
     mov     eax, ecx
     call    shell_print_dec_byte
@@ -2783,7 +2786,7 @@ shell_print_dec_byte:
     call    uart_putc
 
     # Print state name
-    movzx   eax, byte ptr [esi]
+    movzx   eax, byte ptr [ebx]
     cmp     eax, 1
     je      .net_st_listen
     cmp     eax, 2
@@ -2826,24 +2829,28 @@ shell_print_dec_byte:
     call    uart_putc
     call    uart_putc
 
-    # Print remote IP (at offset +4)
-    lea     eax, [esi + 4]
+    # Print remote IP (from connection entry at ebx+4)
+    mov     eax, [ebx + 4]
     call    print_ip_inline
 
-    # Print colon and remote port (at offset +8)
+    # Print colon and remote port (from connection entry at ebx+8)
     mov     al, ':'
     call    uart_putc
-    movzx   eax, word ptr [esi + 8]
+    movzx   eax, word ptr [ebx + 8]
     call    shell_print_dec_byte
 
     mov     al, 0x0a
     call    uart_putc
     mov     al, 0x0d
     call    uart_putc
+
+    # Restore esi from ebx for next iteration
+    mov     esi, ebx
     jmp     .netstat_next
 
 .netstat_skip:
-    # Print empty slot
+    # Save esi, print empty slot, restore esi
+    push    esi
     mov     eax, ecx
     call    shell_print_dec_byte
     mov     esi, offset msg_net_st_empty
@@ -2852,6 +2859,7 @@ shell_print_dec_byte:
     call    uart_putc
     mov     al, 0x0d
     call    uart_putc
+    pop     esi
 
 .netstat_next:
     add     esi, 24                     # next entry
