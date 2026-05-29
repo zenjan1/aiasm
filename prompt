@@ -741,9 +741,28 @@
 
 ---
 
+## 当前版本：v0.55
+
+### ✅ v0.55 新增
+
+#### netstat shell命令
+- 显示TCP连接表（4槽位）
+- 活跃连接计数（X / 4）
+- 每槽位状态：CLOSED/LISTEN/SYN_SENT/SYN_RECV/ESTABLISHED/FIN_WAIT/CLOSE_WAIT
+- 远程IP:port显示
+- print_ip_inline辅助函数（无尾随点）
+- tcp_conn_active_count导出供shell访问
+
+#### QEMU测试结果
+- 内核正常启动 v0.55 ✓
+- e1000初始化成功 ✓
+- netstat命令正常工作 ✓
+
+---
+
 **下一步**:
-1. 多TCP连接并发端到端测试（验证4槽位可重复使用）
+1. 多TCP连接并发端到端测试（验证4槽位可重复使用 + netstat）
 2. DHCP成功后自动使用动态IP替换硬编码IP
-3. UDP echo server完善
+3. UDP echo server完善（checksum已完成 ✓）
 4. UPDATE=1
 
