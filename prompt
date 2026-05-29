@@ -706,6 +706,23 @@
 
 ---
 
+## 当前版本：v0.52
+
+### ✅ v0.52 新增
+
+#### 动态源IP支持
+- 所有硬编码0x0F02000A (10.0.2.15)替换为[e1000_our_ip]变量
+- 8个发送/校验路径更新：ICMP echo, UDP, TCP synack/tcp_ack/tcp_data/fin_ack/rst, tcp_checksum, udp_checksum
+- 启动时静态初始化：e1000_our_ip = 10.0.2.15, e1000_arp_ip = 10.0.2.15, e1000_our_ip_ready = 1
+- DHCP绑定后将自动覆盖为动态分配的IP
+
+#### QEMU测试结果
+- 内核正常启动 v0.52 ✓
+- e1000初始化成功 ✓
+- 动态IP框架完成 ✓
+
+---
+
 **下一步**:
 1. 多TCP连接并发端到端测试
 2. TCP连接表与e1000_send_synack集成验证
