@@ -2141,13 +2141,30 @@ shell_print_dec_byte:
     mov     al, 0x0a
     call    uart_putc
 
+    # Set our IP for ARP
+    mov     dword ptr [e1000_arp_ip], 0x0F02000A  # 10.0.2.15
+
+    # Send ARP request for target IP
+    mov     eax, [ping_target_ip]
+    call    e1000_send_arp
+
     # Build ICMP Echo Request packet in e1000_tx_buf
     # Ethernet header (14 bytes)
-    # Destination MAC: broadcast (FF:FF:FF:FF:FF:FF) for ARP-less mode
     mov     edi, offset e1000_tx_buf
+
+    # Destination MAC: use resolved ARP MAC, or broadcast if ARP failed
+    test    eax, eax
+    jnz     .ping_use_broadcast
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+    jmp     .ping_mac_set
+.ping_use_broadcast:
     mov     dword ptr [edi], 0xFFFFFFFF
     mov     word ptr [edi + 4], 0xFFFF
 
+.ping_mac_set:
     # Source MAC: our MAC
     mov     eax, [e1000_mac]
     mov     [edi + 6], eax
@@ -2708,7 +2725,7 @@ msg_ping_badip:
     .byte   13, 10, 0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.39"
+    .ascii  "AI-ASM Kernel v0.40"
     .byte   13, 10, 0
 
 help_text:

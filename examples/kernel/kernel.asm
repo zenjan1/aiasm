@@ -420,8 +420,12 @@ e1000_poll:
     # For simplicity, process one packet at a time from the shared buffer
     mov     esi, offset e1000_rx_buf
 
-    # Check Ethernet type (offset 12-13: 0x0800 = IPv4)
-    cmp     word ptr [esi + 12], 0x0008  # little-endian 0x0800
+    # Check Ethernet type
+    cmp     word ptr [esi + 12], 0x0608  # little-endian 0x0806 = ARP
+    je      .poll_arp
+
+    # Check for IPv4 (0x0800)
+    cmp     word ptr [esi + 12], 0x0008
     jne     .poll_next
 
     # Check IP protocol (offset 23: 1 = ICMP)
@@ -430,6 +434,10 @@ e1000_poll:
 
     # This is an ICMP packet, handle it
     call    e1000_handle_icmp
+    jmp     .poll_next
+
+.poll_arp:
+    call    e1000_handle_arp
 
 .poll_next:
     # Reset the descriptor and update RDT
@@ -595,6 +603,186 @@ e1000_handle_icmp:
     popad
     ret
 
+# ============================================================================
+# e1000_handle_arp: Handle ARP packet (request or reply)
+# Input: esi = packet buffer address (RX buffer)
+# ============================================================================
+e1000_handle_arp:
+    pushad
+
+    # Check ARP operation (offset 20: 1=request, 2=reply)
+    cmp     word ptr [esi + 20], 1    # ARP request?
+    je      .handle_arp_request
+    cmp     word ptr [esi + 20], 2    # ARP reply?
+    je      .handle_arp_reply
+    jmp     .arp_done
+
+.handle_arp_request:
+    # Check if request is for our IP
+    mov     eax, [esi + 38]           # target IP in request
+    cmp     eax, [e1000_arp_ip]
+    jne     .arp_done
+
+    # Build ARP reply in TX buffer
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = sender MAC (offset 22)
+    mov     eax, [esi + 22]
+    mov     [edi], eax
+    mov     ax, [esi + 26]
+    mov     [edi + 4], ax
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = ARP (0x0806)
+    mov     word ptr [edi + 12], 0x0608
+
+    # ARP reply header
+    mov     word ptr [edi + 14], 1     # HW type = Ethernet
+    mov     word ptr [edi + 16], 0x0800  # Protocol = IPv4
+    mov     byte ptr [edi + 18], 6     # HW size
+    mov     byte ptr [edi + 19], 4     # Protocol size
+    mov     word ptr [edi + 20], 2     # Operation = reply
+
+    # Sender MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 22], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 26], ax
+
+    # Sender IP = our IP
+    mov     eax, [e1000_arp_ip]
+    mov     [edi + 28], eax
+
+    # Target MAC = request sender MAC (already copied above)
+    mov     eax, [esi + 22]
+    mov     [edi + 32], eax
+    mov     ax, [esi + 26]
+    mov     [edi + 36], ax
+
+    # Target IP = request sender IP (offset 28)
+    mov     eax, [esi + 28]
+    mov     [edi + 38], eax
+
+    # Send ARP reply (42 bytes: 14 eth + 28 ARP)
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 42
+    call    e1000_transmit
+
+    jmp     .arp_done
+
+.handle_arp_reply:
+    # Save sender MAC for our pending request
+    mov     eax, [esi + 22]
+    mov     [e1000_arp_mac], eax
+    mov     ax, [esi + 26]
+    mov     [e1000_arp_mac + 4], ax
+
+    # Signal that ARP reply was received
+    mov     dword ptr [e1000_arp_ready], 1
+
+.arp_done:
+    popad
+    ret
+
+# ============================================================================
+# e1000_send_arp: Send ARP request for target IP
+# Input: eax = target IP (host byte order: 10.0.2.2 = 0x0A000202)
+# Output: eax = 0 success, 1 failure
+# ============================================================================
+    .globl  e1000_send_arp
+e1000_send_arp:
+    pushad
+
+    # Clear ARP ready flag
+    xor     eax, eax
+    mov     [e1000_arp_ready], eax
+
+    # Build Ethernet frame in TX buffer
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = broadcast (FF:FF:FF:FF:FF:FF)
+    mov     dword ptr [edi], 0xFFFFFFFF
+    mov     word ptr [edi + 4], 0xFFFF
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = ARP (0x0806)
+    mov     word ptr [edi + 12], 0x0608
+
+    # ARP request header
+    mov     word ptr [edi + 14], 1     # HW type = Ethernet
+    mov     word ptr [edi + 16], 0x0800  # Protocol = IPv4
+    mov     byte ptr [edi + 18], 6     # HW size
+    mov     byte ptr [edi + 19], 4     # Protocol size
+    mov     word ptr [edi + 20], 1     # Operation = request
+
+    # Sender MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 22], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 26], ax
+
+    # Sender IP = our IP
+    mov     eax, [e1000_arp_ip]
+    mov     [edi + 28], eax
+
+    # Target MAC = 00:00:00:00:00:00 (unknown)
+    xor     eax, eax
+    mov     [edi + 32], eax
+    mov     word ptr [edi + 36], ax
+
+    # Target IP = target IP (from eax argument, restore from stack)
+    # We pushedad, so eax is at [esp]... restore original eax
+    mov     eax, [esp + 36]  # saved eax before pushad
+    mov     [edi + 38], eax
+
+    # Send ARP request (42 bytes)
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 42
+    call    e1000_transmit
+    test    eax, eax
+    jnz     .arp_send_fail
+
+    # Wait for ARP reply (poll up to 2 seconds)
+    mov     edx, 200           # 200 * 10ms = 2s
+.arp_wait_loop:
+    # Small delay
+    mov     ecx, 500000
+.arp_delay:
+    dec     ecx
+    jnz     .arp_delay
+
+    # Poll for received packets
+    call    e1000_poll
+
+    # Check if ARP reply arrived
+    cmp     dword ptr [e1000_arp_ready], 1
+    je      .arp_resolved
+
+    dec     edx
+    jnz     .arp_wait_loop
+
+.arp_timeout:
+    mov     eax, 1             # timeout
+    jmp     .arp_send_done
+
+.arp_resolved:
+    xor     eax, eax           # success
+
+.arp_send_fail:
+.arp_send_done:
+    popad
+    ret
+
 esi_temp:
     .space  4
 
@@ -691,6 +879,15 @@ e1000_rx_idx:
     .space  4                  # current RX descriptor index
 e1000_tx_len:
     .space  4                  # last TX length
+e1000_arp_ip:
+    .globl  e1000_arp_ip
+    .space  4                  # our IP address (for ARP)
+e1000_arp_mac:
+    .globl  e1000_arp_mac
+    .space  6                  # resolved MAC for last ARP lookup
+e1000_arp_ready:
+    .globl  e1000_arp_ready
+    .space  4                  # 1 = ARP reply received
 
     .section .rodata
 msg_bar:    .asciz  "BAR0 = "
@@ -702,7 +899,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.39 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.40 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
