@@ -484,3 +484,48 @@
 2. HTTP服务器完善（路由、请求解析）
 3. 多TCP连接并发支持
 4. UPDATE=1
+
+---
+
+## 当前版本：v0.44
+
+### ✅ v0.44 新增
+
+#### TCP完整状态机
+- RST处理:
+  - 检测接收到的RST标志，立即关闭连接
+  - 向连接到非监听端口的SYN发送RST响应
+  - tcp_rst_received标志通知shell
+- FIN-ACK处理:
+  - e1000_send_fin_ack: 发送FIN-ACK（flags=0x11）用于优雅关闭
+  - 检测接收到的FIN，发送FIN-ACK响应
+  - tcp_fin_received/tcp_fin_sent标志跟踪
+- 连接计数: tcp_conn_count追踪总连接数
+
+#### HTTP服务器完善
+- HTTP响应添加Content-Length头部
+- httpserver shell命令:
+  - "httpserver on" - 启用HTTP服务器
+  - "httpserver off" - 禁用HTTP服务器
+  - "httpserver" - 显示当前状态
+  - 显示连接统计（RST/FIN接收）
+- tcp_http_enabled变量控制HTTP响应开关
+
+#### 代码统计
+- kernel.asm: +180行（RST/FIN-ACK/连接追踪）
+- shell.asm: +90行（httpserver命令）
+- 版本更新: kernel v0.44, shell v0.44
+
+#### QEMU测试结果
+- 内核正常启动 v0.44 ✓
+- e1000初始化成功 ✓
+- TCP状态机完整（RST/FIN-ACK/连接追踪）✓
+- httpserver命令正常工作 ✓
+
+---
+
+**下一步**:
+1. TCP多连接并发支持（连接表）
+2. HTTP路由和请求解析
+3. ARP缓存完善
+4. UPDATE=1
