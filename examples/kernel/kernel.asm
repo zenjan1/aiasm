@@ -3566,6 +3566,7 @@ tcp_conn_table:
 # conn[entry]: state at +0 (byte), remote_ip at +4, remote_port at +8 (word)
 # local_seq at +12, remote_seq at +16, remote_ack at +20
 tcp_conn_active_count:
+    .globl  tcp_conn_active_count
     .space  4                  # number of active connections
 
 # TCP/UDP checksum workspace
@@ -3660,7 +3661,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.54"
+    .ascii  "Server: aiasm/v0.55"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3669,7 +3670,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.54!"
+    .ascii  "Hello from AI-ASM Kernel v0.55!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3686,7 +3687,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.54"
+    .ascii  "AI-ASM Kernel v0.55"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3733,7 +3734,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.54 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.55 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

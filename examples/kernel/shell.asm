@@ -548,6 +548,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_tcpstatus
 
+    # "netstat" - show TCP connection table
+    mov     edi, offset cmd_netstat
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_netstat
+
     # "httpserver" - toggle HTTP server
     mov     edi, offset cmd_httpserver
     call    utils_strcmp
@@ -2098,6 +2104,33 @@ shell_print_ip:
     # Remove trailing dot by overwriting with newline
     ret
 
+# print_ip_inline: Print IP from pointer, no trailing dot
+# Input: eax = pointer to 4-byte IP address
+print_ip_inline:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edx
+    mov     ebx, [eax]              # load IP
+    mov     ecx, 3
+.print_octet2:
+    mov     eax, ebx
+    and     eax, 0xFF
+    call    shell_print_dec_byte
+    mov     al, '.'
+    call    uart_putc
+    shr     ebx, 8
+    loop    .print_octet2
+    # Last octet without dot
+    mov     eax, ebx
+    and     eax, 0xFF
+    call    shell_print_dec_byte
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     eax
+    ret
+
 # shell_parse_dec: Parse decimal number from string at esi
 # Input: esi = pointer to digits
 # Output: ax = value, esi advanced past digits
@@ -2644,6 +2677,127 @@ shell_print_dec_byte:
     pop     esi
     ret
 
+.do_netstat:
+    # Print header
+    mov     esi, offset msg_netstat_header
+    call    uart_puts
+
+    # Print active connection count
+    mov     eax, [tcp_conn_active_count]
+    mov     esi, offset msg_netstat_active
+    call    uart_puts
+    call    shell_print_dec_byte
+    mov     esi, offset msg_netstat_of
+    call    uart_puts
+    mov     eax, 4
+    call    shell_print_dec_byte
+    mov     esi, offset msg_netstat_conns
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Print connection table header
+    mov     esi, offset msg_netstat_tbl_hdr
+    call    uart_puts
+
+    # Walk connection table
+    xor     ecx, ecx                     # index = 0
+    mov     esi, offset tcp_conn_table
+.netstat_loop:
+    cmp     ecx, 4
+    jge     .netstat_done
+
+    # Check if slot is active (state != 0)
+    cmp     byte ptr [esi], 0
+    je      .netstat_skip
+
+    # Print slot index
+    mov     eax, ecx
+    call    shell_print_dec_byte
+    mov     al, ' '
+    call    uart_putc
+
+    # Print state name
+    movzx   eax, byte ptr [esi]
+    cmp     eax, 1
+    je      .net_st_listen
+    cmp     eax, 2
+    je      .net_st_synsent
+    cmp     eax, 3
+    je      .net_st_synrecv
+    cmp     eax, 4
+    je      .net_st_established
+    cmp     eax, 5
+    je      .net_st_finwait
+    cmp     eax, 6
+    je      .net_st_closewait
+    mov     edi, offset msg_net_st_closed
+    jmp     .net_st_print
+.net_st_listen:
+    mov     edi, offset msg_net_st_listen
+    jmp     .net_st_print
+.net_st_synsent:
+    mov     edi, offset msg_net_st_synsent
+    jmp     .net_st_print
+.net_st_synrecv:
+    mov     edi, offset msg_net_st_synrecv
+    jmp     .net_st_print
+.net_st_established:
+    mov     edi, offset msg_net_st_established
+    jmp     .net_st_print
+.net_st_finwait:
+    mov     edi, offset msg_net_st_finwait
+    jmp     .net_st_print
+.net_st_closewait:
+    mov     edi, offset msg_net_st_closewait
+    jmp     .net_st_print
+
+.net_st_print:
+    mov     esi, edi
+    call    uart_puts
+
+    # Pad with spaces
+    mov     al, ' '
+    call    uart_putc
+    call    uart_putc
+
+    # Print remote IP (at offset +4)
+    lea     eax, [esi + 4]
+    call    print_ip_inline
+
+    # Print colon and remote port (at offset +8)
+    mov     al, ':'
+    call    uart_putc
+    movzx   eax, word ptr [esi + 8]
+    call    shell_print_dec_byte
+
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    jmp     .netstat_next
+
+.netstat_skip:
+    # Print empty slot
+    mov     eax, ecx
+    call    shell_print_dec_byte
+    mov     esi, offset msg_net_st_empty
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+.netstat_next:
+    add     esi, 24                     # next entry
+    inc     ecx
+    jmp     .netstat_loop
+
+.netstat_done:
+    ret
+
 .do_httpserver:
     # Check for "on" or "off" argument after "httpserver" (10 chars)
     lea     esi, [shell_cmd_buf + 10]
@@ -3132,6 +3286,8 @@ cmd_udprecv:
     .asciz  "udprecv"
 cmd_tcpstatus:
     .asciz  "tcpstatus"
+cmd_netstat:
+    .asciz  "netstat"
 cmd_httpserver:
     .asciz  "httpserver"
 cmd_dhcp:
@@ -3269,6 +3425,48 @@ msg_tcp_rst_recv:
 msg_tcp_fin_recv:
     .ascii  "  FIN received"
     .byte   0
+
+# netstat messages
+msg_netstat_header:
+    .ascii  "Network Status:"
+    .byte   13, 10, 0
+msg_netstat_active:
+    .ascii  "  Active: "
+    .byte   0
+msg_netstat_of:
+    .ascii  " / "
+    .byte   0
+msg_netstat_conns:
+    .ascii  " connections"
+    .byte   13, 10, 0
+msg_netstat_tbl_hdr:
+    .ascii  "  TCP Connection Table:"
+    .byte   13, 10, 0
+msg_net_st_closed:
+    .ascii  "CLOSED       "
+    .byte   0
+msg_net_st_listen:
+    .ascii  "LISTEN       "
+    .byte   0
+msg_net_st_synsent:
+    .ascii  "SYN_SENT     "
+    .byte   0
+msg_net_st_synrecv:
+    .ascii  "SYN_RECV     "
+    .byte   0
+msg_net_st_established:
+    .ascii  "ESTABLISHED  "
+    .byte   0
+msg_net_st_finwait:
+    .ascii  "FIN_WAIT     "
+    .byte   0
+msg_net_st_closewait:
+    .ascii  "CLOSE_WAIT   "
+    .byte   0
+msg_net_st_empty:
+    .ascii  "(empty)"
+    .byte   0
+
 msg_http_on:
     .ascii  "HTTP server enabled"
     .byte   0
@@ -3342,6 +3540,8 @@ help_text:
     .ascii  "  dhcp          - Run DHCP client (auto-configure IP)"
     .byte   13, 10
     .ascii  "  netpoll       - Poll for received packets"
+    .byte   13, 10
+    .ascii  "  netstat       - Show TCP connection table"
     .byte   13, 10, 0
 
 tick_prefix:
