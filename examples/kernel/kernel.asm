@@ -3548,8 +3548,10 @@ udp_recv_ready:
 
 # ARP cache (8 entries, each 12 bytes: 4 IP + 6 MAC + 1 valid + 1 padding)
 e1000_arp_cache:
+    .globl  e1000_arp_cache
     .space  96                 # 8 * 12 bytes
 e1000_arp_cache_size:
+    .globl  e1000_arp_cache_size
     .space  4                  # number of valid entries
 
 # TCP connection table (4 concurrent connections)

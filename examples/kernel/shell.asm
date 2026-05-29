@@ -554,6 +554,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_netstat
 
+    # "arp" - show ARP cache
+    mov     edi, offset cmd_arp
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_arp
+
     # "httpserver" - toggle HTTP server
     mov     edi, offset cmd_httpserver
     call    utils_strcmp
@@ -2131,6 +2137,63 @@ print_ip_inline:
     pop     eax
     ret
 
+# print_ip_arp: Print IP address from value in eax
+# Input: eax = IP address (little-endian)
+print_ip_arp:
+    push    ebx
+    push    ecx
+    push    edx
+    mov     ebx, eax
+    mov     ecx, 3
+.pia_loop:
+    mov     eax, ebx
+    and     eax, 0xFF
+    call    shell_print_dec_byte
+    mov     al, '.'
+    call    uart_putc
+    shr     ebx, 8
+    loop    .pia_loop
+    # Last octet without dot
+    mov     eax, ebx
+    and     eax, 0xFF
+    call    shell_print_dec_byte
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# print_hex_byte: Print byte in eax as 2 hex chars
+# Input: eax = byte value (0-255)
+print_hex_byte:
+    push    eax
+    push    ebx
+    mov     ebx, eax
+    # High nibble
+    mov     eax, ebx
+    shr     eax, 4
+    cmp     al, 10
+    jl      .ph_high_dec
+    add     al, 'A' - 10
+    jmp     .ph_high_done
+.ph_high_dec:
+    add     al, '0'
+.ph_high_done:
+    call    uart_putc
+    # Low nibble
+    mov     eax, ebx
+    and     eax, 0xF
+    cmp     al, 10
+    jl      .ph_low_dec
+    add     al, 'A' - 10
+    jmp     .ph_low_done
+.ph_low_dec:
+    add     al, '0'
+.ph_low_done:
+    call    uart_putc
+    pop     ebx
+    pop     eax
+    ret
+
 # shell_parse_dec: Parse decimal number from string at esi
 # Input: esi = pointer to digits
 # Output: ax = value, esi advanced past digits
@@ -2798,6 +2861,108 @@ shell_print_dec_byte:
 .netstat_done:
     ret
 
+.do_arp:
+    # Print header
+    mov     esi, offset msg_arp_header
+    call    uart_puts
+
+    # Print ARP cache size
+    mov     eax, [e1000_arp_cache_size]
+    mov     esi, offset msg_arp_entries
+    call    uart_puts
+    call    shell_print_dec_byte
+    mov     esi, offset msg_arp_of
+    call    uart_puts
+    mov     eax, 8
+    call    shell_print_dec_byte
+    mov     esi, offset msg_arp_entries2
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Print table header
+    mov     esi, offset msg_arp_tbl_hdr
+    call    uart_puts
+
+    # Walk ARP cache
+    xor     ecx, ecx                     # index = 0
+    mov     esi, offset e1000_arp_cache
+.arp_loop:
+    cmp     ecx, 8
+    jge     .arp_done
+
+    # Check if slot is active (IP != 0)
+    cmp     dword ptr [esi], 0
+    je      .arp_skip
+
+    # Print slot index
+    mov     eax, ecx
+    call    shell_print_dec_byte
+    mov     al, ' '
+    call    uart_putc
+
+    # Print IP address
+    mov     eax, [esi]
+    call    print_ip_arp
+
+    # Pad
+    mov     al, ' '
+    call    uart_putc
+    mov     al, ' '
+    call    uart_putc
+
+    # Print MAC address
+    movzx   eax, byte ptr [esi + 4]
+    call    print_hex_byte
+    mov     al, ':'
+    call    uart_putc
+    movzx   eax, byte ptr [esi + 5]
+    call    print_hex_byte
+    mov     al, ':'
+    call    uart_putc
+    movzx   eax, byte ptr [esi + 6]
+    call    print_hex_byte
+    mov     al, ':'
+    call    uart_putc
+    movzx   eax, byte ptr [esi + 7]
+    call    print_hex_byte
+    mov     al, ':'
+    call    uart_putc
+    movzx   eax, byte ptr [esi + 8]
+    call    print_hex_byte
+    mov     al, ':'
+    call    uart_putc
+    movzx   eax, byte ptr [esi + 9]
+    call    print_hex_byte
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    jmp     .arp_next
+
+.arp_skip:
+    # Print empty slot (save esi first)
+    push    esi
+    mov     eax, ecx
+    call    shell_print_dec_byte
+    mov     esi, offset msg_arp_empty
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     esi
+
+.arp_next:
+    add     esi, 12                     # next entry
+    inc     ecx
+    jmp     .arp_loop
+
+.arp_done:
+    ret
+
 .do_httpserver:
     # Check for "on" or "off" argument after "httpserver" (10 chars)
     lea     esi, [shell_cmd_buf + 10]
@@ -3294,6 +3459,27 @@ cmd_dhcp:
     .asciz  "dhcp"
 cmd_pciscan:
     .asciz  "pciscan"
+cmd_arp:
+    .asciz  "arp"
+
+msg_arp_header:
+    .ascii  "ARP Cache:"
+    .byte   13, 10, 0
+msg_arp_entries:
+    .ascii  "  Entries: "
+    .byte   0
+msg_arp_of:
+    .ascii  " of "
+    .byte   0
+msg_arp_entries2:
+    .ascii  " slots used"
+    .byte   13, 10, 0
+msg_arp_tbl_hdr:
+    .ascii  "Slot IP              MAC"
+    .byte   13, 10, 0
+msg_arp_empty:
+    .ascii  "  (empty)"
+    .byte   0
 
 msg_dhcp_bound:
     .ascii  "DHCP Bound: IP="
