@@ -3314,7 +3314,7 @@ e1000_echo_server:
     mov     [edi], ax
     mov     ax, [esi + 38]              # Same UDP length
     mov     [edi + 4], ax
-    mov     word ptr [edi + 6], 0        # Checksum = 0 (optional)
+    mov     word ptr [edi + 6], 0        # Checksum (placeholder)
 
     # Copy payload (same as received)
     mov     edi, offset e1000_tx_buf + 42
@@ -3327,6 +3327,14 @@ e1000_echo_server:
     pop     ecx
     and     ecx, 3
     rep     movsb
+
+    # Calculate UDP checksum (with pseudo-header)
+    mov     dword ptr [udp_cksum_src], offset e1000_tx_buf + 34
+    mov     ecx, [udp_recv_len]
+    mov     cx, 8
+    add     cx, [udp_recv_len]
+    call    udp_checksum
+    mov     [e1000_tx_buf + 34 + 6], ax  # store checksum
 
     # Send packet
     mov     eax, [udp_recv_len]
@@ -3569,6 +3577,8 @@ udp_cksum_buf:
     .space  1548               # workspace for UDP checksum (pseudo-header + segment)
 udp_cksum_src:
     .space  4                  # source pointer for UDP checksum
+udp_cksum_len:
+    .space  2                  # UDP segment length for checksum
 
 # TCP state
 tcp_state:
@@ -3650,7 +3660,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.53"
+    .ascii  "Server: aiasm/v0.54"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3659,7 +3669,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.53!"
+    .ascii  "Hello from AI-ASM Kernel v0.54!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3676,7 +3686,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.53"
+    .ascii  "AI-ASM Kernel v0.54"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3723,7 +3733,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.53 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.54 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
