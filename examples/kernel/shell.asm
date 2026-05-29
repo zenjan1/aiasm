@@ -28,6 +28,16 @@ shell_date_ticks:
 ping_target_ip:
     .space  4                   # target IP for ping command
 
+# UDP send parameters
+udp_send_dst_ip_tmp:
+    .space  4
+udp_send_dst_port_tmp:
+    .space  2
+udp_send_data_len_tmp:
+    .space  4
+udp_send_data_buf:
+    .space  512
+
 # PCI 扫描计数器
 pciscan_bus:
     .space  4
@@ -519,6 +529,18 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_ping
+
+    # "udpsend" - send UDP packet
+    mov     edi, offset cmd_udpsend
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_udpsend
+
+    # "udprecv" - check received UDP data
+    mov     edi, offset cmd_udprecv
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_udprecv
 
     # "pciscan" - scan PCI devices
     mov     edi, offset cmd_pciscan
@@ -2058,6 +2080,42 @@ shell_print_ip:
     # Remove trailing dot by overwriting with newline
     ret
 
+# shell_parse_dec: Parse decimal number from string at esi
+# Input: esi = pointer to digits
+# Output: ax = value, esi advanced past digits
+shell_parse_dec:
+    push    edx
+    push    ecx
+    xor     edx, edx             # result
+    xor     ecx, ecx             # digit count
+
+.parse_loop:
+    movzx   eax, byte ptr [esi]
+    cmp     al, '0'
+    jb      .done_dec
+    cmp     al, '9'
+    ja      .done_dec
+    sub     al, '0'
+    imul    edx, edx, 10
+    add     edx, eax
+    inc     esi
+    inc     ecx
+    jmp     .parse_loop
+
+.done_dec:
+    test    ecx, ecx
+    jz      .bad_dec
+    mov     ax, dx
+    pop     ecx
+    pop     edx
+    ret
+
+.bad_dec:
+    xor     ax, ax
+    pop     ecx
+    pop     edx
+    ret
+
 # shell_print_dec_byte: Print a byte (0-255) as decimal
 # Input: eax (low byte = value)
 shell_print_dec_byte:
@@ -2317,6 +2375,170 @@ shell_print_dec_byte:
     call    uart_putc
     mov     al, 0x0d
     call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_udpsend:
+    # Parse "udpsend <ip> <port> <data>"
+    lea     esi, [shell_cmd_buf + 8]  # skip "udpsend"
+
+    # Skip space
+.skip_space1:
+    cmp     byte ptr [esi], ' '
+    jne     .udpsend_bad
+    inc     esi
+    jmp     .skip_space1
+
+    # Parse IP
+    call    shell_parse_ip
+    test    eax, eax
+    jz      .udpsend_bad
+    mov     [udp_send_dst_ip_tmp], eax
+
+    # Skip space to port
+.skip_space2:
+    cmp     byte ptr [esi], ' '
+    jne     .parse_port
+    inc     esi
+    jmp     .skip_space2
+
+    # Parse port number
+.parse_port:
+    call    shell_parse_dec
+    mov     [udp_send_dst_port_tmp], ax
+
+    # Skip space to data
+.skip_space3:
+    cmp     byte ptr [esi], ' '
+    jne     .prep_send
+    inc     esi
+    jmp     .skip_space3
+
+.prep_send:
+    # Our IP for ARP
+    mov     dword ptr [e1000_arp_ip], 0x0F02000A  # 10.0.2.15
+
+    # Send ARP for target IP
+    mov     eax, [udp_send_dst_ip_tmp]
+    call    e1000_send_arp
+
+    # Calculate data length
+    mov     edi, esi
+    call    utils_strlen
+    mov     [udp_send_data_len_tmp], eax   # save length
+
+    # Copy data to send buffer
+    mov     edi, offset udp_send_data_buf
+    mov     ecx, eax
+    push    esi
+    push    edi
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     edi
+    pop     esi
+    mov     ecx, eax
+    and     ecx, 3
+    rep     movsb
+
+    # Send UDP packet
+    mov     eax, [udp_send_dst_ip_tmp]  # dest IP
+    mov     cx, [udp_send_dst_port_tmp]  # dest port
+    mov     dx, 5000                     # src port
+    mov     esi, offset udp_send_data_buf
+    mov     ecx, [udp_send_data_len_tmp]
+    call    e1000_send_udp
+
+    mov     esi, offset msg_udpsend_ok
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.udpsend_bad:
+    mov     esi, offset msg_udpsend_bad
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_udprecv:
+    # Check if UDP data received
+    cmp     dword ptr [udp_recv_ready], 1
+    jne     .udprecv_none
+
+    mov     esi, offset msg_udprecv_header
+    call    uart_puts
+
+    # Print source IP
+    mov     eax, [udp_recv_src_ip]
+    call    shell_print_ip
+    mov     al, ':'
+    call    uart_putc
+
+    # Print source port
+    movzx   eax, word ptr [udp_recv_src_port]
+    call    shell_print_dec_byte
+    mov     esi, offset msg_udprecv_len
+    call    uart_puts
+
+    # Print length
+    mov     eax, [udp_recv_len]
+    call    shell_print_dec_byte
+
+    mov     esi, offset msg_udprecv_data
+    call    uart_puts
+
+    # Print data (limit to 64 chars)
+    mov     esi, offset udp_recv_buf
+    mov     ecx, [udp_recv_len]
+    cmp     ecx, 64
+    jle     .udprecv_print
+    mov     ecx, 64
+.udprecv_print:
+    mov     edx, ecx
+.udprecv_loop:
+    test    ecx, ecx
+    jz      .udprecv_done
+    movzx   eax, byte ptr [esi]
+    call    uart_putc
+    inc     esi
+    dec     ecx
+    jmp     .udprecv_loop
+
+.udprecv_done:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # Clear ready flag
+    xor     eax, eax
+    mov     [udp_recv_ready], eax
+    jmp     .udprecv_exit
+
+.udprecv_none:
+    mov     esi, offset msg_udprecv_none
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+.udprecv_exit:
     pop     ecx
     pop     edi
     pop     esi
@@ -2656,6 +2878,10 @@ cmd_netpoll:
     .asciz  "netpoll"
 cmd_ping:
     .asciz  "ping"
+cmd_udpsend:
+    .asciz  "udpsend"
+cmd_udprecv:
+    .asciz  "udprecv"
 cmd_pciscan:
     .asciz  "pciscan"
 
@@ -2724,8 +2950,27 @@ msg_ping_badip:
     .ascii  "  Usage: ping <ip> (e.g. ping 10.0.2.2)"
     .byte   13, 10, 0
 
+msg_udpsend_ok:
+    .ascii  "  UDP packet sent"
+    .byte   13, 10, 0
+msg_udpsend_bad:
+    .ascii  "  Usage: udpsend <ip> <port> <data>"
+    .byte   13, 10, 0
+msg_udprecv_header:
+    .ascii  "UDP from "
+    .byte   0
+msg_udprecv_len:
+    .ascii  " len="
+    .byte   0
+msg_udprecv_data:
+    .ascii  ": "
+    .byte   0
+msg_udprecv_none:
+    .ascii  "  No UDP data received"
+    .byte   13, 10, 0
+
 version_text:
-    .ascii  "AI-ASM Kernel v0.40"
+    .ascii  "AI-ASM Kernel v0.41"
     .byte   13, 10, 0
 
 help_text:
@@ -2772,6 +3017,10 @@ help_text:
     .ascii  "  wasmapp <app> - Run WASM app (uptime, sum, hello, fibonacci, factorial, multiply, countdown)"
     .byte   13, 10
     .ascii  "  ping <ip>     - Send ICMP Echo Request"
+    .byte   13, 10
+    .ascii  "  udpsend <ip> <port> <data> - Send UDP packet"
+    .byte   13, 10
+    .ascii  "  udprecv       - Check received UDP data"
     .byte   13, 10
     .ascii  "  netpoll       - Poll for received packets"
     .byte   13, 10, 0

@@ -83,6 +83,25 @@ _start:
     mov     [e1000_mmio_base], edx
     call    e1000_init
 
+    # Read IRQ line from PCI config (offset 60)
+    mov     dx, 0xCF8
+    mov     eax, 0x8000183C      # bus=0, dev=3, func=0, offset=0x3C
+    out     dx, eax
+    mov     dx, 0xCFC
+    in      eax, dx
+    and     eax, 0xFF            # IRQ line in low byte
+    mov     [e1000_irq_line], eax
+
+    # Register e1000 IRQ handler (vector = IRQ + 32)
+    add     eax, 32
+    mov     edi, eax
+    mov     eax, offset e1000_irq_handler
+    call    idt_set_gate
+
+    # Enable e1000 interrupts (set IMS register)
+    mov     ebx, [e1000_mmio_base]
+    mov     dword ptr [ebx + 0x00D0], 0x0000009D  # RX|RXO|RXDMT0|LSC|TXDW
+
     jmp     .net_done
 
 .net_found_virtio:
@@ -428,12 +447,18 @@ e1000_poll:
     cmp     word ptr [esi + 12], 0x0008
     jne     .poll_next
 
-    # Check IP protocol (offset 23: 1 = ICMP)
-    cmp     byte ptr [esi + 23], 1
+    # Check IP protocol (offset 23)
+    cmp     byte ptr [esi + 23], 17        # UDP
+    je      .poll_udp
+    cmp     byte ptr [esi + 23], 1         # ICMP
     jne     .poll_next
 
     # This is an ICMP packet, handle it
     call    e1000_handle_icmp
+    jmp     .poll_next
+
+.poll_udp:
+    call    e1000_handle_udp
     jmp     .poll_next
 
 .poll_arp:
@@ -783,6 +808,197 @@ e1000_send_arp:
     popad
     ret
 
+# ============================================================================
+# e1000_send_udp: Send a UDP packet
+# Input: eax = dest IP, cx = dest port, dx = src port, esi = data, ecx_data = len
+# Uses global e1000_tx_buf for packet construction
+# ============================================================================
+    .globl  e1000_send_udp
+e1000_send_udp:
+    pushad
+
+    # Save parameters
+    mov     [udp_send_dest_ip], eax
+    mov     [udp_send_dest_port], cx
+    mov     [udp_send_src_port], dx
+    mov     [udp_send_data_ptr], esi
+    mov     [udp_send_data_len], ecx
+
+    # Build Ethernet frame
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = gateway MAC (10.0.2.2 gateway, use resolved ARP MAC)
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = IPv4
+    mov     word ptr [edi + 12], 0x0800
+
+    # IP header (20 bytes) at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45          # Version=4, IHL=5
+    mov     byte ptr [edi + 1], 0         # TOS
+    mov     ax, [udp_send_data_len]
+    add     ax, 28                        # IP(20) + UDP(8)
+    mov     [edi + 2], ax                 # Total length
+    mov     word ptr [edi + 4], 0x1234    # Identification
+    mov     word ptr [edi + 6], 0x4000    # Flags: Don't fragment
+    mov     byte ptr [edi + 8], 64        # TTL
+    mov     byte ptr [edi + 9], 17        # Protocol = UDP
+    mov     word ptr [edi + 10], 0        # Checksum (to calc)
+
+    # Source IP: 10.0.2.15
+    mov     dword ptr [edi + 12], 0x0F02000A
+
+    # Dest IP
+    mov     eax, [udp_send_dest_ip]
+    mov     [edi + 16], eax
+
+    # Calculate IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.ip_cksum_loop:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .ip_cksum_loop
+.fold_ip_cksum:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .ip_cksum_fold_done
+    add     eax, 1
+.ip_cksum_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # UDP header (8 bytes) at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     ax, [udp_send_src_port]
+    mov     [edi], ax                     # Source port
+    mov     ax, [udp_send_dest_port]
+    mov     [edi + 2], ax                 # Dest port
+    mov     ax, [udp_send_data_len]
+    add     ax, 8                         # UDP length
+    mov     [edi + 4], ax                 # UDP length
+    mov     word ptr [edi + 6], 0         # UDP checksum (optional, set to 0)
+
+    # Copy payload at offset 42
+    mov     edi, offset e1000_tx_buf + 42
+    mov     esi, [udp_send_data_ptr]
+    mov     ecx, [udp_send_data_len]
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Calculate total packet length
+    mov     eax, [udp_send_data_len]
+    add     eax, 42                       # 14(eth) + 20(IP) + 8(UDP)
+
+    # Send
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, eax
+    call    e1000_transmit
+
+    popad
+    ret
+
+# ============================================================================
+# e1000_handle_udp: Handle received UDP packet
+# Input: esi = RX buffer (pointing to Ethernet header)
+# ============================================================================
+e1000_handle_udp:
+    pushad
+
+    # Extract UDP ports
+    # IP header starts at offset 14
+    movzx   eax, byte ptr [esi + 23]     # Protocol
+    cmp     al, 17                        # UDP
+    jne     .udp_done
+
+    # UDP header at offset 14+20=34
+    movzx   eax, word ptr [esi + 34]      # Dest port
+    mov     [udp_recv_dest_port], ax
+    movzx   eax, word ptr [esi + 36]      # Source port
+    mov     [udp_recv_src_port], ax
+    movzx   eax, word ptr [esi + 38]      # UDP length
+    sub     eax, 8                        # payload length
+    mov     [udp_recv_len], eax
+
+    # Copy payload to udp_recv_buf
+    mov     ecx, eax
+    cmp     ecx, 1500                     # max buffer size
+    jg      .udp_done
+    mov     esi, offset e1000_rx_buf + 42
+    mov     edi, offset udp_recv_buf
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Save source IP
+    mov     eax, [esi - 8]               # src IP from IP header (esi was at 34+eth=48, need IP at 14+12=26)
+    # Actually: esi points to RX buf start, IP src is at offset 26
+    mov     esi, offset e1000_rx_buf
+    mov     eax, [esi + 26]
+    mov     [udp_recv_src_ip], eax
+
+    # Signal data available
+    mov     dword ptr [udp_recv_ready], 1
+
+.udp_done:
+    popad
+    ret
+
+# ============================================================================
+# e1000_irq_handler: e1000 NIC interrupt handler
+# Called on NIC IRQ line
+# ============================================================================
+    .globl  e1000_irq_handler
+e1000_irq_handler:
+    pushad
+
+    # Read interrupt cause register (ICR) - read clears
+    mov     ebx, [e1000_mmio_base]
+    mov     eax, [ebx + 0x00C0]
+
+    # Check for RX interrupt (bit 7 = RXDW)
+    test    eax, 0x80
+    jz      .irq_check_tx
+    # Process received packets
+    call    e1000_poll
+
+.irq_check_tx:
+    # Check for TX interrupt (bit 1 = TXDW)
+    test    eax, 0x02
+    jz      .irq_done
+
+.irq_done:
+    # Send EOI
+    mov     eax, [e1000_irq_line]
+    call    pic_send_eoi
+
+    popad
+    iretd
+
 esi_temp:
     .space  4
 
@@ -888,6 +1104,40 @@ e1000_arp_mac:
 e1000_arp_ready:
     .globl  e1000_arp_ready
     .space  4                  # 1 = ARP reply received
+e1000_irq_line:
+    .space  4                  # IRQ line assigned by PCI
+
+# UDP send parameters
+udp_send_dest_ip:
+    .space  4
+udp_send_dest_port:
+    .space  2
+udp_send_src_port:
+    .space  2
+udp_send_data_ptr:
+    .space  4
+udp_send_data_len:
+    .space  4
+
+# UDP receive buffer and state
+udp_recv_buf:
+    .globl  udp_recv_buf
+    .space  1500               # max UDP payload
+udp_recv_src_ip:
+    .globl  udp_recv_src_ip
+    .space  4
+udp_recv_src_port:
+    .globl  udp_recv_src_port
+    .space  2
+udp_recv_dest_port:
+    .globl  udp_recv_dest_port
+    .space  2
+udp_recv_len:
+    .globl  udp_recv_len
+    .space  4
+udp_recv_ready:
+    .globl  udp_recv_ready
+    .space  4                  # 1 = data available
 
     .section .rodata
 msg_bar:    .asciz  "BAR0 = "
@@ -899,7 +1149,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.40 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.41 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
