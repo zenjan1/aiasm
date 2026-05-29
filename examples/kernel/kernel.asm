@@ -1142,7 +1142,7 @@ e1000_send_udp:
     mov     ax, [udp_send_data_len]
     add     ax, 8                         # UDP length
     mov     [edi + 4], ax                 # UDP length
-    mov     word ptr [edi + 6], 0         # UDP checksum (optional, set to 0)
+    mov     word ptr [edi + 6], 0         # Checksum (placeholder)
 
     # Copy payload at offset 42
     mov     edi, offset e1000_tx_buf + 42
@@ -1155,6 +1155,13 @@ e1000_send_udp:
     pop     ecx
     and     ecx, 3
     rep     movsb
+
+    # Calculate UDP checksum (header + payload with pseudo-header)
+    mov     dword ptr [udp_cksum_src], offset e1000_tx_buf + 34
+    mov     cx, [udp_send_data_len]
+    add     cx, 8                         # UDP header + payload
+    call    udp_checksum
+    mov     [e1000_tx_buf + 34 + 6], ax
 
     # Calculate total packet length
     mov     eax, [udp_send_data_len]
@@ -1211,6 +1218,151 @@ print_dec5:
 
     pop     edx
     pop     ebx
+    ret
+
+# ip_checksum: Calculate IP-style one's complement checksum
+# Input: esi = pointer to data, ecx = length in bytes (must be even)
+# Output: eax = checksum value
+ip_checksum:
+    push    ecx
+    push    edx
+    push    esi
+    xor     edx, edx            # running sum
+.ipcs_loop:
+    test    ecx, ecx
+    jz      .ipcs_done
+    movzx   eax, word ptr [esi]
+    add     edx, eax
+    add     esi, 2
+    sub     ecx, 2
+    jmp     .ipcs_loop
+.ipcs_done:
+.ipcs_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .ipcs_fold_done
+    add     eax, 1
+.ipcs_fold_done:
+    not     ax
+    pop     esi
+    pop     edx
+    pop     ecx
+    ret
+
+# tcp_checksum: Calculate TCP checksum with pseudo-header
+# Input: esi = TCP header + data pointer, ecx = TCP segment length
+#        edi = destination IP (stored in tcp_recv_src_ip)
+# Uses: tcp_cksum_buf as workspace
+tcp_checksum:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    lea     edi, [tcp_cksum_buf]
+
+    # Build pseudo-header:
+    # Source IP (4 bytes) - our IP is 10.0.2.15 = 0x0F02000A
+    mov     dword ptr [edi], 0x0F02000A
+    # Dest IP (4 bytes) - remote IP from tcp_recv_src_ip
+    mov     eax, [tcp_recv_src_ip]
+    mov     [edi + 4], eax
+    # Zero (1 byte) + Protocol (1 byte = 6 for TCP)
+    mov     word ptr [edi + 8], 0x0006
+    # TCP length (2 bytes)
+    mov     ax, cx
+    mov     [edi + 10], ax
+
+    # Copy TCP header + data after pseudo-header
+    mov     esi, [tcp_cksum_src]   # source pointer (set by caller)
+    mov     edi, offset tcp_cksum_buf + 12
+    mov     edx, ecx
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Calculate checksum over pseudo-header + TCP segment
+    mov     esi, offset tcp_cksum_buf
+    mov     ecx, edx
+    add     ecx, 12                # pseudo-header length
+    # Make even if odd
+    test    cl, 1
+    jz      .tcpcs_even
+    mov     byte ptr [esi + ecx], 0
+    inc     ecx
+.tcpcs_even:
+    call    ip_checksum
+
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     eax
+    ret
+
+# udp_checksum: Calculate UDP checksum with pseudo-header
+# Input: esi = UDP header + data pointer, ecx = UDP segment length
+# Uses: udp_cksum_buf as workspace
+udp_checksum:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    lea     edi, [udp_cksum_buf]
+
+    # Build pseudo-header:
+    # Source IP (4 bytes) - 10.0.2.15
+    mov     dword ptr [edi], 0x0F02000A
+    # Dest IP (4 bytes) - from udp_send_dest_ip
+    mov     eax, [udp_send_dest_ip]
+    mov     [edi + 4], eax
+    # Zero (1 byte) + Protocol (1 byte = 17 for UDP)
+    mov     word ptr [edi + 8], 0x0011
+    # UDP length (2 bytes)
+    mov     ax, cx
+    mov     [edi + 10], ax
+
+    # Copy UDP header + data after pseudo-header
+    mov     esi, [udp_cksum_src]   # source pointer (set by caller)
+    mov     edi, offset udp_cksum_buf + 12
+    mov     edx, ecx
+    push    ecx
+    shr     ecx, 2
+    cld
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+
+    # Calculate checksum over pseudo-header + UDP segment
+    mov     esi, offset udp_cksum_buf
+    mov     ecx, edx
+    add     ecx, 12                # pseudo-header length
+    test    cl, 1
+    jz      .udpcs_even
+    mov     byte ptr [esi + ecx], 0
+    inc     ecx
+.udpcs_even:
+    call    ip_checksum
+
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     eax
     ret
 
 # ============================================================================
@@ -1833,10 +1985,15 @@ e1000_send_synack:
     mov     byte ptr [edi + 12], 0x50      # Data offset: 5 (20 bytes, no options)
     mov     byte ptr [edi + 13], 0x12      # Flags: SYN + ACK
     mov     word ptr [edi + 14], 65535     # Window size
-    mov     word ptr [edi + 16], 0         # Checksum
+    mov     word ptr [edi + 16], 0         # Checksum (placeholder)
     mov     word ptr [edi + 18], 0         # Urgent pointer
 
-    # TCP checksum = 0 for now (optional in many stacks)
+    # Calculate TCP checksum
+    mov     dword ptr [tcp_cksum_src], offset e1000_tx_buf + 34
+    mov     cx, 20                         # TCP header only, no data
+    call    tcp_checksum
+    mov     [e1000_tx_buf + 34 + 16], ax   # store checksum at TCP offset 16
+
     # Send: 14 + 20 + 20 = 54 bytes
     mov     esi, offset e1000_tx_buf
     mov     ecx, 54
@@ -1937,8 +2094,14 @@ e1000_send_tcp_ack:
     mov     byte ptr [edi + 12], 0x50      # Data offset: 5
     mov     byte ptr [edi + 13], 0x10      # Flags: ACK
     mov     word ptr [edi + 14], 65535     # Window size
-    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 16], 0         # Checksum (placeholder)
     mov     word ptr [edi + 18], 0
+
+    # Calculate TCP checksum
+    mov     dword ptr [tcp_cksum_src], offset e1000_tx_buf + 34
+    mov     cx, 20                         # TCP header only
+    call    tcp_checksum
+    mov     [e1000_tx_buf + 34 + 16], ax
 
     # Send: 14 + 20 + 20 = 54 bytes
     mov     esi, offset e1000_tx_buf
@@ -2032,7 +2195,7 @@ e1000_send_tcp_data:
     mov     byte ptr [edi + 12], 0x50      # Data offset: 5
     mov     byte ptr [edi + 13], 0x18      # Flags: PSH + ACK
     mov     word ptr [edi + 14], 65535     # Window size
-    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 16], 0         # Checksum (placeholder)
     mov     word ptr [edi + 18], 0
 
     # Copy payload (echo data back)
@@ -2046,6 +2209,13 @@ e1000_send_tcp_data:
     pop     ecx
     and     ecx, 3
     rep     movsb
+
+    # Calculate TCP checksum (header + payload)
+    mov     dword ptr [tcp_cksum_src], offset e1000_tx_buf + 34
+    mov     cx, [tcp_recv_len]
+    add     cx, 20                         # header + payload
+    call    tcp_checksum
+    mov     [e1000_tx_buf + 34 + 16], ax
 
     # Send
     mov     eax, [tcp_tx_total_len]
@@ -2209,8 +2379,14 @@ e1000_send_fin_ack:
     mov     byte ptr [edi + 12], 0x50      # Data offset: 5
     mov     byte ptr [edi + 13], 0x11      # Flags: FIN + ACK
     mov     word ptr [edi + 14], 65535     # Window size
-    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 16], 0         # Checksum (placeholder)
     mov     word ptr [edi + 18], 0
+
+    # Calculate TCP checksum
+    mov     dword ptr [tcp_cksum_src], offset e1000_tx_buf + 34
+    mov     cx, 20                         # TCP header only
+    call    tcp_checksum
+    mov     [e1000_tx_buf + 34 + 16], ax
 
     # Send: 14 + 20 + 20 = 54 bytes
     mov     esi, offset e1000_tx_buf
@@ -2302,8 +2478,14 @@ e1000_send_rst:
     mov     byte ptr [edi + 12], 0x50      # Data offset: 5
     mov     byte ptr [edi + 13], 0x04      # Flags: RST
     mov     word ptr [edi + 14], 0         # Window = 0 (RST)
-    mov     word ptr [edi + 16], 0         # Checksum = 0
+    mov     word ptr [edi + 16], 0         # Checksum (placeholder)
     mov     word ptr [edi + 18], 0
+
+    # Calculate TCP checksum
+    mov     dword ptr [tcp_cksum_src], offset e1000_tx_buf + 34
+    mov     cx, 20                         # TCP header only
+    call    tcp_checksum
+    mov     [e1000_tx_buf + 34 + 16], ax
 
     # Send: 14 + 20 + 20 = 54 bytes
     mov     esi, offset e1000_tx_buf
@@ -2605,6 +2787,16 @@ tcp_conn_table:
 tcp_conn_active_count:
     .space  4                  # number of active connections
 
+# TCP/UDP checksum workspace
+tcp_cksum_buf:
+    .space  2048               # workspace for TCP checksum (pseudo-header + segment)
+tcp_cksum_src:
+    .space  4                  # source pointer for TCP checksum
+udp_cksum_buf:
+    .space  1548               # workspace for UDP checksum (pseudo-header + segment)
+udp_cksum_src:
+    .space  4                  # source pointer for UDP checksum
+
 # TCP state
 tcp_state:
     .globl  tcp_state
@@ -2685,7 +2877,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.48"
+    .ascii  "Server: aiasm/v0.49"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -2694,7 +2886,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.48!"
+    .ascii  "Hello from AI-ASM Kernel v0.49!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -2711,7 +2903,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.48"
+    .ascii  "AI-ASM Kernel v0.49"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -2745,7 +2937,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.48 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.49 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

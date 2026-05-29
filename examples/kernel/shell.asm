@@ -3212,7 +3212,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.48"
+    .ascii  "AI-ASM Kernel v0.49"
     .byte   13, 10, 0
 
 help_text:
