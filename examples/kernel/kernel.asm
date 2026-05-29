@@ -652,6 +652,13 @@ e1000_handle_arp:
     jmp     .arp_done
 
 .handle_arp_request:
+    # Cache sender IP->MAC from request
+    mov     eax, [esi + 28]           # sender IP
+    push    esi
+    add     esi, 22                   # pointer to sender MAC
+    call    arp_cache_insert
+    pop     esi
+
     # Check if request is for our IP
     mov     eax, [esi + 38]           # target IP in request
     cmp     eax, [e1000_arp_ip]
@@ -716,11 +723,229 @@ e1000_handle_arp:
     mov     ax, [esi + 26]
     mov     [e1000_arp_mac + 4], ax
 
+    # Also insert into ARP cache
+    # Sender IP is at offset 28, sender MAC at offset 22
+    mov     eax, [esi + 28]      # sender IP
+    push    esi
+    add     esi, 22              # pointer to sender MAC
+    call    arp_cache_insert
+    pop     esi
+
     # Signal that ARP reply was received
     mov     dword ptr [e1000_arp_ready], 1
 
 .arp_done:
     popad
+    ret
+
+# ============================================================================
+# arp_cache_lookup: Look up IP in ARP cache
+# Input: eax = IP address
+# Output: eax = 0 if found (MAC in [e1000_arp_mac]), 1 if not found
+# ============================================================================
+arp_cache_lookup:
+    push    ecx
+    push    edx
+    push    esi
+
+    mov     ecx, [e1000_arp_cache_size]
+    test    ecx, ecx
+    jz      .acl_not_found
+
+    lea     esi, [e1000_arp_cache]
+.acl_loop:
+    cmp     dword ptr [esi], eax    # compare IP
+    je      .acl_found
+    add     esi, 12                 # next entry
+    loop    .acl_loop
+
+.acl_not_found:
+    mov     eax, 1
+    jmp     .acl_done
+
+.acl_found:
+    # Copy MAC to e1000_arp_mac
+    mov     eax, [esi + 4]
+    mov     [e1000_arp_mac], eax
+    mov     ax, [esi + 8]
+    mov     [e1000_arp_mac + 4], ax
+    xor     eax, eax                # success
+
+.acl_done:
+    pop     esi
+    pop     edx
+    pop     ecx
+    ret
+
+# ============================================================================
+# arp_cache_insert: Insert IP->MAC mapping into ARP cache
+# Input: eax = IP, esi = pointer to 6-byte MAC
+# ============================================================================
+arp_cache_insert:
+    pushad
+
+    # Check if entry already exists
+    call    arp_cache_lookup
+    test    eax, eax
+    jz      .aci_done               # already in cache
+
+    # Get cache size
+    mov     ecx, [e1000_arp_cache_size]
+    cmp     ecx, 8
+    jge     .aci_done               # cache full
+
+    # Calculate offset = ecx * 12
+    mov     edx, ecx
+    shl     ecx, 3                   # ecx * 8
+    shl     edx, 2                   # edx * 4
+    add     ecx, edx                 # ecx = size * 12
+    lea     edi, [e1000_arp_cache + ecx]
+
+    # Restore IP and MAC from stack (saved by pushad)
+    # IP was in eax before call, now at [esp + 28] (saved eax in pushad)
+    mov     eax, [esp + 28]
+    mov     [edi], eax               # store IP
+
+    # MAC pointer was in esi, at [esp + 20]
+    mov     esi, [esp + 20]
+    mov     eax, [esi]
+    mov     [edi + 4], eax
+    mov     ax, [esi + 4]
+    mov     [edi + 8], ax
+
+    # Increment count
+    inc     dword ptr [e1000_arp_cache_size]
+
+.aci_done:
+    popad
+    ret
+
+# ============================================================================
+# tcp_conn_lookup: Find connection by remote IP + port
+# Input: eax = remote IP, cx = remote port
+# Output: eax = slot index (0-3), or -1 if not found
+#         ebx = pointer to connection entry (if found)
+# ============================================================================
+tcp_conn_lookup:
+    push    ecx
+    push    edx
+    push    esi
+
+    movzx   edx, cx                  # remote port in edx
+    mov     ecx, TCP_MAX_CONN
+    lea     esi, [tcp_conn_table]
+
+.tcp_lookup_loop:
+    test    ecx, ecx
+    jz      .tcp_lookup_not_found
+
+    # Check if slot is active (state != 0)
+    cmp     byte ptr [esi], 0
+    je      .tcp_lookup_next
+
+    # Check IP match
+    cmp     dword ptr [esi + 4], eax
+    jne     .tcp_lookup_next
+
+    # Check port match
+    cmp     word ptr [esi + 8], dx
+    je      .tcp_lookup_found
+
+.tcp_lookup_next:
+    add     esi, TCP_CONN_ENTRY_SIZE
+    dec     ecx
+    jmp     .tcp_lookup_loop
+
+.tcp_lookup_found:
+    # Calculate slot index: (esi - tcp_conn_table) / 24
+    mov     eax, esi
+    sub     eax, offset tcp_conn_table
+    mov     edx, TCP_CONN_ENTRY_SIZE
+    xor     ecx, ecx
+.tcp_lookup_div:
+    cmp     eax, edx
+    jl      .tcp_lookup_div_done
+    sub     eax, edx
+    inc     ecx
+    jmp     .tcp_lookup_div
+.tcp_lookup_div_done:
+    mov     ebx, esi                 # ebx = entry pointer
+    pop     esi
+    pop     edx
+    pop     ecx
+    ret
+
+.tcp_lookup_not_found:
+    mov     eax, -1
+    xor     ebx, ebx
+    pop     esi
+    pop     edx
+    pop     ecx
+    ret
+
+# ============================================================================
+# tcp_conn_alloc: Allocate a new connection slot
+# Input: eax = remote IP, cx = remote port
+# Output: eax = slot index, ebx = pointer to entry, or eax = -1 if full
+# ============================================================================
+tcp_conn_alloc:
+    push    ecx
+    push    edx
+    push    esi
+
+    movzx   edx, cx
+    mov     ecx, TCP_MAX_CONN
+    lea     esi, [tcp_conn_table]
+
+.tcp_alloc_loop:
+    test    ecx, ecx
+    jz      .tcp_alloc_full
+
+    # Check if slot is free (state == 0)
+    cmp     byte ptr [esi], 0
+    je      .tcp_alloc_found
+
+    add     esi, TCP_CONN_ENTRY_SIZE
+    dec     ecx
+    jmp     .tcp_alloc_loop
+
+.tcp_alloc_found:
+    # Initialize connection entry
+    mov     byte ptr [esi], 2        # state = SYN_RECV (will transition)
+    mov     [esi + 4], eax           # remote IP
+    mov     [esi + 8], dx            # remote port
+    mov     dword ptr [esi + 12], 0  # local_seq (will be set)
+    mov     dword ptr [esi + 16], 0  # remote_seq
+    mov     dword ptr [esi + 20], 0  # remote_ack
+    mov     dword ptr [esi + 24], 0  # recv_len (past entry, use separate var)
+
+    # Calculate slot index
+    mov     eax, esi
+    sub     eax, offset tcp_conn_table
+    mov     edx, TCP_CONN_ENTRY_SIZE
+    xor     ecx, ecx
+.tcp_alloc_div:
+    cmp     eax, edx
+    jl      .tcp_alloc_div_done
+    sub     eax, edx
+    inc     ecx
+    jmp     .tcp_alloc_div
+.tcp_alloc_div_done:
+
+    # Increment active count
+    inc     dword ptr [tcp_conn_active_count]
+
+    pop     esi
+    pop     edx
+    pop     ecx
+    ret
+
+.tcp_alloc_full:
+    mov     eax, -1
+    xor     ebx, ebx
+    pop     esi
+    pop     edx
+    pop     ecx
     ret
 
 # ============================================================================
@@ -924,6 +1149,125 @@ e1000_send_udp:
     mov     ecx, eax
     call    e1000_transmit
 
+    popad
+    ret
+
+# ============================================================================
+# http_parse_request: Parse HTTP request from tcp_recv_buf
+# Extracts method (GET/POST), URL path, and Host header
+# Input: esi = tcp_recv_buf pointer (already set by caller)
+# Output: http_method[0] = 'G' for GET, 'P' for POST, 0 for unknown
+#         http_url[] = URL path (max 256 bytes)
+#         http_host[] = Host header value (max 128 bytes)
+#         eax = 1 if valid HTTP, 0 otherwise
+# ============================================================================
+http_parse_request:
+    pushad
+
+    mov     esi, offset tcp_recv_buf
+
+    # Check for "GET " (0x20544547 little-endian)
+    mov     eax, [esi]
+    cmp     eax, 0x20544547
+    je      .http_is_get
+
+    # Check for "POST" (0x54534f50 little-endian)
+    cmp     eax, 0x54534f50
+    je      .http_is_post
+
+    # Not a recognized HTTP method
+    xor     eax, eax
+    mov     [http_method], al
+    popad
+    ret
+
+.http_is_get:
+    mov     byte ptr [http_method], 'G'
+    mov     byte ptr [http_method + 1], 'E'
+    mov     byte ptr [http_method + 2], 'T'
+    mov     byte ptr [http_method + 3], 0
+    mov     ecx, 4                     # skip "GET "
+    jmp     .http_parse_url
+
+.http_is_post:
+    mov     byte ptr [http_method], 'P'
+    mov     byte ptr [http_method + 1], 'O'
+    mov     byte ptr [http_method + 2], 'S'
+    mov     byte ptr [http_method + 3], 'T'
+    mov     byte ptr [http_method + 4], 0
+    mov     ecx, 5                     # skip "POST "
+
+.http_parse_url:
+    # Copy URL path (until space or CR)
+    lea     edi, [http_url]
+    mov     esi, offset tcp_recv_buf
+    add     esi, ecx                   # skip method
+
+.http_url_loop:
+    mov     al, [esi]
+    test    al, al
+    jz      .http_url_done
+    cmp     al, 13                     # CR
+    je      .http_url_done
+    cmp     al, ' '
+    je      .http_url_done
+    cmp     ecx, 256                   # max URL length
+    jge     .http_url_done
+    mov     [edi], al
+    inc     esi
+    inc     edi
+    inc     ecx
+    jmp     .http_url_loop
+
+.http_url_done:
+    mov     byte ptr [edi], 0
+
+    # Try to find "Host: " header
+    lea     esi, [tcp_recv_buf]
+    mov     ecx, 512                   # search limit
+
+.http_host_search:
+    cmp     ecx, 0
+    je      .http_host_not_found
+    mov     eax, [esi]
+    # Check for "Host" (0x74736f48 little-endian)
+    cmp     eax, 0x74736f48
+    je      .http_host_found_check
+    inc     esi
+    dec     ecx
+    jmp     .http_host_search
+
+.http_host_found_check:
+    cmp     word ptr [esi + 4], 0x3a20  # ": "
+    jne     .http_host_search
+    # Copy host value
+    add     esi, 6
+    lea     edi, [http_host]
+    mov     ecx, 0
+
+.http_host_copy:
+    mov     al, [esi]
+    cmp     al, 13
+    je      .http_host_done
+    test    al, al
+    je      .http_host_done
+    cmp     ecx, 127
+    je      .http_host_done
+    mov     [edi], al
+    inc     esi
+    inc     edi
+    inc     ecx
+    jmp     .http_host_copy
+
+.http_host_done:
+    mov     byte ptr [edi], 0
+    jmp     .http_parse_done
+
+.http_host_not_found:
+    mov     byte ptr [http_host], 0
+
+.http_parse_done:
+    mov     eax, 1
     popad
     ret
 
@@ -1891,6 +2235,28 @@ udp_recv_ready:
     .globl  udp_recv_ready
     .space  4                  # 1 = data available
 
+# ARP cache (8 entries, each 12 bytes: 4 IP + 6 MAC + 1 valid + 1 padding)
+e1000_arp_cache:
+    .space  96                 # 8 * 12 bytes
+e1000_arp_cache_size:
+    .space  4                  # number of valid entries
+
+# TCP connection table (4 concurrent connections)
+# Each entry: 4(remote_ip) + 2(remote_port) + 1(state) + 1(padding) +
+#             4(local_seq) + 4(remote_seq) + 4(remote_ack) + 4(recv_len) = 24 bytes
+# Total: 4 * 24 = 96 bytes
+TCP_MAX_CONN = 4
+TCP_CONN_ENTRY_SIZE = 24       # bytes per connection entry
+tcp_conn_table:
+    .globl  tcp_conn_table
+    .space  96                 # 4 connections * 24 bytes each
+
+# Connection entry offsets within each 24-byte entry
+# conn[entry]: state at +0 (byte), remote_ip at +4, remote_port at +8 (word)
+# local_seq at +12, remote_seq at +16, remote_ack at +20
+tcp_conn_active_count:
+    .space  4                  # number of active connections
+
 # TCP state
 tcp_state:
     .globl  tcp_state
@@ -1942,6 +2308,18 @@ tcp_http_enabled:
 tcp_flags_tmp:
     .space  1                  # Temporary storage for TCP flags byte
 
+# HTTP request parsing
+http_method:
+    .space  5                  # "GET\0" or "POST\0"
+http_url:
+    .space  256                # URL path
+http_host:
+    .space  128                # Host header value
+http_url_len:
+    .space  4                  # URL length
+http_active_conn:
+    .space  4                  # current connection slot index
+
     .section .rodata
 http_response_text:
     .ascii  "HTTP/1.1 200 OK"
@@ -1950,11 +2328,11 @@ http_response_text:
     .byte   13, 10
     .ascii  "Content-Length: 29"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.44"
+    .ascii  "Server: aiasm/v0.45"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
-    .ascii  "Hello from AI-ASM Kernel v0.44!"
+    .ascii  "Hello from AI-ASM Kernel v0.45!"
     .byte   13, 10
 http_response_end:
 http_response_len = http_response_end - http_response_text
@@ -1967,7 +2345,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.44 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.45 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
