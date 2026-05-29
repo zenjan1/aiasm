@@ -1061,11 +1061,27 @@ e1000_send_udp:
     # Build Ethernet frame
     mov     edi, offset e1000_tx_buf
 
-    # Dest MAC = gateway MAC (10.0.2.2 gateway, use resolved ARP MAC)
+    # ARP cache lookup for gateway (10.0.2.2 = 0x0A000202)
+    mov     eax, 0x0A000202
+    call    arp_cache_lookup
+    test    eax, eax
+    jnz     .udp_arp_miss
+
+    # Cache hit - MAC already in e1000_arp_mac
     mov     eax, [e1000_arp_mac]
     mov     [edi], eax
     mov     ax, [e1000_arp_mac + 4]
     mov     [edi + 4], ax
+    jmp     .udp_mac_done
+
+.udp_arp_miss:
+    # Cache miss - use existing gateway MAC (may be from last ARP)
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+
+.udp_mac_done:
 
     # Source MAC = our MAC
     mov     eax, [e1000_mac]
@@ -1740,11 +1756,27 @@ e1000_send_synack:
     # Build Ethernet frame
     mov     edi, offset e1000_tx_buf
 
-    # Dest MAC = resolved ARP MAC
+    # ARP cache lookup for remote IP
+    mov     eax, [tcp_recv_src_ip]
+    call    arp_cache_lookup
+    test    eax, eax
+    jnz     .synack_arp_miss
+
+    # Cache hit - MAC already in e1000_arp_mac
     mov     eax, [e1000_arp_mac]
     mov     [edi], eax
     mov     ax, [e1000_arp_mac + 4]
     mov     [edi + 4], ax
+    jmp     .synack_mac_done
+
+.synack_arp_miss:
+    # Cache miss - use last known MAC
+    mov     eax, [e1000_arp_mac]
+    mov     [edi], eax
+    mov     ax, [e1000_arp_mac + 4]
+    mov     [edi + 4], ax
+
+.synack_mac_done:
 
     # Source MAC = our MAC
     mov     eax, [e1000_mac]
@@ -1835,6 +1867,11 @@ e1000_send_tcp_ack:
 
     # Build Ethernet frame
     mov     edi, offset e1000_tx_buf
+
+    # ARP cache lookup for remote IP
+    mov     eax, [tcp_recv_src_ip]
+    call    arp_cache_lookup
+    # Use result regardless of hit/miss
     mov     eax, [e1000_arp_mac]
     mov     [edi], eax
     mov     ax, [e1000_arp_mac + 4]
@@ -1924,6 +1961,11 @@ e1000_send_tcp_data:
 
     # Build Ethernet frame
     mov     edi, offset e1000_tx_buf
+
+    # ARP cache lookup for remote IP
+    mov     eax, [tcp_recv_src_ip]
+    call    arp_cache_lookup
+    # Use result regardless of hit/miss
     mov     eax, [e1000_arp_mac]
     mov     [edi], eax
     mov     ax, [e1000_arp_mac + 4]
@@ -2104,6 +2146,11 @@ e1000_send_fin_ack:
 
     # Build Ethernet frame
     mov     edi, offset e1000_tx_buf
+
+    # ARP cache lookup for remote IP
+    mov     eax, [tcp_recv_src_ip]
+    call    arp_cache_lookup
+    # Use result regardless of hit/miss
     mov     eax, [e1000_arp_mac]
     mov     [edi], eax
     mov     ax, [e1000_arp_mac + 4]
@@ -2194,6 +2241,11 @@ e1000_send_rst:
 
     # Build Ethernet frame
     mov     edi, offset e1000_tx_buf
+
+    # ARP cache lookup for remote IP
+    mov     eax, [tcp_recv_src_ip]
+    call    arp_cache_lookup
+    # Use result regardless of hit/miss
     mov     eax, [e1000_arp_mac]
     mov     [edi], eax
     mov     ax, [e1000_arp_mac + 4]
@@ -2633,7 +2685,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.47"
+    .ascii  "Server: aiasm/v0.48"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -2642,7 +2694,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.47!"
+    .ascii  "Hello from AI-ASM Kernel v0.48!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -2659,7 +2711,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.47"
+    .ascii  "AI-ASM Kernel v0.48"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -2693,7 +2745,7 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.47 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.48 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
