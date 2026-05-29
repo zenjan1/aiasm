@@ -488,6 +488,22 @@ e1000_poll:
     popad
     ret
 
+# e1000_poll_delay: Poll for packets with a small delay (for ping timeout)
+# Polls and burns ~10ms of CPU time
+e1000_poll_delay:
+    push    eax
+    push    ecx
+    push    edx
+    call    e1000_poll
+    mov     ecx, 100000           # ~10ms delay loop
+.poll_delay_loop:
+    dec     ecx
+    jnz     .poll_delay_loop
+    pop     edx
+    pop     ecx
+    pop     eax
+    ret
+
 # ============================================================================
 # e1000_handle_icmp: Handle ICMP Echo Request, send Echo Reply
 # Input: esi = packet buffer address (RX buffer)
@@ -496,7 +512,28 @@ e1000_poll:
 e1000_handle_icmp:
     pushad
 
-    # Build Ethernet frame in TX buffer
+    # Check if this is an ICMP Echo Reply (type=0) for our ping
+    # ICMP type at offset: 14(IP) + 20(ICMP header start) = 34
+    movzx   eax, byte ptr [esi + 34]
+    cmp     al, 0                  # Echo Reply
+    jne     .icmp_check_request
+
+    # Check identifier matches our ping (0x5555)
+    movzx   eax, word ptr [esi + 38]
+    cmp     ax, 0x5555
+    jne     .icmp_check_request
+
+    # It's our ping reply - signal ready
+    mov     dword ptr [e1000_icmp_reply_ready], 1
+    mov     dword ptr [e1000_icmp_reply_rtt], 1  # approximate RTT
+
+.icmp_check_request:
+    # Check if this is an Echo Request (type=8)
+    movzx   eax, byte ptr [esi + 34]
+    cmp     al, 8
+    jne     .icmp_not_ours
+
+    # Original echo request handling continues below
     # Swap source/dest MAC
     mov     edi, offset e1000_tx_buf
 
@@ -634,6 +671,7 @@ e1000_handle_icmp:
     mov     esi, offset msg_icmp_sent
     call    uart_puts
 
+.icmp_not_ours:
     popad
     ret
 
@@ -946,6 +984,135 @@ tcp_conn_alloc:
     pop     esi
     pop     edx
     pop     ecx
+    ret
+
+# ============================================================================
+# e1000_send_icmp_echo: Send ICMP Echo Request (ping)
+# Input: eax = target IP (host byte order: 10.0.2.2 = 0x0A000202)
+# ============================================================================
+e1000_send_icmp_echo:
+    pushad
+
+    # Save target IP
+    mov     [e1000_ping_target_ip], eax
+
+    # Clear ready flag
+    xor     eax, eax
+    mov     [e1000_icmp_reply_ready], eax
+
+    # Build Ethernet frame in TX buffer
+    mov     edi, offset e1000_tx_buf
+
+    # Dest MAC = broadcast (ARP not resolved yet)
+    mov     dword ptr [edi], 0xFFFFFFFF
+    mov     word ptr [edi + 4], 0xFFFF
+
+    # Source MAC = our MAC
+    mov     eax, [e1000_mac]
+    mov     [edi + 6], eax
+    mov     ax, [e1000_mac + 4]
+    mov     [edi + 10], ax
+
+    # EtherType = IPv4
+    mov     word ptr [edi + 12], 0x0008
+
+    # IP header at offset 14
+    mov     edi, offset e1000_tx_buf + 14
+    mov     byte ptr [edi], 0x45       # Version 4, IHL 5
+    mov     byte ptr [edi + 1], 0      # TOS
+    mov     word ptr [edi + 2], 60     # Total length: 20(IP) + 8(ICMP) + 32(data)
+    mov     word ptr [edi + 4], 0x1234 # Identification
+    mov     word ptr [edi + 6], 0x4000 # Don't fragment
+    mov     byte ptr [edi + 8], 64     # TTL
+    mov     byte ptr [edi + 9], 1      # Protocol = ICMP
+    mov     word ptr [edi + 10], 0     # Checksum (placeholder)
+    mov     dword ptr [edi + 12], 0x0F02000A  # Source IP: 10.0.2.15
+    mov     eax, [e1000_ping_target_ip]
+    mov     [edi + 16], eax
+
+    # IP checksum
+    push    edi
+    xor     edx, edx
+    mov     ecx, 10
+.ipcsum_loop:
+    movzx   eax, word ptr [edi]
+    add     edx, eax
+    add     edi, 2
+    loop    .ipcsum_loop
+.ipcsum_fold:
+    mov     eax, edx
+    shr     edx, 16
+    and     eax, 0xFFFF
+    add     eax, edx
+    jnc     .ipcsum_fold_done
+    add     eax, 1
+.ipcsum_fold_done:
+    not     ax
+    pop     edi
+    mov     [edi + 10], ax
+
+    # ICMP Echo Request header at offset 34
+    mov     edi, offset e1000_tx_buf + 34
+    mov     byte ptr [edi], 8        # type = Echo Request
+    mov     byte ptr [edi + 1], 0    # code = 0
+    mov     word ptr [edi + 2], 0    # checksum placeholder
+    mov     word ptr [edi + 4], 0x5555  # identifier
+    mov     eax, [icmp_echo_seq]
+    mov     [edi + 6], ax              # sequence number
+
+    # ICMP payload: 32 bytes of test data
+    mov     edi, offset e1000_tx_buf + 42
+    mov     eax, 0x01020304
+    mov     [edi], eax
+    mov     [edi + 4], eax
+    mov     [edi + 8], eax
+    mov     [edi + 12], eax
+    mov     eax, 0x05060708
+    mov     [edi + 16], eax
+    mov     [edi + 20], eax
+    mov     [edi + 24], eax
+    mov     [edi + 28], eax
+
+    # Calculate ICMP checksum (8 header + 32 data = 40 bytes)
+    mov     esi, offset e1000_tx_buf + 34
+    mov     ecx, 40
+    call    ip_checksum
+    mov     [e1000_tx_buf + 34 + 2], ax
+
+    # Increment sequence number
+    mov     eax, [icmp_echo_seq]
+    inc     eax
+    mov     [icmp_echo_seq], eax
+
+    # Send: 14(eth) + 20(IP) + 8(ICMP) + 32(data) = 74 bytes
+    mov     esi, offset e1000_tx_buf
+    mov     ecx, 74
+    call    e1000_transmit
+
+    # Wait for reply (poll for ~2 seconds)
+    mov     edx, 200              # 200 * 10ms = 2s timeout
+.icmp_wait_loop:
+    call    e1000_poll_delay
+    cmp     dword ptr [e1000_icmp_reply_ready], 1
+    je      .icmp_reply_received
+    dec     edx
+    jnz     .icmp_wait_loop
+
+    # Timeout - no reply
+    mov     esi, offset msg_ping_timeout
+    call    uart_puts
+    jmp     .icmp_echo_done
+
+.icmp_reply_received:
+    mov     esi, offset msg_ping_reply
+    call    uart_puts
+    mov     eax, [e1000_icmp_reply_rtt]
+    call    print_dec5
+    mov     esi, offset msg_ping_ms
+    call    uart_puts
+
+.icmp_echo_done:
+    popad
     ret
 
 # ============================================================================
@@ -2730,6 +2897,16 @@ e1000_arp_mac:
 e1000_arp_ready:
     .globl  e1000_arp_ready
     .space  4                  # 1 = ARP reply received
+
+# ICMP ping state
+e1000_ping_target_ip:
+    .space  4                  # target IP for ping
+e1000_icmp_reply_ready:
+    .space  4                  # 1 = ICMP Echo Reply received
+e1000_icmp_reply_rtt:
+    .space  4                  # round-trip time (approximate ticks)
+icmp_echo_seq:
+    .space  4                  # ICMP echo sequence number
 e1000_irq_line:
     .space  4                  # IRQ line assigned by PCI
 
@@ -2877,7 +3054,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.49"
+    .ascii  "Server: aiasm/v0.50"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -2886,7 +3063,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.49!"
+    .ascii  "Hello from AI-ASM Kernel v0.50!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -2903,7 +3080,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.49"
+    .ascii  "AI-ASM Kernel v0.50"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -2937,7 +3114,12 @@ msg_e100ok: .asciz "  e1000 initialized\n"
 msg_e100fail:.asciz "  e1000 reset timeout!\n"
 msg_net_skip:.asciz "  No known NIC found\n"
 msg_icmp_sent:.asciz "  ICMP echo reply sent\n"
-msg_boot:    .asciz  "AI-ASM Kernel v0.49 booting..."
+msg_ping_timeout:.asciz "  Request timeout\n"
+msg_ping_reply:.asciz "  Reply received, RTT="
+msg_ping_ms:.asciz "ms\n"
+msg_ping_sent:.asciz "  PING "
+msg_ping_ip:.asciz " sent\n"
+msg_boot:    .asciz  "AI-ASM Kernel v0.50 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
