@@ -760,9 +760,30 @@
 
 ---
 
+## 当前版本：v0.56
+
+### ✅ v0.56 新增
+
+#### ARP缓存shell命令
+- `arp`命令显示ARP缓存表（8槽位）
+- 每槽位显示：槽号、IP地址、MAC地址
+- kernel.asm添加`.globl e1000_arp_cache`和`.globl e1000_arp_cache_size`导出
+- shell.asm添加print_ip_arp和print_hex_byte辅助函数
+- **关键bug修复**：.arp_skip中push/pop esi保护ARP缓存指针
+  - 之前esi被msg_arp_empty字符串地址覆盖导致垃圾数据显示
+  - 修复后所有空槽位正确显示"(empty)"
+
+#### QEMU测试结果
+- 内核正常启动 v0.56 ✓
+- e1000初始化成功 ✓
+- ARP命令显示正确（8个空槽位）✓
+
+---
+
 **下一步**:
 1. 多TCP连接并发端到端测试（验证4槽位可重复使用 + netstat）
-2. DHCP成功后自动使用动态IP替换硬编码IP
+2. DHCP成功后自动使用动态IP替换硬编码IP（已实现 ✓）
 3. UDP echo server完善（checksum已完成 ✓）
-4. UPDATE=1
+4. WASM测试全部通过验证
+5. UPDATE=1
 
