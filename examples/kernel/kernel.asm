@@ -955,7 +955,7 @@ tcp_conn_alloc:
 
 .tcp_alloc_found:
     # Initialize connection entry
-    mov     byte ptr [esi], 2        # state = SYN_RECV (will transition)
+    mov     byte ptr [esi], 3        # state = SYN_RECV (incoming SYN)
     mov     [esi + 4], eax           # remote IP
     mov     [esi + 8], dx            # remote port
     mov     dword ptr [esi + 12], 0  # local_seq (will be set)
@@ -990,6 +990,44 @@ tcp_conn_alloc:
     pop     esi
     pop     edx
     pop     ecx
+    ret
+
+# ============================================================================
+# tcp_conn_free: Free a connection slot (called on FIN/RST close)
+# Input: ebx = pointer to connection entry (or NULL)
+# ============================================================================
+tcp_conn_free:
+    push    eax
+    push    ecx
+    push    esi
+
+    test    ebx, ebx
+    jz      .free_done
+
+    # Zero out the connection entry
+    mov     esi, ebx
+    mov     ecx, TCP_CONN_ENTRY_SIZE / 4
+    xor     eax, eax
+.clear_loop:
+    mov     [esi], eax
+    add     esi, 4
+    loop    .clear_loop
+
+    # Decrement active count
+    mov     eax, [tcp_conn_active_count]
+    test    eax, eax
+    jz      .free_done
+    dec     eax
+    mov     [tcp_conn_active_count], eax
+
+    # Clear global slot pointer
+    xor     ebx, ebx
+    mov     [tcp_conn_slot_ptr], ebx
+
+.free_done:
+    pop     esi
+    pop     ecx
+    pop     eax
     ret
 
 # ============================================================================
@@ -2257,6 +2295,18 @@ e1000_handle_tcp:
     jz      .tcp_check_port
     mov     dword ptr [tcp_rst_received], 1
     mov     dword ptr [tcp_state], 0       # CLOSED
+    # Look up and free connection if it exists
+    mov     eax, [esi + 26]               # remote IP
+    movzx   ecx, word ptr [esi + ebp]      # remote port
+    push    esi
+    push    ebp
+    call    tcp_conn_lookup
+    pop     ebp
+    pop     esi
+    cmp     eax, -1
+    je      .tcp_rst_done                 # no connection, just done
+    call    tcp_conn_free                 # ebx = entry pointer from lookup
+.tcp_rst_done:
     jmp     .tcp_done
 
 .tcp_check_port:
@@ -2419,6 +2469,12 @@ e1000_handle_tcp:
     rep     movsb
     mov     dword ptr [tcp_recv_ready], 1
     mov     dword ptr [tcp_state], 4       # ESTABLISHED
+    # Update connection entry state
+    mov     ebx, [tcp_conn_slot_ptr]
+    test    ebx, ebx
+    jz      .psh_skip_state
+    mov     byte ptr [ebx], 4              # ESTABLISHED
+.psh_skip_state:
 
     # Send ACK for received data
     call    e1000_send_tcp_ack
@@ -2555,15 +2611,12 @@ e1000_handle_tcp:
     test    al, 0x01                       # FIN flag
     jz      .tcp_done
     mov     dword ptr [tcp_fin_received], 1
-    # Update connection entry state
-    mov     ebx, [tcp_conn_slot_ptr]
-    test    ebx, ebx
-    jz      .fin_skip_entry
-    mov     byte ptr [ebx], 6              # state = CLOSE_WAIT
-.fin_skip_entry:
     mov     dword ptr [tcp_state], 0       # CLOSED
     # Send FIN-ACK back for graceful close
     call    e1000_send_fin_ack
+    # Free connection slot (graceful close complete)
+    mov     ebx, [tcp_conn_slot_ptr]
+    call    tcp_conn_free
     jmp     .tcp_done
 
 .tcp_not_our:
@@ -3597,7 +3650,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.52"
+    .ascii  "Server: aiasm/v0.53"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3606,7 +3659,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.52!"
+    .ascii  "Hello from AI-ASM Kernel v0.53!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3623,7 +3676,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.52"
+    .ascii  "AI-ASM Kernel v0.53"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3670,7 +3723,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.52 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.53 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
