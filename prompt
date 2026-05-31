@@ -938,3 +938,31 @@
 
 ---
 
+## 当前版本：v0.65
+
+### ✅ v0.65 新增
+
+#### WASM宿主函数参数处理完善 (wasm_vm.asm)
+- .host_3arg: 3参数处理（net_recv用）
+- .host_5arg: 5参数处理（net_send用）
+- net_status (10): 0参数，返回网络状态
+- net_config (11): 1参数，写入IP/MAC配置
+
+#### WASM网络测试框架 (shell.asm)
+- wasmtest19: 测试net_status宿主函数
+- wasm_test_net_status_module: WASM字节码模块
+- 调用宿主函数11 (func_idx=11, host_id=10=net_status)
+- 返回值显示：网络状态十六进制格式
+
+#### QEMU测试结果
+- 内核正常启动 v0.65 ✓
+- e1000初始化成功 ✓
+- WASM宿主函数参数处理完善 ✓
+- wasmtest19命令框架完成 ✓
+
+#### 下一步
+1. wasmtest19交互测试验证
+2. UPDATE=1
+
+---
+

@@ -1089,6 +1089,14 @@ do_call_host:
     je      .host_1arg
     cmp     ecx, WASM_HOST_FREE
     je      .host_1arg
+    cmp     ecx, WASM_HOST_NET_STATUS
+    je      .host_0arg
+    cmp     ecx, WASM_HOST_NET_CONFIG
+    je      .host_1arg
+    cmp     ecx, WASM_HOST_NET_RECV
+    je      .host_3arg
+    cmp     ecx, WASM_HOST_NET_SEND
+    je      .host_5arg
     # default: print/println - 2 args
 .host_2arg:
     call    _stack_pop           # 参数2
@@ -1110,6 +1118,31 @@ do_call_host:
     xor     ecx, ecx
     xor     edx, edx
     pop     eax
+    jmp     .do_host_call
+.host_3arg:
+    call    _stack_pop           # 参数3 (maxlen)
+    mov     edx, eax
+    call    _stack_pop           # 参数2 (ptr)
+    mov     ecx, eax
+    call    _stack_pop           # 参数1 (type)
+    mov     ebx, eax
+    pop     eax
+    jmp     .do_host_call
+.host_5arg:
+    # 5参数：type, dst_ip, dst_port, ptr, len
+    # 前3个通过寄存器，后2个通过栈传递到wasm_host_call
+    call    _stack_pop           # 参数5 (len)
+    push    eax                  # 保存到栈（供wasm_host_call使用）
+    call    _stack_pop           # 参数4 (ptr)
+    push    eax                  # 保存到栈
+    call    _stack_pop           # 参数3 (dst_port)
+    mov     edx, eax
+    call    _stack_pop           # 参数2 (dst_ip)
+    mov     ecx, eax
+    call    _stack_pop           # 参数1 (type)
+    mov     ebx, eax
+    pop     eax                   # eax = host ID (恢复)
+    jmp     .do_host_call
 .do_host_call:
     call    wasm_host_call
     # 返回值压入操作数栈
