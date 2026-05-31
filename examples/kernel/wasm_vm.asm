@@ -267,6 +267,18 @@ wasm_running:
 wasm_pc:
     .space  4                   # 程序计数器（代码指针）
 
+    # 临时变量（宿主函数调用参数暂存）
+wasm_host_id_tmp:
+    .space  4                   # 保存 host function ID
+wasm_param_ptr:
+    .space  4                   # 保存 ptr 参数
+wasm_param_len:
+    .space  4                   # 保存 len 参数
+wasm_saved_ret_addr:
+    .space  4                   # 保存 wasm_exec_func 的返回地址
+wasm_dispatch_ret_addr:
+    .space  4                   # 保存 _dispatch_opcode 的返回地址
+
     .globl  wasm_code_end
 wasm_code_end:
     .space  4                   # 代码结束指针
@@ -413,6 +425,9 @@ wasm_exec_func:
     push    edx
     push    esi
     push    edi
+    # Save return address (at [esp+20] after 5 pushes)
+    mov     ecx, [esp + 20]
+    mov     [wasm_saved_ret_addr], ecx
 
     # 检查函数索引合法性
     cmp     eax, [wasm_func_count]
@@ -494,6 +509,10 @@ exec_code_loop:
     mov     [wasm_pc], esi
 
     # 分发执行
+    # Save return address BEFORE call (avoid stack corruption during call)
+    lea     edx, [.ret_save]
+    mov     [wasm_dispatch_ret_addr], edx
+.ret_save:
     call    _dispatch_opcode
 
     jmp     exec_code_loop
@@ -508,6 +527,9 @@ exec_code_done:
     pop     edx
     pop     ecx
     pop     ebx
+    # Restore saved return address (it got corrupted during WASM execution)
+    mov     ecx, [wasm_saved_ret_addr]
+    mov     [esp], ecx
     mov     eax, [wasm_return_value]  # 加载返回值到 eax
     ret
 
@@ -926,7 +948,9 @@ do_else:
 
 do_end:
     # 弹出控制帧，end 只是退出 block/loop/if，不循环
+    push    eax
     call    _ctrl_frame_pop
+    pop     eax
     jmp     dispatch_done
 
 do_br:
@@ -1130,18 +1154,23 @@ do_call_host:
     jmp     .do_host_call
 .host_5arg:
     # 5参数：type, dst_ip, dst_port, ptr, len
-    # 前3个通过寄存器，后2个通过栈传递到wasm_host_call
+    # 先保存host_id（从x86栈顶pop），然后从WASM操作数栈pop 5个参数
+    pop     dword ptr [wasm_host_id_tmp]  # host_id → 内存
     call    _stack_pop           # 参数5 (len)
-    push    eax                  # 保存到栈（供wasm_host_call使用）
+    mov     [wasm_param_len], eax
     call    _stack_pop           # 参数4 (ptr)
-    push    eax                  # 保存到栈
+    mov     [wasm_param_ptr], eax
     call    _stack_pop           # 参数3 (dst_port)
     mov     edx, eax
     call    _stack_pop           # 参数2 (dst_ip)
     mov     ecx, eax
     call    _stack_pop           # 参数1 (type)
     mov     ebx, eax
-    pop     eax                   # eax = host ID (恢复)
+    # 把ptr和len压入x86栈（供wasm_host_call通过[ebp+16/20]访问）
+    push    dword ptr [wasm_param_len]
+    push    dword ptr [wasm_param_ptr]
+    # 恢复host_id到eax
+    mov     eax, [wasm_host_id_tmp]
     jmp     .do_host_call
 .do_host_call:
     call    wasm_host_call
@@ -4716,6 +4745,12 @@ do_unknown:
 dispatch_done:
     pop     ecx
     pop     eax
+    # Fix corrupted return address
+    mov     edx, [wasm_dispatch_ret_addr]
+    cmp     dword ptr [esp], 0x100000
+    jae     .ra_ok
+    mov     [esp], edx
+.ra_ok:
     ret
 
 # ============================================================================

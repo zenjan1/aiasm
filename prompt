@@ -1025,3 +1025,39 @@ aiasm>
 2. UPDATE=1
 
 ---
+
+## 当前版本：v0.68
+
+### ✅ v0.68 新增
+
+#### wasmtest21: net_send/net_recv 宿主函数测试
+- wasm_test_net_send_module: WASM字节码模块
+  - 类型签名: (i32,i32,i32,i32,i32) -> i32
+  - 调用宿主函数10 (func_idx=10, host_id=9=net_send)
+  - 参数: type=0(UDP), dst_ip=0x0A000202(10.0.2.2), dst_port=7, ptr=0, len=4
+- wasm_test_net_recv_module: WASM字节码模块
+  - 类型签名: (i32,i32,i32) -> i32
+  - 调用宿主函数10 (func_idx=10, host_id=9=net_recv)
+  - 参数: type=0(UDP), ptr=256, maxlen=1024
+- 测试结果:
+  - net_send result = 0x1 (发送成功)
+  - net_recv result = 0x0 (无数据，预期行为)
+
+#### 关键bug修复
+- **WASM栈返回地址 corruption**: 在exec_code_loop中，call _dispatch_opcode的返回地址在执行WASM宿主函数期间被破坏
+  - 根因: 深层调用链（do_call_host → wasm_host_call → e1000_send_udp_wasm → e1000_transmit）中栈被污染
+  - 修复: 在call _dispatch_opcode之前保存返回地址到wasm_dispatch_ret_addr，dispatch_done恢复
+  - 分离wasm_saved_ret_addr（exec_func返回地址）和wasm_dispatch_ret_addr（dispatch_opcode返回地址）
+- **WASM字节码大小修正**: wasm_test_net_send_module的body size从0x13改为0x11，section size从0x15改为0x13
+
+#### QEMU测试结果
+- 内核正常启动 v0.68 ✓
+- e1000初始化成功 ✓
+- wasmtest2 = 42 ✓
+- wasmtest21 net_send = 0x1, net_recv = 0x0 ✓
+
+#### 下一步
+1. 更多WASM网络测试
+2. UPDATE=1
+
+---

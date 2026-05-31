@@ -226,11 +226,11 @@ wasm_host_call:
     jmp     .done
 
 .host_net_send:
-    # ebx = type (0=UDP, 1=TCP), ecx = dst_ip, edx = dst_port, [esp+8] = ptr, [esp+12] = len
-    # 从栈获取额外参数（ebp已设置）
+    # Stack layout after wasm_host_call prologue:
+    #   [ebp+8]=ptr, [ebp+12]=len
+    #   ebx=type, ecx=dst_ip, edx=dst_port (from .host_5arg)
     mov     esi, [ebp + 8]        # esi = ptr (WASM线性内存偏移)
-    mov     edi, [ebp + 12]       # edi = len
-    # 检查type
+    mov     edi, [ebp + 12]       # edi = len (save to edi, don't clobber edx=port)
     test    ebx, ebx
     jnz     .net_send_tcp
     # UDP发送
@@ -240,7 +240,6 @@ wasm_host_call:
     push    edx                   # port
     push    ecx                   # ip
     call    e1000_send_udp_wasm
-    add     esp, 16
     jmp     .done
 .net_send_tcp:
     # TCP发送（简化实现，使用当前连接）
@@ -250,7 +249,6 @@ wasm_host_call:
     push    edx                   # port
     push    ecx                   # ip
     call    e1000_send_tcp_data_wasm
-    add     esp, 16
     jmp     .done
 
 .host_net_recv:
@@ -350,6 +348,8 @@ wasm_host_call:
     ret
 
     .section .rodata
+msg_host_net_send_debug:
+    .asciz  "[HOST] net_send called\n"
 msg_mem_total:
     .asciz  "Total: "
 msg_mem_free:

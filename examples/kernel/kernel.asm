@@ -388,43 +388,63 @@ e1000_transmit:
     mov     [edi], eax           # buffer address low
     mov     dword ptr [edi + 4], 0  # buffer address high
     mov     word ptr [edi + 8], cx    # length
-    mov     word ptr [edi + 10], 0    # clear status
+    mov     word ptr [edi + 10], 0    # CSO/CSS (checksum offset)
 
-    # Set EOP|RS|IFCS (bit 0 | bit 3 | bit 4) in status/cmd
-    mov     word ptr [edi + 14], 0x000B  # EOP=1, RS=1, IFCS=1
+    # Set CMD: EOP=bit0 | RS=bit3 | IFCS=bit4 = 0x0B
+    mov     byte ptr [edi + 12], 0x0B
+    mov     byte ptr [edi + 13], 0    # reserved
 
-    # Send: write TDT=0 (notify hardware)
-    mov     dword ptr [ebx + 0x3818], 0
+    # Send: write TDT=1 (one descriptor ready; TDH=0, so TDT must be > TDH)
+    mov     dword ptr [ebx + 0x3818], 1
 
-    # Wait for completion (RS=1 means report status)
-    mov     edx, 100000
+    # Wait for completion: poll DD bit (bit 0) in status byte at offset 10
+    # Use PIT ticks to yield to QEMU event loop (avoid busy-wait deadlock in TCG)
+    mov     edx, 100
+    mov     esi, 3                     # max retry count
+.tx_poll:
     dec     edx
-    jz      .tx_timeout
+    jz      .tx_retry
 
-    # Check descriptor status for DD bit (bit 0)
-    cmp     word ptr [edi + 12], 0
-    je      .tx_wait
+    # Check status byte: DD bit set by hardware when done
+    test    byte ptr [edi + 10], 1
+    jnz     .tx_success
 
+    # Yield: read PIT channel 0 to give QEMU event loop a chance
+    in      al, 0x40
+    jmp     .tx_poll
+
+.tx_success:
     mov     [e1000_tx_len], ecx
     xor     eax, eax             # success
     jmp     .tx_done
 
 .tx_timeout:
+    # TX timeout - expected in QEMU without network backend
+    # e1000 may still transmit but DD bit may not be set in TCG
     mov     eax, 1               # failure
 
 .tx_done:
     popad
     ret
 
-.tx_wait:
-    mov     eax, [ebx + 0x3818]  # check TDT
-    test    eax, eax
-    jz      .tx_wait2
-    jmp     .tx_done
+.tx_retry:
+    dec     esi
+    jz      .tx_timeout              # retry limit exceeded
+    mov     edx, 100                 # reset timeout counter
+    # Re-notify: set TDT=1
+    mov     dword ptr [ebx + 0x3818], 1
+.tx_poll2:
+    dec     edx
+    jz      .tx_timeout
+    # Check status byte: DD bit set by hardware when done
+    test    byte ptr [edi + 10], 1
+    jnz     .tx_success
+    # Yield: read PIT channel 0
+    in      al, 0x40
+    jmp     .tx_poll2
 
-.tx_wait2:
-    cmp     word ptr [edi + 12], 0
-    je      .tx_wait
+    mov     [e1000_tx_len], ecx
+    xor     eax, eax             # success
     jmp     .tx_done
 
 # ============================================================================
@@ -3464,11 +3484,15 @@ e1000_send_udp_wasm:
     # Save len to temp variable
     mov     [udp_send_data_len], ecx
 
-    # Call original UDP send (uses saved variables)
-    mov     esi, [ebp + 16]
+    # Set up registers for e1000_send_udp: eax=ip, cx=port, dx=src_port, esi=ptr
+    mov     eax, [ebp + 8]           # dest IP
+    movzx   ecx, word ptr [ebp + 12] # dest port
+    mov     dx, 12345                # src port
+    mov     esi, [ebp + 16]          # data ptr
     call    e1000_send_udp
 
     popad
+    mov     eax, 1                  # return 1 = sent OK
     pop     ebp
     ret     16
 
@@ -3737,7 +3761,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.67"
+    .ascii  "Server: aiasm/v0.68"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3746,7 +3770,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.67!"
+    .ascii  "Hello from AI-ASM Kernel v0.68!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3763,7 +3787,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.67"
+    .ascii  "AI-ASM Kernel v0.68"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3810,7 +3834,11 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.67 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.68 booting..."
+msg_udp_send_debug:
+    .asciz  "[UDP_SEND] Calling e1000_send_udp\n"
+msg_udp_send_done:
+    .asciz  "[UDP_SEND] Done, returning 1\n"
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"

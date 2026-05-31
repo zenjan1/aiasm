@@ -471,6 +471,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest20
 
+    # "wasmtest21" - WASM net_send/net_recv test
+    mov     edi, offset cmd_wasmtest21
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest21
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1503,6 +1509,89 @@ shell_dispatch:
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_net_config_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16                 # hex output
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# shell_wasmtest21: Global entry point for wasmtest21 (called from kernel boot)
+# ============================================================================
+    .globl  shell_wasmtest21
+shell_wasmtest21:
+    mov     esi, offset msg_wasm_test21
+    call    uart_puts
+    mov     esi, offset wasm_test_net_send_module
+    mov     ecx, offset wasm_test_net_send_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm21_done
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_net_send_result
+    call    uart_puts
+    call    print_hex8
+    mov     al, 0x0d
+    call    uart_putc
+    mov     al, 0x0a
+    call    uart_putc
+.wasm21_done:
+    ret
+
+.do_wasmtest21:
+    # WASM net_send + net_recv test
+    # Part 1: net_send - send UDP packet
+    mov     esi, offset msg_wasm_test21
+    call    uart_puts
+    mov     esi, offset wasm_test_net_send_module
+    mov     ecx, offset wasm_test_net_send_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    push    eax                    # save net_send result
+    mov     esi, offset msg_net_send_result
+    call    uart_puts
+    pop     eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16                 # hex output
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    # Part 2: net_recv - try to receive data
+    mov     esi, offset wasm_test_net_recv_module
+    mov     ecx, offset wasm_test_net_recv_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_net_recv_result
     call    uart_puts
     mov     edi, offset shell_cmd_buf
     mov     dl, 16                 # hex output
@@ -3505,6 +3594,8 @@ cmd_wasmtest19:
     .asciz  "wasmtest19"
 cmd_wasmtest20:
     .asciz  "wasmtest20"
+cmd_wasmtest21:
+    .asciz  "wasmtest21"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -3753,7 +3844,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.67"
+    .ascii  "AI-ASM Kernel v0.68"
     .byte   13, 10, 0
 
 help_text:
@@ -3972,6 +4063,12 @@ msg_wasm_test20:
     .asciz  "Running WASM test20 (net_config)...\r\n"
 msg_net_config_result:
     .asciz  "net_config result = 0x"
+msg_wasm_test21:
+    .asciz  "Running WASM test21 (net_send/net_recv)...\r\n"
+msg_net_send_result:
+    .asciz  "net_send result = 0x"
+msg_net_recv_result:
+    .asciz  "net_recv result = 0x"
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -4705,3 +4802,72 @@ wasm_test_net_config_module:
     .byte   0x10, 0x0C             # call 12 (func_count=1, host_id=12-1=11=net_config)
     .byte   0x0B                   # end
 wasm_test_net_config_size = . - wasm_test_net_config_module
+
+# WASM 测试模块 21a：call time() host function
+# time() = host slot 5, wasm_func_count=1, call 6
+# WASM 测试模块 21a：net_send syscall
+# 发送 UDP 数据到 10.0.2.2:7
+wasm_test_net_send_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: (i32,i32,i32,i32,i32) -> i32
+    .byte   0x01                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x05                   # num params
+    .byte   0x7F, 0x7F, 0x7F, 0x7F, 0x7F  # 5 x i32
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: call net_send(type=0, dst_ip=0x0A000202, dst_port=7, ptr=0, len=4)
+    # WASM stack: last pushed = first popped, so push in reverse: type, ip, port, ptr, len
+    .byte   0x0A                   # section id
+    .byte   0x13                   # section size = 19
+    .byte   0x01                   # num codes
+    .byte   0x11                   # body size = 17
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x00             # i32.const 0 (type=UDP, first pushed=bottom)
+    .byte   0x41, 0x82, 0x90, 0x80, 0x80, 0x0A  # i32.const 0x0A000202 (10.0.2.2)
+    .byte   0x41, 0x07             # i32.const 7 (dst_port)
+    .byte   0x41, 0x00             # i32.const 0 (ptr)
+    .byte   0x41, 0x04             # i32.const 4 (len, last pushed=top)
+    .byte   0x10, 0x09             # call 9
+    .byte   0x0B                   # end
+wasm_test_net_send_size = . - wasm_test_net_send_module
+
+# WASM 测试模块 21b：net_recv syscall
+wasm_test_net_recv_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: (i32,i32,i32) -> i32
+    .byte   0x01                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x03                   # num params
+    .byte   0x7F, 0x7F, 0x7F       # 3 x i32
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: call net_recv(0, 256, 1024)
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14 (1 + 1 + 12 body)
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x00             # i32.const 0 (type)
+    .byte   0x41, 0x80, 0x02       # i32.const 256 (ptr)
+    .byte   0x41, 0x80, 0x08       # i32.const 1024 (maxlen)
+    .byte   0x10, 0x0A             # call 10 (func_count=1, host_id=9=net_recv)
+    .byte   0x0B                   # end
+wasm_test_net_recv_size = . - wasm_test_net_recv_module
+
