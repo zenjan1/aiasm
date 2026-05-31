@@ -465,6 +465,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest19
 
+    # "wasmtest20" - WASM net_config test
+    mov     edi, offset cmd_wasmtest20
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest20
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1466,6 +1472,37 @@ shell_dispatch:
     xor     eax, eax
     call    wasm_exec_func
     mov     esi, offset msg_net_status_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 16                 # hex output
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest20:
+    # WASM net_config test: call host function 11, verify config write
+    mov     esi, offset msg_wasm_test20
+    call    uart_puts
+    mov     esi, offset wasm_test_net_config_module
+    mov     ecx, offset wasm_test_net_config_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_net_config_result
     call    uart_puts
     mov     edi, offset shell_cmd_buf
     mov     dl, 16                 # hex output
@@ -3466,6 +3503,8 @@ cmd_wasmtest18:
     .asciz  "wasmtest18"
 cmd_wasmtest19:
     .asciz  "wasmtest19"
+cmd_wasmtest20:
+    .asciz  "wasmtest20"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -3714,7 +3753,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.66"
+    .ascii  "AI-ASM Kernel v0.67"
     .byte   13, 10, 0
 
 help_text:
@@ -3929,6 +3968,10 @@ msg_wasm_test19:
     .asciz  "Running WASM test19 (net_status)...\r\n"
 msg_net_status_result:
     .asciz  "net_status = 0x"
+msg_wasm_test20:
+    .asciz  "Running WASM test20 (net_config)...\r\n"
+msg_net_config_result:
+    .asciz  "net_config result = 0x"
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -4632,3 +4675,33 @@ wasm_test_net_status_module:
     .byte   0x10, 0x0B             # call 11 (func_count=1, host_id=11-1=10=net_status)
     .byte   0x0B                   # end
 wasm_test_net_status_size = . - wasm_test_net_status_module
+
+# WASM 测试模块 20：net_config syscall
+# 调用宿主函数11 (net_config)，传入缓冲区指针，返回结果
+wasm_test_net_config_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: (i32) -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x01                   # num params
+    .byte   0x7F                   # i32
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i32.const 0; call 12 (net_config); return
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # code size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x00             # i32.const 0 (buffer at linear memory offset 0)
+    .byte   0x10, 0x0C             # call 12 (func_count=1, host_id=12-1=11=net_config)
+    .byte   0x0B                   # end
+wasm_test_net_config_size = . - wasm_test_net_config_module

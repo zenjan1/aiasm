@@ -996,3 +996,32 @@ aiasm>
 
 ---
 
+## 当前版本：v0.67
+
+### ✅ v0.67 新增
+
+#### wasmtest20: net_config 宿主函数测试
+- wasm_test_net_config_module: WASM字节码模块
+  - 类型签名: (i32) -> i32
+  - 调用宿主函数12 (func_idx=12, host_id=12-1=11=net_config)
+  - 传入缓冲区指针: i32.const 0（线性内存偏移0）
+- net_config将IP(4字节)+MAC(6字节)+Gateway(4字节)+DNS(4字节)写入线性内存
+- 测试结果: net_config result = 0x0（成功）
+
+#### QEMU测试结果
+- 内核正常启动 v0.67 ✓
+- e1000初始化成功 ✓
+- version命令显示v0.67 ✓
+- wasmtest2-11全部通过 ✓
+- wasmtest19 net_status = 0x1 ✓
+- wasmtest20 net_config = 0x0 ✓
+
+#### 结论
+- WASM网络syscall接口完整验证（status + config）
+- 三层架构（汇编底层+WASM中间层+应用层）进一步验证成功
+
+#### 下一步
+1. wasmtest21: net_send/net_recv测试
+2. UPDATE=1
+
+---
