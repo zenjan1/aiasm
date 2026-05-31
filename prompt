@@ -901,3 +901,40 @@
 
 ---
 
+## 当前版本：v0.64
+
+### ✅ v0.64 新增
+
+#### WASM网络syscall接口 (wasm_syscall.asm)
+- WASM_HOST_NET_SEND (8): 发送网络数据（UDP/TCP）
+- WASM_HOST_NET_RECV (9): 接收网络数据
+- WASM_HOST_NET_STATUS (10): 获取网络状态
+- WASM_HOST_NET_CONFIG (11): 获取IP/MAC配置
+
+#### WASM发送包装函数 (kernel.asm)
+- e1000_send_udp_wasm: UDP发送包装，供WASM模块调用
+- e1000_send_tcp_data_wasm: TCP发送包装，供WASM模块调用
+
+#### 网络状态导出
+- e1000_status: 网卡初始化状态标志
+- e1000_mac_addr: MAC地址导出
+- e1000_dns_ip: DNS服务器IP导出
+- udp_send_dest_ip/data_len: UDP发送参数导出
+- tcp_recv_src_ip/src_port: TCP接收源导出
+
+#### WASM接口复用驱动架构
+- WASM模块可通过宿主函数接口调用e1000驱动
+- 简化开发：不重复造轮子，复用现有内核驱动
+- 12个宿主函数：print/println/putchar/getchar/meminfo/time/alloc/free/net_send/net_recv/net_status/net_config
+
+#### QEMU测试结果
+- 内核正常启动 v0.64 ✓
+- e1000初始化成功 ✓
+- WASM syscall接口添加完成 ✓
+
+#### 下一步
+1. WASM网络测试应用编写
+2. UPDATE=1
+
+---
+

@@ -18,6 +18,10 @@ WASM_HOST_MEMINFO    = 4     # meminfo() -> 打印内存信息
 WASM_HOST_TIME       = 5     # time() -> 获取系统滴答数
 WASM_HOST_ALLOC      = 6     # alloc(size) -> ptr -> 分配内存
 WASM_HOST_FREE       = 7     # free(ptr) -> 释放内存
+WASM_HOST_NET_SEND   = 8     # net_send(type, dst_ip, dst_port, ptr, len) -> 发送网络数据
+WASM_HOST_NET_RECV   = 9     # net_recv(type, ptr, maxlen) -> len -> 接收网络数据
+WASM_HOST_NET_STATUS = 10    # net_status() -> 网络状态
+WASM_HOST_NET_CONFIG = 11    # net_config(ptr) -> 写入IP/MAC配置到内存
 
 # ============================================================================
 # WASM 系统调用计数
@@ -72,6 +76,14 @@ wasm_host_call:
     je      .host_alloc
     cmp     eax, WASM_HOST_FREE
     je      .host_free
+    cmp     eax, WASM_HOST_NET_SEND
+    je      .host_net_send
+    cmp     eax, WASM_HOST_NET_RECV
+    je      .host_net_recv
+    cmp     eax, WASM_HOST_NET_STATUS
+    je      .host_net_status
+    cmp     eax, WASM_HOST_NET_CONFIG
+    je      .host_net_config
 
     # 未知函数
     mov     eax, -1
@@ -210,6 +222,121 @@ wasm_host_call:
 .host_free:
     # ebx = ptr
     # 简化实现：暂不支持真正的释放
+    xor     eax, eax
+    jmp     .done
+
+.host_net_send:
+    # ebx = type (0=UDP, 1=TCP), ecx = dst_ip, edx = dst_port, [esp+8] = ptr, [esp+12] = len
+    # 从栈获取额外参数（ebp已设置）
+    mov     esi, [ebp + 8]        # esi = ptr (WASM线性内存偏移)
+    mov     edi, [ebp + 12]       # edi = len
+    # 检查type
+    test    ebx, ebx
+    jnz     .net_send_tcp
+    # UDP发送
+    push    edi                   # len
+    add     esi, offset wasm_linear_memory  # esi = 物理地址
+    push    esi                   # data ptr
+    push    edx                   # port
+    push    ecx                   # ip
+    call    e1000_send_udp_wasm
+    add     esp, 16
+    jmp     .done
+.net_send_tcp:
+    # TCP发送（简化实现，使用当前连接）
+    push    edi                   # len
+    add     esi, offset wasm_linear_memory
+    push    esi                   # data ptr
+    push    edx                   # port
+    push    ecx                   # ip
+    call    e1000_send_tcp_data_wasm
+    add     esp, 16
+    jmp     .done
+
+.host_net_recv:
+    # ebx = type (0=UDP, 1=TCP), ecx = ptr, edx = maxlen
+    # 检查是否有数据就绪
+    test    ebx, ebx
+    jnz     .net_recv_tcp
+    # UDP接收
+    mov     eax, [udp_recv_ready]
+    test    eax, eax
+    jz      .net_recv_none
+    # 复制数据到WASM线性内存
+    mov     esi, offset udp_recv_buf
+    mov     edi, ecx
+    add     edi, offset wasm_linear_memory
+    mov     ecx, [udp_recv_len]
+    cmp     ecx, edx
+    ja      .net_recv_trunc_udp
+    rep     movsb
+    mov     eax, [udp_recv_len]
+    mov     dword ptr [udp_recv_ready], 0  # 清除标志
+    jmp     .done
+.net_recv_trunc_udp:
+    mov     ecx, edx
+    rep     movsb
+    mov     eax, edx              # 返回截断长度
+    mov     dword ptr [udp_recv_ready], 0
+    jmp     .done
+.net_recv_tcp:
+    # TCP接收
+    mov     eax, [tcp_recv_ready]
+    test    eax, eax
+    jz      .net_recv_none
+    mov     esi, offset tcp_recv_buf
+    mov     edi, ecx
+    add     edi, offset wasm_linear_memory
+    mov     ecx, [tcp_recv_len]
+    cmp     ecx, edx
+    ja      .net_recv_trunc_tcp
+    rep     movsb
+    mov     eax, [tcp_recv_len]
+    mov     dword ptr [tcp_recv_ready], 0
+    jmp     .done
+.net_recv_trunc_tcp:
+    mov     ecx, edx
+    rep     movsb
+    mov     eax, edx
+    mov     dword ptr [tcp_recv_ready], 0
+    jmp     .done
+.net_recv_none:
+    xor     eax, eax              # 返回0表示无数据
+    jmp     .done
+
+.host_net_status:
+    # 返回网络状态：eax = (e1000_ready << 0) | (dhcp_bound << 8) | (tcp_conn_count << 16)
+    movzx   eax, byte ptr [e1000_status]
+    movzx   ecx, byte ptr [e1000_dhcp_state]
+    cmp     ecx, 3                # DHCP bound?
+    jne     .net_status_no_dhcp
+    or      eax, 0x100            # DHCP bound bit
+.net_status_no_dhcp:
+    movzx   ecx, byte ptr [tcp_conn_active_count]
+    shl     ecx, 16
+    or      eax, ecx
+    jmp     .done
+
+.host_net_config:
+    # ebx = ptr (WASM线性内存偏移)
+    # 写入16字节网络配置：IP(4) + MAC(6) + Gateway(4) + DNS(4) - 2 = 16
+    mov     edi, ebx
+    add     edi, offset wasm_linear_memory
+    # IP地址
+    mov     eax, [e1000_our_ip]
+    mov     [edi], eax
+    # MAC地址
+    add     edi, 4
+    mov     esi, offset e1000_mac_addr
+    mov     ecx, 6
+    rep     movsb
+    # Gateway
+    mov     eax, [e1000_gateway_ip]
+    mov     [edi], eax
+    add     edi, 4
+    # DNS
+    mov     eax, [e1000_dns_ip]
+    mov     [edi], eax
     xor     eax, eax
     jmp     .done
 

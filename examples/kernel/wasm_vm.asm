@@ -201,6 +201,10 @@ WASM_HOST_MEMINFO    = 4
 WASM_HOST_TIME       = 5
 WASM_HOST_ALLOC      = 6
 WASM_HOST_FREE       = 7
+WASM_HOST_NET_SEND   = 8
+WASM_HOST_NET_RECV   = 9
+WASM_HOST_NET_STATUS = 10
+WASM_HOST_NET_CONFIG = 11
 
 # ============================================================================
 # 虚拟机状态（BSS）

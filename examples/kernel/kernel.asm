@@ -349,6 +349,9 @@ e1000_init:
     mov     esi, offset msg_e100ok
     call    uart_puts
 
+    # Mark e1000 initialized successfully
+    mov     dword ptr [e1000_status], 1
+
     popad
     ret
 
@@ -3442,6 +3445,68 @@ kernel_reboot:
     mov     al, 0xFE; out 0x64, al
 1:  hlt; jmp 1b
 
+# ============================================================================
+# e1000_send_udp_wasm: WASM wrapper for UDP send
+# Input: [esp+4] = ip, [esp+8] = port, [esp+12] = data ptr, [esp+16] = len
+# ============================================================================
+    .globl  e1000_send_udp_wasm
+e1000_send_udp_wasm:
+    push    ebp
+    mov     ebp, esp
+    pushad
+
+    mov     eax, [ebp + 8]           # dest IP
+    movzx   ecx, word ptr [ebp + 12] # dest port
+    mov     dx, 12345                # src port (fixed)
+    mov     esi, [ebp + 16]          # data ptr
+    mov     ecx, [ebp + 20]          # data len (overwrites port)
+
+    # Save len to temp variable
+    mov     [udp_send_data_len], ecx
+
+    # Call original UDP send (uses saved variables)
+    mov     esi, [ebp + 16]
+    call    e1000_send_udp
+
+    popad
+    pop     ebp
+    ret     16
+
+# ============================================================================
+# e1000_send_tcp_data_wasm: WASM wrapper for TCP send
+# Input: [esp+4] = ip, [esp+8] = port, [esp+12] = data ptr, [esp+16] = len
+# ============================================================================
+    .globl  e1000_send_tcp_data_wasm
+e1000_send_tcp_data_wasm:
+    push    ebp
+    mov     ebp, esp
+    pushad
+
+    # Copy data to tcp_recv_buf (source for e1000_send_tcp_data)
+    mov     esi, [ebp + 16]
+    mov     edi, offset tcp_recv_buf
+    mov     ecx, [ebp + 20]
+    push    ecx
+    shr     ecx, 2
+    rep     movsd
+    pop     ecx
+    and     ecx, 3
+    rep     movsb
+    mov     [tcp_recv_len], ecx
+
+    # Set remote IP/port for TCP response
+    mov     eax, [ebp + 8]
+    mov     [tcp_recv_src_ip], eax
+    movzx   eax, word ptr [ebp + 12]
+    mov     [tcp_recv_src_port], ax
+
+    # Call TCP data send
+    call    e1000_send_tcp_data
+
+    popad
+    pop     ebp
+    ret     16
+
     .section .bss
     .space  8192
 stack_top:
@@ -3466,7 +3531,12 @@ e1000_tx_desc:
     .space  128                # 8 descriptors * 16 bytes
 e1000_mac:
     .globl  e1000_mac
+    .globl  e1000_mac_addr
+e1000_mac_addr:
     .space  6
+e1000_status:
+    .globl  e1000_status
+    .space  4                  # 1 = e1000 initialized successfully
 e1000_rx_idx:
     .globl  e1000_rx_idx
     .space  4                  # current RX descriptor index
@@ -3484,6 +3554,7 @@ e1000_gateway_ip:
 e1000_subnet_mask:
     .space  4                  # subnet mask (from DHCP)
 e1000_dns_ip:
+    .globl  e1000_dns_ip
     .space  4                  # DNS server IP (from DHCP)
 e1000_dhcp_state:
     .globl  e1000_dhcp_state
@@ -3515,6 +3586,7 @@ e1000_irq_line:
 
 # UDP send parameters
 udp_send_dest_ip:
+    .globl  udp_send_dest_ip
     .space  4
 udp_send_dest_port:
     .space  2
@@ -3523,6 +3595,7 @@ udp_send_src_port:
 udp_send_data_ptr:
     .space  4
 udp_send_data_len:
+    .globl  udp_send_data_len
     .space  4
 
 # UDP receive buffer and state
@@ -3599,8 +3672,10 @@ tcp_recv_len:
     .globl  tcp_recv_len
     .space  4                  # received data length
 tcp_recv_src_ip:
+    .globl  tcp_recv_src_ip
     .space  4
 tcp_recv_src_port:
+    .globl  tcp_recv_src_port
     .space  2
 tcp_recv_dst_port:
     .space  2
@@ -3662,7 +3737,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.58"
+    .ascii  "Server: aiasm/v0.64"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3671,7 +3746,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.58!"
+    .ascii  "Hello from AI-ASM Kernel v0.64!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3688,7 +3763,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.58"
+    .ascii  "AI-ASM Kernel v0.64"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3735,7 +3810,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.58 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.64 booting..."
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
 msg_pic:     .asciz  "  PIC remapped"
