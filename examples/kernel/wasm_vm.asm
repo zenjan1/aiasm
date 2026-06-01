@@ -2012,7 +2012,7 @@ grow_fail:
 # 常量
 do_i32_const:
     mov     esi, [wasm_pc]
-    call    _read_leb128_s32      # 使用有符号解码器
+    call    _read_leb128_vm       # 使用无符号解码器
     call    _stack_push
     jmp     dispatch_done
 
