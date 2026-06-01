@@ -30,6 +30,10 @@ WASM_HOST_NET_CONFIG = 11    # net_config(ptr) -> 写入IP/MAC配置到内存
     .globl  wasm_syscall_count
 wasm_syscall_count:
     .space  4
+wasm_itoa_buf:
+    .space  32
+wasm_itoa_buf2:
+    .space  32
 
 # ============================================================================
 # wasm_syscall_init: 初始化 WASM 系统调用
@@ -141,40 +145,59 @@ wasm_host_call:
     jmp     .done
 
 .host_meminfo:
+    # Simplified: just print memory total as hex number
     push    eax
-    call    get_total_memory
-    mov     esi, eax
+    push    ebx
+    push    ecx
+    push    edx
     push    esi
+    push    edi
 
-    mov     esi, offset msg_mem_total
-    call    uart_puts
+    call    get_total_memory      # eax = total KB
 
-    pop     esi
-    mov     eax, esi
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
+    # Convert to decimal manually (simple, no itoa)
+    mov     ebx, eax              # ebx = value
+    mov     edi, offset wasm_itoa_buf
+    add     edi, 31
+    mov     byte ptr [edi], 0     # null terminator
+    dec     edi
 
-    mov     esi, offset msg_mem_kb
-    call    uart_puts
+    test    ebx, ebx
+    jz      .meminfo_zero
+.meminfo_loop:
+    test    ebx, ebx
+    jz      .meminfo_done
+    xor     edx, edx
+    mov     eax, ebx
+    mov     ecx, 10
+    div     ecx                   # eax = value/10, edx = remainder
+    mov     ebx, eax              # save quotient
+    add     dl, '0'
+    mov     [edi], dl
+    dec     edi
+    jmp     .meminfo_loop
 
-    call    get_free_memory
-    push    eax
-
-    mov     esi, offset msg_mem_free
-    call    uart_puts
-
-    pop     eax
-    call    utils_itoa
-    mov     esi, eax
+.meminfo_done:
+    inc     edi                   # edi = string start
+    mov     esi, edi
     call    uart_puts
 
     mov     esi, offset msg_mem_kb2
     call    uart_puts
 
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
     pop     eax
     xor     eax, eax
     jmp     .done
+
+.meminfo_zero:
+    mov     byte ptr [edi], '0'
+    dec     edi
+    jmp     .meminfo_done
 
 .host_time:
     call    get_tick_count
@@ -350,6 +373,8 @@ wasm_host_call:
     .section .rodata
 msg_host_net_send_debug:
     .asciz  "[HOST] net_send called\n"
+msg_meminfo_debug:
+    .asciz  "[HOST] meminfo called\n"
 msg_mem_total:
     .asciz  "Total: "
 msg_mem_free:

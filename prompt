@@ -1062,38 +1062,33 @@ aiasm>
 
 ---
 
-## 当前版本：v0.70
+## 当前版本：v0.71
 
-### ✅ v0.70 新增
+### ✅ v0.71 新增
 
-#### Bug修复: i32.const LEB128有符号解码错误
-- 问题: `_read_leb128_s32` 对单字节值 >= 64（bit 6 为 1）执行错误的符号扩展
-- 影响: i32.const 64-127 的值被错误解码为负数（如 72 → -128+72 = -56）
-- 修复: `do_i32_const` 改用 `_read_leb128_vm`（无符号解码器），符合WASM规范
+#### Bug修复: meminfo宿主函数崩溃
+- 问题: meminfo调用utils_itoa时未设置edi缓冲区指针，且utils_itoa不保存esi寄存器
+- 修复: 重写meminfo使用内联十进制转换+静态BSS缓冲区，避免utils_itoa寄存器破坏问题
 
-#### wasmtest23: putchar 多字符宿主函数测试
-- wasm_test_print_module: WASM字节码模块
+#### wasmtest24: meminfo宿主函数测试
+- wasm_test_meminfo_module: WASM字节码模块
   - 类型签名: () -> i32
   - 无局部变量
-  - 指令序列:
-    1. i32.const 72 ('H'); call 3 → putchar('H')
-    2. i32.const 105 ('i'); call 3 → putchar('i')
-    3. i32.const 33 ('!'); call 3 → putchar('!')
-    4. i32.const 10 ('\n'); call 3 → putchar('\n')
-    5. call 6 → time() 获取系统滴答数并返回
-- 测试结果: 输出 "Hi!" + time() = 1
+  - 指令序列: meminfo() → time() → 返回
+- 测试结果: 输出 "128956 KB" (系统128MB物理内存) + "meminfo() done"
 
 #### QEMU测试结果
-- 内核正常启动 v0.70 ✓
+- 内核正常启动 v0.71 ✓
 - e1000初始化成功 ✓
 - wasmtest2 = 42 ✓
-- wasmtest21 net_send = 0x1, net_recv = 0x0 ✓
+- wasmtest21 net_send = 0x1 ✓
 - wasmtest22 time() = 1 ✓
 - wasmtest23 = "Hi!" ✓
+- wasmtest24 = "128956 KB" ✓
 
 #### 下一步
-1. println/putchar/store/load 复合测试
-2. meminfo/getchar 宿主函数测试
+1. store/load内存读写调试
+2. getchar宿主函数测试
 3. UPDATE=1
 
 ---

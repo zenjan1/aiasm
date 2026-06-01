@@ -489,6 +489,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest23
 
+    # "wasmtest24" - WASM meminfo host function test
+    mov     edi, offset cmd_wasmtest24
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest24
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1676,6 +1682,29 @@ shell_wasmtest21:
     call    uart_putc
     mov     al, 0x0d
     call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest24:
+    # WASM meminfo host function test
+    mov     esi, offset msg_wasm_test24
+    call    uart_puts
+    mov     esi, offset wasm_test_meminfo_module
+    mov     ecx, offset wasm_test_meminfo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "meminfo() done\n"
+    mov     esi, offset msg_meminfo_result
+    call    uart_puts
     pop     ecx
     pop     edi
     pop     esi
@@ -3674,6 +3703,8 @@ cmd_wasmtest22:
     .asciz  "wasmtest22"
 cmd_wasmtest23:
     .asciz  "wasmtest23"
+cmd_wasmtest24:
+    .asciz  "wasmtest24"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4155,6 +4186,10 @@ msg_wasm_test23:
     .asciz  "Running WASM test23 (print/println/putchar)...\r\n"
 msg_print_result:
     .asciz  "time() = "
+msg_wasm_test24:
+    .asciz  "Running WASM test24 (meminfo)...\r\n"
+msg_meminfo_result:
+    .asciz  "meminfo() done\r\n"
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -5036,3 +5071,31 @@ wasm_test_print_module:
     .byte   0x0B                   # end
 wasm_test_print_size = . - wasm_test_print_module
 
+# WASM 测试模块 24：meminfo 宿主函数测试
+# 测试：meminfo() → time() → 返回
+wasm_test_meminfo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: meminfo() time()
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x06                   # body size = 6
+    .byte   0x00                   # num locals
+    .byte   0x10, 0x05             # call 5 (meminfo, host_id=4)
+    .byte   0x10, 0x06             # call 6 (time, host_id=5)
+    .byte   0x0B                   # end
+wasm_test_meminfo_size = . - wasm_test_meminfo_module
