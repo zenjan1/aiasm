@@ -1093,3 +1093,25 @@ aiasm>
 2. UPDATE=1
 
 ---
+
+## 当前版本：v0.73
+
+### ✅ v0.73 新增
+
+#### wasmtest26: getchar 宿主函数测试
+- wasm_test_getchar_module: WASM字节码模块
+  - 类型签名: () -> i32
+  - 指令序列: call getchar (func_idx=3, host_id=3); end
+- getchar从UART读取单字符并返回其ASCII码
+- 测试结果: getchar() 返回输入字符的十六进制值
+
+#### QEMU测试结果
+- 内核正常启动 v0.73 ✓
+- e1000初始化成功 ✓
+- wasmtest26 getchar 测试通过 ✓
+
+#### 下一步
+1. println + store/load 组合测试（验证store修复后println可用）
+2. UPDATE=1
+
+---
