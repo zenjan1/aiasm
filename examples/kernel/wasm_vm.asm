@@ -1506,19 +1506,19 @@ do_i32_store8:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
+    call    _stack_pop           # eax = address (WASM: address on top)
+    mov     edx, eax             # edx = base address
     call    _stack_pop           # eax = value
-    mov     edx, eax
-    call    _stack_pop           # eax = address
-    add     eax, ebx
+    add     edx, ebx             # edx = effective address (base + offset)
     test    ecx, ecx
     jz      .store8_skip_align
     mov     esi, 1
     shl     esi, cl
     dec     esi
-    test    eax, esi
+    test    edx, esi
     jnz     .store8_align_fail
 .store8_skip_align:
-    mov     [wasm_linear_memory + eax], dl
+    mov     [wasm_linear_memory + edx], al
     jmp     dispatch_done
 .store8_align_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1530,10 +1530,10 @@ do_i32_store16:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
+    call    _stack_pop           # eax = address (WASM: address on top)
+    mov     edx, eax             # edx = base address
     call    _stack_pop           # eax = value
-    mov     edx, eax
-    call    _stack_pop           # eax = address
-    add     eax, ebx
+    add     edx, ebx             # edx = effective address (base + offset)
     test    ecx, ecx
     jz      .store16_skip_align
     cmp     ecx, 1
@@ -1541,10 +1541,10 @@ do_i32_store16:
     mov     esi, 1
     shl     esi, cl
     dec     esi
-    test    eax, esi
+    test    edx, esi
     jnz     .store16_align_fail
 .store16_skip_align:
-    mov     [wasm_linear_memory + eax], dx
+    mov     [wasm_linear_memory + edx], ax
     jmp     dispatch_done
 .store16_align_fail:
     mov     dword ptr [wasm_exec_error], 4

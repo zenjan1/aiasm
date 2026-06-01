@@ -1115,3 +1115,27 @@ aiasm>
 2. UPDATE=1
 
 ---
+## 当前版本：v0.74
+
+### ✅ v0.74 新增
+
+#### Bug修复: i32.store8/i32.store16 栈操作顺序 + opcode错误
+- 问题1: store8/store16先弹value再弹address，但WASM语义中address在栈顶
+- 问题2: 手写字节码使用了错误opcode（0x38≠store8, 0x2E≠load8_u）
+- 修复: 修正栈弹出顺序，修正store8用al存储，store16用ax存储
+
+#### wasmtest27: store8/load8_u 字节存储测试
+- wasm_test_store_load_module: i32.const 64; i32.const 0; i32.store8; i32.const 0; i32.load8_u; return
+- 测试结果: 返回 64 ✓
+
+#### QEMU测试结果
+- 内核正常启动 v0.74 ✓
+- wasmtest27 = 64 ✓
+- wasmtest25 = 305419896 ✓
+- wasmtest2 = 42 ✓
+
+#### 下一步
+1. store16/load16_u 组合测试
+2. UPDATE=1
+
+---
