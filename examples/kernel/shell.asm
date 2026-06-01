@@ -513,6 +513,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest27
 
+    # "wasmtest28" - WASM store16/load16_u test
+    mov     edi, offset cmd_wasmtest28
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest28
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1809,6 +1815,38 @@ shell_wasmtest21:
     call    wasm_exec_func
     # Print "loaded value = "
     mov     esi, offset msg_store8_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest28:
+    # WASM store16/load16_u test: store16(0, 0xBEEF) → load16_u(0) → return 48879
+    mov     esi, offset msg_wasm_test28
+    call    uart_puts
+    mov     esi, offset wasm_test_store16_load16_module
+    mov     ecx, offset wasm_test_store16_load16_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "loaded value = "
+    mov     esi, offset msg_store16_result
     call    uart_puts
     mov     edi, offset shell_cmd_buf
     mov     dl, 10
@@ -3825,6 +3863,8 @@ cmd_wasmtest26:
     .asciz  "wasmtest26"
 cmd_wasmtest27:
     .asciz  "wasmtest27"
+cmd_wasmtest28:
+    .asciz  "wasmtest28"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4073,7 +4113,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.74"
+    .ascii  "AI-ASM Kernel v0.75"
     .byte   13, 10, 0
 
 help_text:
@@ -4322,24 +4362,10 @@ msg_wasm_test27:
     .asciz  "Running WASM test27 (store8/load8_u)...\r\n"
 msg_store8_result:
     .asciz  "loaded value = "
-msg_s8dbg_store:
-    .asciz  "[S8] val="
-msg_s8dbg_at:
-    .asciz  " addr="
-msg_s8dbg_byte:
-    .asciz  "[MEM+0]="
-msg_s8dbg_const:
-    .asciz  "[CONST]="
-msg_s8dbg_stkdp:
-    .asciz  "[STK_DEPTH]="
-msg_s8dbg_stkel:
-    .asciz  " ["
-msg_s8dbg_instcnt:
-    .asciz  "[INST_CNT]="
-msg_s8dbg_lastop:
-    .asciz  "[LAST_OP]=0x"
-msg_s8dbg_bytes:
-    .asciz  "[CODE]="
+msg_wasm_test28:
+    .asciz  "Running WASM test28 (store16/load16_u)...\r\n"
+msg_store16_result:
+    .asciz  "loaded value = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -5343,3 +5369,35 @@ wasm_test_store_load_module:
     .byte   0x2D, 0x00, 0x00       # i32.load8_u (align=0, offset=0)
     .byte   0x0B                   # end
 wasm_test_store_load_size = . - wasm_test_store_load_module
+
+# WASM 测试模块 28：store16/load16_u 组合测试
+# 测试：i32.store16(0, 0xBEEF) → i32.load16_u(0) → 返回 48879
+wasm_test_store16_load16_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: store16(0, 0xBEEF), load16_u(0), return
+    .byte   0x0A                   # section id
+    .byte   0x11                   # section size = 17
+    .byte   0x01                   # num codes
+    .byte   0x10                   # body size = 16
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEF, 0xFD, 0x02 # i32.const 0xBEEF (48879)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3B, 0x00, 0x00       # i32.store16 (align=0, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x2F, 0x00, 0x00       # i32.load16_u (align=0, offset=0)
+    .byte   0x0B                   # end
+wasm_test_store16_load16_size = . - wasm_test_store16_load16_module

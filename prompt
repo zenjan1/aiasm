@@ -1139,3 +1139,25 @@ aiasm>
 2. UPDATE=1
 
 ---
+
+## 当前版本：v0.75
+
+### ✅ v0.75 新增
+
+#### wasmtest28: store16/load16_u 字存储测试
+- wasm_test_store16_load16_module: i32.const 0xBEEF; i32.const 0; i32.store16; i32.const 0; i32.load16_u; return
+- 测试结果: 返回 48879 (0xBEEF) ✓
+- Bug修复: i32.load16_u 错误opcode (0x30≠load16_u, 正确是0x2F)
+
+#### QEMU测试结果
+- 内核正常启动 v0.75 ✓
+- wasmtest28 = 48879 ✓
+- wasmtest27 = 64 ✓
+- wasmtest25 = 305419896 ✓
+- wasmtest2 = 42 ✓
+
+#### 下一步
+1. store32/load32_u 组合测试
+2. UPDATE=1
+
+---
