@@ -477,6 +477,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest21
 
+    # "wasmtest22" - WASM time+alloc+memory test
+    mov     edi, offset cmd_wasmtest22
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest22
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1595,6 +1601,37 @@ shell_wasmtest21:
     call    uart_puts
     mov     edi, offset shell_cmd_buf
     mov     dl, 16                 # hex output
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest22:
+    # WASM time+alloc+memory test
+    mov     esi, offset msg_wasm_test22
+    call    uart_puts
+    mov     esi, offset wasm_test_time_alloc_module
+    mov     ecx, offset wasm_test_time_alloc_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_time_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10                 # decimal output
     call    utils_itoa
     mov     esi, eax
     call    uart_puts
@@ -3596,6 +3633,8 @@ cmd_wasmtest20:
     .asciz  "wasmtest20"
 cmd_wasmtest21:
     .asciz  "wasmtest21"
+cmd_wasmtest22:
+    .asciz  "wasmtest22"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4069,6 +4108,10 @@ msg_net_send_result:
     .asciz  "net_send result = 0x"
 msg_net_recv_result:
     .asciz  "net_recv result = 0x"
+msg_wasm_test22:
+    .asciz  "Running WASM test22 (time+alloc/memory)...\r\n"
+msg_time_result:
+    .asciz  "time() = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -4870,4 +4913,42 @@ wasm_test_net_recv_module:
     .byte   0x10, 0x0A             # call 10 (func_count=1, host_id=9=net_recv)
     .byte   0x0B                   # end
 wasm_test_net_recv_size = . - wasm_test_net_recv_module
+
+# WASM 测试模块 22：time + alloc/free + memory test
+# 测试组合：alloc → store → load → free → time → return
+wasm_test_time_alloc_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: alloc(4), tee 0, store "WASM", load, free, time
+    .byte   0x0A                   # section id
+    .byte   0x1F                   # section size = 31
+    .byte   0x01                   # num codes
+    .byte   0x1E                   # body size = 30
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x04             # i32.const 4 (size for alloc)
+    .byte   0x10, 0x07             # call 7 (func_count=1, host_id=6=alloc)
+    .byte   0x22, 0x00             # local.tee 0 (save ptr)
+    .byte   0x41, 0xCD, 0xA6, 0x85, 0xBA, 0x05  # i32.const 0x5741534D ("WASM" in memory)
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x36, 0x00, 0x00       # i32.store (alignment=0, offset=0)
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x28, 0x00, 0x00       # i32.load (alignment=0, offset=0)
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x10, 0x08             # call 8 (func_count=1, host_id=7=free)
+    .byte   0x10, 0x06             # call 6 (func_count=1, host_id=5=time)
+    .byte   0x0B                   # end
+wasm_test_time_alloc_size = . - wasm_test_time_alloc_module
 

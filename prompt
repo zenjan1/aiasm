@@ -1061,3 +1061,34 @@ aiasm>
 2. UPDATE=1
 
 ---
+
+## 当前版本：v0.69
+
+### ✅ v0.69 新增
+
+#### wasmtest22: time+alloc/memory 复合宿主函数测试
+- wasm_test_time_alloc_module: WASM字节码模块
+  - 类型签名: () -> i32
+  - 包含1个局部变量 (local 0)
+  - 指令序列:
+    1. i32.const 4; call 7 → alloc(4) 分配4字节
+    2. local.tee 0 → 保存指针到局部变量0
+    3. i32.const 0x5741534D; local.get 0; i32.store → 写入"WASM"到线性内存
+    4. local.get 0; i32.load → 从线性内存读回验证
+    5. local.get 0; call 8 → free(ptr) 释放内存
+    6. call 6 → time() 获取系统滴答数并返回
+- 测试结果: time() = 1 (系统刚启动，tick数很小)
+- 验证: alloc/free配对使用、i32.store/load内存读写、time()宿主函数调用均正常
+
+#### QEMU测试结果
+- 内核正常启动 v0.68 ✓
+- e1000初始化成功 ✓
+- wasmtest2 = 42 ✓
+- wasmtest21 net_send = 0x1, net_recv = 0x0 ✓
+- wasmtest22 time() = 1 ✓
+
+#### 下一步
+1. 更多WASM宿主函数测试 (print, println, putchar, meminfo, getchar)
+2. UPDATE=1
+
+---
