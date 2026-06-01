@@ -1062,33 +1062,34 @@ aiasm>
 
 ---
 
-## 当前版本：v0.71
+## 当前版本：v0.72
 
-### ✅ v0.71 新增
+### ✅ v0.72 新增
 
-#### Bug修复: meminfo宿主函数崩溃
-- 问题: meminfo调用utils_itoa时未设置edi缓冲区指针，且utils_itoa不保存esi寄存器
-- 修复: 重写meminfo使用内联十进制转换+静态BSS缓冲区，避免utils_itoa寄存器破坏问题
+#### Bug修复: i32.store栈操作顺序错误
+- 问题: store指令先弹出value再弹出address，但WASM语义中address在栈顶
+- 影响: 存储值被写入错误地址（值作为地址），线性内存读写完全错误
+- 修复: 改为先pop address再pop value，修正栈操作顺序
 
-#### wasmtest24: meminfo宿主函数测试
-- wasm_test_meminfo_module: WASM字节码模块
+#### wasmtest25: store/load 内存读写测试
+- wasm_test_store_module: WASM字节码模块
   - 类型签名: () -> i32
   - 无局部变量
-  - 指令序列: meminfo() → time() → 返回
-- 测试结果: 输出 "128956 KB" (系统128MB物理内存) + "meminfo() done"
+  - 指令序列: i32.const 0x12345678; i32.const 0; i32.store; i32.const 0; i32.load; return
+- 测试结果: 从线性内存offset 0读回值 305419896 (= 0x12345678) ✓
 
 #### QEMU测试结果
-- 内核正常启动 v0.71 ✓
+- 内核正常启动 v0.72 ✓
 - e1000初始化成功 ✓
 - wasmtest2 = 42 ✓
 - wasmtest21 net_send = 0x1 ✓
 - wasmtest22 time() = 1 ✓
 - wasmtest23 = "Hi!" ✓
 - wasmtest24 = "128956 KB" ✓
+- wasmtest25 = 305419896 (0x12345678) ✓
 
 #### 下一步
-1. store/load内存读写调试
-2. getchar宿主函数测试
-3. UPDATE=1
+1. getchar宿主函数测试
+2. UPDATE=1
 
 ---

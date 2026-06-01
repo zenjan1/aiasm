@@ -30,8 +30,10 @@ WASM_HOST_NET_CONFIG = 11    # net_config(ptr) -> 写入IP/MAC配置到内存
     .globl  wasm_syscall_count
 wasm_syscall_count:
     .space  4
+    .globl  wasm_itoa_buf
 wasm_itoa_buf:
     .space  32
+    .globl  wasm_itoa_buf2
 wasm_itoa_buf2:
     .space  32
 

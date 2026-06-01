@@ -495,6 +495,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest24
 
+    # "wasmtest25" - WASM store/load debug test
+    mov     edi, offset cmd_wasmtest25
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest25
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1705,6 +1711,38 @@ shell_wasmtest21:
     # Print "meminfo() done\n"
     mov     esi, offset msg_meminfo_result
     call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest25:
+    # WASM store/load debug test
+    mov     esi, offset msg_wasm_test25
+    call    uart_puts
+    mov     esi, offset wasm_test_store_module
+    mov     ecx, offset wasm_test_store_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "store/load result = "
+    mov     esi, offset msg_store_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
     pop     ecx
     pop     edi
     pop     esi
@@ -3705,6 +3743,8 @@ cmd_wasmtest23:
     .asciz  "wasmtest23"
 cmd_wasmtest24:
     .asciz  "wasmtest24"
+cmd_wasmtest25:
+    .asciz  "wasmtest25"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4190,6 +4230,10 @@ msg_wasm_test24:
     .asciz  "Running WASM test24 (meminfo)...\r\n"
 msg_meminfo_result:
     .asciz  "meminfo() done\r\n"
+msg_wasm_test25:
+    .asciz  "Running WASM test25 (store/load)...\r\n"
+msg_store_result:
+    .asciz  "loaded value = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -5099,3 +5143,37 @@ wasm_test_meminfo_module:
     .byte   0x10, 0x06             # call 6 (time, host_id=5)
     .byte   0x0B                   # end
 wasm_test_meminfo_size = . - wasm_test_meminfo_module
+
+# WASM 测试模块 25：store/load 调试测试
+# 测试：store 0x12345678 at offset 0 → load from offset 0 → return value
+wasm_test_store_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: store 0x12345678 at 0, load from 0, return
+    .byte   0x0A                   # section id
+    .byte   0x12                   # section size = 18
+    .byte   0x01                   # num codes
+    .byte   0x11                   # body size = 17
+    .byte   0x00                   # num locals
+    # store 0x12345678 at offset 0
+    .byte   0x41, 0xF8, 0xAC, 0xD1, 0x91, 0x01  # i32.const 0x12345678
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x36, 0x00, 0x00       # i32.store (align=0, offset=0)
+    # load from offset 0
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x28, 0x00, 0x00       # i32.load (align=0, offset=0)
+    .byte   0x0B                   # end
+wasm_test_store_size = . - wasm_test_store_module

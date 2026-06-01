@@ -1376,19 +1376,19 @@ do_i32_store:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
+    call    _stack_pop           # eax = address (WASM: address on top)
+    mov     edx, eax             # edx = base address
     call    _stack_pop           # eax = value
-    mov     edx, eax
-    call    _stack_pop           # eax = address
-    add     eax, ebx
+    add     edx, ebx             # edx = effective address (base + offset)
     test    ecx, ecx
     jz      .store_skip_align
     mov     esi, 1
     shl     esi, cl
     dec     esi
-    test    eax, esi
+    test    edx, esi
     jnz     .store_align_fail
 .store_skip_align:
-    mov     [wasm_linear_memory + eax], edx
+    mov     [wasm_linear_memory + edx], eax
     jmp     dispatch_done
 .store_align_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -5292,3 +5292,24 @@ read_sleb_vm_no_extend:
     pop     ecx
     pop     ebx
     ret
+
+    .section .rodata
+msg_store_debug:
+    .asciz  "[STORE] val="
+msg_store_debug2:
+    .asciz  "[STORE] stack_top="
+msg_store_pop1:
+    .asciz  "[STORE] pop1 (value)="
+msg_store_pop2:
+    .asciz  "[STORE] pop2 (addr)="
+msg_store_addr:
+    .asciz  "[STORE] addr="
+msg_store_val:
+    .asciz  "[STORE] val="
+msg_store_verify:
+    .asciz  "[STORE] verify="
+msg_load_debug:
+    .asciz  "[LOAD] val="
+msg_const_debug:
+    .asciz  "[CONST] val="
+
