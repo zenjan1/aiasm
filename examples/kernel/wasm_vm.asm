@@ -115,6 +115,22 @@ OP_I64_LE_U      = 0x58
 OP_I64_GE_S      = 0x59
 OP_I64_GE_U      = 0x5A
 
+# f32 比较运算 (返回 i32)
+OP_F32_EQ        = 0x5B
+OP_F32_NE        = 0x5C
+OP_F32_LT        = 0x5D
+OP_F32_GT        = 0x5E
+OP_F32_LE        = 0x5F
+OP_F32_GE        = 0x60
+
+# f64 比较运算 (返回 i32)
+OP_F64_EQ        = 0x61
+OP_F64_NE        = 0x62
+OP_F64_LT        = 0x63
+OP_F64_GT        = 0x64
+OP_F64_LE        = 0x65
+OP_F64_GE        = 0x66
+
 # i64 算术运算
 OP_I64_CLZ       = 0x79
 OP_I64_CTZ       = 0x7A
@@ -801,6 +817,34 @@ _dispatch_opcode:
     je      do_i64_ge_s
     cmp     ebx, OP_I64_GE_U
     je      do_i64_ge_u
+
+    # f32 比较运算
+    cmp     ebx, OP_F32_EQ
+    je      do_f32_eq
+    cmp     ebx, OP_F32_NE
+    je      do_f32_ne
+    cmp     ebx, OP_F32_LT
+    je      do_f32_lt
+    cmp     ebx, OP_F32_GT
+    je      do_f32_gt
+    cmp     ebx, OP_F32_LE
+    je      do_f32_le
+    cmp     ebx, OP_F32_GE
+    je      do_f32_ge
+
+    # f64 比较运算
+    cmp     ebx, OP_F64_EQ
+    je      do_f64_eq
+    cmp     ebx, OP_F64_NE
+    je      do_f64_ne
+    cmp     ebx, OP_F64_LT
+    je      do_f64_lt
+    cmp     ebx, OP_F64_GT
+    je      do_f64_gt
+    cmp     ebx, OP_F64_LE
+    je      do_f64_le
+    cmp     ebx, OP_F64_GE
+    je      do_f64_ge
 
     # i64 算术
     cmp     ebx, OP_I64_ADD
@@ -3927,10 +3971,12 @@ do_f64_div:
 # f32.eq: 比较两个 f32，返回 i32 (0 或 1)
 do_f32_eq:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b
     call    _stack_pop           # a
+    push    edx                  # [esp] = b (push b first)
+    push    eax                  # [esp] = a, [esp+4] = b (push a second)
     fld     dword ptr [esp]      # st0 = a
-    fcomp   dword ptr [esp + 4]  # 比较 a 和 b，弹出 st0
+    fcomp   dword ptr [esp + 4]  # compare a 和 b，弹出 st0
     fstsw   ax                   # ax = FPU 状态字
     sahf                        # 将 ah 存入 CPU flags
     sete    al                   # al = 1 if equal
@@ -3942,10 +3988,12 @@ do_f32_eq:
 # f32.ne: 比较两个 f32，返回 i32 (不相等为 1)
 do_f32_ne:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b
     call    _stack_pop           # a
-    fld     dword ptr [esp]
-    fcomp   dword ptr [esp + 4]
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = a, [esp+4] = b
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # compare a, b
     fstsw   ax
     sahf
     setne   al                   # not equal
@@ -3957,8 +4005,10 @@ do_f32_ne:
 # f32.lt: 比较两个 f32，a < b 返回 1
 do_f32_lt:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b
     call    _stack_pop           # a
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = a, [esp+4] = b
     fld     dword ptr [esp]      # st0 = a
     fcomp   dword ptr [esp + 4]  # compare a, b
     fstsw   ax
@@ -3972,10 +4022,12 @@ do_f32_lt:
 # f32.gt: 比较两个 f32，a > b 返回 1
 do_f32_gt:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b
     call    _stack_pop           # a
-    fld     dword ptr [esp]
-    fcomp   dword ptr [esp + 4]
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = a, [esp+4] = b
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # compare a, b
     fstsw   ax
     sahf
     seta    al                   # above (a > b)
@@ -3987,10 +4039,12 @@ do_f32_gt:
 # f32.le: 比较两个 f32，a <= b 返回 1
 do_f32_le:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b
     call    _stack_pop           # a
-    fld     dword ptr [esp]
-    fcomp   dword ptr [esp + 4]
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = a, [esp+4] = b
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # compare a, b
     fstsw   ax
     sahf
     setbe   al                   # below or equal
@@ -4002,10 +4056,12 @@ do_f32_le:
 # f32.ge: 比较两个 f32，a >= b 返回 1
 do_f32_ge:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b
     call    _stack_pop           # a
-    fld     dword ptr [esp]
-    fcomp   dword ptr [esp + 4]
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = a, [esp+4] = b
+    fld     dword ptr [esp]      # st0 = a
+    fcomp   dword ptr [esp + 4]  # compare a, b
     fstsw   ax
     sahf
     setae   al                   # above or equal
@@ -4016,19 +4072,23 @@ do_f32_ge:
 
 # f64.eq: 比较两个 f64（各 2 栈槽），返回 i32
 do_f64_eq:
+    # WASM栈：先压high，后压low。弹出顺序：low先，high后
     # 弹出 b: b_low, b_high
     call    _stack_pop           # b_low
-    push    eax
+    mov     edx, eax             # 保存 b_low
     call    _stack_pop           # b_high
-    push    eax
+    mov     ecx, eax             # 保存 b_high
     # 弹出 a: a_low, a_high
     call    _stack_pop           # a_low
-    push    eax
+    mov     ebx, eax             # 保存 a_low
     call    _stack_pop           # a_high
-    push    eax
-    # 栈布局: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
-    fld     qword ptr [esp + 4]  # st0 = a (qword from a_low addr)
-    fcomp   qword ptr [esp + 12] # compare with b
+    # 构建栈布局: [esp]=a_low, [esp+4]=a_high, [esp+8]=b_low, [esp+12]=b_high
+    push    ecx                  # b_high (at esp+12)
+    push    edx                  # b_low (at esp+8)
+    push    eax                  # a_high (at esp+4)
+    push    ebx                  # a_low (at esp)
+    fld     qword ptr [esp]      # st0 = a
+    fcomp   qword ptr [esp + 8]  # compare a, b
     fstsw   ax
     sahf
     sete    al
@@ -4039,16 +4099,19 @@ do_f64_eq:
 
 # f64.ne
 do_f64_ne:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp + 4]
-    fcomp   qword ptr [esp + 12]
+    call    _stack_pop           # b_low
+    mov     edx, eax
+    call    _stack_pop           # b_high
+    mov     ecx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high
+    push    edx                  # b_low
+    push    eax                  # a_high
+    push    ebx                  # a_low
+    fld     qword ptr [esp]
+    fcomp   qword ptr [esp + 8]
     fstsw   ax
     sahf
     setne   al
@@ -4059,19 +4122,22 @@ do_f64_ne:
 
 # f64.lt
 do_f64_lt:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp + 4]
-    fcomp   qword ptr [esp + 12]
+    call    _stack_pop           # b_low
+    mov     edx, eax
+    call    _stack_pop           # b_high
+    mov     ecx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high
+    push    edx                  # b_low
+    push    eax                  # a_high
+    push    ebx                  # a_low
+    fld     qword ptr [esp]
+    fcomp   qword ptr [esp + 8]
     fstsw   ax
     sahf
-    setb    al
+    setb    al                   # below (a < b)
     movzx   eax, al
     add     esp, 16
     call    _stack_push
@@ -4079,19 +4145,22 @@ do_f64_lt:
 
 # f64.gt
 do_f64_gt:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp + 4]
-    fcomp   qword ptr [esp + 12]
+    call    _stack_pop           # b_low
+    mov     edx, eax
+    call    _stack_pop           # b_high
+    mov     ecx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high
+    push    edx                  # b_low
+    push    eax                  # a_high
+    push    ebx                  # a_low
+    fld     qword ptr [esp]
+    fcomp   qword ptr [esp + 8]
     fstsw   ax
     sahf
-    seta    al
+    seta    al                   # above (a > b)
     movzx   eax, al
     add     esp, 16
     call    _stack_push
@@ -4099,19 +4168,22 @@ do_f64_gt:
 
 # f64.le
 do_f64_le:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp + 4]
-    fcomp   qword ptr [esp + 12]
+    call    _stack_pop           # b_low
+    mov     edx, eax
+    call    _stack_pop           # b_high
+    mov     ecx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high
+    push    edx                  # b_low
+    push    eax                  # a_high
+    push    ebx                  # a_low
+    fld     qword ptr [esp]
+    fcomp   qword ptr [esp + 8]
     fstsw   ax
     sahf
-    setbe   al
+    setbe   al                   # below or equal (a <= b)
     movzx   eax, al
     add     esp, 16
     call    _stack_push
@@ -4119,19 +4191,22 @@ do_f64_le:
 
 # f64.ge
 do_f64_ge:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp + 4]
-    fcomp   qword ptr [esp + 12]
+    call    _stack_pop           # b_low
+    mov     edx, eax
+    call    _stack_pop           # b_high
+    mov     ecx, eax
+    call    _stack_pop           # a_low
+    mov     ebx, eax
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high
+    push    edx                  # b_low
+    push    eax                  # a_high
+    push    ebx                  # a_low
+    fld     qword ptr [esp]
+    fcomp   qword ptr [esp + 8]
     fstsw   ax
     sahf
-    setae   al
+    setae   al                   # above or equal (a >= b)
     movzx   eax, al
     add     esp, 16
     call    _stack_push
