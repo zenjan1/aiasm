@@ -549,6 +549,18 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest33
 
+    # "wasmtest34" - WASM i64.div_u test
+    mov     edi, offset cmd_wasmtest34
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest34
+
+    # "wasmtest35" - WASM i64.div_s test
+    mov     edi, offset cmd_wasmtest35
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest35
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -2037,6 +2049,70 @@ shell_wasmtest21:
     call    wasm_exec_func
     # Print "i64 mul = "
     mov     esi, offset msg_i64_mul_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest34:
+    # WASM i64.div_u test: 0x100000000 / 16 = 0x10000000 (268435456)
+    mov     esi, offset msg_wasm_test34
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_div_u_module
+    mov     ecx, offset wasm_test_i64_div_u_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 div_u = "
+    mov     esi, offset msg_i64_div_u_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest35:
+    # WASM i64.div_s test: -100 / 10 = -10
+    mov     esi, offset msg_wasm_test35
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_div_s_module
+    mov     ecx, offset wasm_test_i64_div_s_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 div_s = "
+    mov     esi, offset msg_i64_div_s_result
     call    uart_puts
     mov     edi, offset shell_cmd_buf
     mov     dl, 10
@@ -4065,6 +4141,10 @@ cmd_wasmtest32:
     .asciz  "wasmtest32"
 cmd_wasmtest33:
     .asciz  "wasmtest33"
+cmd_wasmtest34:
+    .asciz  "wasmtest34"
+cmd_wasmtest35:
+    .asciz  "wasmtest35"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4313,7 +4393,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.78"
+    .ascii  "AI-ASM Kernel v0.79"
     .byte   13, 10, 0
 
 help_text:
@@ -4586,6 +4666,14 @@ msg_wasm_test33:
     .asciz  "Running WASM test33 (i64.mul)...\r\n"
 msg_i64_mul_result:
     .asciz  "i64 mul = "
+msg_wasm_test34:
+    .asciz  "Running WASM test34 (i64.div_u)...\r\n"
+msg_i64_div_u_result:
+    .asciz  "i64 div_u = "
+msg_wasm_test35:
+    .asciz  "Running WASM test35 (i64.div_s)...\r\n"
+msg_i64_div_s_result:
+    .asciz  "i64 div_s = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -5771,3 +5859,63 @@ wasm_test_i64_mul_module:
     .byte   0x7E                   # i64.mul
     .byte   0x0B                   # end
 wasm_test_i64_mul_size = . - wasm_test_i64_mul_module
+
+# WASM 测试模块 34：i64.div_u 测试
+# 测试：i64.const 0x100000000 / i64.const 16 = 0x10000000 (268435456)
+wasm_test_i64_div_u_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0x100000000, i64.const 16, i64.div_u, end
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x80, 0x80, 0x80, 0x10  # i64.const 0x100000000 (LEB128, 5 bytes)
+    .byte   0x42, 0x10             # i64.const 16
+    .byte   0x80                   # i64.div_u
+    .byte   0x0B                   # end
+wasm_test_i64_div_u_size = . - wasm_test_i64_div_u_module
+
+# WASM 测试模块 35：i64.div_s 测试
+# 测试：i64.const -100 / i64.const 10 = -10
+wasm_test_i64_div_s_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const -100, i64.const 10, i64.div_s, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x9C, 0x7F       # i64.const -100 (signed LEB128)
+    .byte   0x42, 0x0A             # i64.const 10
+    .byte   0x7F                   # i64.div_s
+    .byte   0x0B                   # end
+wasm_test_i64_div_s_size = . - wasm_test_i64_div_s_module
