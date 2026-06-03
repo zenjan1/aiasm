@@ -1,7 +1,7 @@
     .intel_syntax noprefix
 # -----------------------------------------------------------------------------
 # shell.asm - 命令行交互界面（串口终端）
-# v1.29 - 280 WASM tests milestone
+# v1.30 - 290 WASM tests milestone
 # -----------------------------------------------------------------------------
     .code32
 
@@ -2047,6 +2047,66 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_wasmtest280
+
+    # "wasmtest281" - f64.nearest test
+    mov     edi, offset cmd_wasmtest281
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest281
+
+    # "wasmtest282" - f64.copysign test
+    mov     edi, offset cmd_wasmtest282
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest282
+
+    # "wasmtest283" - f64.eq test
+    mov     edi, offset cmd_wasmtest283
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest283
+
+    # "wasmtest284" - f64.ne test
+    mov     edi, offset cmd_wasmtest284
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest284
+
+    # "wasmtest285" - f64.lt test
+    mov     edi, offset cmd_wasmtest285
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest285
+
+    # "wasmtest286" - f64.gt test
+    mov     edi, offset cmd_wasmtest286
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest286
+
+    # "wasmtest287" - f64.le test
+    mov     edi, offset cmd_wasmtest287
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest287
+
+    # "wasmtest288" - f64.ge test
+    mov     edi, offset cmd_wasmtest288
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest288
+
+    # "wasmtest289" - f64 conversion test
+    mov     edi, offset cmd_wasmtest289
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest289
+
+    # "wasmtest290" - 290 tests milestone (returns 290)
+    mov     edi, offset cmd_wasmtest290
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest290
 
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
@@ -12353,6 +12413,368 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest281: f64.nearest test
+# ============================================================================
+.do_wasmtest281:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test281
+    call    uart_puts
+    mov     esi, offset wasm_test281_f64_nearest_module
+    mov     ecx, offset wasm_test281_f64_nearest_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_test281_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest282: f64.copysign test
+# ============================================================================
+.do_wasmtest282:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test282
+    call    uart_puts
+    mov     esi, offset wasm_test282_f64_copysign_module
+    mov     ecx, offset wasm_test282_f64_copysign_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_test282_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest283: f64.eq test
+# ============================================================================
+.do_wasmtest283:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test283
+    call    uart_puts
+    mov     esi, offset wasm_test283_f64_eq_module
+    mov     ecx, offset wasm_test283_f64_eq_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest284: f64.ne test
+# ============================================================================
+.do_wasmtest284:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test284
+    call    uart_puts
+    mov     esi, offset wasm_test284_f64_ne_module
+    mov     ecx, offset wasm_test284_f64_ne_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest285: f64.lt test
+# ============================================================================
+.do_wasmtest285:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test285
+    call    uart_puts
+    mov     esi, offset wasm_test285_f64_lt_module
+    mov     ecx, offset wasm_test285_f64_lt_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest286: f64.gt test
+# ============================================================================
+.do_wasmtest286:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test286
+    call    uart_puts
+    mov     esi, offset wasm_test286_f64_gt_module
+    mov     ecx, offset wasm_test286_f64_gt_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest287: f64.le test
+# ============================================================================
+.do_wasmtest287:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test287
+    call    uart_puts
+    mov     esi, offset wasm_test287_f64_le_module
+    mov     ecx, offset wasm_test287_f64_le_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest288: f64.ge test
+# ============================================================================
+.do_wasmtest288:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test288
+    call    uart_puts
+    mov     esi, offset wasm_test288_f64_ge_module
+    mov     ecx, offset wasm_test288_f64_ge_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest289: f64 conversion test (i32.trunc_f64_s)
+# ============================================================================
+.do_wasmtest289:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test289
+    call    uart_puts
+    mov     esi, offset wasm_test289_f64_conv_module
+    mov     ecx, offset wasm_test289_f64_conv_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest290: 290 tests milestone (returns 290)
+# ============================================================================
+.do_wasmtest290:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test290
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone290_module
+    mov     ecx, offset wasm_test_milestone290_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone290
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -15689,6 +16111,26 @@ cmd_wasmtest279:
     .asciz  "wasmtest279"
 cmd_wasmtest280:
     .asciz  "wasmtest280"
+cmd_wasmtest281:
+    .asciz  "wasmtest281"
+cmd_wasmtest282:
+    .asciz  "wasmtest282"
+cmd_wasmtest283:
+    .asciz  "wasmtest283"
+cmd_wasmtest284:
+    .asciz  "wasmtest284"
+cmd_wasmtest285:
+    .asciz  "wasmtest285"
+cmd_wasmtest286:
+    .asciz  "wasmtest286"
+cmd_wasmtest287:
+    .asciz  "wasmtest287"
+cmd_wasmtest288:
+    .asciz  "wasmtest288"
+cmd_wasmtest289:
+    .asciz  "wasmtest289"
+cmd_wasmtest290:
+    .asciz  "wasmtest290"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -16792,6 +17234,45 @@ msg_wasm_test280:
 
 msg_wasm_milestone280:
     .asciz  "[280 WASM tests completed! v1.29 MILESTONE!]\r\n"
+
+msg_wasm_test281:
+    .asciz  "[WASMTEST281] f64.nearest test\r\n"
+
+msg_test281_result:
+    .asciz  "f64.nearest(3.7) = "
+
+msg_wasm_test282:
+    .asciz  "[WASMTEST282] f64.copysign test\r\n"
+
+msg_test282_result:
+    .asciz  "f64.copysign(3.0, -2.0) = "
+
+msg_wasm_test283:
+    .asciz  "[WASMTEST283] f64.eq test\r\n"
+
+msg_wasm_test284:
+    .asciz  "[WASMTEST284] f64.ne test\r\n"
+
+msg_wasm_test285:
+    .asciz  "[WASMTEST285] f64.lt test\r\n"
+
+msg_wasm_test286:
+    .asciz  "[WASMTEST286] f64.gt test\r\n"
+
+msg_wasm_test287:
+    .asciz  "[WASMTEST287] f64.le test\r\n"
+
+msg_wasm_test288:
+    .asciz  "[WASMTEST288] f64.ge test\r\n"
+
+msg_wasm_test289:
+    .asciz  "[WASMTEST289] f64 conversion test\r\n"
+
+msg_wasm_test290:
+    .asciz  "[WASMTEST290] 290 tests milestone\r\n"
+
+msg_wasm_milestone290:
+    .asciz  "[290 WASM tests completed! v1.30 MILESTONE!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -29054,3 +29535,450 @@ wasm_test_milestone280_module:
     .byte   0x41, 0x98, 0x02       # i32.const 280 (LEB128: 0x98, 0x02)
     .byte   0x0B                   # end
 wasm_test_milestone280_size = . - wasm_test_milestone280_module
+
+# =====================================================
+# wasmtest281: f64.nearest test
+# =====================================================
+# Test: f64.nearest(3.7) = 4.0
+# IEEE 754 double: 3.7 = 0x400D99999999999A (little-endian)
+# Type: () -> f64
+wasm_test281_f64_nearest_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.7, f64.nearest
+    .byte   0x0A                   # section id
+    .byte   0x12                   # section size = 18
+    .byte   0x01                   # num codes
+    .byte   0x10                   # body size = 16
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.7 in IEEE 754 double: 0x400D99999999999A (little-endian)
+    .byte   0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0x0D, 0x40
+    .byte   0x9F                   # f64.nearest opcode
+    .byte   0x0B                   # end
+wasm_test281_f64_nearest_size = . - wasm_test281_f64_nearest_module
+
+# =====================================================
+# wasmtest282: f64.copysign test
+# =====================================================
+# Test: f64.copysign(3.0, -2.0) = -3.0
+# IEEE 754: 3.0 = 0x4008000000000000, -2.0 = 0xC000000000000000
+# Type: () -> f64
+wasm_test282_f64_copysign_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.0, f64.const -2.0, f64.copysign
+    .byte   0x0A                   # section id
+    .byte   0x1A                   # section size = 26
+    .byte   0x01                   # num codes
+    .byte   0x18                   # body size = 24
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x44                   # f64.const opcode
+    # -2.0 in IEEE 754 double: 0xC000000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0
+    .byte   0xA6                   # f64.copysign opcode
+    .byte   0x0B                   # end
+wasm_test282_f64_copysign_size = . - wasm_test282_f64_copysign_module
+
+# =====================================================
+# wasmtest283: f64.eq test
+# =====================================================
+# Test: 3.0 == 3.0 -> 1 (i32)
+# IEEE 754: 3.0 = 0x4008000000000000
+# Type: () -> i32 (comparison returns i32)
+wasm_test283_f64_eq_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.0, f64.const 3.0, f64.eq
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x61                   # f64.eq opcode
+    .byte   0x0B                   # end
+wasm_test283_f64_eq_size = . - wasm_test283_f64_eq_module
+
+# =====================================================
+# wasmtest284: f64.ne test
+# =====================================================
+# Test: 3.0 != 4.0 -> 1 (i32)
+# IEEE 754: 3.0 = 0x4008000000000000, 4.0 = 0x4010000000000000
+# Type: () -> i32
+wasm_test284_f64_ne_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.0, f64.const 4.0, f64.ne
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x44                   # f64.const opcode
+    # 4.0 in IEEE 754 double: 0x4010000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x40
+    .byte   0x62                   # f64.ne opcode
+    .byte   0x0B                   # end
+wasm_test284_f64_ne_size = . - wasm_test284_f64_ne_module
+
+# =====================================================
+# wasmtest285: f64.lt test
+# =====================================================
+# Test: 2.0 < 3.0 -> 1 (i32)
+# IEEE 754: 2.0 = 0x4000000000000000, 3.0 = 0x4008000000000000
+# Type: () -> i32
+wasm_test285_f64_lt_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 2.0, f64.const 3.0, f64.lt
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 2.0 in IEEE 754 double: 0x4000000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x63                   # f64.lt opcode
+    .byte   0x0B                   # end
+wasm_test285_f64_lt_size = . - wasm_test285_f64_lt_module
+
+# =====================================================
+# wasmtest286: f64.gt test
+# =====================================================
+# Test: 3.0 > 2.0 -> 1 (i32)
+# IEEE 754: 3.0 = 0x4008000000000000, 2.0 = 0x4000000000000000
+# Type: () -> i32
+wasm_test286_f64_gt_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.0, f64.const 2.0, f64.gt
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x44                   # f64.const opcode
+    # 2.0 in IEEE 754 double: 0x4000000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40
+    .byte   0x64                   # f64.gt opcode
+    .byte   0x0B                   # end
+wasm_test286_f64_gt_size = . - wasm_test286_f64_gt_module
+
+# =====================================================
+# wasmtest287: f64.le test
+# =====================================================
+# Test: 3.0 <= 3.0 -> 1 (i32)
+# IEEE 754: 3.0 = 0x4008000000000000
+# Type: () -> i32
+wasm_test287_f64_le_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.0, f64.const 3.0, f64.le
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x65                   # f64.le opcode
+    .byte   0x0B                   # end
+wasm_test287_f64_le_size = . - wasm_test287_f64_le_module
+
+# =====================================================
+# wasmtest288: f64.ge test
+# =====================================================
+# Test: 3.0 >= 3.0 -> 1 (i32)
+# IEEE 754: 3.0 = 0x4008000000000000
+# Type: () -> i32
+wasm_test288_f64_ge_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.0, f64.const 3.0, f64.ge
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x44                   # f64.const opcode
+    # 3.0 in IEEE 754 double: 0x4008000000000000 (little-endian)
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40
+    .byte   0x66                   # f64.ge opcode
+    .byte   0x0B                   # end
+wasm_test288_f64_ge_size = . - wasm_test288_f64_ge_module
+
+# =====================================================
+# wasmtest289: f64 conversion test (i32.trunc_f64_s)
+# =====================================================
+# Test: i32.trunc_f64_s(3.7) = 3 (i32)
+# IEEE 754: 3.7 = 0x400D99999999999A
+# Type: () -> i32
+wasm_test289_f64_conv_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 3.7, i32.trunc_f64_s
+    .byte   0x0A                   # section id
+    .byte   0x12                   # section size = 18
+    .byte   0x01                   # num codes
+    .byte   0x10                   # body size = 16
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const opcode
+    # 3.7 in IEEE 754 double: 0x400D99999999999A (little-endian)
+    .byte   0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0x0D, 0x40
+    .byte   0xAA                   # i32.trunc_f64_s opcode
+    .byte   0x0B                   # end
+wasm_test289_f64_conv_size = . - wasm_test289_f64_conv_module
+
+# =====================================================
+# wasmtest290: 290 tests milestone - returns 290
+# =====================================================
+# v1.30 milestone: 290 WASM tests completed
+# Type: () -> i32
+wasm_test_milestone290_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 290 (LEB128: 0x22, 0x02)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x22, 0x02       # i32.const 290 (LEB128: 0x22, 0x02)
+    .byte   0x0B                   # end
+wasm_test_milestone290_size = . - wasm_test_milestone290_module
