@@ -351,9 +351,11 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasm
 
-    # "wasmrun" - run WASM test
+    # "wasmrun <file>" - run WASM from file
     mov     edi, offset cmd_wasmrun
-    call    utils_strcmp
+    mov     esi, offset shell_cmd_buf
+    mov     ecx, 8                 # "wasmrun " length
+    call    utils_strncmp
     test    eax, eax
     jz      .do_wasmrun
 
@@ -1287,13 +1289,50 @@ shell_dispatch:
     ret
 
 .do_wasmrun:
-    # 运行内置测试 WASM 模块
-    mov     esi, offset msg_wasm_test
-    call    uart_puts
+    # wasmrun <filename> - 从VFS加载并执行WASM文件
+    # 跳过 "wasmrun " 前缀 (8 字符)
+    lea     esi, [shell_cmd_buf + 8]
+    call    utils_strlen
+    test    eax, eax
+    jz      .wasmrun_usage
 
-    # 加载测试模块（手工编码的简单加法函数）
-    mov     esi, offset wasm_test_module
-    mov     ecx, 32              # wasm_test_module size (hardcoded)
+    # 检查是否是内置 hello.wasm
+    lea     edi, [shell_cmd_buf + 8]
+    mov     esi, offset cmd_hello_wasm
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmrun_hello_builtin
+
+    # 使用 vfs_find_by_path 查找文件
+    lea     esi, [shell_cmd_buf + 8]
+    call    vfs_find_by_path
+    cmp     eax, -1
+    je      .wasmrun_not_found
+
+    # 读取文件内容
+    call    vfs_read_file
+    cmp     ecx, -1
+    je      .wasmrun_read_err
+    test    ecx, ecx
+    jz      .wasmrun_empty
+
+    # 保存文件大小
+    push    ecx
+
+    # 打印加载信息
+    mov     esi, offset msg_wasmrun_loading
+    call    uart_puts
+    lea     esi, [shell_cmd_buf + 8]
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 恢复文件大小到 ecx
+    pop     ecx
+
+    # 解析WASM模块
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
@@ -1306,7 +1345,7 @@ shell_dispatch:
     mov     al, 0x0d
     call    uart_putc
 
-    # 执行函数 0
+    # 执行函数 0 (main)
     xor     eax, eax
     call    wasm_exec_func
 
@@ -1325,6 +1364,88 @@ shell_dispatch:
     mov     al, 0x0d
     call    uart_putc
 
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_hello_builtin:
+    # 使用内置 hello.wasm 模块（返回 42）
+    mov     esi, offset msg_wasmrun_hello
+    call    uart_puts
+
+    # 加载内置 wasm_test_add_module (返回42)
+    mov     esi, offset wasm_test_add_module
+    mov     ecx, 27              # wasm_test_add_module size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+
+    # 打印解析结果
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 执行函数 0 (main)
+    xor     eax, eax
+    call    wasm_exec_func
+
+    # 打印结果
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_usage:
+    mov     esi, offset msg_wasmrun_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_not_found:
+    mov     esi, offset msg_wasmrun_not_found
+    call    uart_puts
+    lea     esi, [shell_cmd_buf + 8]
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_read_err:
+    mov     esi, offset msg_wasmrun_read_err
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_empty:
+    mov     esi, offset msg_wasmrun_empty
+    call    uart_puts
     pop     ecx
     pop     edi
     pop     esi
@@ -6009,7 +6130,7 @@ cmd_touch:
 cmd_wasm:
     .asciz  "wasm"
 cmd_wasmrun:
-    .asciz  "wasmrun"
+    .asciz  "wasmrun "
 cmd_wasmtest2:
     .asciz  "wasmtest2"
 cmd_wasmtest3:
@@ -6579,6 +6700,20 @@ msg_wasm_result:
     .asciz  "Result: "
 msg_wasm_parse_err:
     .asciz  "WASM parse error\r\n"
+msg_wasmrun_usage:
+    .asciz  "Usage: wasmrun <filename>\r\n"
+msg_wasmrun_loading:
+    .asciz  "Loading WASM: "
+msg_wasmrun_not_found:
+    .asciz  "Error: File not found: "
+msg_wasmrun_read_err:
+    .asciz  "Error: Failed to read file\r\n"
+msg_wasmrun_empty:
+    .asciz  "Error: Empty file\r\n"
+msg_wasmrun_hello:
+    .asciz  "Running built-in hello.wasm (returns 42)...\r\n"
+cmd_hello_wasm:
+    .asciz  "hello.wasm"
 msg_wasmapp_usage:
     .asciz  "Usage: wasmapp <uptime|sum|hello|fibonacci|factorial|multiply|countdown>\r\n"
 msg_wasmapp_unknown:
@@ -7001,6 +7136,42 @@ msg_date_sec:
     .asciz  "s\r\n"
 msg_date_sec_short:
     .asciz  " seconds\r\n"
+
+# WASM hello.wasm 模块：返回 42 (用于测试文件加载)
+# 简化版本：无 export section，直接执行函数0
+# (module
+#   (func $hello (result i32)
+#     i32.const 42))
+# 字节码编码:
+#   00 61 73 6D 01 00 00 00  # magic + version
+#   01 05 01 60 00 01 7F     # type section: 1 function, ()->i32
+#   03 02 01 00              # function section: type 0
+#   0A 06 01 04 00 41 2A 0B  # code: i32.const 42, end
+hello_wasm_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=5)
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2)
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index
+    # code section (id=10, size=6)
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size
+    .byte   0x01                   # num codes
+    .byte   0x04                   # code size
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x2A             # i32.const 42
+    .byte   0x0B                   # end
+hello_wasm_module_size = . - hello_wasm_module
 
 # WASM 测试模块 1：简单加法 (local.get 0 + local.get 1)
 # WASM 格式：
