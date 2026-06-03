@@ -1595,19 +1595,17 @@ do_i64_load8_s:
     test    eax, edx
     jnz     .i64l8s_fail
 .i64l8s_skip:
-    movzx   eax, byte ptr [wasm_linear_memory + eax]
-    test    eax, 0x80
+    movzx   edx, byte ptr [wasm_linear_memory + eax]  # edx = value (byte)
+    # Sign-extend to 64-bit
+    xor     eax, eax                                    # eax = 0 (high bits)
+    test    edx, 0x80                                   # sign bit check
     jz      .i64l8s_ok
-    or      eax, 0xFFFFFF00
+    or      edx, 0xFFFFFF00                             # sign-extend low 32 bits
+    mov     eax, -1                                     # sign-extend high 32 bits
 .i64l8s_ok:
-    xor     edx, edx
-    test    eax, eax
-    jns     .i64l8s_pos
-    mov     edx, -1
-.i64l8s_pos:
-    call    _stack_push
-    mov     eax, edx
-    call    _stack_push
+    call    _stack_push                                 # push high first
+    mov     eax, edx                                    # eax = value (low 32 bits)
+    call    _stack_push                                 # push low second
     jmp     dispatch_done
 .i64l8s_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1629,11 +1627,11 @@ do_i64_load8_u:
     test    eax, edx
     jnz     .i64l8u_fail
 .i64l8u_skip:
-    movzx   eax, byte ptr [wasm_linear_memory + eax]
-    xor     edx, edx
-    call    _stack_push
-    mov     eax, edx
-    call    _stack_push
+    movzx   edx, byte ptr [wasm_linear_memory + eax]  # edx = value (byte, zero-extended)
+    xor     eax, eax                                   # eax = 0 (high bits)
+    call    _stack_push                                # push high first
+    mov     eax, edx                                   # eax = value (low bits)
+    call    _stack_push                                # push low second
     jmp     dispatch_done
 .i64l8u_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1657,19 +1655,17 @@ do_i64_load16_s:
     test    eax, edx
     jnz     .i64l16s_fail
 .i64l16s_skip:
-    movzx   eax, word ptr [wasm_linear_memory + eax]
-    test    eax, 0x8000
+    movzx   edx, word ptr [wasm_linear_memory + eax]  # edx = value (word)
+    # Sign-extend to 64-bit
+    xor     eax, eax                                    # eax = 0 (high bits)
+    test    edx, 0x8000                                 # sign bit check
     jz      .i64l16s_ok
-    or      eax, 0xFFFF0000
+    or      edx, 0xFFFF0000                             # sign-extend low 32 bits
+    mov     eax, -1                                     # sign-extend high 32 bits
 .i64l16s_ok:
-    xor     edx, edx
-    test    eax, eax
-    jns     .i64l16s_pos
-    mov     edx, -1
-.i64l16s_pos:
-    call    _stack_push
-    mov     eax, edx
-    call    _stack_push
+    call    _stack_push                                 # push high first
+    mov     eax, edx                                    # eax = value (low 32 bits)
+    call    _stack_push                                 # push low second
     jmp     dispatch_done
 .i64l16s_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1693,11 +1689,11 @@ do_i64_load16_u:
     test    eax, edx
     jnz     .i64l16u_fail
 .i64l16u_skip:
-    movzx   eax, word ptr [wasm_linear_memory + eax]
-    xor     edx, edx
-    call    _stack_push
-    mov     eax, edx
-    call    _stack_push
+    movzx   edx, word ptr [wasm_linear_memory + eax]  # edx = value (word, zero-extended)
+    xor     eax, eax                                   # eax = 0 (high bits)
+    call    _stack_push                                # push high first
+    mov     eax, edx                                   # eax = value (low bits)
+    call    _stack_push                                # push low second
     jmp     dispatch_done
 .i64l16u_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1721,15 +1717,15 @@ do_i64_load32_s:
     test    eax, edx
     jnz     .i64l32s_fail
 .i64l32s_skip:
-    mov     eax, [wasm_linear_memory + eax]
-    xor     edx, edx
-    test    eax, eax
+    mov     edx, [wasm_linear_memory + eax]  # edx = value (low 32 bits)
+    xor     eax, eax                         # eax = 0 (high 32 bits)
+    test    edx, edx                         # sign check on low bits
     jns     .i64l32s_pos
-    mov     edx, -1
+    mov     eax, -1                          # sign-extend: high = -1
 .i64l32s_pos:
-    call    _stack_push
-    mov     eax, edx
-    call    _stack_push
+    call    _stack_push                      # push high first
+    mov     eax, edx                         # eax = value (low 32 bits)
+    call    _stack_push                      # push low second
     jmp     dispatch_done
 .i64l32s_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1753,11 +1749,11 @@ do_i64_load32_u:
     test    eax, edx
     jnz     .i64l32u_fail
 .i64l32u_skip:
-    mov     eax, [wasm_linear_memory + eax]
-    xor     edx, edx
-    call    _stack_push
-    mov     eax, edx
-    call    _stack_push
+    mov     edx, [wasm_linear_memory + eax]  # edx = value (low 32 bits)
+    xor     eax, eax                         # eax = 0 (high 32 bits, zero-extended)
+    call    _stack_push                      # push high first
+    mov     eax, edx                         # eax = value (low 32 bits)
+    call    _stack_push                      # push low second
     jmp     dispatch_done
 .i64l32u_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1769,15 +1765,14 @@ do_i64_store:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    mov     edx, eax
-    pop     eax
-    push    edx
-    call    _stack_pop
-    add     eax, ebx
-    pop     edx
+    call    _stack_pop       # pop addr (top of stack)
+    add     eax, ebx         # eax = effective address
+    push    eax              # save effective address
+    call    _stack_pop       # pop value-high
+    mov     edx, eax         # edx = value-high
+    call    _stack_pop       # pop value-low
+    mov     ebx, eax         # ebx = value-low
+    pop     eax              # eax = effective address
     test    ecx, ecx
     jz      .i64s_skip
     cmp     ecx, 3
@@ -1788,8 +1783,8 @@ do_i64_store:
     test    eax, esi
     jnz     .i64s_fail
 .i64s_skip:
-    mov     [wasm_linear_memory + eax], eax
-    mov     [wasm_linear_memory + eax + 4], edx
+    mov     [wasm_linear_memory + eax], ebx      # store value-low
+    mov     [wasm_linear_memory + eax + 4], edx  # store value-high
     jmp     dispatch_done
 .i64s_fail:
     mov     dword ptr [wasm_exec_error], 4
@@ -1801,11 +1796,13 @@ do_i64_store8:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop
-    call    _stack_pop
-    mov     edx, eax
-    call    _stack_pop
-    add     eax, ebx
+    call    _stack_pop       # pop addr (top of stack)
+    add     eax, ebx         # eax = effective address
+    push    eax              # save effective address
+    call    _stack_pop       # pop value-high (discarded for store8)
+    call    _stack_pop       # pop value-low
+    mov     edx, eax         # edx = value-low
+    pop     eax              # eax = effective address
     test    ecx, ecx
     jz      .i64s8_skip
     mov     esi, 1
@@ -1826,11 +1823,13 @@ do_i64_store16:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop
-    call    _stack_pop
-    mov     edx, eax
-    call    _stack_pop
-    add     eax, ebx
+    call    _stack_pop       # pop addr (top of stack)
+    add     eax, ebx         # eax = effective address
+    push    eax              # save effective address
+    call    _stack_pop       # pop value-high (discarded for store16)
+    call    _stack_pop       # pop value-low
+    mov     edx, eax         # edx = value-low
+    pop     eax              # eax = effective address
     test    ecx, ecx
     jz      .i64s16_skip
     cmp     ecx, 1
@@ -1853,11 +1852,13 @@ do_i64_store32:
     mov     ecx, eax
     call    _read_leb128_vm  # offset
     mov     ebx, eax
-    call    _stack_pop
-    call    _stack_pop
-    mov     edx, eax
-    call    _stack_pop
-    add     eax, ebx
+    call    _stack_pop       # pop addr (top of stack)
+    add     eax, ebx         # eax = effective address
+    push    eax              # save effective address
+    call    _stack_pop       # pop value-high (discarded for store32)
+    call    _stack_pop       # pop value-low
+    mov     edx, eax         # edx = value-low (32 bits to store)
+    pop     eax              # eax = effective address
     test    ecx, ecx
     jz      .i64s32_skip
     cmp     ecx, 2
@@ -2279,15 +2280,37 @@ do_i64_const:
     movzx   edi, byte ptr [esi]
     inc     esi
     and     edi, 0x7F
-    cmp     ebx, 28
+    cmp     ebx, 32
     jae     .i64c_high
+    # shift < 32: 字节左移后可能跨越 low/high 边界
     push    ecx
+    push    edx
     mov     ecx, ebx
-    shl     edi, cl
-    pop     ecx
+    shl     edi, cl               # edi = byte << shift (可能超过32位)
+    # 检查是否跨越边界 (shift + 7 > 32)
+    cmp     ebx, 25
+    ja      .i64c_split
+    # 不跨越边界：全部加到 eax
+    pop     edx
     or      eax, edi
+    pop     ecx
+    jmp     .i64c_cont
+.i64c_split:
+    # 跨越边界：需要分割到 eax 和 edx
+    # edi 有高位部分（需要右移后加到 edx）
+    # BUG FIX: 不要修改 esi，使用 edi 保存移位值
+    pop     edx
+    push    edi                  # 保存完整的移位值
+    and     edi, 0xFFFFFFFF       # edi = 低32位部分
+    or      eax, edi              # 加到 eax
+    pop     edi                  # 恢复完整的移位值
+    shr     edi, 32               # edi = 高32位部分 (0-6位)
+    or      edx, edi              # 加到 edx
+    pop     ecx
+    # esi 已经正确递增（指向下一个字节），不需要恢复
     jmp     .i64c_cont
 .i64c_high:
+    # shift >= 32: 整个7位加到 edx
     push    ecx
     mov     ecx, ebx
     sub     ecx, 32
@@ -2327,11 +2350,12 @@ do_i64_const:
     mov     edx, -1
 .i64c_no_extend:
     mov     [wasm_pc], esi
-    # 推入栈：先高后低
+    # 推入栈：先高后低，保存 low 值
+    push    eax                  # save low 32 bits
     mov     eax, edx
-    call    _stack_push
-    mov     eax, eax              # eax already has low 32 bits
-    call    _stack_push
+    call    _stack_push          # push high
+    pop     eax                  # restore low 32 bits
+    call    _stack_push          # push low
     jmp     dispatch_done
 
 # i64.eqz: 弹出 i64，如果为 0 则推入 1，否则 0

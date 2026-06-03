@@ -519,6 +519,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest28
 
+    # "wasmtest29" - WASM store32/load32_u test
+    mov     edi, offset cmd_wasmtest29
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest29
+
+    # "wasmtest30" - WASM i64.const test (no store/load)
+    mov     edi, offset cmd_wasmtest30
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest30
+
+    # "wasmtest31" - WASM i64.add test
+    mov     edi, offset cmd_wasmtest31
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest31
+
+    # "wasmtest32" - WASM i64.sub test
+    mov     edi, offset cmd_wasmtest32
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest32
+
+    # "wasmtest33" - WASM i64.mul test
+    mov     edi, offset cmd_wasmtest33
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest33
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -1847,6 +1877,166 @@ shell_wasmtest21:
     call    wasm_exec_func
     # Print "loaded value = "
     mov     esi, offset msg_store16_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest29:
+    # WASM store32/load32_u test: store32(0, 0xDEADBEEF) → load32_u(0) → return 3735928559
+    mov     esi, offset msg_wasm_test29
+    call    uart_puts
+    mov     esi, offset wasm_test_store32_load32_module
+    mov     ecx, offset wasm_test_store32_load32_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "loaded value = "
+    mov     esi, offset msg_store32_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest30:
+    # WASM i64.const test: i64.const 0x12345678 -> return (no store/load)
+    mov     esi, offset msg_wasm_test30
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_const_module
+    mov     ecx, offset wasm_test_i64_const_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 const = "
+    mov     esi, offset msg_i64_const_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest31:
+    # WASM i64.add test: 0x12345678 + 0x87654321 = 0x99999999 (2566980377)
+    mov     esi, offset msg_wasm_test31
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_add_module
+    mov     ecx, offset wasm_test_i64_add_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 add = "
+    mov     esi, offset msg_i64_add_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest32:
+    # WASM i64.sub test: 0x100000000 - 0x1 = 0xFFFFFFFF (4294967295)
+    mov     esi, offset msg_wasm_test32
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_sub_module
+    mov     ecx, offset wasm_test_i64_sub_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 sub = "
+    mov     esi, offset msg_i64_sub_result
+    call    uart_puts
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest33:
+    # WASM i64.mul test: 0x10000 * 0x10000 = 0x100000000 (4294967296)
+    mov     esi, offset msg_wasm_test33
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_mul_module
+    mov     ecx, offset wasm_test_i64_mul_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 mul = "
+    mov     esi, offset msg_i64_mul_result
     call    uart_puts
     mov     edi, offset shell_cmd_buf
     mov     dl, 10
@@ -3865,6 +4055,16 @@ cmd_wasmtest27:
     .asciz  "wasmtest27"
 cmd_wasmtest28:
     .asciz  "wasmtest28"
+cmd_wasmtest29:
+    .asciz  "wasmtest29"
+cmd_wasmtest30:
+    .asciz  "wasmtest30"
+cmd_wasmtest31:
+    .asciz  "wasmtest31"
+cmd_wasmtest32:
+    .asciz  "wasmtest32"
+cmd_wasmtest33:
+    .asciz  "wasmtest33"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4113,7 +4313,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.75"
+    .ascii  "AI-ASM Kernel v0.78"
     .byte   13, 10, 0
 
 help_text:
@@ -4366,6 +4566,26 @@ msg_wasm_test28:
     .asciz  "Running WASM test28 (store16/load16_u)...\r\n"
 msg_store16_result:
     .asciz  "loaded value = "
+msg_wasm_test29:
+    .asciz  "Running WASM test29 (store32/load32_u)...\r\n"
+msg_store32_result:
+    .asciz  "loaded value = "
+msg_wasm_test30:
+    .asciz  "Running WASM test30 (i64.const)...\r\n"
+msg_i64_const_result:
+    .asciz  "i64 const = "
+msg_wasm_test31:
+    .asciz  "Running WASM test31 (i64.add)...\r\n"
+msg_i64_add_result:
+    .asciz  "i64 add = "
+msg_wasm_test32:
+    .asciz  "Running WASM test32 (i64.sub)...\r\n"
+msg_i64_sub_result:
+    .asciz  "i64 sub = "
+msg_wasm_test33:
+    .asciz  "Running WASM test33 (i64.mul)...\r\n"
+msg_i64_mul_result:
+    .asciz  "i64 mul = "
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -5401,3 +5621,153 @@ wasm_test_store16_load16_module:
     .byte   0x2F, 0x00, 0x00       # i32.load16_u (align=0, offset=0)
     .byte   0x0B                   # end
 wasm_test_store16_load16_size = . - wasm_test_store16_load16_module
+
+# WASM 测试模块 29：store32/load32_u 组合测试
+# 测试：i64.store32(0, 0x12345678) → i64.load32_u(0) → 返回 305419896
+wasm_test_store32_load32_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0x12345678, i32.const 0, i64.store32, i32.const 0, i64.load32_u, return
+    .byte   0x0A                   # section id
+    .byte   0x14                   # section size = 20
+    .byte   0x01                   # num codes
+    .byte   0x13                   # body size = 19
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xF8, 0xAC, 0xD1, 0x91, 0x01  # i64.const 305419896 (0x12345678) SLEB128
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3E, 0x00, 0x00       # i64.store32 (align=0, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x35, 0x00, 0x00       # i64.load32_u (align=0, offset=0)
+    .byte   0x0B                   # end
+wasm_test_store32_load32_size = . - wasm_test_store32_load32_module
+
+# WASM 测试模块 30：i64.const 测试 (无存储/加载)
+# 测试：i64.const 0x12345678 -> return 305419896
+wasm_test_i64_const_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0x12345678, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xF8, 0xAC, 0xD1, 0x91, 0x01  # i64.const 305419896 (0x12345678) LEB128
+    .byte   0x0B                   # end
+wasm_test_i64_const_size = . - wasm_test_i64_const_module
+
+# WASM 测试模块 31：i64.add 测试
+# 测试：i64.const 0x12345678 + i64.const 0x87654321 = 0x99999999 (2566980377)
+wasm_test_i64_add_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0x12345678, i64.const 0x87654321, i64.add, end
+    .byte   0x0A                   # section id
+    .byte   0x11                   # section size = 17
+    .byte   0x01                   # num codes
+    .byte   0x0F                   # body size = 15
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xF8, 0xAC, 0xD1, 0x91, 0x01  # i64.const 0x12345678 (LEB128)
+    .byte   0x42, 0xB1, 0xE5, 0x9A, 0x86, 0x04  # i64.const 0x87654321 (LEB128)
+    .byte   0x7C                   # i64.add
+    .byte   0x0B                   # end
+wasm_test_i64_add_size = . - wasm_test_i64_add_module
+
+# WASM 测试模块 32：i64.sub 测试
+# 测试：i64.const 0x100000000 - i64.const 0x1 = 0xFFFFFFFF (4294967295)
+wasm_test_i64_sub_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0x100000000, i64.const 1, i64.sub, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x80, 0x80, 0x80, 0x08, 0x01  # i64.const 0x100000000 (LEB128)
+    .byte   0x42, 0x01                   # i64.const 1
+    .byte   0x7D                   # i64.sub
+    .byte   0x0B                   # end
+wasm_test_i64_sub_size = . - wasm_test_i64_sub_module
+
+# WASM 测试模块 33：i64.mul 测试
+# 测试：i64.const 0x10000 * i64.const 0x10000 = 0x100000000 (4294967296)
+wasm_test_i64_mul_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0x10000, i64.const 0x10000, i64.mul, end
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x80, 0x02  # i64.const 0x10000 (LEB128)
+    .byte   0x42, 0x80, 0x80, 0x02  # i64.const 0x10000 (LEB128)
+    .byte   0x7E                   # i64.mul
+    .byte   0x0B                   # end
+wasm_test_i64_mul_size = . - wasm_test_i64_mul_module

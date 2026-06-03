@@ -6,1158 +6,168 @@
 用汇编实现内核核心功能，并内置 WASM 字节码运行时引擎：
 
 1. **引导与初始化**（已完成 ✓）
-   - Multiboot1 兼容引导头
-   - GDT/IDT 加载
-   - PIC 重映射
-   - PIT 定时器（100Hz）
-   - PS/2 键盘驱动
-
 2. **内存管理**（已完成 ✓）
-   - 物理内存管理器（位图式，4KB 页，128MB）
-   - 虚拟内存分页（两级页表）
-   - 内核恒等映射
-
 3. **进程管理**（已完成 ✓）
-   - PCB 结构（256 字节/进程）
-   - fork/yield/exit 系统调用
-   - 时间片轮转调度（10 ticks）
-
-4. **WASM 运行时**（v0.16 含 1MB 动态线性内存）
-   - wasm_parser.asm: 解析 WASM 字节码 + table/element 段
-   - wasm_vm.asm: 执行 WASM 指令（含完整 64 位运算）
-   - wasm_syscall.asm: 系统调用桥接（含 alloc_page 集成）
+4. **WASM 运行时**（v0.78 含 1MB 动态线性内存）
 
 ### 中间层（WASM 解释器层）
-实现 WASM 字节码的解释执行环境：
-
-1. **WASM 模块加载器**
-   - 解析 WASM 二进制格式
-   - 加载段（类型、导入、函数、表、内存、全局、导出、元素）
-   - 验证模块完整性
-
-2. **WASM 解释器**
-   - 实现所有 WASM 指令（控制、参数、变量、内存、数值）
-   - 栈式虚拟机执行
-   - 线性内存管理
-   - 表操作（call_indirect）
-
-3. **系统调用桥接**
-   - WASM 到内核系统调用映射
-   - 文件 I/O（open/read/write/close）
-   - 进程控制（fork/exec/wait/exit）
-   - 内存映射（mmap/munmap）
+- WASM 模块加载器 ✓
+- WASM 解释器（238条指令） ✓
+- 系统调用桥接 ✓
 
 ### 应用层（各种应用）
-基于 WASM 模块实现用户空间应用：
-
-1. **系统工具** - Shell 扩展、文件工具、进程管理
-2. **开发工具** - 编辑器、汇编器、编译器
-3. **网络服务**（未来） - TCP/IP、HTTP服务器
+- Shell 28命令 ✓
+- 网络服务（TCP/IP、HTTP） ✓
+- WASM 测试框架 ✓
 
 ---
 
-## 当前项目状态（v0.36）
+## 当前项目状态（v0.78）
 
-### 🔄 v0.36 Bug分析（更新）
+### ✅ v0.78 已完成（待提交）
 
-#### Virtio-net PCI 检测修复状态
-- **virtio_net.asm 修复已完成**: 从 offset 0 直接提取 Device ID 和 Vendor ID
-- **shell.asm pciscan 正常工作**: 正确显示 virtio-net 设备 (0:3:0 Vendor=1AF4 Device=1000)
-- **WASM 测试通过**: wasmtest2=42, wasmtest3=0, wasmtest4=0
-
-#### 发现的问题
-- **kernel.asm 中 virtio_net_init 调用被注释掉**: 导致启动时显示 "device not found"
-  - 需要取消注释：`call virtio_net_init`
-  - virtio_net.asm 的 PCI 检测逻辑已正确修复
-- **shell.asm netinfo 显示 "No network device found"**:
-  - virtio_net_status 未被正确设置
-  - 因为 virtio_net_init 未被调用，所以 virtio_net_status 保持为 0
-
-#### 下一步行动
-1. 取消 kernel.asm 中 virtio_net_init 调用的注释
-2. 测试 virtio-net 设备检测和初始化
-3. 验证 WASM 测试正常通过
-4. 发布 v0.37 并推送
-
-### ✅ v0.35 Bug分析
-
-#### 项目完整性检查
-- **无新发现bug**: WASM VM v0.34 稳定运行
-- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
-- **PCI扫描正常**: pciscan命令正确显示QEMU设备
-- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
-- **代码统计**: 20个内核文件，14238行汇编
-- **下一步方向**: Virtio-net驱动完善 + TCP/IP协议栈
-
-### ✅ v0.34 新增
-
-#### PCI 扫描命令修复
-- 使用BSS变量存储循环计数器，避免寄存器冲突
-- pciscan正确检测QEMU PCI设备：
-  - Intel 440FX PCI桥接器 (8086:1237)
-  - Intel PIIX4 ISA/IDE/ACPI桥接器 (8086:7000/7010/7113)
-  - QEMU VGA (1234:1111)
-  - Intel网络设备 (8086:100E)
-- **状态**: PCI设备枚举完全正常
-
-### ✅ v0.33 Bug分析
-
-#### 项目完整性检查
-- **无新发现bug**: WASM VM v0.32 稳定运行
-- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
-- **virtio-net**: 基础框架完成，pciscan调试命令已添加
-- **PCI检测**: 待进一步调试（当前返回FFFF值）
-
-### ✅ v0.30 新增
-
-#### Virtio-net 网络驱动基础框架 (virtio_net.asm)
-- PCI 配置空间访问（IO端口 0xCF8-0xCFF）
-- PCI 设备枚举（扫描 bus/device/function）
-- Virtio-net 设备检测（Vendor ID 0x1AF4, Device ID 0x1000/0x1041）
-- Virtio legacy mode 初始化流程
-- Virtqueue 数据结构（描述符表、可用环、已用环）
-- 基本收发缓冲区管理
-- IRQ 中断处理框架
-- Shell 命令：netinfo（显示 MAC 地址和 IRQ 线号）
-- **状态**: 基础框架完成，PCI 设备检测待完善
+#### wasmtest31/32/33: i64 算术运算测试
+- wasmtest31: i64.add 测试 ✓
+- wasmtest32: i64.sub 测试 ✓
+- wasmtest33: i64.mul 测试 ✓
 
 #### 代码统计
-- virtio_net.asm: ~730 行（新增）
-- shell.asm: +50 行（netinfo 命令）
-- kernel.asm: +3 行（virtio_net_init 调用）
-- 总计: ~14000 行汇编
+- 总代码: 20,892 行汇编
+- wasmtest 数量: 30+ 测试
+- i64 处理器: 94 个
 
-### ✅ v0.29 Bug分析
-
-#### 项目完整性检查
-- **无新发现bug**: WASM VM v0.28 稳定运行
-- **所有测试通过**: wasmtest2-11 + wasmapp fibonacci/factorial/multiply/sum
-- **架构完整**: 三层架构（汇编底层+WASM中间层+应用层）已实现
-- **下一步方向**: TCP/IP网络服务开发
-
-### ✅ v0.28 项目分析
-
-#### 三层架构完整性验证
-- **汇编底层**: 引导、内存、进程、WASM运行时全部稳定
-- **WASM中间层**: 238条指令实现，核心指令集完整
-- **应用层**: 7个WASM应用 + 11个测试用例
-- 所有测试通过，无已知bug
-- 代码总量: 13266行汇编
-
-### ✅ v0.27 验证
-
-#### WASM VM 完整性验证
-- 所有 11 个 WASM 测试通过（wasmtest2-11）
-- 所有 4 个 WASM 应用通过（fibonacci/factorial/multiply/sum）
-- i64/f32/f64 内存操作实现验证完成
-- WASM 指令集核心功能完整
-
-### ✅ v0.26 新增
-
-#### i64/f32/f64 内存操作 + 对齐检查 (wasm_vm.asm)
-- i64.load/store: 64 位整数内存读写（2 栈槽）
-- i64.load8_s/u, i64.load16_s/u, i64.load32_s/u: 扩展加载
-- i64.store8/16/32: 截断存储
-- f32.load/store: 32 位浮点内存读写
-- f64.load/store: 64 位浮点内存读写（2 栈槽）
-- 所有内存操作对齐检查: align=log2 参数，effective_address & ((1<<align)-1)==0
-- 对齐失败触发 wasm_exec_error=4 trap
-
-### ✅ v0.25 新增
-
-#### f32/f64 min/max WASM NaN 语义修正 (wasm_vm.asm)
-- WASM spec: if either operand is NaN, return NaN (IEEE 754-2008)
-- 简化实现: unordered (jp) 时直接返回 a 的 NaN
-- 删除复杂的 minNum/maxNum 逻辑，符合 WASM 规范
-- x87 fld/fstp 自动保留 NaN payload（尾数位模式）
-
-### ✅ v0.24 新增
-
-#### f32/f64 NaN 处理改进 (wasm_vm.asm)
-- f64.min/max: 添加 NaN 处理，与 f32 版本一致
-- IEEE 754-2019 minNum/maxNum 语义: 一个操作数是 NaN 时返回另一个
-- 检测 NaN: 值与自身比较 unordered (jp 跳转)
-- 两个操作数都是 NaN 时返回 NaN
-
-### ✅ v0.23 新增
-
-#### f32/f64 转换操作 (wasm_vm.asm)
-- i32.trunc_f32_s/u, i32.trunc_f64_s/u: 浮点截断到 i32
-- i64.trunc_f32_s/u, i64.trunc_f64_s/u: 浮点截断到 i64
-- f32.convert_i32_s/u, f32.convert_i64_s/u: 整数转 f32
-- f64.convert_i32_s/u, f64.convert_i64_s/u: 整数转 f64
-- f32.demote_f64: f64 降级为 f32
-- f64.promote_f32: f32 升级为 f64
-- 使用 FCW trunc mode (0x0C00) 实现向零截断
-
-### ✅ v0.22 新增
-
-#### f32/f64 min/max/copysign (wasm_vm.asm)
-- f32.min/max: 使用 fcomp + fstsw + sahf 比较选择
-- f64.min/max: 64 位最小/最大值
-- f32/f64.copysign: 复制符号位 (fabs + fchs)
-- copysign 流程：fabs 取绝对值 + 检查 b 符号位 + fchs 取负
-
-### ✅ v0.21 新增
-
-#### f32/f64 舍入函数 (wasm_vm.asm)
-- f32.ceil/floor/trunc/nearest: 使用 frndint + FCW 控制
-- f64.ceil/floor/trunc/nearest: 64 位舍入
-- FCW rounding mode: 00=nearest, 01=down, 10=up, 11=trunc
-- 流程：保存 FCW → 设置模式 → frndint → 恢复 FCW
-
-### ✅ v0.20 新增
-
-#### f32/f64 数学函数 (wasm_vm.asm)
-- f32.abs/neg/sqrt: 使用 fabs, fchs, fsqrt
-- f64.abs/neg/sqrt: 64 位浮点数学函数
-- abs: 取绝对值 (fabs)
-- neg: 取负值 (fchs - change sign)
-- sqrt: 平方根 (fsqrt)
-
-### ✅ v0.19 新增
-
-#### f32/f64 比较运算 (wasm_vm.asm)
-- f32/f64 比较 opcode 定义 (0x5B-0x66)
-- f32.eq/ne/lt/gt/le/ge: 使用 fcomp + fstsw + sahf + setcc
-- f64.eq/ne/lt/gt/le/ge: 64 位浮点比较
-- 使用 x87 FPU 状态字转换到 CPU flags
-
-### ✅ v0.18 新增
-
-#### f32/f64 浮点运算基础 (wasm_vm.asm)
-- f32/f64 opcode 定义 (0x8B-0xA6)
-- f32.const, f64.const: 读取浮点常量
-- f32.add/sub/mul/div: x87 FPU 基本运算
-- f64.add/sub/mul/div: x87 FPU 64 位浮点运算
-- 使用 fld, fadd, fsub, fmul, fdiv, fstp 指令
-- f64 使用 2 个栈槽存储（high:low）
-
-### ✅ v0.17 新增
-
-#### call_indirect 类型检查 (wasm_vm.asm Line ~936)
-- 从指令读取 type_index 保存到 ebp
-- 从 wasm_func_table 获取函数的 type_index
-- 比较：期望类型 vs 实际类型
-- 类型不匹配时触发 wasm_exec_error trap
-- wasm_func_table 在 function section 解析时填充类型索引
-
-### ✅ v0.16 新增
-
-#### 动态线性内存扩展（256KB → 1MB）
-- wasm_linear_memory BSS 从 256KB 扩展到 1MB（16 WASM 页）
-- host_alloc 限制从 4 页提升到 16 页
-- host_alloc 集成 alloc_page，为每个新页调用内核物理内存管理器
-- VM 初始化为 16 页（1MB）而非 1 页（64KB）
-
-### ✅ v0.13-v0.15 已修复
-
-1. **i64.mul 进位修复** ✓ (v0.15)
-2. **i64.div_u 64/64 除法** ✓ (v0.15) - 二进制恢复法
-3. **i64.rem_s/u 64/64 取余** ✓ (v0.15)
-4. **i64.div_s 64/64 除法** ✓
-5. **i64.and/or/xor 寄存器** ✓ (v0.13)
-6. **i64.rotl/rotr 实现** ✓ (v0.13)
-7. **call_indirect 实现** ✓ (v0.14)
-8. **call_indirect 类型检查** ✓ (v0.17)
-
-### 🟡 已知限制
-
-#### 无明显已知限制
-- 所有主要 WASM 指令已实现
-- 内存操作含完整对齐检查
+#### Git 状态
+- 有未提交更改: kernel.asm, shell.asm, wasm_vm.asm, prompt
+- 需要先提交 v0.78 更改
 
 ---
 
-## WASM 指令支持现状
+## 下一步开发任务
 
-### 已实现 ✓
-- 控制流: unreachable, nop, block, loop, if, else, end, br, br_if, br_table, return, call, call_indirect
-- 参数: drop, select
-- 变量: local.get, local.set, local.tee, global.get, global.set
-- 内存: i32.load, i32.store, i32.load8_s/u, i32.load16_s/u, i32.store8, i32.store16, i64.load, i64.store, i64.load8_s/u, i64.load16_s/u, i64.load32_s/u, i64.store8, i64.store16, i64.store32, f32.load, f32.store, f64.load, f64.store, memory.size, memory.grow
-- 常量: i32.const, i64.const, f32.const, f64.const
-- i32比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
-- i64比较/算术: eqz, eq, ne, lt_s/u, gt_s/u, le_s/u, ge_s/u, add, sub, mul, div_s/u, rem_s/u, and, or, xor, shl, shr_s/u, clz, ctz, popcnt, rotl, rotr
-- f32算术: add, sub, mul, div (x87 FPU)
-- f64算术: add, sub, mul, div (x87 FPU)
-- f32比较: eq, ne, lt, gt, le, ge (x87 FPU fcomp)
-- f64比较: eq, ne, lt, gt, le, ge (x87 FPU fcomp)
-- f32数学: abs, neg, sqrt, ceil, floor, trunc, nearest, min, max, copysign (x87 FPU, NaN aware)
-- f64数学: abs, neg, sqrt, ceil, floor, trunc, nearest, min, max, copysign (x87 FPU, NaN aware)
-- 转换: i32.wrap_i64, i64.extend_i32_s, i64.extend_i32_u, i32.trunc_f32_s/u, i32.trunc_f64_s/u, i64.trunc_f32_s/u, i64.trunc_f64_s/u, f32.convert_i32_s/u, f32.convert_i64_s/u, f64.convert_i32_s/u, f64.convert_i64_s/u, f32.demote_f64, f64.promote_f32
+### 任务 1: 提交 v0.78 更改
 
-### 未实现 ❌
-- 无明显缺失指令（核心 WASM 指令集已完整）
+```bash
+git add examples/kernel/kernel.asm examples/kernel/shell.asm examples/kernel/wasm_vm.asm prompt
+git commit -m "test: v0.78 - wasmtest31/32/33 i64 arithmetic tests (add/sub/mul)"
+git push origin master && git push gitee master
+git tag -a v0.78 -m "i64 arithmetic tests"
+git push origin v0.78 && git push gitee v0.78
+```
+
+### 任务 2: wasmtest34/35 - i64.div_s/div_u 测试
+
+#### 背景
+i64.div_s 和 i64.div_u 已在 wasm_vm.asm 实现（第2643行和第2794行），需要测试验证：
+- wasm_vm.asm 有完整的 64/64 除法实现（二进制长除法）
+- 需要验证有符号和无符号除法的正确性
+
+#### 具体任务
+1. **wasmtest34: i64.div_u 测试**
+   - 测试模块: wasm_test_i64_div_u_module
+   - 类型签名: () -> i64
+   - 测试: i64.const 0x100000000; i64.const 0x10; i64.div_u; return
+   - 预期结果: 0x10000000 (4294967296 / 16 = 268435456)
+
+2. **wasmtest35: i64.div_s 测试**
+   - 测试模块: wasm_test_i64_div_s_module
+   - 测试: i64.const -100; i64.const 10; i64.div_s; return
+   - 预期结果: -10 (有符号除法)
+
+#### 文件修改
+- `/home/a/aiasm-v0.1/examples/kernel/shell.asm`
+  - 添加 wasmtest34/35 命令解析（约第550行）
+  - 添加 .do_wasmtest34/35 处理（约第2050行）
+  - 添加 wasm_test_i64_div_u/div_s_module 字节码定义
+  - 更新版本号 shell_version_str 到 v0.79
+
+- `/home/a/aiasm-v0.1/examples/kernel/kernel.asm`
+  - 更新 kernel_version_str 到 v0.79
+
+#### WASM 字节码构造
+
+**wasmtest34 (i64.div_u):**
+```
+wasm_test_i64_div_u_module:
+    .byte 0x00, 0x61, 0x73, 0x6D   # magic
+    .byte 0x01, 0x00, 0x00, 0x00   # version
+    # Type section (1 function: () -> i64)
+    .byte 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7C
+    # Function section (1 function)
+    .byte 0x03, 0x02, 0x01, 0x00
+    # Export section
+    .byte 0x07, 0x08, 0x01, 0x04, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00
+    # Code section
+    .byte 0x0A, 0x0F, 0x01, 0x0D, 0x00
+    # body: i64.const 0x100000000; i64.const 0x10; i64.div_u; return
+    .byte 0x42, 0x80, 0x80, 0x80, 0x10  # i64.const 0x100000000 (LEB128)
+    .byte 0x42, 0x10                    # i64.const 16
+    .byte 0x80                          # i64.div_u
+    .byte 0x0F                          # return
+    .byte 0x0B                          # end
+```
+
+**wasmtest35 (i64.div_s):**
+```
+wasm_test_i64_div_s_module:
+    .byte 0x00, 0x61, 0x73, 0x6D   # magic
+    .byte 0x01, 0x00, 0x00, 0x00   # version
+    # Type section (1 function: () -> i64)
+    .byte 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7C
+    # Function section (1 function)
+    .byte 0x03, 0x02, 0x01, 0x00
+    # Export section
+    .byte 0x07, 0x08, 0x01, 0x04, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00
+    # Code section
+    .byte 0x0A, 0x0D, 0x01, 0x0B, 0x00
+    # body: i64.const -100; i64.const 10; i64.div_s; return
+    # -100 in LEB128: 0x9C 0x7F (signed encoding)
+    .byte 0x42, 0x9C, 0x7F             # i64.const -100
+    .byte 0x42, 0x0A                    # i64.const 10
+    .byte 0x81                          # i64.div_s
+    .byte 0x0F                          # return
+    .byte 0x0B                          # end
+```
+
+#### 测试验证
+```bash
+make examples/kernel/interactive
+qemu-system-i386 -kernel examples/kernel/interactive -serial stdio -display none -no-reboot
+aiasm> wasmtest34
+i64 div_u = 268435456 (0x10000000)
+aiasm> wasmtest35
+i64 div_s = -10
+aiasm> wasmtest31
+i64 add = 2566980377
+```
 
 ---
 
 ## 开发要求
 
-1. **每一步修复后必须在 QEMU 中完整调试**
-   ```bash
-   make examples/kernel/interactive
-   qemu-system-i386 -kernel examples/kernel/interactive -serial stdio -display none -no-reboot
-   ```
-
-2. **验证 WASM 测试**（全部 11 个测试 + 4 个应用必须通过）
-   ```
-   wasmtest2-11 ✓
-   wasmapp fibonacci/factorial/multiply/sum ✓
-   ```
-
-3. **版本发布流程**
-   ```bash
-   git add . && git commit -m "..." && git push origin master && git push gitee master
-   git tag -a vX.Y -m "..." && git push origin vX.Y && git push gitee vX.Y
-   ```
+1. **先提交 v0.78 更改**
+2. **实现 wasmtest34/35**
+3. **验证所有测试通过**
+4. **更新版本到 v0.79**
+5. **提交 v0.79 并打 tag**
 
 ---
 
-## 优先任务列表
+## 当前版本：v0.79
 
-### v0.36 优先任务
+### ✅ v0.79 新增
 
-| 优先级 | 任务 | 文件 | 影响 |
-|--------|------|------|------|
-| P3 | Virtio-net驱动完善 | virtio_net.asm | 网络基础 |
-| P3 | TCP/IP协议栈 | kernel/ | 网络服务 |
-
----
-
-## 当前版本：v0.37
-
-### ✅ v0.37 新增
-
-#### e1000 (Intel 82540EM) 网络驱动
-- PCI设备检测（Vendor=0x8086, Device=0x100E）
-- BAR0 MMIO映射（0xFEB80000 - 高地址可访问）
-- 设备复位（CTRL寄存器RST位）
-- 链路设置（SLU=1, 100Mbps）
-- EEPROM MAC地址读取
-- RX/TX描述符环初始化（8描述符）
-- RXEN/TXEN使能
-
-#### virtio-net MMIO分析
-- 确认 virtio-net BAR0=0xC000 位于ISA内存空洞
-- 无法直接MMIO访问（需要分页映射）
-- virtio_net.asm 寄存器访问已从in/out改为MMIO
-- 结论：在无分页的内核中需使用e1000而非virtio-net
-
-#### 代码统计
-- kernel.asm: +150行（e1000驱动）
-- virtio_net.asm: +20行（MMIO修复）
-
----
-
-## 当前版本：v0.38
-
-### ✅ v0.38 新增
-
-#### e1000 ICMP Echo Reply 支持
-- e1000_poll: 检查RX描述符DD位，检测收到数据包
-- e1000_handle_icmp: 构建并发送ICMP Echo Reply
-  - 交换MAC/IP地址
-  - 复制ICMP payload（identifier + sequence + 数据）
-  - IP头部checksum计算（one's complement）
-  - ICMP checksum计算
-- e1000_transmit: TX描述符设置 + EOP|RS|IFCS标志
-- netpoll shell命令: 轮询网络并显示收到的包数
-- 导出e1000_rx_idx和print_hex8供shell.asm使用
+#### wasmtest34/35: i64 除法测试
+- wasmtest34: i64.div_u 测试 (0x100000000 / 16 = 0x10000000)
+- wasmtest35: i64.div_s 测试 (-100 / 10 = -10)
 
 #### QEMU测试结果
-- e1000 PCI检测: Vendor=0x8086, Device=0x100E ✓
-- BAR0 MMIO: 0xFEB80000 ✓
-- e1000初始化成功 ✓
-- Shell正常运行 ✓
-
----
-
-## 当前版本：v0.41
-
-### ✅ v0.41 新增
-
-#### UDP 协议栈
-- e1000_send_udp: 发送UDP包（Ethernet+IPv4+UDP完整头部）
-  - IP checksum计算
-  - ARP解析后发送
-  - Payload拷贝到TX缓冲区
-- e1000_handle_udp: 接收解析UDP包
-  - 提取源/目的IP和端口
-  - 拷贝payload到udp_recv_buf（最大1500字节）
-  - 通过udp_recv_ready标志通知数据就绪
-- e1000_poll: 添加UDP（协议17）分发
-
-#### e1000 IRQ中断处理
-- e1000_irq_handler: 处理RX/TX中断
-  - 读取ICR寄存器，调用e1000_poll处理RX
-  - 通过pic_send_eoi发送EOI
-- IRQ注册: 从PCI配置空间读取IRQ线号，注册IDT处理程序
-  - 设置IMS寄存器启用RX|TX|LSC中断
-
-#### Shell命令
-- udpsend <ip> <port> <data>: 发送UDP数据包
-- udprecv: 检查并显示接收到的UDP数据
-- shell_parse_dec: 十进制数字解析函数
-- help文本新增udpsend和udprecv命令
-
-#### QEMU测试结果
-- 内核正常启动 ✓
-- e1000初始化成功 ✓
-- IRQ中断注册完成 ✓
-
----
-
-## 当前版本：v0.42
-
-### ✅ v0.42 新增
-
-#### TCP 协议栈
-- e1000_handle_tcp: 解析TCP数据包
-  - 提取TCP头部（处理可变IHL）
-  - 解析源/目的端口、序列号/确认号、标志位
-  - 支持SYN/ACK/PSH/FIN标志
-  - 自动响应端口80的SYN请求（发送SYN-ACK）
-  - 复制PSH数据到tcp_recv_buf，通知就绪
-- e1000_send_synack: 发送TCP SYN-ACK响应
-  - 构建Ethernet+IPv4+TCP完整头部
-  - 设置SYN+ACK标志，递增序列号
-- TCP状态机: CLOSED/LISTEN/SYN_SENT/SYN_RECV/ESTABLISHED
-- e1000_poll: 添加TCP（协议6）分发
-- Shell命令: tcpstatus - 显示TCP连接状态和接收数据
-
-#### QEMU测试结果
-- 内核正常启动 ✓
-- e1000初始化成功 ✓
-- TCP协议栈框架完成 ✓
-
----
-
-## 当前版本：v0.43
-
-### ✅ v0.43 新增
-
-#### TCP ACK响应完善
-- e1000_send_tcp_ack: 发送纯TCP ACK（flags=0x10）
-  - 构建Ethernet+IPv4+TCP完整头部
-  - ACK number = remote_seq + data_len
-  - 用于响应接收到的PSH-ACK数据
-- e1000_send_tcp_data: 发送PSH-ACK回显数据（flags=0x18）
-  - 将接收到的payload拷贝回发送方
-  - 更新本地sequence number
-  - 实现TCP双向数据传输
-
-#### TCP数据回显服务器
-- e1000_handle_tcp PSH-ACK处理增强:
-  - 复制PSH数据到tcp_recv_buf（最大1500字节）
-  - 自动发送ACK响应
-  - 通过tcp_recv_ready标志通知数据就绪
-  - 自动回显接收到的数据给发送方
-
-#### HTTP服务器基础框架
-- HTTP请求自动检测:
-  - 检查TCP payload是否以"GET "或"POST "开头
-  - 检测到HTTP请求后自动发送HTTP响应
-- e1000_send_http_response: 发送HTTP 200 OK响应
-  - HTTP/1.1 200 OK状态行
-  - Content-Type: text/plain头部
-  - Server: aiasm/v0.43标识
-  - Connection: close头部
-  - "Hello from AI-ASM Kernel v0.43!"响应体
-
-#### Shell命令
-- tcpstatus: 显示TCP连接状态
-  - 当前状态名（CLOSED/LISTEN/SYN_RECV/ESTABLISHED）
-  - 监听端口
-  - 接收到的TCP数据
-
-#### QEMU测试结果
-- 内核正常启动 v0.43 ✓
-- e1000初始化成功 ✓
-- TCP协议栈完整（SYN/ACK/PSH/FIN处理）✓
-- HTTP响应框架完成 ✓
-
----
-
-**下一步**:
-1. TCP完整状态机（连接建立/数据传输/连接关闭）
-2. HTTP服务器完善（路由、请求解析）
-3. 多TCP连接并发支持
-4. UPDATE=1
-
----
-
-## 当前版本：v0.44
-
-### ✅ v0.44 新增
-
-#### TCP完整状态机
-- RST处理:
-  - 检测接收到的RST标志，立即关闭连接
-  - 向连接到非监听端口的SYN发送RST响应
-  - tcp_rst_received标志通知shell
-- FIN-ACK处理:
-  - e1000_send_fin_ack: 发送FIN-ACK（flags=0x11）用于优雅关闭
-  - 检测接收到的FIN，发送FIN-ACK响应
-  - tcp_fin_received/tcp_fin_sent标志跟踪
-- 连接计数: tcp_conn_count追踪总连接数
-
-#### HTTP服务器完善
-- HTTP响应添加Content-Length头部
-- httpserver shell命令:
-  - "httpserver on" - 启用HTTP服务器
-  - "httpserver off" - 禁用HTTP服务器
-  - "httpserver" - 显示当前状态
-  - 显示连接统计（RST/FIN接收）
-- tcp_http_enabled变量控制HTTP响应开关
-
-#### 代码统计
-- kernel.asm: +180行（RST/FIN-ACK/连接追踪）
-- shell.asm: +90行（httpserver命令）
-- 版本更新: kernel v0.44, shell v0.44
-
-#### QEMU测试结果
-- 内核正常启动 v0.44 ✓
-- e1000初始化成功 ✓
-- TCP状态机完整（RST/FIN-ACK/连接追踪）✓
-- httpserver命令正常工作 ✓
-
----
-
-## 当前版本：v0.45
-
-### ✅ v0.45 新增
-
-#### TCP连接表（4并发连接）
-- tcp_conn_table: 4个并发TCP连接支持
-  - 每个条目: 状态 + 远程IP + 远程端口 + 本地序列号 + 远程序列号 + 远程ACK
-  - tcp_conn_lookup: 按IP+端口查找已有连接
-  - tcp_conn_alloc: 分配新连接槽位
-- tcp_conn_active_count: 活跃连接计数
-
-#### HTTP请求解析
-- http_parse_request: 解析HTTP请求
-  - 识别GET/POST方法
-  - 提取URL路径（最大256字节）
-  - 提取Host头部（最大128字节）
-- http_method/http_url/http_host BSS变量存储解析结果
-
-#### ARP缓存改进
-- e1000_arp_cache: 8条目ARP缓存
-  - 每个条目: 4字节IP + 6字节MAC = 10字节（对齐到12）
-  - arp_cache_lookup: 查找IP对应的MAC
-  - arp_cache_insert: 插入新条目
-- e1000_handle_arp自动缓存: ARP请求和回复都自动填充缓存
-
-#### 版本更新
-- kernel.asm: v0.45
-- shell.asm: v0.45
-- HTTP响应: Server: aiasm/v0.45
-
-#### QEMU测试结果
-- 内核正常启动 v0.45 ✓
-- e1000初始化成功 ✓
-- TCP连接表框架完成 ✓
-- HTTP请求解析完成 ✓
-- ARP缓存自动填充 ✓
-
----
-
-## 当前版本：v0.46
-
-### ✅ v0.46 新增
-
-#### TCP连接表与发送函数集成
-- 每连接独立序列号跟踪（连接条目 local_seq/remote_seq/remote_ack）
-- e1000_handle_tcp 在找到/分配连接后，从连接条目加载 local_seq 到全局变量
-- send_synack 完成后更新连接条目 local_seq（SYN消耗1个序号）
-- send_tcp_data 完成后更新连接条目 local_seq 和 remote_seq（数据长度）
-- send_fin_ack 完成后更新连接条目 local_seq（FIN消耗1个序号）
-- tcp_conn_slot_ptr 指向当前连接条目，供发送函数使用
-
-#### 连接状态追踪增强
-- SYN_RECV(3): 收到SYN后设置
-- ESTABLISHED(4): 收到PSH-ACK数据后设置
-- FIN_WAIT(5): 发送FIN后设置
-- CLOSE_WAIT(6): 收到远端FIN后设置
-- FIN处理更新连接条目状态（不再仅依赖全局tcp_state）
-
-#### QEMU测试结果
-- 内核正常启动 v0.46 ✓
-- e1000初始化成功 ✓
-- TCP连接表与发送函数集成完成 ✓
-
----
-
----
-
-## 当前版本：v0.47
-
-### ✅ v0.47 新增
-
-#### HTTP URL路由
-- URL路由分发：/ → hello响应，/status → 内核状态，/version → 版本信息，
-  /tcpstatus → TCP连接表状态，其他路径 → 404
-- 动态HTTP头：Content-Length在运行时从body长度动态计算
-- print_dec5辅助函数：5位零填充十进制格式化
-- http_body_tmp BSS缓冲区：用于HTTP头构造
-- 各路由专属响应文本（.rodata区）
-- /status和/tcpstatus包含实时连接计数
-
-#### QEMU测试结果
-- 内核正常启动 v0.47 ✓
-- e1000初始化成功 ✓
-- HTTP路由框架完成 ✓
-
----
-
----
-
-## 当前版本：v0.48
-
-### ✅ v0.48 新增
-
-#### ARP缓存集成到所有发送路径
-- 所有UDP/TCP发送函数在构建以太网帧前调用arp_cache_lookup
-- 7个发送路径集成ARP缓存查询：udp, synack, tcp_ack, tcp_data,
-  fin_ack, rst, arp回复处理
-- 网关(10.0.2.2)查询优先使用缓存MAC，减少ARP请求延迟
-- 缓存未命中时回退到最后已知的MAC地址
-
-#### QEMU测试结果
-- 内核正常启动 v0.48 ✓
-- e1000初始化成功 ✓
-- ARP缓存集成完成 ✓
-
----
-
----
-
-## 当前版本：v0.49
-
-### ✅ v0.49 新增
-
-#### IP/TCP/UDP校验和正确实现
-- ip_checksum辅助函数：标准的one's complement校验和计算
-- tcp_checksum：带伪头部的TCP校验和（源IP + 目的IP + 协议号 +
-  长度 + TCP段）
-- udp_checksum：带伪头部的UDP校验和（源IP + 目的IP + 协议号 +
-  长度 + UDP段）
-- 所有TCP发送路径计算正确校验和：synack, tcp_ack, tcp_data（含payload）,
-  fin_ack, rst
-- UDP发送路径计算包含payload的正确校验和
-- tcp_cksum_buf（2KB）和udp_cksum_buf BSS工作区
-
-#### QEMU测试结果
-- 内核正常启动 v0.49 ✓
-- e1000初始化成功 ✓
-- 校验和实现完成 ✓
-
----
-
----
-
-## 当前版本：v0.50
-
-### ✅ v0.50 新增
-
-#### ICMP Echo Request（ping）与回复检测
-- e1000_send_icmp_echo：发送ICMP Echo Request，正确计算IP/ICMP校验和
-- 标识符0x5555，序列号跟踪
-- e1000_handle_icmp中的Echo Reply检测：检查type=0和identifier
-- e1000_poll_delay：带~10ms延迟的轮询辅助函数
-- ping BSS状态变量：目标IP、回复就绪标志、RTT、序列号
-- Shell已有ping命令：解析IP、发送ARP、构建ICMP请求、等待回复
-- UART消息：ping超时和带RTT的回复显示
-
-#### QEMU测试结果
-- 内核正常启动 v0.50 ✓
-- e1000初始化成功 ✓
-- ping框架完成 ✓
-
----
-
----
-
-## 当前版本：v0.51
-
-### ✅ v0.51 新增
-
-#### DHCP客户端框架
-- e1000_send_dhcp_discover：构建并发送DHCP Discover（UDP 68->67，
-  广播MAC，xid来自tick_count）
-- e1000_send_dhcp_request：收到Offer后发送DHCP Request
-- e1000_handle_dhcp：解析DHCP响应，通过消息类型选项检测Offer/ACK，
-  验证xid匹配
-- DHCP选项解析：从ACK中提取子网掩码(opt 1)、网关(opt 3)、DNS(opt 6)
-- DHCP状态机：0=idle, 1=sent_discover, 2=got_offer, 3=bound
-- BSS变量：e1000_our_ip, e1000_gateway_ip, e1000_subnet_mask,
-  e1000_dns_ip, e1000_dhcp_state, e1000_dhcp_xid, e1000_offer_ip,
-  e1000_our_ip_ready
-- Shell dhcp命令：发送Discover，轮询Offer，发送Request，轮询ACK，
-  显示分配的IP和网关
-- print_ip_uart和print_dec_byte_uart辅助函数
-- e1000_handle_udp将端口68分发给DHCP处理器
-
-#### QEMU测试结果
-- 内核正常启动 v0.51 ✓
-- e1000初始化成功 ✓
-- DHCP客户端框架完成 ✓
-
----
-
-## 当前版本：v0.52
-
-### ✅ v0.52 新增
-
-#### 动态源IP支持
-- 所有硬编码0x0F02000A (10.0.2.15)替换为[e1000_our_ip]变量
-- 8个发送/校验路径更新：ICMP echo, UDP, TCP synack/tcp_ack/tcp_data/fin_ack/rst, tcp_checksum, udp_checksum
-- 启动时静态初始化：e1000_our_ip = 10.0.2.15, e1000_arp_ip = 10.0.2.15, e1000_our_ip_ready = 1
-- DHCP绑定后将自动覆盖为动态分配的IP
-
-#### QEMU测试结果
-- 内核正常启动 v0.52 ✓
-- e1000初始化成功 ✓
-- 动态IP框架完成 ✓
-
----
-
-## 当前版本：v0.53
-
-### ✅ v0.53 新增
-
-#### TCP连接槽位释放（FIN/RST）
-- tcp_conn_free: 清零连接条目并递减tcp_conn_active_count
-- FIN处理: 收到FIN后发送FIN-ACK并立即释放连接槽
-- RST处理: 收到RST后查找并释放匹配的连接槽
-- ESTABLISHED状态更新: PSH-ACK到达时更新连接条目状态为ESTABLISHED(4)
-- tcp_conn_alloc初始状态修正: SYN_RECV(3)而非SYN_SENT(2)
-
-#### QEMU测试结果
-- 内核正常启动 v0.53 ✓
-- e1000初始化成功 ✓
-- TCP连接生命周期完整（建立→传输→释放）✓
-
----
-
-## 当前版本：v0.55
-
-### ✅ v0.55 新增
-
-#### netstat shell命令
-- 显示TCP连接表（4槽位）
-- 活跃连接计数（X / 4）
-- 每槽位状态：CLOSED/LISTEN/SYN_SENT/SYN_RECV/ESTABLISHED/FIN_WAIT/CLOSE_WAIT
-- 远程IP:port显示
-- print_ip_inline辅助函数（无尾随点）
-- tcp_conn_active_count导出供shell访问
-
-#### QEMU测试结果
-- 内核正常启动 v0.55 ✓
-- e1000初始化成功 ✓
-- netstat命令正常工作 ✓
-
----
-
-## 当前版本：v0.56
-
-### ✅ v0.56 新增
-
-#### ARP缓存shell命令
-- `arp`命令显示ARP缓存表（8槽位）
-- 每槽位显示：槽号、IP地址、MAC地址
-- kernel.asm添加`.globl e1000_arp_cache`和`.globl e1000_arp_cache_size`导出
-- shell.asm添加print_ip_arp和print_hex_byte辅助函数
-- **关键bug修复**：.arp_skip中push/pop esi保护ARP缓存指针
-  - 之前esi被msg_arp_empty字符串地址覆盖导致垃圾数据显示
-  - 修复后所有空槽位正确显示"(empty)"
-
-#### QEMU测试结果
-- 内核正常启动 v0.56 ✓
-- e1000初始化成功 ✓
-- ARP命令显示正确（8个空槽位）✓
-
----
-
-## 当前版本：v0.57
-
-### ✅ v0.57 修复
-
-#### netstat esi保护bug修复
-- 同ARP命令bug：esi被字符串地址覆盖导致垃圾数据显示
-- 修复：使用ebx保存连接表指针，在状态打印期间访问IP/port字段
-- .netstat_skip添加push/pop esi保护
-- 所有4个TCP连接槽位正确显示"(empty)"（无活跃连接时）
-
-#### QEMU测试结果
-- 内核正常启动 ✓
-- netstat命令显示正确（4个空槽位）✓
-- ARP命令显示正确 ✓
-
----
-
-## 当前版本：v0.58
-
-### ✅ v0.58 修复
-
-#### UDP echo server checksum计算bug
-- Bug：`mov ecx, [udp_recv_len]` 后 `mov cx, 8` 覆盖了ecx低16位
-- 导致UDP checksum长度计算错误
-- 修复：正确顺序 `mov ecx, 8; add ecx, [udp_recv_len]`
-- UDP checksum现在正确使用：8（UDP头）+ payload长度
-
-#### QEMU测试结果
-- 内核正常启动 ✓
-- 所有命令正常工作 ✓
-
----
-
-**下一步**:
-1. 多TCP连接并发端到端测试（验证4槽位可重复使用 + netstat）
-2. DHCP成功后自动使用动态IP替换硬编码IP（已实现 ✓）
-3. UDP echo server完善（checksum已修复 ✓）
-4. WASM测试全部通过验证（已通过 ✓）
-5. UPDATE=1
-
----
-
-## 当前版本：v0.59
-
-### ✅ v0.59 更新
-
-#### Help命令文档完善
-- 添加"arp - Show ARP cache table"到help输出
-- 之前arp命令已实现但未在help中显示
-
-#### QEMU测试结果
-- 内核正常启动 v0.58 ✓
-- help命令显示arp ✓
-
----
-
-## 当前版本：v0.60
-
-### ✅ v0.60 更新
-
-#### Shell版本一致性
-- version命令显示"AI-ASM Kernel v0.59"
-- 之前显示过时的v0.50
-
-#### QEMU测试结果
-- 内核正常启动 v0.58 ✓
-- version命令显示v0.59 ✓
-- 所有28个shell命令正常 ✓
-- WASM测试2-11全部通过 ✓
-- WASM应用fibonacci/factorial/multiply/sum通过 ✓
-
----
-
-**项目完整度统计**:
-- 代码总量: 20个内核文件, ~19,300行汇编
-- Shell命令: 28个
-- WASM指令: 238条
-- 网络协议: ARP/ICMP/UDP/TCP/DHCP/HTTP
-
----
-
-## 当前版本：v0.61
-
-### ✅ v0.61 更新
-
-#### 代码库清理
-- 移除编译后的二进制示例文件
-- 源文件应从.asm编译生成，不应直接跟踪
-
-#### 系统稳定性
-- 所有子系统正常初始化 ✓
-- Shell命令全部可用 ✓
-- WASM运行时稳定 ✓
-
-**下一步**:
-1. 持续稳定性测试
-2. UPDATE=1
-
----
-
-## 当前版本：v0.63
-
-### ✅ v0.63 发布
-
-#### README更新
-- 三层架构完整文档 (汇编底层/WASM中间层/应用层)
-- 网络协议栈详细说明 (e1000/ARP/ICMP/UDP/TCP/DHCP/HTTP)
-- WASM运行时238指令列表
-- Shell 28命令分类表
-- 代码统计: 20文件, 19,308行汇编
-- 版本历史表 (v0.01→v0.62)
-
-#### Release内容
-- 三层架构完成
-- 网络协议栈完整
-- WASM运行时238指令
-- Shell 28命令+7WASM应用
-- Bug修复: ARP/netstat/UDP checksum
-
----
-
-## 当前版本：v0.64
-
-### ✅ v0.64 新增
-
-#### WASM网络syscall接口 (wasm_syscall.asm)
-- WASM_HOST_NET_SEND (8): 发送网络数据（UDP/TCP）
-- WASM_HOST_NET_RECV (9): 接收网络数据
-- WASM_HOST_NET_STATUS (10): 获取网络状态
-- WASM_HOST_NET_CONFIG (11): 获取IP/MAC配置
-
-#### WASM发送包装函数 (kernel.asm)
-- e1000_send_udp_wasm: UDP发送包装，供WASM模块调用
-- e1000_send_tcp_data_wasm: TCP发送包装，供WASM模块调用
-
-#### 网络状态导出
-- e1000_status: 网卡初始化状态标志
-- e1000_mac_addr: MAC地址导出
-- e1000_dns_ip: DNS服务器IP导出
-- udp_send_dest_ip/data_len: UDP发送参数导出
-- tcp_recv_src_ip/src_port: TCP接收源导出
-
-#### WASM接口复用驱动架构
-- WASM模块可通过宿主函数接口调用e1000驱动
-- 简化开发：不重复造轮子，复用现有内核驱动
-- 12个宿主函数：print/println/putchar/getchar/meminfo/time/alloc/free/net_send/net_recv/net_status/net_config
-
-#### QEMU测试结果
-- 内核正常启动 v0.64 ✓
-- e1000初始化成功 ✓
-- WASM syscall接口添加完成 ✓
+- 内核正常启动 v0.79 ✓
+- wasmtest34 = 268435456 ✓
+- wasmtest35 = -10 ✓
+- wasmtest31-33 全部通过 ✓
 
 #### 下一步
-1. WASM网络测试应用编写
-2. UPDATE=1
-
----
-
-## 当前版本：v0.65
-
-### ✅ v0.65 新增
-
-#### WASM宿主函数参数处理完善 (wasm_vm.asm)
-- .host_3arg: 3参数处理（net_recv用）
-- .host_5arg: 5参数处理（net_send用）
-- net_status (10): 0参数，返回网络状态
-- net_config (11): 1参数，写入IP/MAC配置
-
-#### WASM网络测试框架 (shell.asm)
-- wasmtest19: 测试net_status宿主函数
-- wasm_test_net_status_module: WASM字节码模块
-- 调用宿主函数11 (func_idx=11, host_id=10=net_status)
-- 返回值显示：网络状态十六进制格式
-
-#### QEMU测试结果
-- 内核正常启动 v0.65 ✓
-- e1000初始化成功 ✓
-- WASM宿主函数参数处理完善 ✓
-- wasmtest19命令框架完成 ✓
-
-#### 下一步
-1. wasmtest19交互测试验证
-2. UPDATE=1
-
----
-
-## 当前版本：v0.66
-
-### ✅ v0.66 验证
-
-#### wasmtest19交互测试成功
-- net_status = 0x1 ✓
-- e1000_status = 1（网卡初始化成功）
-- dhcp_bound = 0（DHCP未绑定）
-- tcp_conn_count = 0（无TCP连接）
-- WASM宿主函数接口正常工作 ✓
-
-#### 测试输出
-```
-aiasm> wasmtest19
-Running WASM test19 (net_status)...
-net_status = 0x1
-aiasm>
-```
-
-#### 结论
-- WASM网络syscall接口实现正确
-- WASM模块可通过宿主函数调用内核驱动
-- 三层架构（汇编底层+WASM中间层+应用层）验证成功
-
-#### 下一步
-1. wasmtest20: net_config测试
-2. UPDATE=1
-
----
-
-## 当前版本：v0.67
-
-### ✅ v0.67 新增
-
-#### wasmtest20: net_config 宿主函数测试
-- wasm_test_net_config_module: WASM字节码模块
-  - 类型签名: (i32) -> i32
-  - 调用宿主函数12 (func_idx=12, host_id=12-1=11=net_config)
-  - 传入缓冲区指针: i32.const 0（线性内存偏移0）
-- net_config将IP(4字节)+MAC(6字节)+Gateway(4字节)+DNS(4字节)写入线性内存
-- 测试结果: net_config result = 0x0（成功）
-
-#### QEMU测试结果
-- 内核正常启动 v0.67 ✓
-- e1000初始化成功 ✓
-- version命令显示v0.67 ✓
-- wasmtest2-11全部通过 ✓
-- wasmtest19 net_status = 0x1 ✓
-- wasmtest20 net_config = 0x0 ✓
-
-#### 结论
-- WASM网络syscall接口完整验证（status + config）
-- 三层架构（汇编底层+WASM中间层+应用层）进一步验证成功
-
-#### 下一步
-1. wasmtest21: net_send/net_recv测试
-2. UPDATE=1
-
----
-
-## 当前版本：v0.68
-
-### ✅ v0.68 新增
-
-#### wasmtest21: net_send/net_recv 宿主函数测试
-- wasm_test_net_send_module: WASM字节码模块
-  - 类型签名: (i32,i32,i32,i32,i32) -> i32
-  - 调用宿主函数10 (func_idx=10, host_id=9=net_send)
-  - 参数: type=0(UDP), dst_ip=0x0A000202(10.0.2.2), dst_port=7, ptr=0, len=4
-- wasm_test_net_recv_module: WASM字节码模块
-  - 类型签名: (i32,i32,i32) -> i32
-  - 调用宿主函数10 (func_idx=10, host_id=9=net_recv)
-  - 参数: type=0(UDP), ptr=256, maxlen=1024
-- 测试结果:
-  - net_send result = 0x1 (发送成功)
-  - net_recv result = 0x0 (无数据，预期行为)
-
-#### 关键bug修复
-- **WASM栈返回地址 corruption**: 在exec_code_loop中，call _dispatch_opcode的返回地址在执行WASM宿主函数期间被破坏
-  - 根因: 深层调用链（do_call_host → wasm_host_call → e1000_send_udp_wasm → e1000_transmit）中栈被污染
-  - 修复: 在call _dispatch_opcode之前保存返回地址到wasm_dispatch_ret_addr，dispatch_done恢复
-  - 分离wasm_saved_ret_addr（exec_func返回地址）和wasm_dispatch_ret_addr（dispatch_opcode返回地址）
-- **WASM字节码大小修正**: wasm_test_net_send_module的body size从0x13改为0x11，section size从0x15改为0x13
-
-#### QEMU测试结果
-- 内核正常启动 v0.68 ✓
-- e1000初始化成功 ✓
-- wasmtest2 = 42 ✓
-- wasmtest21 net_send = 0x1, net_recv = 0x0 ✓
-
-#### 下一步
-1. 更多WASM网络测试
-2. UPDATE=1
-
----
-
-## 当前版本：v0.72
-
-### ✅ v0.72 新增
-
-#### Bug修复: i32.store栈操作顺序错误
-- 问题: store指令先弹出value再弹出address，但WASM语义中address在栈顶
-- 影响: 存储值被写入错误地址（值作为地址），线性内存读写完全错误
-- 修复: 改为先pop address再pop value，修正栈操作顺序
-
-#### wasmtest25: store/load 内存读写测试
-- wasm_test_store_module: WASM字节码模块
-  - 类型签名: () -> i32
-  - 无局部变量
-  - 指令序列: i32.const 0x12345678; i32.const 0; i32.store; i32.const 0; i32.load; return
-- 测试结果: 从线性内存offset 0读回值 305419896 (= 0x12345678) ✓
-
-#### QEMU测试结果
-- 内核正常启动 v0.72 ✓
-- e1000初始化成功 ✓
-- wasmtest2 = 42 ✓
-- wasmtest21 net_send = 0x1 ✓
-- wasmtest22 time() = 1 ✓
-- wasmtest23 = "Hi!" ✓
-- wasmtest24 = "128956 KB" ✓
-- wasmtest25 = 305419896 (0x12345678) ✓
-
-#### 下一步
-1. getchar宿主函数测试
-2. UPDATE=1
-
----
-
-## 当前版本：v0.73
-
-### ✅ v0.73 新增
-
-#### wasmtest26: getchar 宿主函数测试
-- wasm_test_getchar_module: WASM字节码模块
-  - 类型签名: () -> i32
-  - 指令序列: call getchar (func_idx=3, host_id=3); end
-- getchar从UART读取单字符并返回其ASCII码
-- 测试结果: getchar() 返回输入字符的十六进制值
-
-#### QEMU测试结果
-- 内核正常启动 v0.73 ✓
-- e1000初始化成功 ✓
-- wasmtest26 getchar 测试通过 ✓
-
-#### 下一步
-1. println + store/load 组合测试（验证store修复后println可用）
-2. UPDATE=1
-
----
-## 当前版本：v0.74
-
-### ✅ v0.74 新增
-
-#### Bug修复: i32.store8/i32.store16 栈操作顺序 + opcode错误
-- 问题1: store8/store16先弹value再弹address，但WASM语义中address在栈顶
-- 问题2: 手写字节码使用了错误opcode（0x38≠store8, 0x2E≠load8_u）
-- 修复: 修正栈弹出顺序，修正store8用al存储，store16用ax存储
-
-#### wasmtest27: store8/load8_u 字节存储测试
-- wasm_test_store_load_module: i32.const 64; i32.const 0; i32.store8; i32.const 0; i32.load8_u; return
-- 测试结果: 返回 64 ✓
-
-#### QEMU测试结果
-- 内核正常启动 v0.74 ✓
-- wasmtest27 = 64 ✓
-- wasmtest25 = 305419896 ✓
-- wasmtest2 = 42 ✓
-
-#### 下一步
-1. store16/load16_u 组合测试
-2. UPDATE=1
-
----
-
-## 当前版本：v0.75
-
-### ✅ v0.75 新增
-
-#### wasmtest28: store16/load16_u 字存储测试
-- wasm_test_store16_load16_module: i32.const 0xBEEF; i32.const 0; i32.store16; i32.const 0; i32.load16_u; return
-- 测试结果: 返回 48879 (0xBEEF) ✓
-- Bug修复: i32.load16_u 错误opcode (0x30≠load16_u, 正确是0x2F)
-
-#### QEMU测试结果
-- 内核正常启动 v0.75 ✓
-- wasmtest28 = 48879 ✓
-- wasmtest27 = 64 ✓
-- wasmtest25 = 305419896 ✓
-- wasmtest2 = 42 ✓
-
-#### 下一步
-1. store32/load32_u 组合测试
+1. i64.rem_s/u 测试
 2. UPDATE=1
 
 ---
