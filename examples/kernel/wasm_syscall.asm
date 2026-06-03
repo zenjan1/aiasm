@@ -463,9 +463,35 @@ wasm_host_call:
 
 .host_fatopen:
     # fatopen(name_ptr, name_len) -> cluster -> 打开文件，返回簇号
-    # ebx = name_ptr, ecx = name_len
-    # 简化实现：暂不支持
+    # 参数: ebx = name_ptr (WASM线性内存偏移), ecx = name_len
+
+    push    ebx
+    push    ecx
+    push    esi
+    push    edi
+
+    # 转换 WASM 指针到实际内存
+    mov     esi, ebx
+    add     esi, offset wasm_linear_memory  # esi = filename ptr (11 bytes, 8.3 format)
+
+    # 查找文件: fat32_get_file_info(esi = filename) -> eax = cluster, ecx = size
+    call    fat32_get_file_info
+
+    # 检查是否找到文件 (eax = 0xFFFFFFFF 表示失败)
+    cmp     eax, 0xFFFFFFFF
+    je      .fatopen_not_found
+
+    # eax 已经是簇号，直接返回
+    jmp     .fatopen_done
+
+.fatopen_not_found:
     mov     eax, -1
+
+.fatopen_done:
+    pop     edi
+    pop     esi
+    pop     ecx
+    pop     ebx
     jmp     .done
 
 .done:

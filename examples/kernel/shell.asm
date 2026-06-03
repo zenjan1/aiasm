@@ -949,6 +949,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest97
 
+    # "wasmtest98" - WASM fatopen host function test
+    mov     edi, offset cmd_wasmtest98
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest98
+
     # "wasmrepl" - WASM interactive REPL
     mov     edi, offset cmd_wasmrepl
     call    utils_strcmp
@@ -4359,6 +4365,52 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest98:
+    # WASM fatopen host function test: call host function 14 (fatopen)
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test98
+    call    uart_puts
+    mov     esi, offset wasm_test_fatopen_module
+    mov     ecx, offset wasm_test_fatopen_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "fatopen result = "
+    mov     esi, offset msg_wasm_fatopen_result
+    call    uart_puts
+    # Print result (eax = cluster or -1)
+    cmp     eax, -1
+    jne     .fatopen_print_success
+    mov     esi, offset msg_wasm_fatopen_fail
+    call    uart_puts
+    jmp     .fatopen_done_print
+.fatopen_print_success:
+    # Print cluster number in hex
+    push    eax
+    mov     esi, offset msg_0x
+    call    uart_puts
+    pop     eax
+    call    print_hex8
+    mov     esi, offset msg_wasm_fatopen_cluster
+    call    uart_puts
+.fatopen_done_print:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # .do_wasmrepl: WASM Interactive REPL
 # ============================================================================
@@ -7310,6 +7362,8 @@ cmd_wasmtest96:
     .asciz  "wasmtest96"
 cmd_wasmtest97:
     .asciz  "wasmtest97"
+cmd_wasmtest98:
+    .asciz  "wasmtest98"
 cmd_wasmrepl:
     .asciz  "wasmrepl"
 cmd_wasmrepl_exit:
@@ -7661,7 +7715,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.06"
+    .ascii  "AI-ASM Kernel v1.07"
     .byte   13, 10, 0
 
 help_text:
@@ -8236,6 +8290,14 @@ msg_wasm_fatread_fail:
     .asciz  "-1 (file not found)"
 msg_wasm_fatread_bytes:
     .asciz  " bytes read"
+msg_wasm_test98:
+    .asciz  "Running WASM test98 (fatopen)...\r\n"
+msg_wasm_fatopen_result:
+    .asciz  "fatopen result = "
+msg_wasm_fatopen_fail:
+    .asciz  "-1 (file not found)"
+msg_wasm_fatopen_cluster:
+    .asciz  " (cluster number)"
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -12109,3 +12171,54 @@ wasm_test_fatread_module:
     .byte   0x10, 0x0E             # call 14 (fatread, host_id=13)
     .byte   0x0B                   # end
 wasm_test_fatread_size = . - wasm_test_fatread_module
+
+# wasm_test_fatopen_module: 测试 host_fatopen (14) - 打开文件，返回簇号
+# 参数: name_ptr (WASM内存偏移), name_len (11 bytes for 8.3 format)
+# 返回: 簇号或 -1
+# Data section: 存储文件名 "HELLO    TXT" (11 bytes) at offset 0
+wasm_test_fatopen_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # memory section: 1 memory, min=1 page (64KB)
+    .byte   0x05                   # section id
+    .byte   0x03                   # section size = 3
+    .byte   0x01                   # num memories
+    .byte   0x00                   # limits flag (no max)
+    .byte   0x01                   # min pages = 1
+    # data section: store filename "HELLO    TXT" (11 bytes) at offset 0
+    .byte   0x0B                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num data segments
+    .byte   0x00                   # memory index
+    .byte   0x00                   # offset (i32.const 0)
+    .byte   0x0B                   # 11 bytes of data
+    .byte   0x48, 0x45, 0x4C, 0x4C, 0x4F  # "HELLO"
+    .byte   0x20, 0x20, 0x20, 0x20       # 4 spaces
+    .byte   0x54, 0x58, 0x54             # "TXT"
+    # code section: push args, call fatopen, return
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    # push name_ptr = 0
+    .byte   0x41, 0x00             # i32.const 0
+    # push name_len = 11
+    .byte   0x41, 0x0B             # i32.const 11
+    # call host_fatopen (host_id=14, call_index=15)
+    .byte   0x10, 0x0F             # call 15 (fatopen, host_id=14)
+    .byte   0x0B                   # end
+wasm_test_fatopen_size = . - wasm_test_fatopen_module
