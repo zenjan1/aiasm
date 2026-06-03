@@ -22,6 +22,9 @@ WASM_HOST_NET_SEND   = 8     # net_send(type, dst_ip, dst_port, ptr, len) -> 发
 WASM_HOST_NET_RECV   = 9     # net_recv(type, ptr, maxlen) -> len -> 接收网络数据
 WASM_HOST_NET_STATUS = 10    # net_status() -> 网络状态
 WASM_HOST_NET_CONFIG = 11    # net_config(ptr) -> 写入IP/MAC配置到内存
+WASM_HOST_FATLS      = 12    # fatls() -> 列出根目录文件
+WASM_HOST_FATREAD    = 13    # fatread(name_ptr, name_len, buf_ptr, buf_len) -> 读取文件内容
+WASM_HOST_FATOPEN    = 14    # fatopen(name_ptr, name_len) -> cluster -> 打开文件，返回簇号
 
 # ============================================================================
 # WASM 系统调用计数
@@ -90,6 +93,12 @@ wasm_host_call:
     je      .host_net_status
     cmp     eax, WASM_HOST_NET_CONFIG
     je      .host_net_config
+    cmp     eax, WASM_HOST_FATLS
+    je      .host_fatls
+    cmp     eax, WASM_HOST_FATREAD
+    je      .host_fatread
+    cmp     eax, WASM_HOST_FATOPEN
+    je      .host_fatopen
 
     # 未知函数
     mov     eax, -1
@@ -361,6 +370,40 @@ wasm_host_call:
     mov     eax, [e1000_dns_ip]
     mov     [edi], eax
     xor     eax, eax
+    jmp     .done
+
+.host_fatls:
+    # fatls() - 列出根目录文件
+    # 无参数，直接调用 fat32_list_root
+    push    eax
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+    call    fat32_list_root
+    # eax = 文件数量
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     eax
+    jmp     .done
+
+.host_fatread:
+    # fatread(name_ptr, name_len, buf_ptr, buf_len) -> 读取文件内容
+    # ebx = name_ptr, ecx = name_len, edx = buf_ptr
+    # [ebp+8] = buf_len (通过栈传递的第4个参数)
+    # 简化实现：暂不支持
+    mov     eax, -1
+    jmp     .done
+
+.host_fatopen:
+    # fatopen(name_ptr, name_len) -> cluster -> 打开文件，返回簇号
+    # ebx = name_ptr, ecx = name_len
+    # 简化实现：暂不支持
+    mov     eax, -1
     jmp     .done
 
 .done:
