@@ -741,6 +741,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest65
 
+    # "wasmtest66" - WASM f64.abs test
+    mov     edi, offset cmd_wasmtest66
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest66
+
+    # "wasmtest67" - WASM f64.neg test
+    mov     edi, offset cmd_wasmtest67
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest67
+
+    # "wasmtest68" - WASM f64.ceil test
+    mov     edi, offset cmd_wasmtest68
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest68
+
+    # "wasmtest69" - WASM f64.floor test
+    mov     edi, offset cmd_wasmtest69
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest69
+
+    # "wasmtest70" - WASM f64.min test
+    mov     edi, offset cmd_wasmtest70
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest70
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -2980,6 +3010,126 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest66:
+    # WASM f64.abs test: abs(-3.5) = 3.5
+    mov     esi, offset msg_wasm_test66
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_abs_module
+    mov     ecx, offset wasm_test_f64_abs_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.abs = "
+    mov     esi, offset msg_f64_abs_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest67:
+    # WASM f64.neg test: neg(2.0) = -2.0
+    mov     esi, offset msg_wasm_test67
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_neg_module
+    mov     ecx, offset wasm_test_f64_neg_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.neg = "
+    mov     esi, offset msg_f64_neg_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest68:
+    # WASM f64.ceil test: ceil(2.3) = 3.0
+    mov     esi, offset msg_wasm_test68
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_ceil_module
+    mov     ecx, offset wasm_test_f64_ceil_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.ceil = "
+    mov     esi, offset msg_f64_ceil_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest69:
+    # WASM f64.floor test: floor(2.7) = 2.0
+    mov     esi, offset msg_wasm_test69
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_floor_module
+    mov     ecx, offset wasm_test_f64_floor_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.floor = "
+    mov     esi, offset msg_f64_floor_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest70:
+    # WASM f64.min test: min(1.0, 3.0) = 1.0
+    mov     esi, offset msg_wasm_test70
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_min_module
+    mov     ecx, offset wasm_test_f64_min_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.min = "
+    mov     esi, offset msg_f64_min_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -5150,6 +5300,16 @@ cmd_wasmtest64:
     .asciz  "wasmtest64"
 cmd_wasmtest65:
     .asciz  "wasmtest65"
+cmd_wasmtest66:
+    .asciz  "wasmtest66"
+cmd_wasmtest67:
+    .asciz  "wasmtest67"
+cmd_wasmtest68:
+    .asciz  "wasmtest68"
+cmd_wasmtest69:
+    .asciz  "wasmtest69"
+cmd_wasmtest70:
+    .asciz  "wasmtest70"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -5799,6 +5959,26 @@ msg_wasm_test65:
     .asciz  "Running WASM test65 (f32.min)...\r\n"
 msg_f32_min_result:
     .asciz  "f32.min = "
+msg_wasm_test66:
+    .asciz  "Running WASM test66 (f64.abs)...\r\n"
+msg_f64_abs_result:
+    .asciz  "f64.abs = "
+msg_wasm_test67:
+    .asciz  "Running WASM test67 (f64.neg)...\r\n"
+msg_f64_neg_result:
+    .asciz  "f64.neg = "
+msg_wasm_test68:
+    .asciz  "Running WASM test68 (f64.ceil)...\r\n"
+msg_f64_ceil_result:
+    .asciz  "f64.ceil = "
+msg_wasm_test69:
+    .asciz  "Running WASM test69 (f64.floor)...\r\n"
+msg_f64_floor_result:
+    .asciz  "f64.floor = "
+msg_wasm_test70:
+    .asciz  "Running WASM test70 (f64.min)...\r\n"
+msg_f64_min_result:
+    .asciz  "f64.min = "
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -8170,3 +8350,210 @@ wasm_test_f32_min_module:
     .byte   0x96                   # f32.min (opcode 0x96)
     .byte   0x0B                   # end
 wasm_test_f32_min_size = . - wasm_test_f32_min_module
+
+# =====================================================
+# wasmtest66: f64.abs test - abs(-3.5) = 3.5
+# =====================================================
+# f64.const -3.5: IEEE 754 = 0xC00C000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0xC0)
+# f64.abs opcode: 0x99
+# body: locals(1) + f64.const(9) + f64.abs(1) + end(1) = 12
+wasm_test_f64_abs_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const -3.5, f64.abs, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0xC0  # f64.const -3.5
+    .byte   0x99                   # f64.abs
+    .byte   0x0B                   # end
+wasm_test_f64_abs_size = . - wasm_test_f64_abs_module
+
+# =====================================================
+# wasmtest67: f64.neg test - neg(2.0) = -2.0
+# =====================================================
+# f64.const 2.0: IEEE 754 = 0x4000000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40)
+# f64.neg opcode: 0x9A
+# body: locals(1) + f64.const(9) + f64.neg(1) + end(1) = 12
+wasm_test_f64_neg_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 2.0, f64.neg, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40  # f64.const 2.0
+    .byte   0x9A                   # f64.neg
+    .byte   0x0B                   # end
+wasm_test_f64_neg_size = . - wasm_test_f64_neg_module
+
+# =====================================================
+# wasmtest68: f64.ceil test - ceil(2.3) = 3.0
+# =====================================================
+# f64.const 2.3: IEEE 754 = 0x4002666666666666 (little endian: 0x66, 0x66, 0x66, 0x66, 0x66, 0x26, 0x02, 0x40)
+# f64.ceil opcode: 0x9B
+# body: locals(1) + f64.const(9) + f64.ceil(1) + end(1) = 12
+wasm_test_f64_ceil_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 2.3, f64.ceil, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x66, 0x66, 0x66, 0x66, 0x66, 0x26, 0x02, 0x40  # f64.const 2.3
+    .byte   0x9B                   # f64.ceil
+    .byte   0x0B                   # end
+wasm_test_f64_ceil_size = . - wasm_test_f64_ceil_module
+
+# =====================================================
+# wasmtest69: f64.floor test - floor(2.7) = 2.0
+# =====================================================
+# f64.const 2.7: IEEE 754 = 0x400599999999999A (little endian: 0x9A, 0x99, 0x99, 0x99, 0x99, 0x59, 0x05, 0x40)
+# f64.floor opcode: 0x9C
+# body: locals(1) + f64.const(9) + f64.floor(1) + end(1) = 12
+wasm_test_f64_floor_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 2.7, f64.floor, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x9A, 0x99, 0x99, 0x99, 0x99, 0x59, 0x05, 0x40  # f64.const 2.7
+    .byte   0x9C                   # f64.floor
+    .byte   0x0B                   # end
+wasm_test_f64_floor_size = . - wasm_test_f64_floor_module
+
+# =====================================================
+# wasmtest70: f64.min test - min(1.0, 3.0) = 1.0
+# =====================================================
+# f64.const 1.0: IEEE 754 = 0x3FF0000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F)
+# f64.const 3.0: IEEE 754 = 0x4008000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40)
+# f64.min opcode: 0xA4
+# body: locals(1) + f64.const(9) + f64.const(9) + f64.min(1) + end(1) = 21
+wasm_test_f64_min_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 1.0, f64.const 3.0, f64.min, end
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F  # f64.const 1.0
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40  # f64.const 3.0
+    .byte   0xA4                   # f64.min
+    .byte   0x0B                   # end
+wasm_test_f64_min_size = . - wasm_test_f64_min_module

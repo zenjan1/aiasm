@@ -4177,47 +4177,61 @@ do_f32_sqrt:
 # f64.abs: 64位绝对值
 do_f64_abs:
     call    _stack_pop           # low
-    push    eax
+    mov     edx, eax             # save low
     call    _stack_pop           # high
-    push    eax
-    # [esp] = high, [esp+4] = low
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
     fld     qword ptr [esp]      # st0 = value
     fabs
     fstp    qword ptr [esp]      # store result
-    pop     eax                  # result_high
-    call    _stack_push
     pop     eax                  # result_low
-    call    _stack_push
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # f64.neg: 64位取负
 do_f64_neg:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp]
+    call    _stack_pop           # low
+    mov     edx, eax             # save low
+    call    _stack_pop           # high
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
+    fld     qword ptr [esp]      # st0 = value
     fchs
-    fstp    qword ptr [esp]
-    pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    fstp    qword ptr [esp]      # store result
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # f64.sqrt: 64位平方根
 do_f64_sqrt:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp]
+    call    _stack_pop           # low
+    mov     edx, eax             # save low
+    call    _stack_pop           # high
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
+    fld     qword ptr [esp]      # st0 = value
     fsqrt
-    fstp    qword ptr [esp]
-    pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    fstp    qword ptr [esp]      # store result
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # ============================================================================
@@ -4310,10 +4324,12 @@ do_f32_nearest:
 # f64.ceil: 64位向上舍入
 do_f64_ceil:
     call    _stack_pop           # low
-    push    eax
+    mov     edx, eax             # save low
     call    _stack_pop           # high
-    push    eax
-    # 栈: [esp]=high, [esp+4]=low
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
+    # 栈: [esp]=low, [esp+4]=high
     sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]       # 保存当前 FCW
     mov     ax, [esp]
@@ -4321,23 +4337,28 @@ do_f64_ceil:
     or      ax, 0x0800           # ceil 模式
     mov     [esp + 2], ax        # 新 FCW
     fldcw   word ptr [esp + 2]   # 加载新 FCW
-    fld     qword ptr [esp + 4]  # 加载 64 位操作数 (high at esp+4, low at esp+8)
+    fld     qword ptr [esp + 4]  # 加载 64 位操作数 (low at esp+4, high at esp+8)
     frndint
     fstp    qword ptr [esp + 4]  # 存储结果
     fldcw   word ptr [esp]       # 恢复 FCW
     add     esp, 4               # 清理 FCW 空间
-    pop     eax                  # result_high
-    call    _stack_push
     pop     eax                  # result_low
-    call    _stack_push
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # f64.floor: 64位向下舍入
 do_f64_floor:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
+    call    _stack_pop           # low
+    mov     edx, eax             # save low
+    call    _stack_pop           # high
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
     sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]
     mov     ax, [esp]
@@ -4345,15 +4366,18 @@ do_f64_floor:
     or      ax, 0x0400           # floor 模式
     mov     [esp + 2], ax        # 新 FCW
     fldcw   word ptr [esp + 2]
-    fld     qword ptr [esp + 4]
+    fld     qword ptr [esp + 4]  # 加载 64 位操作数 (low at esp+4, high at esp+8)
     frndint
     fstp    qword ptr [esp + 4]
     fldcw   word ptr [esp]
     add     esp, 4
-    pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # f64.trunc: 64位向零舍入
@@ -4517,34 +4541,84 @@ do_f32_copysign:
 
 # f64.min: 弹出两个 f64，返回 min
 do_f64_min:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    # Stack: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
-    # WASM spec: if either NaN, return NaN (IEEE 754-2008)
-    fld     qword ptr [esp]      # st0 = a
-    fcomp   qword ptr [esp + 8]  # compare a with b
-    fstsw   ax
-    sahf
-    jp      .f64min_return_a     # unordered -> NaN, return a
-    jbe     .f64min_return_a     # a <= b -> return a
-    add     esp, 8               # discard a
-    pop     eax
+    # WASM栈: b_low(top), b_high, a_low, a_high(bottom)
+    call    _stack_pop           # b_low
+    mov     edx, eax             # save b_low
+    call    _stack_pop           # b_high
+    mov     ecx, eax             # save b_high
+    call    _stack_pop           # a_low
+    mov     ebx, eax             # save a_low
+    call    _stack_pop           # a_high
+    # Now: edx=b_low, ecx=b_high, ebx=a_low, eax=a_high
+
+    # Check for NaN (exponent all 1s and mantissa non-zero)
+    # For f64: bits 52-62 are exponent, bits 0-51 are mantissa
+    # NaN detection: (high & 0x7FF00000) == 0x7FF00000 and (high & 0x000FFFFF | low) != 0
+    mov     esi, eax             # esi = a_high
+    and     esi, 0x7FF00000      # mask exponent
+    cmp     esi, 0x7FF00000
+    je      .f64min_nan_a        # a is NaN
+    mov     esi, ecx             # esi = b_high
+    and     esi, 0x7FF00000
+    cmp     esi, 0x7FF00000
+    je      .f64min_nan_b        # b is NaN
+
+    # Check if signs differ
+    mov     esi, eax
+    xor     esi, ecx             # xor a_high and b_high
+    test    esi, 0x80000000      # check sign bit
+    jnz     .f64min_diff_sign    # signs differ
+
+    # Same sign: compare as integers (high first, then low)
+    cmp     eax, ecx             # compare a_high with b_high
+    jb      .f64min_return_a     # a_high < b_high -> a is smaller
+    ja      .f64min_return_b     # a_high > b_high -> b is smaller
+    # High parts equal, compare low parts
+    cmp     ebx, edx             # compare a_low with b_low
+    jbe     .f64min_return_a     # a_low <= b_low -> a is smaller or equal
+    jmp     .f64min_return_b     # a_low > b_low -> b is smaller
+
+.f64min_return_a:
+    # Return a: push a_high first (below), then a_low (top)
+    push    ebx                  # save a_low
+    mov     eax, eax             # a_high (already in eax)
+    call    _stack_push          # push a_high
+    pop     eax                  # a_low
+    call    _stack_push          # push a_low
+    jmp     dispatch_done
+
+.f64min_return_b:
+    # Return b: push b_high first (below), then b_low (top)
+    push    edx                  # save b_low
+    mov     eax, ecx             # b_high
+    call    _stack_push          # push b_high
+    pop     eax                  # b_low
+    call    _stack_push          # push b_low
+    jmp     dispatch_done
+
+.f64min_diff_sign:
+    # Different signs: negative is smaller
+    test    eax, 0x80000000      # is a negative?
+    jnz     .f64min_return_a     # a is negative, return a
+    jmp     .f64min_return_b     # a is positive, b is negative, return b
+
+.f64min_nan_a:
+    # a is NaN, return canonical NaN
+    push    0                    # NaN low
+    mov     eax, 0x7FF80000      # NaN high
     call    _stack_push
     pop     eax
     call    _stack_push
     jmp     dispatch_done
-.f64min_return_a:
-    add     esp, 8               # discard b
-    pop     eax
+
+.f64min_nan_b:
+    # b is NaN, return canonical NaN
+    push    0                    # NaN low
+    mov     eax, 0x7FF80000      # NaN high
     call    _stack_push
     pop     eax
     call    _stack_push
+    jmp     dispatch_done
     jmp     dispatch_done
 
 # f64.max: 弹出两个 f64，返回 max
