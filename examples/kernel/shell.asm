@@ -831,6 +831,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest80
 
+    # "wasmtest81" - WASM f32.copysign test
+    mov     edi, offset cmd_wasmtest81
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest81
+
+    # "wasmtest82" - WASM f32.convert_i32_s test
+    mov     edi, offset cmd_wasmtest82
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest82
+
+    # "wasmtest83" - WASM f64.promote_f32 test
+    mov     edi, offset cmd_wasmtest83
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest83
+
+    # "wasmtest84" - WASM i32.trunc_f32_s test
+    mov     edi, offset cmd_wasmtest84
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest84
+
+    # "wasmtest85" - WASM f32.demote_f64 test
+    mov     edi, offset cmd_wasmtest85
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest85
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -3485,6 +3515,137 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest81:
+    # WASM f32.copysign test: copysign(2.0, -1.0) = -2.0
+    mov     esi, offset msg_wasm_test81
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_copysign_module
+    mov     ecx, offset wasm_test_f32_copysign_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.copysign = "
+    mov     esi, offset msg_f32_copysign_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest82:
+    # WASM f32.convert_i32_s test: (i32) 42 -> (f32) 42.0
+    mov     esi, offset msg_wasm_test82
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_convert_i32_s_module
+    mov     ecx, offset wasm_test_f32_convert_i32_s_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.convert_i32_s = "
+    mov     esi, offset msg_f32_convert_i32_s_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest83:
+    # WASM f64.promote_f32 test: (f32) 3.0 -> (f64) 3.0
+    mov     esi, offset msg_wasm_test83
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_promote_f32_module
+    mov     ecx, offset wasm_test_f64_promote_f32_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.promote_f32 = "
+    mov     esi, offset msg_f64_promote_f32_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest84:
+    # WASM i32.trunc_f32_s test: (f32) 3.7 -> (i32) 3
+    mov     esi, offset msg_wasm_test84
+    call    uart_puts
+    mov     esi, offset wasm_test_i32_trunc_f32_s_module
+    mov     ecx, offset wasm_test_i32_trunc_f32_s_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i32.trunc_f32_s = "
+    mov     esi, offset msg_i32_trunc_f32_s_result
+    call    uart_puts
+    # Result is i32
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest85:
+    # WASM f32.demote_f64 test: (f64) 3.14159 -> (f32) 3.14159
+    mov     esi, offset msg_wasm_test85
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_demote_f64_module
+    mov     ecx, offset wasm_test_f32_demote_f64_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.demote_f64 = "
+    mov     esi, offset msg_f32_demote_f64_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -5685,6 +5846,16 @@ cmd_wasmtest79:
     .asciz  "wasmtest79"
 cmd_wasmtest80:
     .asciz  "wasmtest80"
+cmd_wasmtest81:
+    .asciz  "wasmtest81"
+cmd_wasmtest82:
+    .asciz  "wasmtest82"
+cmd_wasmtest83:
+    .asciz  "wasmtest83"
+cmd_wasmtest84:
+    .asciz  "wasmtest84"
+cmd_wasmtest85:
+    .asciz  "wasmtest85"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -5933,7 +6104,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.86"
+    .ascii  "AI-ASM Kernel v0.91"
     .byte   13, 10, 0
 
 help_text:
@@ -6394,6 +6565,26 @@ msg_wasm_test80:
     .asciz  "Running WASM test80 (f64.gt)...\r\n"
 msg_f64_gt_result:
     .asciz  "f64.gt = "
+msg_wasm_test81:
+    .asciz  "Running WASM test81 (f32.copysign)...\r\n"
+msg_f32_copysign_result:
+    .asciz  "f32.copysign = "
+msg_wasm_test82:
+    .asciz  "Running WASM test82 (f32.convert_i32_s)...\r\n"
+msg_f32_convert_i32_s_result:
+    .asciz  "f32.convert_i32_s = "
+msg_wasm_test83:
+    .asciz  "Running WASM test83 (f64.promote_f32)...\r\n"
+msg_f64_promote_f32_result:
+    .asciz  "f64.promote_f32 = "
+msg_wasm_test84:
+    .asciz  "Running WASM test84 (i32.trunc_f32_s)...\r\n"
+msg_i32_trunc_f32_s_result:
+    .asciz  "i32.trunc_f32_s = "
+msg_wasm_test85:
+    .asciz  "Running WASM test85 (f32.demote_f64)...\r\n"
+msg_f32_demote_f64_result:
+    .asciz  "f32.demote_f64 = "
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -9391,3 +9582,210 @@ wasm_test_f64_gt_module:
     .byte   0x64                   # f64.gt
     .byte   0x0B                   # end
 wasm_test_f64_gt_size = . - wasm_test_f64_gt_module
+
+# =====================================================
+# wasmtest81: f32.copysign test - copysign(2.0, -1.0) = -2.0
+# =====================================================
+# f32.const 2.0: IEEE 754 = 0x40000000 (little endian: 00 00 00 40)
+# f32.const -1.0: IEEE 754 = 0xBF800000 (little endian: 00 00 80 BF)
+# f32.copysign opcode: 0x98
+# Expected result: -2.0 = 0xC0000000
+wasm_test_f32_copysign_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f32 (using existing convention)
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.0, f32.const -1.0, f32.copysign, end
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x00, 0x40  # f32.const 2.0
+    .byte   0x43, 0x00, 0x00, 0x80, 0xBF  # f32.const -1.0
+    .byte   0x98                   # f32.copysign
+    .byte   0x0B                   # end
+wasm_test_f32_copysign_size = . - wasm_test_f32_copysign_module
+
+# =====================================================
+# wasmtest82: f32.convert_i32_s test - (i32) 42 -> (f32) 42.0
+# =====================================================
+# i32.const 42: LEB128 = 0x2A
+# f32.convert_i32_s opcode: 0xB2
+# Expected result: 42.0 = 0x42280000
+wasm_test_f32_convert_i32_s_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f32 (using existing convention)
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: i32.const 42, f32.convert_i32_s, end
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x2A             # i32.const 42
+    .byte   0xB2                   # f32.convert_i32_s
+    .byte   0x0B                   # end
+wasm_test_f32_convert_i32_s_size = . - wasm_test_f32_convert_i32_s_module
+
+# =====================================================
+# wasmtest83: f64.promote_f32 test - (f32) 3.0 -> (f64) 3.0
+# =====================================================
+# f32.const 3.0: IEEE 754 = 0x40400000 (little endian: 00 00 40 40)
+# f64.promote_f32 opcode: 0xBB
+# Expected result: f64 3.0 = 0x4008000000000000
+wasm_test_f64_promote_f32_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64 (using existing convention)
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 3.0, f64.promote_f32, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x40, 0x40  # f32.const 3.0
+    .byte   0xBB                   # f64.promote_f32
+    .byte   0x0B                   # end
+wasm_test_f64_promote_f32_size = . - wasm_test_f64_promote_f32_module
+
+# =====================================================
+# wasmtest84: i32.trunc_f32_s test - (f32) 3.7 -> (i32) 3
+# =====================================================
+# f32.const 3.7: IEEE 754 = 0x406CCCCD (little endian: CD CC 6C 40)
+# i32.trunc_f32_s opcode: 0xA8
+# Expected result: 3 (integer)
+wasm_test_i32_trunc_f32_s_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 3.7, i32.trunc_f32_s, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0xCD, 0xCC, 0x6C, 0x40  # f32.const 3.7
+    .byte   0xA8                   # i32.trunc_f32_s
+    .byte   0x0B                   # end
+wasm_test_i32_trunc_f32_s_size = . - wasm_test_i32_trunc_f32_s_module
+
+# =====================================================
+# wasmtest85: f32.demote_f64 test - (f64) 3.14159 -> (f32) 3.14159
+# =====================================================
+# f64.const 3.14159: IEEE 754 = 0x400921F9F01B866E (little endian: 6E 86 1B F0 F9 21 09 40)
+# f32.demote_f64 opcode: 0xB6 (per WebAssembly spec)
+# Expected result: f32 3.14159 ≈ 0x40490FD0
+wasm_test_f32_demote_f64_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f32 (using existing convention)
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 3.14159, f32.demote_f64, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x6E, 0x86, 0x1B, 0xF0, 0xF9, 0x21, 0x09, 0x40  # f64.const 3.14159
+    .byte   0xB6                   # f32.demote_f64 (correct opcode)
+    .byte   0x0B                   # end
+wasm_test_f32_demote_f64_size = . - wasm_test_f32_demote_f64_module

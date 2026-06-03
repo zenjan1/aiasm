@@ -4609,18 +4609,12 @@ do_f32_max:
 # f32.copysign: 弹出 a, b，返回 a with sign of b
 do_f32_copysign:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # save b in edx
     call    _stack_pop           # a
-    push    eax
     # Extract sign of b (bit 31), magnitude of a (bits 0-30)
-    mov     eax, [esp + 4]       # b
-    and     eax, 0x80000000      # sign bit of b
-    mov     edx, [esp]           # a
-    and     edx, 0x7FFFFFFF      # magnitude of a
-    or      eax, edx             # combine
-    mov     [esp], eax           # store result
-    add     esp, 4
-    pop     eax
+    and     edx, 0x80000000      # sign bit of b
+    and     eax, 0x7FFFFFFF      # magnitude of a
+    or      eax, edx             # combine sign of b with magnitude of a
     call    _stack_push
     jmp     dispatch_done
 
@@ -4738,28 +4732,22 @@ do_f64_max:
     jmp     dispatch_done
 
 # f64.copysign: 弹出 a, b，返回 a with sign of b
+# Stack: a_low(top), a_high, b_low, b_high(bottom)
 do_f64_copysign:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    # [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
+    call    _stack_pop           # a_low (top)
+    mov     ebx, eax             # save a_low
+    call    _stack_pop           # a_high
+    mov     ecx, eax             # save a_high
+    call    _stack_pop           # b_low
+    call    _stack_pop           # b_high (sign bit is here)
     # Sign bit of f64 is bit 63 = bit 31 of high 32 bits
-    mov     eax, [esp + 8]       # b_high
-    and     eax, 0x80000000      # sign bit of b
-    mov     edx, [esp]           # a_high
-    and     edx, 0x7FFFFFFF      # magnitude of a
-    or      eax, edx
-    mov     [esp], eax           # new a_high
-    add     esp, 8               # discard b
-    pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    and     eax, 0x80000000      # sign bit of b_high
+    and     ecx, 0x7FFFFFFF      # magnitude of a_high
+    or      eax, ecx             # combine: result_high
+    # Push result: high first, then low (so low is on top)
+    call    _stack_push          # push result_high
+    mov     eax, ebx             # result_low = a_low
+    call    _stack_push          # push result_low (on top)
     jmp     dispatch_done
 
 # ============================================================================
@@ -4768,22 +4756,26 @@ do_f64_copysign:
 
 # i32.trunc_f32_s: 截断 f32 到有符号 i32
 do_i32_trunc_f32_s:
-    call    _stack_pop
-    push    eax
-    sub     esp, 2
-    fstcw   word ptr [esp]
+    call    _stack_pop             # pop f32 value from WASM stack
+    push    eax                     # push f32 to x86 stack
+    sub     esp, 4                  # reserve 4 bytes for FCW (original + scratch)
+    # Stack layout: [esp] = FCW orig, [esp+2] = FCW scratch, [esp+4] = f32 value
+
+    fstcw   word ptr [esp]         # save original FCW at [esp]
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0C00             # trunc mode (toward zero)
-    mov     [esp + 2], ax
-    fldcw   word ptr [esp + 2]
-    fld     dword ptr [esp + 4]
-    frndint
-    fistp   dword ptr [esp + 4]    # store as integer
-    fldcw   word ptr [esp]         # restore FCW
-    add     esp, 6
-    pop     eax
-    call    _stack_push
+    mov     word ptr [esp + 2], ax # modified FCW at [esp+2]
+    fldcw   word ptr [esp + 2]     # load trunc mode
+
+    fld     dword ptr [esp + 4]    # load f32 from [esp+4]
+    frndint                         # round to integer (toward zero)
+    fistp   dword ptr [esp + 4]    # store i32 at [esp+4], overwriting f32
+
+    fldcw   word ptr [esp]         # restore original FCW
+    add     esp, 4                  # remove FCW storage
+    pop     eax                     # pop integer result from [esp]
+    call    _stack_push            # push result to WASM stack
     jmp     dispatch_done
 
 # i32.trunc_f32_u: 截断 f32 到无符号 i32
@@ -4994,16 +4986,25 @@ do_f32_convert_i64_u:
     jmp     dispatch_done
 
 # f32.demote_f64: f64 降级为 f32
+# WASM stack: low(top), high(bottom)
 do_f32_demote_f64:
-    call    _stack_pop           # f64 low
-    push    eax
-    call    _stack_pop           # f64 high
-    push    eax
-    fld     qword ptr [esp]       # load f64
-    fstp    dword ptr [esp + 4]   # store as f32 (precision loss)
-    add     esp, 4                # cleanup high
-    pop     eax                   # f32 result
-    call    _stack_push
+    call    _stack_pop           # pop low (from WASM stack top)
+    mov     ebx, eax             # save low in ebx
+    call    _stack_pop           # pop high (from WASM stack bottom)
+    # Now: ebx = low, eax = high
+    # Push high and low to x86 stack in correct order for fld
+    push    eax                   # push high -> after push: [esp] = high
+    push    ebx                   # push low -> after push: [esp] = low, [esp+4] = high
+    # Now x86 stack: [esp] = low, [esp+4] = high (correct for fld qword)
+    # Reserve space for f32 ABOVE the f64 (by pushing below)
+    push    eax                   # push something to create space for f32
+    # Stack: [esp] = temp space, [esp+4] = low, [esp+8] = high
+    fld     qword ptr [esp + 4]   # load f64 from [esp+4..esp+11]
+    fstp    dword ptr [esp]       # store f32 at [esp] (overwrites temp space)
+    # Now: [esp] = f32 result, [esp+4] = low, [esp+8] = high
+    pop     eax                   # pop f32 result from [esp]
+    add     esp, 8                # remove low and high from stack
+    call    _stack_push           # push f32 to WASM stack
     jmp     dispatch_done
 
 # f64.convert_i32_s: 有符号 i32 转 f64
