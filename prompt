@@ -1,173 +1,97 @@
 你是一个操作系统开发工程师。请阅读并检查整个项目的当前状态，然后按照以下三层架构开发一个本机可用的商用操作系统：
 
-## 架构要求
+## 三层架构 - v1.35
 
-### 底层（汇编 + WASM 运行时）
-用汇编实现内核核心功能，并内置 WASM 字节码运行时引擎：
+### 1. 汇编底层（含 WASM 运行时）
+- Multiboot/GRUB 引导 ✓
+- GDT/TSS ✓ (ring 3 支持)
+- ATA 磁盘 ✓ (读取+写入)
+- FAT32 文件系统 ✓
+- WASM 运行时: 175 操作, 330 测试 ✓
 
-1. **引导与初始化**（已完成 ✓）
-2. **内存管理**（已完成 ✓）
-3. **进程管理**（已完成 ✓）
-4. **WASM 运行时**（v0.78 含 1MB 动态线性内存）
-
-### 中间层（WASM 解释器层）
+### 2. WASM 中间层
 - WASM 模块加载器 ✓
-- WASM 解释器（238条指令） ✓
-- 系统调用桥接 ✓
+- WASM 解释器 ✓
+- WASM 磁盘加载 ✓
+- wasmrun/wasmrepl ✓
+- WASM ring3 ✓
 
-### 应用层（各种应用）
-- Shell 28命令 ✓
-- 网络服务（TCP/IP、HTTP） ✓
-- WASM 测试框架 ✓
+### 3. 外层应用
+- Shell 命令 ✓
+- 网络协议栈 ✓
+- 进程调度器 ✓
+- GRUB ISO ✓
 
 ---
 
-## 当前项目状态（v0.78）
+## 当前项目状态（v1.34）
 
-### ✅ v0.78 已完成（待提交）
+### ✅ 已完成
+- wasmtest321-330 (内存加载/存储变体测试)
+- WASM 测试总数: 330 个
+- 代码总量: 50,405 行汇编
+- 版本标签: 125 个
 
-#### wasmtest31/32/33: i64 算术运算测试
-- wasmtest31: i64.add 测试 ✓
-- wasmtest32: i64.sub 测试 ✓
-- wasmtest33: i64.mul 测试 ✓
-
-#### 代码统计
-- 总代码: 20,892 行汇编
-- wasmtest 数量: 30+ 测试
-- i64 处理器: 94 个
-
-#### Git 状态
-- 有未提交更改: kernel.asm, shell.asm, wasm_vm.asm, prompt
-- 需要先提交 v0.78 更改
+### 🎯 v1.35 目标
+- wasmtest331-340 (继续扩展WASM测试)
 
 ---
 
 ## 下一步开发任务
 
-### 任务 1: 提交 v0.78 更改
-
-```bash
-git add examples/kernel/kernel.asm examples/kernel/shell.asm examples/kernel/wasm_vm.asm prompt
-git commit -m "test: v0.78 - wasmtest31/32/33 i64 arithmetic tests (add/sub/mul)"
-git push origin master && git push gitee master
-git tag -a v0.78 -m "i64 arithmetic tests"
-git push origin v0.78 && git push gitee v0.78
-```
-
-### 任务 2: wasmtest34/35 - i64.div_s/div_u 测试
+### 任务: v1.35 - WASM测试扩展 (wasmtest331-340)
 
 #### 背景
-i64.div_s 和 i64.div_u 已在 wasm_vm.asm 实现（第2643行和第2794行），需要测试验证：
-- wasm_vm.asm 有完整的 64/64 除法实现（二进制长除法）
-- 需要验证有符号和无符号除法的正确性
+继续扩展WASM测试，覆盖控制流指令。
 
-#### 具体任务
-1. **wasmtest34: i64.div_u 测试**
-   - 测试模块: wasm_test_i64_div_u_module
-   - 类型签名: () -> i64
-   - 测试: i64.const 0x100000000; i64.const 0x10; i64.div_u; return
-   - 预期结果: 0x10000000 (4294967296 / 16 = 268435456)
+#### wasmtest331-340 设计
 
-2. **wasmtest35: i64.div_s 测试**
-   - 测试模块: wasm_test_i64_div_s_module
-   - 测试: i64.const -100; i64.const 10; i64.div_s; return
-   - 预期结果: -10 (有符号除法)
+| 测试 | 描述 |
+|------|------|
+| wasmtest331 | block测试 |
+| wasmtest332 | loop测试 |
+| wasmtest333 | if测试 |
+| wasmtest334 | else测试 |
+| wasmtest335 | br测试 |
+| wasmtest336 | br_if测试 |
+| wasmtest337 | br_table测试 |
+| wasmtest338 | return测试 |
+| wasmtest339 | call增强测试 |
+| wasmtest340 | v3.40里程碑准备 |
+
+#### wasmtest340: 里程碑
+
+返回 340，标志 WASM 测试达到 340 个。
 
 #### 文件修改
-- `/home/a/aiasm-v0.1/examples/kernel/shell.asm`
-  - 添加 wasmtest34/35 命令解析（约第550行）
-  - 添加 .do_wasmtest34/35 处理（约第2050行）
-  - 添加 wasm_test_i64_div_u/div_s_module 字节码定义
-  - 更新版本号 shell_version_str 到 v0.79
 
-- `/home/a/aiasm-v0.1/examples/kernel/kernel.asm`
-  - 更新 kernel_version_str 到 v0.79
+1. `/home/a/aiasm-v0.1/examples/kernel/shell.asm`
+   - 添加 wasmtest331-340 命令解析
+   - 添加 .do_wasmtest331-340 处理
+   - 添加 WASM 模块字节码定义
+   - 更新版本到 v1.35
 
-#### WASM 字节码构造
-
-**wasmtest34 (i64.div_u):**
-```
-wasm_test_i64_div_u_module:
-    .byte 0x00, 0x61, 0x73, 0x6D   # magic
-    .byte 0x01, 0x00, 0x00, 0x00   # version
-    # Type section (1 function: () -> i64)
-    .byte 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7C
-    # Function section (1 function)
-    .byte 0x03, 0x02, 0x01, 0x00
-    # Export section
-    .byte 0x07, 0x08, 0x01, 0x04, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00
-    # Code section
-    .byte 0x0A, 0x0F, 0x01, 0x0D, 0x00
-    # body: i64.const 0x100000000; i64.const 0x10; i64.div_u; return
-    .byte 0x42, 0x80, 0x80, 0x80, 0x10  # i64.const 0x100000000 (LEB128)
-    .byte 0x42, 0x10                    # i64.const 16
-    .byte 0x80                          # i64.div_u
-    .byte 0x0F                          # return
-    .byte 0x0B                          # end
-```
-
-**wasmtest35 (i64.div_s):**
-```
-wasm_test_i64_div_s_module:
-    .byte 0x00, 0x61, 0x73, 0x6D   # magic
-    .byte 0x01, 0x00, 0x00, 0x00   # version
-    # Type section (1 function: () -> i64)
-    .byte 0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7C
-    # Function section (1 function)
-    .byte 0x03, 0x02, 0x01, 0x00
-    # Export section
-    .byte 0x07, 0x08, 0x01, 0x04, 0x74, 0x65, 0x73, 0x74, 0x00, 0x00
-    # Code section
-    .byte 0x0A, 0x0D, 0x01, 0x0B, 0x00
-    # body: i64.const -100; i64.const 10; i64.div_s; return
-    # -100 in LEB128: 0x9C 0x7F (signed encoding)
-    .byte 0x42, 0x9C, 0x7F             # i64.const -100
-    .byte 0x42, 0x0A                    # i64.const 10
-    .byte 0x81                          # i64.div_s
-    .byte 0x0F                          # return
-    .byte 0x0B                          # end
-```
-
-#### 测试验证
-```bash
-make examples/kernel/interactive
-qemu-system-i386 -kernel examples/kernel/interactive -serial stdio -display none -no-reboot
-aiasm> wasmtest34
-i64 div_u = 268435456 (0x10000000)
-aiasm> wasmtest35
-i64 div_s = -10
-aiasm> wasmtest31
-i64 add = 2566980377
-```
+2. `/home/a/aiasm-v0.1/examples/kernel/kernel.asm`
+   - 更新版本到 v1.35
 
 ---
 
-## 开发要求
+## 版本更新
 
-1. **先提交 v0.78 更改**
-2. **实现 wasmtest34/35**
-3. **验证所有测试通过**
-4. **更新版本到 v0.79**
-5. **提交 v0.79 并打 tag**
+- 完成后版本: v1.35
+- 提交并推送
+- 创建标签 v1.35
 
 ---
 
-## 当前版本：v0.79
+## 当前版本：v1.35
 
-### ✅ v0.79 新增
+### ✅ v1.35 任务
 
-#### wasmtest34/35: i64 除法测试
-- wasmtest34: i64.div_u 测试 (0x100000000 / 16 = 0x10000000)
-- wasmtest35: i64.div_s 测试 (-100 / 10 = -10)
+#### WASM测试扩展
+- wasmtest331-340 (10 个新测试)
+- WASM 测试总数达到 340 个
 
-#### QEMU测试结果
-- 内核正常启动 v0.79 ✓
-- wasmtest34 = 268435456 ✓
-- wasmtest35 = -10 ✓
-- wasmtest31-33 全部通过 ✓
-
-#### 下一步
-1. i64.rem_s/u 测试
+#### 完成后
+1. 提交并推送 v1.35
 2. UPDATE=1
-
----
