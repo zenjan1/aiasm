@@ -25,6 +25,7 @@ WASM_HOST_NET_CONFIG = 11    # net_config(ptr) -> 写入IP/MAC配置到内存
 WASM_HOST_FATLS      = 12    # fatls() -> 列出根目录文件
 WASM_HOST_FATREAD    = 13    # fatread(name_ptr, name_len, buf_ptr, buf_len) -> 读取文件内容
 WASM_HOST_FATOPEN    = 14    # fatopen(name_ptr, name_len) -> cluster -> 打开文件，返回簇号
+WASM_HOST_FATWRITE   = 15    # fatwrite(cluster, buffer_ptr, size) -> 写入数据到文件簇
 
 # ============================================================================
 # WASM 系统调用计数
@@ -99,6 +100,8 @@ wasm_host_call:
     je      .host_fatread
     cmp     eax, WASM_HOST_FATOPEN
     je      .host_fatopen
+    cmp     eax, WASM_HOST_FATWRITE
+    je      .host_fatwrite
 
     # 未知函数
     mov     eax, -1
@@ -488,6 +491,39 @@ wasm_host_call:
     mov     eax, -1
 
 .fatopen_done:
+    pop     edi
+    pop     esi
+    pop     ecx
+    pop     ebx
+    jmp     .done
+
+.host_fatwrite:
+    # fatwrite(cluster, buffer_ptr, size) -> bytes_written
+    # ebx = cluster, ecx = buffer_ptr (WASM线性内存偏移), edx = size
+    push    ebx
+    push    ecx
+    push    esi
+    push    edi
+
+    # 保存 size
+    mov     esi, edx              # esi = size
+
+    # 转换 WASM 指针
+    mov     edi, ecx
+    add     edi, offset wasm_linear_memory
+
+    # Cluster -> LBA: LBA = (Cluster - 2) * SecPerClus + DataRegionLBA
+    mov     eax, ebx              # eax = cluster
+    sub     eax, 2
+    movzx   ebx, byte ptr [sec_per_clus]
+    imul    eax, ebx
+    add     eax, [data_region_lba]
+
+    # 写入扇区 (eax=LBA, edi=buffer)
+    call    ata_write_sector
+
+    # 返回写入大小
+    mov     eax, esi
     pop     edi
     pop     esi
     pop     ecx

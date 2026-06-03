@@ -224,6 +224,7 @@ WASM_HOST_NET_CONFIG = 11
 WASM_HOST_FATLS      = 12
 WASM_HOST_FATREAD    = 13
 WASM_HOST_FATOPEN    = 14
+WASM_HOST_FATWRITE   = 15
 
 # ============================================================================
 # 虚拟机状态（BSS）
@@ -1238,6 +1239,8 @@ do_call_host:
     je      .host_2arg
     cmp     ecx, WASM_HOST_FATREAD     # fatread(name_ptr, name_len, buf_ptr, buf_len) = 4 args
     je      .host_4arg
+    cmp     ecx, WASM_HOST_FATWRITE    # fatwrite(cluster, buffer_ptr, size) = 3 args
+    je      .host_3arg
     # default: print/println - 2 args
 .host_2arg:
     call    _stack_pop           # 参数2

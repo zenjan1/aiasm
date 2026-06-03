@@ -955,6 +955,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest98
 
+    # "wasmtest99" - WASM fatwrite host function test
+    mov     edi, offset cmd_wasmtest99
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest99
+
     # "wasmrepl" - WASM interactive REPL
     mov     edi, offset cmd_wasmrepl
     call    utils_strcmp
@@ -4411,6 +4417,52 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest99:
+    # WASM fatwrite host function test: call host function 15 (fatwrite)
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test99
+    call    uart_puts
+    mov     esi, offset wasm_test_fatwrite_module
+    mov     ecx, offset wasm_test_fatwrite_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "fatwrite result = "
+    mov     esi, offset msg_wasm_fatwrite_result
+    call    uart_puts
+    # Print result (eax = bytes_written or -1)
+    cmp     eax, -1
+    jne     .fatwrite_print_success
+    mov     esi, offset msg_wasm_fatwrite_fail
+    call    uart_puts
+    jmp     .fatwrite_done_print
+.fatwrite_print_success:
+    # Print bytes written
+    push    eax
+    mov     esi, offset msg_wasm_fatwrite_bytes
+    call    uart_puts
+    pop     eax
+    call    print_hex8
+    mov     esi, offset msg_wasm_fatwrite_written
+    call    uart_puts
+.fatwrite_done_print:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # .do_wasmrepl: WASM Interactive REPL
 # ============================================================================
@@ -7364,6 +7416,8 @@ cmd_wasmtest97:
     .asciz  "wasmtest97"
 cmd_wasmtest98:
     .asciz  "wasmtest98"
+cmd_wasmtest99:
+    .asciz  "wasmtest99"
 cmd_wasmrepl:
     .asciz  "wasmrepl"
 cmd_wasmrepl_exit:
@@ -7715,7 +7769,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.07"
+    .ascii  "AI-ASM Kernel v1.08"
     .byte   13, 10, 0
 
 help_text:
@@ -8298,6 +8352,16 @@ msg_wasm_fatopen_fail:
     .asciz  "-1 (file not found)"
 msg_wasm_fatopen_cluster:
     .asciz  " (cluster number)"
+msg_wasm_test99:
+    .asciz  "WASM fatwrite test...\r\n"
+msg_wasm_fatwrite_result:
+    .asciz  "fatwrite result = "
+msg_wasm_fatwrite_fail:
+    .asciz  "-1 (write failed)"
+msg_wasm_fatwrite_bytes:
+    .asciz  ""
+msg_wasm_fatwrite_written:
+    .asciz  " bytes written"
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -12222,3 +12286,65 @@ wasm_test_fatopen_module:
     .byte   0x10, 0x0F             # call 15 (fatopen, host_id=14)
     .byte   0x0B                   # end
 wasm_test_fatopen_size = . - wasm_test_fatopen_module
+
+# =====================================================
+# wasmtest99: fatwrite host function test - call host function 15 (fatwrite)
+# =====================================================
+# WASM_HOST_FATWRITE = 15
+# func_count = 1, so call_index = 15 + 1 = 16 = 0x10
+# fatwrite(cluster, buffer_ptr, size) -> bytes_written
+# Parameters: cluster = 3, buffer_ptr = 0 (data section), size = 512
+# Data section: 512 bytes of test data "WRITETEST..." at offset 0
+wasm_test_fatwrite_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # memory section: 1 memory, min=1 page (64KB)
+    .byte   0x05                   # section id
+    .byte   0x03                   # section size = 3
+    .byte   0x01                   # num memories
+    .byte   0x00                   # limits flag (no max)
+    .byte   0x01                   # min pages = 1
+    # data section: store test data "WRITETEST..." at offset 0 (512 bytes)
+    .byte   0x0B                   # section id
+    .byte   0x84, 0x04             # section size = 516 (LEB128: 0x84, 0x04)
+    .byte   0x01                   # num data segments
+    .byte   0x00                   # memory index
+    .byte   0x00                   # offset (i32.const 0)
+    .byte   0x80, 0x04             # 512 bytes of data (LEB128: 0x80, 0x04)
+    # Fill with "WRITETEST..." pattern (512 bytes)
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETEST"
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETEST"
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETEST"
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETEST"
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETEST"
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETESTWRITETEST"
+    .ascii  "WRITETESTWRITETESTWRITETESTWRITETEST"  # 512 bytes total (64 * 8 = 512)
+    # code section: push args, call fatwrite, return
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    # push cluster = 3
+    .byte   0x41, 0x03             # i32.const 3
+    # push buffer_ptr = 0
+    .byte   0x41, 0x00             # i32.const 0
+    # push size = 512 (0x200)
+    .byte   0x41, 0xC8, 0x04       # i32.const 512 (LEB128: 0xC8, 0x04)
+    # call host_fatwrite (host_id=15, call_index=16)
+    .byte   0x10, 0x10             # call 16 (fatwrite, host_id=15)
+    .byte   0x0B                   # end
+wasm_test_fatwrite_size = . - wasm_test_fatwrite_module

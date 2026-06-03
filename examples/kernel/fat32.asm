@@ -33,6 +33,8 @@
     .section .bss
 
 # FAT32 BPB 信息
+    .globl  sec_per_clus
+    .globl  data_region_lba
 bytes_per_sec:    .space 2          # 每扇区字节数
 sec_per_clus:     .space 1          # 每簇扇区数
 rsvd_sec_cnt:     .space 2          # 保留扇区数
