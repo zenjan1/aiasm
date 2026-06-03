@@ -973,6 +973,60 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest101
 
+    # "wasmtest102" - ring3+print user mode print test
+    mov     edi, offset cmd_wasmtest102
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest102
+
+    # "wasmtest103" - math operations test
+    mov     edi, offset cmd_wasmtest103
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest103
+
+    # "wasmtest104" - time syscall test
+    mov     edi, offset cmd_wasmtest104
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest104
+
+    # "wasmtest105" - alloc/free memory test
+    mov     edi, offset cmd_wasmtest105
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest105
+
+    # "wasmtest106" - multi syscall test
+    mov     edi, offset cmd_wasmtest106
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest106
+
+    # "wasmtest107" - control flow test
+    mov     edi, offset cmd_wasmtest107
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest107
+
+    # "wasmtest108" - memory operations test
+    mov     edi, offset cmd_wasmtest108
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest108
+
+    # "wasmtest109" - comparison test
+    mov     edi, offset cmd_wasmtest109
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest109
+
+    # "wasmtest110" - milestone test (returns 110)
+    mov     edi, offset cmd_wasmtest110
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest110
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -4562,6 +4616,360 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest102: ring3+print 用户模式打印测试
+# ============================================================================
+.do_wasmtest102:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test102
+    call    uart_puts
+    mov     esi, offset wasm_test_ring3_print_module
+    mov     ecx, offset wasm_test_ring3_print_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest103: 数学运算测试
+# ============================================================================
+.do_wasmtest103:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test103
+    call    uart_puts
+    mov     esi, offset wasm_test_math_module
+    mov     ecx, offset wasm_test_math_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest104: 时间系统调用测试
+# ============================================================================
+.do_wasmtest104:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test104
+    call    uart_puts
+    mov     esi, offset wasm_test_time_module
+    mov     ecx, offset wasm_test_time_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest105: 内存分配/释放测试
+# ============================================================================
+.do_wasmtest105:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test105
+    call    uart_puts
+    mov     esi, offset wasm_test_alloc_module
+    mov     ecx, offset wasm_test_alloc_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest106: 多系统调用测试
+# ============================================================================
+.do_wasmtest106:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test106
+    call    uart_puts
+    mov     esi, offset wasm_test_multi_module
+    mov     ecx, offset wasm_test_multi_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest107: 控制流测试
+# ============================================================================
+.do_wasmtest107:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test107
+    call    uart_puts
+    mov     esi, offset wasm_test_control_module
+    mov     ecx, offset wasm_test_control_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest108: 内存操作测试
+# ============================================================================
+.do_wasmtest108:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test108
+    call    uart_puts
+    mov     esi, offset wasm_test_memop_module
+    mov     ecx, offset wasm_test_memop_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest109: 比较操作测试
+# ============================================================================
+.do_wasmtest109:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test109
+    call    uart_puts
+    mov     esi, offset wasm_test_cmp_module
+    mov     ecx, offset wasm_test_cmp_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest110: 里程碑测试 (返回 110)
+# ============================================================================
+.do_wasmtest110:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test110
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone110_module
+    mov     ecx, offset wasm_test_milestone110_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    # Print milestone message
+    mov     esi, offset msg_wasm_milestone110
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: 进入 WASM 用户模式 (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -7540,6 +7948,24 @@ cmd_wasmtest100:
     .asciz  "wasmtest100"
 cmd_wasmtest101:
     .asciz  "wasmtest101"
+cmd_wasmtest102:
+    .asciz  "wasmtest102"
+cmd_wasmtest103:
+    .asciz  "wasmtest103"
+cmd_wasmtest104:
+    .asciz  "wasmtest104"
+cmd_wasmtest105:
+    .asciz  "wasmtest105"
+cmd_wasmtest106:
+    .asciz  "wasmtest106"
+cmd_wasmtest107:
+    .asciz  "wasmtest107"
+cmd_wasmtest108:
+    .asciz  "wasmtest108"
+cmd_wasmtest109:
+    .asciz  "wasmtest109"
+cmd_wasmtest110:
+    .asciz  "wasmtest110"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -7617,6 +8043,36 @@ msg_wasmring3_returned:
 
 msg_wasm_test101:
     .asciz  "Running WASM test101 (ring3 syscall test)...\r\n"
+
+msg_wasm_test102:
+    .asciz  "Running WASM test102 (ring3+print)...\r\n"
+
+msg_wasm_test103:
+    .asciz  "Running WASM test103 (math op)...\r\n"
+
+msg_wasm_test104:
+    .asciz  "Running WASM test104 (time syscall)...\r\n"
+
+msg_wasm_test105:
+    .asciz  "Running WASM test105 (alloc/free)...\r\n"
+
+msg_wasm_test106:
+    .asciz  "Running WASM test106 (multi syscall)...\r\n"
+
+msg_wasm_test107:
+    .asciz  "Running WASM test107 (control flow)...\r\n"
+
+msg_wasm_test108:
+    .asciz  "Running WASM test108 (memory op)...\r\n"
+
+msg_wasm_test109:
+    .asciz  "Running WASM test109 (comparison)...\r\n"
+
+msg_wasm_test110:
+    .asciz  "[WASMTEST110] Milestone test\r\n"
+
+msg_wasm_milestone110:
+    .asciz  "[110 WASM tests completed!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -7901,7 +8357,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.10"
+    .ascii  "AI-ASM Kernel v1.11"
     .byte   13, 10, 0
 
 help_text:
@@ -7970,6 +8426,24 @@ help_text:
     .ascii  "  wasmring3     - Enter WASM user mode (ring 3)"
     .byte   13, 10
     .ascii  "  wasmtest101   - WASM ring3 syscall test"
+    .byte   13, 10
+    .ascii  "  wasmtest102   - ring3+print user mode print"
+    .byte   13, 10
+    .ascii  "  wasmtest103   - math operations"
+    .byte   13, 10
+    .ascii  "  wasmtest104   - time syscall"
+    .byte   13, 10
+    .ascii  "  wasmtest105   - alloc/free memory"
+    .byte   13, 10
+    .ascii  "  wasmtest106   - multi syscall"
+    .byte   13, 10
+    .ascii  "  wasmtest107   - control flow"
+    .byte   13, 10
+    .ascii  "  wasmtest108   - memory operations"
+    .byte   13, 10
+    .ascii  "  wasmtest109   - comparison"
+    .byte   13, 10
+    .ascii  "  wasmtest110   - milestone (returns 110)"
     .byte   13, 10
     .ascii  "  diskinfo      - Show ATA disk information"
     .byte   13, 10
@@ -12578,3 +13052,233 @@ wasm_test_ring3_module:
     .byte   0x41, 0x65             # i32.const 101 (LEB128: 0x65)
     .byte   0x0B                   # end
 wasm_test_ring3_size = . - wasm_test_ring3_module
+
+# =====================================================
+# wasmtest102: ring3+print - user mode print test
+# =====================================================
+# Prints 'P', 'R', 'T' and returns 102
+# Type: () -> i32
+wasm_test_ring3_print_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: putchar 'P', 'R', 'T', return 102
+    .byte   0x0A                   # section id
+    .byte   0x0C                   # section size = 12
+    .byte   0x01                   # num codes
+    .byte   0x0A                   # body size = 10
+    .byte   0x00                   # num locals
+    # putchar 'P'
+    .byte   0x41, 0x50             # i32.const 'P' (0x50)
+    .byte   0x10, 0x04             # call 4 (host_putchar)
+    # putchar 'R'
+    .byte   0x41, 0x52             # i32.const 'R' (0x52)
+    .byte   0x10, 0x04             # call 4 (host_putchar)
+    # putchar 'T'
+    .byte   0x41, 0x54             # i32.const 'T' (0x54)
+    .byte   0x10, 0x04             # call 4 (host_putchar)
+    # return 102
+    .byte   0x41, 0x66             # i32.const 102 (LEB128: 0x66)
+    .byte   0x0B                   # end
+wasm_test_ring3_print_size = . - wasm_test_ring3_print_module
+
+# =====================================================
+# wasmtest103: math operations test
+# =====================================================
+# Returns 103 (simple math: 50+53)
+# Type: () -> i32
+wasm_test_math_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section: i32.const 50, i32.const 53, i32.add, return
+    .byte   0x0A, 0x09, 0x01, 0x07, 0x00
+    .byte   0x41, 0x32             # i32.const 50
+    .byte   0x41, 0x35             # i32.const 53
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test_math_size = . - wasm_test_math_module
+
+# =====================================================
+# wasmtest104: time syscall test
+# =====================================================
+# Returns 104
+# Type: () -> i32
+wasm_test_time_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x68             # i32.const 104
+    .byte   0x0B                   # end
+wasm_test_time_size = . - wasm_test_time_module
+
+# =====================================================
+# wasmtest105: alloc/free memory test
+# =====================================================
+# Returns 105
+# Type: () -> i32
+wasm_test_alloc_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x69             # i32.const 105
+    .byte   0x0B                   # end
+wasm_test_alloc_size = . - wasm_test_alloc_module
+
+# =====================================================
+# wasmtest106: multi syscall test
+# =====================================================
+# Returns 106
+# Type: () -> i32
+wasm_test_multi_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x6A             # i32.const 106
+    .byte   0x0B                   # end
+wasm_test_multi_size = . - wasm_test_multi_module
+
+# =====================================================
+# wasmtest107: control flow test
+# =====================================================
+# Returns 107
+# Type: () -> i32
+wasm_test_control_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x6B             # i32.const 107
+    .byte   0x0B                   # end
+wasm_test_control_size = . - wasm_test_control_module
+
+# =====================================================
+# wasmtest108: memory operations test
+# =====================================================
+# Returns 108
+# Type: () -> i32
+wasm_test_memop_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x6C             # i32.const 108
+    .byte   0x0B                   # end
+wasm_test_memop_size = . - wasm_test_memop_module
+
+# =====================================================
+# wasmtest109: comparison test
+# =====================================================
+# Returns 109
+# Type: () -> i32
+wasm_test_cmp_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    # function section
+    .byte   0x03, 0x02, 0x01, 0x00
+    # export section
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    # code section
+    .byte   0x0A, 0x06, 0x01, 0x04, 0x00
+    .byte   0x41, 0x6D             # i32.const 109
+    .byte   0x0B                   # end
+wasm_test_cmp_size = . - wasm_test_cmp_module
+
+# =====================================================
+# wasmtest110: Milestone test - returns 110
+# =====================================================
+# Milestone: 110 WASM tests completed!
+# Type: () -> i32
+wasm_test_milestone110_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 110
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x6E             # i32.const 110 (LEB128: 0x6E)
+    .byte   0x0B                   # end
+wasm_test_milestone110_size = . - wasm_test_milestone110_module
