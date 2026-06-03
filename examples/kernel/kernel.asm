@@ -1,21 +1,37 @@
     .intel_syntax noprefix
     .code32
 
-    .section .text
-    .align 4
-mb_start:
-    .long  0x1BADB002
-    .long  0x00000003
-    .long  0xE4524FFB
+# =============================================================================
+# Multiboot Header (must be in first 8KB of ELF file)
+# =============================================================================
+    .set MULTIBOOT_MAGIC,    0x1BADB002
+    .set MULTIBOOT_FLAGS,    0x00000003    # Page align + memory info request
+    .set MULTIBOOT_CHECKSUM, -(MULTIBOOT_MAGIC + MULTIBOOT_FLAGS)
 
+    .section .multiboot, "a"
+    .align 4
+multiboot_header:
+    .long MULTIBOOT_MAGIC
+    .long MULTIBOOT_FLAGS
+    .long MULTIBOOT_CHECKSUM
+
+# =============================================================================
+# Xen note section (for Xen compatibility)
+# =============================================================================
     .section ".note.Xen","a",@note
     .align  4
-    .long  4; .long  4; .long  18
+    .long 4; .long  4; .long  18
     .ascii "Xen"; .byte  0; .long  _start
 
+# =============================================================================
+# Entry Point
+# =============================================================================
     .section .text
     .globl _start
 _start:
+    # Save Multiboot info pointer (ebx) from GRUB
+    mov     [multiboot_info_ptr], ebx
+    # Set up stack
     lea     esp, [stack_top]
     mov     edi, offset __bss_start
     mov     ecx, offset __bss_end
@@ -3543,6 +3559,11 @@ e1000_send_tcp_data_wasm:
     .space  8192
 stack_top:
 
+# Multiboot info pointer (saved from ebx by _start)
+multiboot_info_ptr:
+    .globl  multiboot_info_ptr
+    .space  4
+
 virtio_pci_temp:
     .space  4
 virtio_pci_temp2:
@@ -3769,7 +3790,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.95"
+    .ascii  "Server: aiasm/v0.96"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3778,7 +3799,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.95!"
+    .ascii  "Hello from AI-ASM Kernel v0.96!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3795,7 +3816,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.95"
+    .ascii  "AI-ASM Kernel v0.96"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3842,7 +3863,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.95 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.96 booting..."
 msg_udp_send_debug:
     .asciz  "[UDP_SEND] Calling e1000_send_udp\n"
 msg_udp_send_done:

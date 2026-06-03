@@ -6936,7 +6936,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.94"
+    .ascii  "AI-ASM Kernel v0.96"
     .byte   13, 10, 0
 
 help_text:
@@ -7068,7 +7068,7 @@ msg_wasm_test9:
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasmrepl_header:
-    .asciz  "WASM REPL v0.95\r\n"
+    .asciz  "WASM REPL v0.96\r\n"
 msg_wasmrepl_prompt:
     .asciz  "> "
 msg_wasmrepl_parse_err:
@@ -7696,7 +7696,7 @@ wasm_test_syscall_module:
 wasm_test_syscall_size = . - wasm_test_syscall_module
 
 # ============================================================================
-# WASM syscall 应用测试模块 (v0.94)
+# WASM syscall 应用测试模块 (v0.96)
 # ============================================================================
 
 # WASM 应用 calc: 计算 2+3=5，使用 putchar 打印 '5'
