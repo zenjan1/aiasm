@@ -3491,6 +3491,55 @@ kernel_reboot:
 1:  hlt; jmp 1b
 
 # ============================================================================
+# enter_ring3: 进入用户模式 (ring 3)
+# 使用 iret 指令从 ring 0 切换到 ring 3
+# iret 从栈中弹出: EIP, CS, EFLAGS, ESP, SS
+# ============================================================================
+    .globl  enter_ring3
+enter_ring3:
+    # 设置用户栈地址
+    mov     edx, offset user_stack_top
+
+    # 设置 iret 结构 (从栈顶向下)
+    # SS = 用户数据段选择子 | DPL=3 (0x20 | 3 = 0x23)
+    push    0x23
+    # ESP = 用户栈顶
+    push    edx
+    # EFLAGS (当前值) - 使用 pushf (32位模式下 pushfd)
+    pushf
+    # 设置 IF 位 (bit 9) 开启中断
+    or      dword ptr [esp], 0x200
+    # CS = 用户代码段选择子 | DPL=3 (0x18 | 3 = 0x1B)
+    push    0x1B
+    # EIP = 用户代码入口
+    push    offset ring3_test
+
+    # 进入 ring 3
+    iret
+
+# ============================================================================
+# ring3_test: 用户模式测试代码
+# 在 ring 3 执行，使用 INT 0x80 系统调用
+# ============================================================================
+    .globl  ring3_test
+ring3_test:
+    # 用户模式代码 - 打印消息
+    # 由于用户模式无法直接调用内核函数，使用 INT 0x80 系统调用
+    # 系统调用号 0 = print_string, 参数: esi = 字符串指针
+    mov     esi, offset msg_ring3_user
+    mov     eax, 0              # syscall 0 = print_string
+    int     0x80
+
+    # 无限循环 (无法返回内核)
+1:  jmp     1b
+
+# ============================================================================
+# 用户模式消息
+# ============================================================================
+msg_ring3_user:
+    .asciz  "Hello from Ring 3 (User Mode)!\r\n"
+
+# ============================================================================
 # e1000_send_udp_wasm: WASM wrapper for UDP send
 # Input: [esp+4] = ip, [esp+8] = port, [esp+12] = data ptr, [esp+16] = len
 # ============================================================================
@@ -3782,6 +3831,14 @@ http_active_conn:
 http_body_tmp:
     .space  1024               # Temporary buffer for HTTP body during header construction
 
+# User mode stack (for ring 3)
+    .align  16
+user_stack:
+    .globl  user_stack
+    .space  4096               # 4KB user stack
+user_stack_top:
+    .globl  user_stack_top
+
     .section .rodata
 
 # HTTP response header template (no body, dynamic Content-Length)
@@ -3792,7 +3849,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.97"
+    .ascii  "Server: aiasm/v0.98"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3801,7 +3858,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.97!"
+    .ascii  "Hello from AI-ASM Kernel v0.98!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3818,7 +3875,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.97"
+    .ascii  "AI-ASM Kernel v0.98"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3865,7 +3922,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.97 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.98 booting..."
 msg_udp_send_debug:
     .asciz  "[UDP_SEND] Calling e1000_send_udp\n"
 msg_udp_send_done:

@@ -1056,6 +1056,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_pciscan
 
+    # "ring3" - enter user mode (ring 3)
+    mov     edi, offset cmd_ring3
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_ring3
+
     # 未知命令
     mov     esi, offset msg_unknown
     call    uart_puts
@@ -6459,6 +6465,26 @@ shell_print_dec_byte:
     ret
 
 # ============================================================================
+# .do_ring3: 进入用户模式 (ring 3)
+# ============================================================================
+.do_ring3:
+    # 打印进入消息
+    mov     esi, offset msg_ring3_entering
+    call    uart_puts
+
+    # 调用 enter_ring3 进入用户模式
+    call    enter_ring3
+
+    # 如果从 ring3 返回（不应该发生）
+    mov     esi, offset msg_ring3_returned
+    call    uart_puts
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # 命令字符串
 # ============================================================================
     .section .rodata
@@ -6731,6 +6757,14 @@ cmd_pciscan:
 cmd_arp:
     .asciz  "arp"
 
+cmd_ring3:
+    .asciz  "ring3"
+
+msg_ring3_entering:
+    .asciz  "Entering Ring 3 (User Mode)...\r\n"
+msg_ring3_returned:
+    .asciz  "Returned from Ring 3 (unexpected)\r\n"
+
 msg_arp_header:
     .ascii  "ARP Cache:"
     .byte   13, 10, 0
@@ -6936,7 +6970,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.97"
+    .ascii  "AI-ASM Kernel v0.98"
     .byte   13, 10, 0
 
 help_text:
@@ -6999,6 +7033,8 @@ help_text:
     .ascii  "  netstat       - Show TCP connection table"
     .byte   13, 10
     .ascii  "  arp           - Show ARP cache table"
+    .byte   13, 10
+    .ascii  "  ring3         - Enter user mode (ring 3)"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -7068,7 +7104,7 @@ msg_wasm_test9:
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasmrepl_header:
-    .asciz  "WASM REPL v0.97\r\n"
+    .asciz  "WASM REPL v0.98\r\n"
 msg_wasmrepl_prompt:
     .asciz  "> "
 msg_wasmrepl_parse_err:
