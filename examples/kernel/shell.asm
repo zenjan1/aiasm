@@ -561,6 +561,18 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest35
 
+    # "wasmtest36" - WASM i64.rem_u test
+    mov     edi, offset cmd_wasmtest36
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest36
+
+    # "wasmtest37" - WASM i64.rem_s test
+    mov     edi, offset cmd_wasmtest37
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest37
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -2073,6 +2085,54 @@ shell_wasmtest21:
     call    wasm_exec_func
     # Print "i64 div_s = "
     mov     esi, offset msg_i64_div_s_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest36:
+    # WASM i64.rem_u test: 0x100000000 % 16 = 0
+    mov     esi, offset msg_wasm_test36
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_rem_u_module
+    mov     ecx, offset wasm_test_i64_rem_u_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 rem_u = "
+    mov     esi, offset msg_i64_rem_u_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest37:
+    # WASM i64.rem_s test: -100 % 7 = -2
+    mov     esi, offset msg_wasm_test37
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_rem_s_module
+    mov     ecx, offset wasm_test_i64_rem_s_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64 rem_s = "
+    mov     esi, offset msg_i64_rem_s_result
     call    uart_puts
     call    print_i64_result
     pop     ecx
@@ -4143,6 +4203,10 @@ cmd_wasmtest34:
     .asciz  "wasmtest34"
 cmd_wasmtest35:
     .asciz  "wasmtest35"
+cmd_wasmtest36:
+    .asciz  "wasmtest36"
+cmd_wasmtest37:
+    .asciz  "wasmtest37"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -4391,7 +4455,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.81"
+    .ascii  "AI-ASM Kernel v0.82"
     .byte   13, 10, 0
 
 help_text:
@@ -4672,6 +4736,14 @@ msg_wasm_test35:
     .asciz  "Running WASM test35 (i64.div_s)...\r\n"
 msg_i64_div_s_result:
     .asciz  "i64 div_s = "
+msg_wasm_test36:
+    .asciz  "Running WASM test36 (i64.rem_u)...\r\n"
+msg_i64_rem_u_result:
+    .asciz  "i64 rem_u = "
+msg_wasm_test37:
+    .asciz  "Running WASM test37 (i64.rem_s)...\r\n"
+msg_i64_rem_s_result:
+    .asciz  "i64 rem_s = "
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -5919,3 +5991,80 @@ wasm_test_i64_div_s_module:
     .byte   0x7F                   # i64.div_s
     .byte   0x0B                   # end
 wasm_test_i64_div_s_size = . - wasm_test_i64_div_s_module
+
+# WASM 测试模块 36：i64.rem_u 测试
+# 测试：i64.const 0x100000000 % i64.const 16 = 0
+wasm_test_i64_rem_u_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: "test" -> func 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind = func
+    .byte   0x00                   # func index
+    # code section: i64.const 0x100000000, i64.const 16, i64.rem_u, end
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42                   # i64.const
+    .byte   0x80, 0x80, 0x80, 0x80, 0x10  # 0x100000000 (LEB128: 5 bytes)
+    .byte   0x42, 0x10             # i64.const 16
+    .byte   0x82                   # i64.rem_u
+    .byte   0x0B                   # end
+wasm_test_i64_rem_u_size = . - wasm_test_i64_rem_u_module
+
+# WASM 测试模块 37：i64.rem_s 测试
+# 测试：i64.const -100 % i64.const 7 = -2
+wasm_test_i64_rem_s_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: "test" -> func 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind = func
+    .byte   0x00                   # func index
+    # code section: i64.const -100, i64.const 7, i64.rem_s, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x9C, 0x7F       # i64.const -100 (signed LEB128)
+    .byte   0x42, 0x07             # i64.const 7
+    .byte   0x81                   # i64.rem_s
+    .byte   0x0B                   # end
+wasm_test_i64_rem_s_size = . - wasm_test_i64_rem_s_module
