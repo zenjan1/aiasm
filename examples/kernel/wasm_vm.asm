@@ -2058,7 +2058,7 @@ grow_fail:
 # 常量
 do_i32_const:
     mov     esi, [wasm_pc]
-    call    _read_leb128_vm       # 使用无符号解码器
+    call    _read_leb128_s32       # 使用有符号解码器（WASM spec: i32.const 使用 SLEB128）
     call    _stack_push
     jmp     dispatch_done
 
@@ -3674,10 +3674,14 @@ do_i64_rotr:
     jmp     dispatch_done
 
 # i32.wrap/i64: 弹出 i64，推入 i32（截断高 32 位）
+# 栈顺序：i64 在栈上是 low 在 top，high 在下面
+# 所以先 pop 得到 low，再 pop 得到 high（丢弃），然后 push low
 do_i32_wrap_i64:
-    call    _stack_pop           # low (丢弃 high)
-    call    _stack_pop           # high (discard)
-    call    _stack_push
+    call    _stack_pop           # pop low 32 bits
+    push    eax                  # save low
+    call    _stack_pop           # pop high 32 bits (discard)
+    pop     eax                  # restore low
+    call    _stack_push          # push low as i32 result
     jmp     dispatch_done
 
 # i64.extend/i32_s: 弹出 i32，符号扩展为 i64
