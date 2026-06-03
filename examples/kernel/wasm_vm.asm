@@ -4230,20 +4230,20 @@ do_f32_ceil:
     call    _stack_pop
     push    eax
     # 保存并修改 FPU 控制字
-    sub     esp, 2                 # 空间存放 FCW
+    sub     esp, 4                 # 空间存放 FCW (原FCW + 新FCW)
     fstcw   word ptr [esp]         # 保存当前 FCW
     mov     ax, [esp]
     and     ax, 0xF3FF             # 清除 rounding mode 位
     or      ax, 0x0800             # 设置 ceil 模式 (10 = round up)
-    mov     [esp + 4], ax          # 临时存放新 FCW（在 eax 原来的位置）
-    fldcw   word ptr [esp + 4]     # 加载新 FCW
-    # 执行舍入
-    fld     dword ptr [esp + 6]    # 加载操作数（原栈位置 +6）
+    mov     [esp + 2], ax          # 新 FCW 放在 esp+2
+    fldcw   word ptr [esp + 2]     # 加载新 FCW
+    # 执行舍入 - 操作数在 [esp + 4]
+    fld     dword ptr [esp + 4]    # 加载操作数
     frndint                      # 舍入到整数
-    fstp    dword ptr [esp + 6]    # 存储结果
+    fstp    dword ptr [esp + 4]    # 存储结果
     # 恢复 FCW
     fldcw   word ptr [esp]         # 恢复原 FCW
-    add     esp, 6                 # 清理 FCW + 操作数
+    add     esp, 4                 # 清理 FCW 空间
     pop     eax                    # 结果
     call    _stack_push
     jmp     dispatch_done
@@ -4252,18 +4252,18 @@ do_f32_ceil:
 do_f32_floor:
     call    _stack_pop
     push    eax
-    sub     esp, 2
-    fstcw   word ptr [esp]
+    sub     esp, 4                 # 空间存放 FCW (原FCW + 新FCW)
+    fstcw   word ptr [esp]         # 保存当前 FCW
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0400             # floor 模式 (01 = round down)
-    mov     [esp + 4], ax
-    fldcw   word ptr [esp + 4]
-    fld     dword ptr [esp + 6]
+    mov     [esp + 2], ax          # 新 FCW 放在 esp+2
+    fldcw   word ptr [esp + 2]     # 加载新 FCW
+    fld     dword ptr [esp + 4]    # 加载操作数
     frndint
-    fstp    dword ptr [esp + 6]
-    fldcw   word ptr [esp]
-    add     esp, 6
+    fstp    dword ptr [esp + 4]    # 存储结果
+    fldcw   word ptr [esp]         # 恢复原 FCW
+    add     esp, 4                 # 清理 FCW 空间
     pop     eax
     call    _stack_push
     jmp     dispatch_done
@@ -4272,18 +4272,18 @@ do_f32_floor:
 do_f32_trunc:
     call    _stack_pop
     push    eax
-    sub     esp, 2
-    fstcw   word ptr [esp]
+    sub     esp, 4                 # 空间存放 FCW (原FCW + 新FCW)
+    fstcw   word ptr [esp]         # 保存当前 FCW
     mov     ax, [esp]
     and     ax, 0xF3FF
     or      ax, 0x0C00             # trunc 模式 (11 = toward zero)
-    mov     [esp + 4], ax
-    fldcw   word ptr [esp + 4]
-    fld     dword ptr [esp + 6]
+    mov     [esp + 2], ax          # 新 FCW 放在 esp+2
+    fldcw   word ptr [esp + 2]     # 加载新 FCW
+    fld     dword ptr [esp + 4]    # 加载操作数
     frndint
-    fstp    dword ptr [esp + 6]
-    fldcw   word ptr [esp]
-    add     esp, 6
+    fstp    dword ptr [esp + 4]    # 存储结果
+    fldcw   word ptr [esp]         # 恢复原 FCW
+    add     esp, 4                 # 清理 FCW 空间
     pop     eax
     call    _stack_push
     jmp     dispatch_done
@@ -4292,17 +4292,17 @@ do_f32_trunc:
 do_f32_nearest:
     call    _stack_pop
     push    eax
-    sub     esp, 2
-    fstcw   word ptr [esp]
+    sub     esp, 4                 # 空间存放 FCW (原FCW + 新FCW)
+    fstcw   word ptr [esp]         # 保存当前 FCW
     mov     ax, [esp]
     and     ax, 0xF3FF             # nearest 模式 (00 = round to nearest)
-    mov     [esp + 4], ax
-    fldcw   word ptr [esp + 4]
-    fld     dword ptr [esp + 6]
+    mov     [esp + 2], ax          # 新 FCW 放在 esp+2
+    fldcw   word ptr [esp + 2]     # 加载新 FCW
+    fld     dword ptr [esp + 4]    # 加载操作数
     frndint
-    fstp    dword ptr [esp + 6]
-    fldcw   word ptr [esp]
-    add     esp, 6
+    fstp    dword ptr [esp + 4]    # 存储结果
+    fldcw   word ptr [esp]         # 恢复原 FCW
+    add     esp, 4                 # 清理 FCW 空间
     pop     eax
     call    _stack_push
     jmp     dispatch_done
@@ -4314,18 +4314,18 @@ do_f64_ceil:
     call    _stack_pop           # high
     push    eax
     # 栈: [esp]=high, [esp+4]=low
-    sub     esp, 2               # FCW 空间
-    fstcw   word ptr [esp]
+    sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
+    fstcw   word ptr [esp]       # 保存当前 FCW
     mov     ax, [esp]
     and     ax, 0xF3FF
-    or      ax, 0x0800
-    mov     [esp + 6], ax        # 新 FCW 在 [esp+6]
-    fldcw   word ptr [esp + 6]
-    fld     qword ptr [esp + 8]  # 加载 64 位操作数
+    or      ax, 0x0800           # ceil 模式
+    mov     [esp + 2], ax        # 新 FCW
+    fldcw   word ptr [esp + 2]   # 加载新 FCW
+    fld     qword ptr [esp + 4]  # 加载 64 位操作数 (high at esp+4, low at esp+8)
     frndint
-    fstp    qword ptr [esp + 8]
+    fstp    qword ptr [esp + 4]  # 存储结果
     fldcw   word ptr [esp]       # 恢复 FCW
-    add     esp, 2               # 清理 FCW 空间
+    add     esp, 4               # 清理 FCW 空间
     pop     eax                  # result_high
     call    _stack_push
     pop     eax                  # result_low
@@ -4338,18 +4338,18 @@ do_f64_floor:
     push    eax
     call    _stack_pop
     push    eax
-    sub     esp, 2
+    sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]
     mov     ax, [esp]
     and     ax, 0xF3FF
-    or      ax, 0x0400
-    mov     [esp + 6], ax
-    fldcw   word ptr [esp + 6]
-    fld     qword ptr [esp + 8]
+    or      ax, 0x0400           # floor 模式
+    mov     [esp + 2], ax        # 新 FCW
+    fldcw   word ptr [esp + 2]
+    fld     qword ptr [esp + 4]
     frndint
-    fstp    qword ptr [esp + 8]
+    fstp    qword ptr [esp + 4]
     fldcw   word ptr [esp]
-    add     esp, 2
+    add     esp, 4
     pop     eax
     call    _stack_push
     pop     eax
@@ -4362,18 +4362,18 @@ do_f64_trunc:
     push    eax
     call    _stack_pop
     push    eax
-    sub     esp, 2
+    sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]
     mov     ax, [esp]
     and     ax, 0xF3FF
-    or      ax, 0x0C00
-    mov     [esp + 6], ax
-    fldcw   word ptr [esp + 6]
-    fld     qword ptr [esp + 8]
+    or      ax, 0x0C00           # trunc 模式
+    mov     [esp + 2], ax        # 新 FCW
+    fldcw   word ptr [esp + 2]
+    fld     qword ptr [esp + 4]
     frndint
-    fstp    qword ptr [esp + 8]
+    fstp    qword ptr [esp + 4]
     fldcw   word ptr [esp]
-    add     esp, 2
+    add     esp, 4
     pop     eax
     call    _stack_push
     pop     eax
@@ -4386,17 +4386,17 @@ do_f64_nearest:
     push    eax
     call    _stack_pop
     push    eax
-    sub     esp, 2
+    sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]
     mov     ax, [esp]
     and     ax, 0xF3FF           # nearest (00)
-    mov     [esp + 6], ax
-    fldcw   word ptr [esp + 6]
-    fld     qword ptr [esp + 8]
+    mov     [esp + 2], ax        # 新 FCW
+    fldcw   word ptr [esp + 2]
+    fld     qword ptr [esp + 4]
     frndint
-    fstp    qword ptr [esp + 8]
+    fstp    qword ptr [esp + 4]
     fldcw   word ptr [esp]
-    add     esp, 2
+    add     esp, 4
     pop     eax
     call    _stack_push
     pop     eax
@@ -4408,51 +4408,94 @@ do_f64_nearest:
 # ============================================================================
 
 # f32.min: 弹出 a, b，返回 min(a, b)
+# WASM: 栈顶是 b，栈下是 a。min(a, b) 返回较小值
+# 对于 IEEE 754 浮点数，正数可以直接用整数比较（较大的整数 = 较大的浮点数）
 do_f32_min:
-    call    _stack_pop           # b
-    push    eax
-    call    _stack_pop           # a
-    push    eax
-    # [esp] = a, [esp+4] = b
-    # WASM spec: if either NaN, return NaN (IEEE 754-2008, not minNum)
-    fld     dword ptr [esp]      # st0 = a
-    fcomp   dword ptr [esp + 4]  # compare a with b, pop
-    fstsw   ax
-    sahf
-    jp      .f32min_return_a     # unordered -> NaN, return a
-    jbe     .f32min_return_a     # a <= b -> return a
-    pop     eax                  # discard a
-    pop     eax                  # eax = b
+    call    _stack_pop           # eax = b (栈顶)
+    mov     ebx, eax             # ebx = b
+    call    _stack_pop           # eax = a (栈下)
+    # eax = a, ebx = b
+    # 处理 NaN：检查是否 NaN（指数全1且尾数非0）
+    mov     ecx, eax             # ecx = a
+    and     ecx, 0x7F800000      # 取指数
+    cmp     ecx, 0x7F800000
+    je      .f32min_nan_a        # a 是 NaN
+    mov     ecx, ebx
+    and     ecx, 0x7F800000
+    cmp     ecx, 0x7F800000
+    je      .f32min_nan_b        # b 是 NaN
+    # 处理符号不同的情况
+    mov     ecx, eax
+    xor     ecx, ebx
+    test    ecx, 0x80000000      # 检查符号位是否不同
+    jnz     .f32min_diff_sign    # 符号不同
+    # 符号相同：直接比较整数
+    cmp     eax, ebx
+    jbe     .f32min_return_a     # a <= b (整数比较)
+    mov     eax, ebx             # a > b，返回 b
+.f32min_push_result:
     call    _stack_push
     jmp     dispatch_done
 .f32min_return_a:
-    pop     eax                  # discard b
-    pop     eax                  # eax = a
-    call    _stack_push
-    jmp     dispatch_done
+    # eax already = a
+    jmp     .f32min_push_result
+.f32min_diff_sign:
+    # 符号不同：负数更小
+    test    eax, 0x80000000      # a 是负数？
+    jnz     .f32min_return_a     # a 是负数，返回 a
+    mov     eax, ebx             # a 是正数，b 是负数，返回 b
+    jmp     .f32min_push_result
+.f32min_nan_a:
+    # a 是 NaN，返回 canonical NaN (0x7FC00000)
+    mov     eax, 0x7FC00000
+    jmp     .f32min_push_result
+.f32min_nan_b:
+    # b 是 NaN，返回 canonical NaN
+    mov     eax, 0x7FC00000
+    jmp     .f32min_push_result
 
 # f32.max: 弹出 a, b，返回 max(a, b)
+# WASM: 栈顶是 b，栈下是 a。max(a, b) 返回较大值
 do_f32_max:
-    call    _stack_pop           # b
-    push    eax
-    call    _stack_pop           # a
-    push    eax
-    # WASM spec: if either NaN, return NaN (IEEE 754-2008, not maxNum)
-    fld     dword ptr [esp]
-    fcomp   dword ptr [esp + 4]
-    fstsw   ax
-    sahf
-    jp      .f32max_return_a     # unordered -> NaN, return a
-    jae     .f32max_return_a     # a >= b -> return a
-    pop     eax
-    pop     eax
+    call    _stack_pop           # eax = b (栈顶)
+    mov     ebx, eax             # ebx = b
+    call    _stack_pop           # eax = a (栈下)
+    # eax = a, ebx = b
+    # 处理 NaN
+    mov     ecx, eax
+    and     ecx, 0x7F800000
+    cmp     ecx, 0x7F800000
+    je      .f32max_nan_a
+    mov     ecx, ebx
+    and     ecx, 0x7F800000
+    cmp     ecx, 0x7F800000
+    je      .f32max_nan_b
+    # 处理符号不同
+    mov     ecx, eax
+    xor     ecx, ebx
+    test    ecx, 0x80000000
+    jnz     .f32max_diff_sign
+    # 符号相同：直接比较整数
+    cmp     eax, ebx
+    jae     .f32max_return_a     # a >= b
+    mov     eax, ebx             # a < b，返回 b
+.f32max_push_result:
     call    _stack_push
     jmp     dispatch_done
 .f32max_return_a:
-    pop     eax
-    pop     eax
-    call    _stack_push
-    jmp     dispatch_done
+    jmp     .f32max_push_result
+.f32max_diff_sign:
+    # 符号不同：正数更大
+    test    eax, 0x80000000      # a 是正数？
+    jz      .f32max_return_a     # a 是正数，返回 a
+    mov     eax, ebx             # a 是负数，b 是正数，返回 b
+    jmp     .f32max_push_result
+.f32max_nan_a:
+    mov     eax, 0x7FC00000
+    jmp     .f32max_push_result
+.f32max_nan_b:
+    mov     eax, 0x7FC00000
+    jmp     .f32max_push_result
 
 # f32.copysign: 弹出 a, b，返回 a with sign of b
 do_f32_copysign:

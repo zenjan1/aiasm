@@ -711,6 +711,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest60
 
+    # "wasmtest61" - WASM f32.abs test
+    mov     edi, offset cmd_wasmtest61
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest61
+
+    # "wasmtest62" - WASM f32.neg test
+    mov     edi, offset cmd_wasmtest62
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest62
+
+    # "wasmtest63" - WASM f32.ceil test
+    mov     edi, offset cmd_wasmtest63
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest63
+
+    # "wasmtest64" - WASM f32.floor test
+    mov     edi, offset cmd_wasmtest64
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest64
+
+    # "wasmtest65" - WASM f32.min test
+    mov     edi, offset cmd_wasmtest65
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest65
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -2825,6 +2855,126 @@ shell_wasmtest21:
     mov     esi, offset msg_f64_mul_result
     call    uart_puts
     call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest61:
+    # WASM f32.abs test: abs(-3.5) = 3.5
+    mov     esi, offset msg_wasm_test61
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_abs_module
+    mov     ecx, offset wasm_test_f32_abs_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.abs = "
+    mov     esi, offset msg_f32_abs_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest62:
+    # WASM f32.neg test: neg(2.0) = -2.0
+    mov     esi, offset msg_wasm_test62
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_neg_module
+    mov     ecx, offset wasm_test_f32_neg_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.neg = "
+    mov     esi, offset msg_f32_neg_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest63:
+    # WASM f32.ceil test: ceil(2.3) = 3.0
+    mov     esi, offset msg_wasm_test63
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_ceil_module
+    mov     ecx, offset wasm_test_f32_ceil_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.ceil = "
+    mov     esi, offset msg_f32_ceil_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest64:
+    # WASM f32.floor test: floor(2.7) = 2.0
+    mov     esi, offset msg_wasm_test64
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_floor_module
+    mov     ecx, offset wasm_test_f32_floor_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.floor = "
+    mov     esi, offset msg_f32_floor_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest65:
+    # WASM f32.min test: min(1.0, 3.0) = 1.0
+    mov     esi, offset msg_wasm_test65
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_min_module
+    mov     ecx, offset wasm_test_f32_min_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.min = "
+    mov     esi, offset msg_f32_min_result
+    call    uart_puts
+    call    print_f32_result
     pop     ecx
     pop     edi
     pop     esi
@@ -4990,6 +5140,16 @@ cmd_wasmtest59:
     .asciz  "wasmtest59"
 cmd_wasmtest60:
     .asciz  "wasmtest60"
+cmd_wasmtest61:
+    .asciz  "wasmtest61"
+cmd_wasmtest62:
+    .asciz  "wasmtest62"
+cmd_wasmtest63:
+    .asciz  "wasmtest63"
+cmd_wasmtest64:
+    .asciz  "wasmtest64"
+cmd_wasmtest65:
+    .asciz  "wasmtest65"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -5619,6 +5779,26 @@ msg_wasm_test60:
     .asciz  "Running WASM test60 (f64.mul)...\r\n"
 msg_f64_mul_result:
     .asciz  "f64.mul = "
+msg_wasm_test61:
+    .asciz  "Running WASM test61 (f32.abs)...\r\n"
+msg_f32_abs_result:
+    .asciz  "f32.abs = "
+msg_wasm_test62:
+    .asciz  "Running WASM test62 (f32.neg)...\r\n"
+msg_f32_neg_result:
+    .asciz  "f32.neg = "
+msg_wasm_test63:
+    .asciz  "Running WASM test63 (f32.ceil)...\r\n"
+msg_f32_ceil_result:
+    .asciz  "f32.ceil = "
+msg_wasm_test64:
+    .asciz  "Running WASM test64 (f32.floor)...\r\n"
+msg_f32_floor_result:
+    .asciz  "f32.floor = "
+msg_wasm_test65:
+    .asciz  "Running WASM test65 (f32.min)...\r\n"
+msg_f32_min_result:
+    .asciz  "f32.min = "
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -7786,3 +7966,207 @@ wasm_test_f64_mul_module:
     .byte   0xA2                   # f64.mul
     .byte   0x0B                   # end
 wasm_test_f64_mul_size = . - wasm_test_f64_mul_module
+
+# =====================================================
+# wasmtest61: f32.abs test - abs(-3.5) = 3.5
+# =====================================================
+# f32.const -3.5: IEEE 754 = 0xC0600000 (little endian: 0x00, 0x00, 0x60, 0xC0)
+# f32.abs opcode: 0x8B
+# body: locals(1) + f32.const(5) + f32.abs(1) + end(1) = 8
+wasm_test_f32_abs_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const -3.5, f32.abs, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x60, 0xC0  # f32.const -3.5
+    .byte   0x8B                   # f32.abs
+    .byte   0x0B                   # end
+wasm_test_f32_abs_size = . - wasm_test_f32_abs_module
+
+# =====================================================
+# wasmtest62: f32.neg test - neg(2.0) = -2.0
+# =====================================================
+# f32.const 2.0: IEEE 754 = 0x40000000 (little endian: 0x00, 0x00, 0x00, 0x40)
+# f32.neg opcode: 0x8C
+wasm_test_f32_neg_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.0, f32.neg, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x00, 0x40  # f32.const 2.0
+    .byte   0x8C                   # f32.neg
+    .byte   0x0B                   # end
+wasm_test_f32_neg_size = . - wasm_test_f32_neg_module
+
+# =====================================================
+# wasmtest63: f32.ceil test - ceil(2.3) = 3.0
+# =====================================================
+# f32.const 2.3: IEEE 754 = 0x40133333 (little endian: 0x33, 0x33, 0x01, 0x40)
+# f32.ceil opcode: 0x8D
+wasm_test_f32_ceil_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.3, f32.ceil, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x33, 0x33, 0x01, 0x40  # f32.const 2.3
+    .byte   0x8D                   # f32.ceil
+    .byte   0x0B                   # end
+wasm_test_f32_ceil_size = . - wasm_test_f32_ceil_module
+
+# =====================================================
+# wasmtest64: f32.floor test - floor(2.7) = 2.0
+# =====================================================
+# f32.const 2.7: IEEE 754 = 0x402CCCCD (little endian: 0xCD, 0xCC, 0x2C, 0x40)
+# f32.floor opcode: 0x8E
+wasm_test_f32_floor_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.7, f32.floor, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0xCD, 0xCC, 0x2C, 0x40  # f32.const 2.7
+    .byte   0x8E                   # f32.floor
+    .byte   0x0B                   # end
+wasm_test_f32_floor_size = . - wasm_test_f32_floor_module
+
+# =====================================================
+# wasmtest65: f32.min test - min(1.0, 3.0) = 1.0
+# =====================================================
+# f32.const 1.0: IEEE 754 = 0x3F800000 (little endian: 0x00, 0x00, 0x80, 0x3F)
+# f32.const 3.0: IEEE 754 = 0x40400000 (little endian: 0x00, 0x00, 0x40, 0x40)
+# f32.min opcode: 0x8F
+# body: locals(1) + f32.const(5) + f32.const(5) + f32.min(1) + end(1) = 13
+wasm_test_f32_min_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 1.0, f32.const 3.0, f32.min, end
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x80, 0x3F  # f32.const 1.0
+    .byte   0x43, 0x00, 0x00, 0x40, 0x40  # f32.const 3.0
+    .byte   0x96                   # f32.min (opcode 0x96)
+    .byte   0x0B                   # end
+wasm_test_f32_min_size = . - wasm_test_f32_min_module
