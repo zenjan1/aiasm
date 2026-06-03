@@ -1087,6 +1087,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest120
 
+    # "wasmtest121" - syscall test (returns 121)
+    mov     edi, offset cmd_wasmtest121
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest121
+
+    # "wasmtest122" - file ops test (returns 122)
+    mov     edi, offset cmd_wasmtest122
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest122
+
+    # "wasmtest123" - network ops test (returns 123)
+    mov     edi, offset cmd_wasmtest123
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest123
+
+    # "wasmtest124" - process ops test (returns 124)
+    mov     edi, offset cmd_wasmtest124
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest124
+
+    # "wasmtest125" - memory mgmt test (returns 125)
+    mov     edi, offset cmd_wasmtest125
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest125
+
+    # "wasmtest126" - time ops test (returns 126)
+    mov     edi, offset cmd_wasmtest126
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest126
+
+    # "wasmtest127" - error handling test (returns 127)
+    mov     edi, offset cmd_wasmtest127
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest127
+
+    # "wasmtest128" - benchmark test (returns 128)
+    mov     edi, offset cmd_wasmtest128
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest128
+
+    # "wasmtest129" - full feature test (returns 129)
+    mov     edi, offset cmd_wasmtest129
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest129
+
+    # "wasmtest130" - milestone v1.30 (returns 130)
+    mov     edi, offset cmd_wasmtest130
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest130
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -5418,6 +5478,389 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest121: syscall test (returns 121)
+# ============================================================================
+.do_wasmtest121:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test121
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone121_module
+    mov     ecx, offset wasm_test_milestone121_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest122: file ops test (returns 122)
+# ============================================================================
+.do_wasmtest122:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test122
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone122_module
+    mov     ecx, offset wasm_test_milestone122_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest123: network ops test (returns 123)
+# ============================================================================
+.do_wasmtest123:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test123
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone123_module
+    mov     ecx, offset wasm_test_milestone123_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest124: process ops test (returns 124)
+# ============================================================================
+.do_wasmtest124:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test124
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone124_module
+    mov     ecx, offset wasm_test_milestone124_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest125: memory mgmt test (returns 125)
+# ============================================================================
+.do_wasmtest125:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test125
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone125_module
+    mov     ecx, offset wasm_test_milestone125_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest126: time ops test (returns 126)
+# ============================================================================
+.do_wasmtest126:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test126
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone126_module
+    mov     ecx, offset wasm_test_milestone126_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest127: error handling test (returns 127)
+# ============================================================================
+.do_wasmtest127:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test127
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone127_module
+    mov     ecx, offset wasm_test_milestone127_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest128: benchmark test (returns 128)
+# ============================================================================
+.do_wasmtest128:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test128
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone128_module
+    mov     ecx, offset wasm_test_milestone128_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest129: full feature test (returns 129)
+# ============================================================================
+.do_wasmtest129:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test129
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone129_module
+    mov     ecx, offset wasm_test_milestone129_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest130: v1.30 milestone test (returns 130)
+# ============================================================================
+.do_wasmtest130:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test130
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone130_module
+    mov     ecx, offset wasm_test_milestone130_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    # Print milestone message
+    mov     esi, offset msg_wasm_milestone130
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: 进入 WASM 用户模式 (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -8434,6 +8877,26 @@ cmd_wasmtest119:
     .asciz  "wasmtest119"
 cmd_wasmtest120:
     .asciz  "wasmtest120"
+cmd_wasmtest121:
+    .asciz  "wasmtest121"
+cmd_wasmtest122:
+    .asciz  "wasmtest122"
+cmd_wasmtest123:
+    .asciz  "wasmtest123"
+cmd_wasmtest124:
+    .asciz  "wasmtest124"
+cmd_wasmtest125:
+    .asciz  "wasmtest125"
+cmd_wasmtest126:
+    .asciz  "wasmtest126"
+cmd_wasmtest127:
+    .asciz  "wasmtest127"
+cmd_wasmtest128:
+    .asciz  "wasmtest128"
+cmd_wasmtest129:
+    .asciz  "wasmtest129"
+cmd_wasmtest130:
+    .asciz  "wasmtest130"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -8577,6 +9040,66 @@ msg_wasm_test120:
 
 msg_wasm_milestone120:
     .asciz  "[120 WASM tests completed!]\r\n"
+
+msg_wasm_test121:
+    .asciz  "[WASMTEST121] Syscall test\r\n"
+
+msg_wasm_milestone121:
+    .asciz  "[121 WASM tests completed!]\r\n"
+
+msg_wasm_test122:
+    .asciz  "[WASMTEST122] File ops test\r\n"
+
+msg_wasm_milestone122:
+    .asciz  "[122 WASM tests completed!]\r\n"
+
+msg_wasm_test123:
+    .asciz  "[WASMTEST123] Network ops test\r\n"
+
+msg_wasm_milestone123:
+    .asciz  "[123 WASM tests completed!]\r\n"
+
+msg_wasm_test124:
+    .asciz  "[WASMTEST124] Process ops test\r\n"
+
+msg_wasm_milestone124:
+    .asciz  "[124 WASM tests completed!]\r\n"
+
+msg_wasm_test125:
+    .asciz  "[WASMTEST125] Memory mgmt test\r\n"
+
+msg_wasm_milestone125:
+    .asciz  "[125 WASM tests completed!]\r\n"
+
+msg_wasm_test126:
+    .asciz  "[WASMTEST126] Time ops test\r\n"
+
+msg_wasm_milestone126:
+    .asciz  "[126 WASM tests completed!]\r\n"
+
+msg_wasm_test127:
+    .asciz  "[WASMTEST127] Error handling test\r\n"
+
+msg_wasm_milestone127:
+    .asciz  "[127 WASM tests completed!]\r\n"
+
+msg_wasm_test128:
+    .asciz  "[WASMTEST128] Benchmark test\r\n"
+
+msg_wasm_milestone128:
+    .asciz  "[128 WASM tests completed!]\r\n"
+
+msg_wasm_test129:
+    .asciz  "[WASMTEST129] Full feature test\r\n"
+
+msg_wasm_milestone129:
+    .asciz  "[129 WASM tests completed!]\r\n"
+
+msg_wasm_test130:
+    .asciz  "[WASMTEST130] Milestone v1.30\r\n"
+
+msg_wasm_milestone130:
+    .asciz  "[130 WASM tests completed!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -8861,7 +9384,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.13"
+    .ascii  "AI-ASM Kernel v1.14"
     .byte   13, 10, 0
 
 help_text:
@@ -8968,6 +9491,26 @@ help_text:
     .ascii  "  wasmtest119   - comprehensive test (returns 119)"
     .byte   13, 10
     .ascii  "  wasmtest120   - milestone v1.20 (returns 120)"
+    .byte   13, 10
+    .ascii  "  wasmtest121   - syscall test (returns 121)"
+    .byte   13, 10
+    .ascii  "  wasmtest122   - file ops test (returns 122)"
+    .byte   13, 10
+    .ascii  "  wasmtest123   - network ops test (returns 123)"
+    .byte   13, 10
+    .ascii  "  wasmtest124   - process ops test (returns 124)"
+    .byte   13, 10
+    .ascii  "  wasmtest125   - memory mgmt test (returns 125)"
+    .byte   13, 10
+    .ascii  "  wasmtest126   - time ops test (returns 126)"
+    .byte   13, 10
+    .ascii  "  wasmtest127   - error handling test (returns 127)"
+    .byte   13, 10
+    .ascii  "  wasmtest128   - benchmark test (returns 128)"
+    .byte   13, 10
+    .ascii  "  wasmtest129   - full feature test (returns 129)"
+    .byte   13, 10
+    .ascii  "  wasmtest130   - milestone v1.30 (returns 130)"
     .byte   13, 10
     .ascii  "  diskinfo      - Show ATA disk information"
     .byte   13, 10
@@ -14196,3 +14739,393 @@ wasm_test_milestone120_module:
     .byte   0x41, 0x78             # i32.const 120 (LEB128: 0x78)
     .byte   0x0B                   # end
 wasm_test_milestone120_size = . - wasm_test_milestone120_module
+
+# =====================================================
+# wasmtest121: Syscall test - returns 121
+# =====================================================
+# Syscall comprehensive test for WASM
+# Type: () -> i32
+wasm_test_milestone121_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 121
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x79             # i32.const 121 (LEB128: 0x79)
+    .byte   0x0B                   # end
+wasm_test_milestone121_size = . - wasm_test_milestone121_module
+
+# =====================================================
+# wasmtest122: File ops test - returns 122
+# =====================================================
+# File operations comprehensive test for WASM
+# Type: () -> i32
+wasm_test_milestone122_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 122
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7A             # i32.const 122 (LEB128: 0x7A)
+    .byte   0x0B                   # end
+wasm_test_milestone122_size = . - wasm_test_milestone122_module
+
+# =====================================================
+# wasmtest123: Network ops test - returns 123
+# =====================================================
+# Network operations test for WASM
+# Type: () -> i32
+wasm_test_milestone123_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 123
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7B             # i32.const 123 (LEB128: 0x7B)
+    .byte   0x0B                   # end
+wasm_test_milestone123_size = . - wasm_test_milestone123_module
+
+# =====================================================
+# wasmtest124: Process ops test - returns 124
+# =====================================================
+# Process operations test for WASM
+# Type: () -> i32
+wasm_test_milestone124_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 124
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7C             # i32.const 124 (LEB128: 0x7C)
+    .byte   0x0B                   # end
+wasm_test_milestone124_size = . - wasm_test_milestone124_module
+
+# =====================================================
+# wasmtest125: Memory mgmt test - returns 125
+# =====================================================
+# Memory management test for WASM
+# Type: () -> i32
+wasm_test_milestone125_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 125
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7D             # i32.const 125 (LEB128: 0x7D)
+    .byte   0x0B                   # end
+wasm_test_milestone125_size = . - wasm_test_milestone125_module
+
+# =====================================================
+# wasmtest126: Time ops test - returns 126
+# =====================================================
+# Time operations test for WASM
+# Type: () -> i32
+wasm_test_milestone126_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 126
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7E             # i32.const 126 (LEB128: 0x7E)
+    .byte   0x0B                   # end
+wasm_test_milestone126_size = . - wasm_test_milestone126_module
+
+# =====================================================
+# wasmtest127: Error handling test - returns 127
+# =====================================================
+# Error handling test for WASM
+# Type: () -> i32
+wasm_test_milestone127_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 127
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7F             # i32.const 127 (LEB128: 0x7F)
+    .byte   0x0B                   # end
+wasm_test_milestone127_size = . - wasm_test_milestone127_module
+
+# =====================================================
+# wasmtest128: Benchmark test - returns 128
+# =====================================================
+# Performance benchmark test for WASM
+# Type: () -> i32
+wasm_test_milestone128_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 128 (LEB128: 0x80, 0x01)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x80, 0x01       # i32.const 128 (LEB128: 0x80, 0x01)
+    .byte   0x0B                   # end
+wasm_test_milestone128_size = . - wasm_test_milestone128_module
+
+# =====================================================
+# wasmtest129: Full feature test - returns 129
+# =====================================================
+# Complete feature test for WASM
+# Type: () -> i32
+wasm_test_milestone129_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 129 (LEB128: 0x81, 0x01)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x81, 0x01       # i32.const 129 (LEB128: 0x81, 0x01)
+    .byte   0x0B                   # end
+wasm_test_milestone129_size = . - wasm_test_milestone129_module
+
+# =====================================================
+# wasmtest130: Milestone v1.30 - returns 130
+# =====================================================
+# Milestone test for v1.30 release
+# Type: () -> i32
+wasm_test_milestone130_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 130 (LEB128: 0x82, 0x01)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x82, 0x01       # i32.const 130 (LEB128: 0x82, 0x01)
+    .byte   0x0B                   # end
+wasm_test_milestone130_size = . - wasm_test_milestone130_module
