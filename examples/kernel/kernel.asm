@@ -164,6 +164,7 @@ _start:
     mov     esi, offset msg_boot; mov edi, 1; call log_print
     call    gdt_load; mov esi, offset msg_gdt; mov edi, 1; call log_print
     call    idt_load; mov esi, offset msg_idt; mov edi, 1; call log_print
+    call    tss_init; mov esi, offset msg_tss; mov edi, 1; call log_print
     call    pic_remap; mov esi, offset msg_pic; mov edi, 1; call log_print
     call    pit_init; mov esi, offset msg_pit; mov edi, 1; call log_print
     call    keyboard_init; mov esi, offset msg_kbd; mov edi, 1; call log_print
@@ -3557,6 +3558,7 @@ e1000_send_tcp_data_wasm:
 
     .section .bss
     .space  8192
+    .globl  stack_top
 stack_top:
 
 # Multiboot info pointer (saved from ebx by _start)
@@ -3790,7 +3792,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v0.96"
+    .ascii  "Server: aiasm/v0.97"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3799,7 +3801,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v0.96!"
+    .ascii  "Hello from AI-ASM Kernel v0.97!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3816,7 +3818,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v0.96"
+    .ascii  "AI-ASM Kernel v0.97"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3863,13 +3865,14 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v0.96 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v0.97 booting..."
 msg_udp_send_debug:
     .asciz  "[UDP_SEND] Calling e1000_send_udp\n"
 msg_udp_send_done:
     .asciz  "[UDP_SEND] Done, returning 1\n"
 msg_gdt:     .asciz  "  GDT loaded"
 msg_idt:     .asciz  "  IDT loaded (256 vectors)"
+msg_tss:     .asciz  "  TSS loaded (selector 0x28)"
 msg_pic:     .asciz  "  PIC remapped"
 msg_pit:     .asciz  "  PIT initialized (100Hz)"
 msg_kbd:     .asciz  "  Keyboard initialized"

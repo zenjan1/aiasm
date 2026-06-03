@@ -6936,7 +6936,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.96"
+    .ascii  "AI-ASM Kernel v0.97"
     .byte   13, 10, 0
 
 help_text:
@@ -7068,7 +7068,7 @@ msg_wasm_test9:
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasmrepl_header:
-    .asciz  "WASM REPL v0.96\r\n"
+    .asciz  "WASM REPL v0.97\r\n"
 msg_wasmrepl_prompt:
     .asciz  "> "
 msg_wasmrepl_parse_err:

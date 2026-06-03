@@ -49,6 +49,20 @@ gdt_table:
     .byte   0xCF
     .byte   0x00
 
+    # 0x28: TSS 描述符 (运行时动态设置)
+    # 在 tss_init 中填充 base 地址
+    # limit=104, type=0x89 (present, DPL=0, 32-bit available TSS)
+tss_desc:
+    .word   104                 # limit[15:0] = TSS 最小大小
+tss_desc_base_low:
+    .word   0                   # base[15:0] (运行时填充)
+tss_desc_base_mid:
+    .byte   0                   # base[23:16] (运行时填充)
+    .byte   0x89                # present(1)|DPL(00)|system(0)|type(1001)
+    .byte   0x00                # G=0, limit[19:16]=0
+tss_desc_base_high:
+    .byte   0                   # base[31:24] (运行时填充)
+
 gdt_table_end:
 
 # ============================================================================
@@ -83,4 +97,41 @@ gdt_load:
     mov     gs, ax
     mov     ss, ax
 
+    ret
+
+# ============================================================================
+# TSS 结构 (BSS)
+# ============================================================================
+    .section .bss
+    .align  4
+    .globl  tss_struct
+tss_struct:
+    .space  104                 # TSS 最小 104 字节
+
+# ============================================================================
+# tss_init: 初始化 TSS 并加载 TR
+# ============================================================================
+    .section .text
+    .globl  tss_init
+    .extern stack_top
+tss_init:
+    # 动态设置 TSS 描述符的 base 地址
+    mov     eax, offset tss_struct
+    # base[15:0]
+    mov     [tss_desc_base_low], ax
+    # base[23:16]
+    shr     eax, 16
+    mov     [tss_desc_base_mid], al
+    # base[31:24]
+    shr     eax, 8
+    mov     [tss_desc_base_high], al
+
+    # 设置 ESP0 (offset 4) = 内核栈顶
+    mov     eax, offset stack_top
+    mov     [tss_struct + 4], eax
+    # 设置 SS0 (offset 8) = 内核数据段选择子 0x10
+    mov     word ptr [tss_struct + 8], 0x10
+    # 加载 TR = TSS 选择子 0x28
+    mov     ax, 0x28
+    ltr     ax
     ret
