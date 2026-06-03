@@ -1084,6 +1084,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_diskwrite
 
+    # "fatls" - list FAT32 root directory
+    mov     edi, offset cmd_fatls
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_fatls
+
     # 未知命令
     mov     esi, offset msg_unknown
     call    uart_puts
@@ -6543,6 +6549,49 @@ shell_print_dec_byte:
     ret
 
 # ============================================================================
+# .do_fatls: 列出 FAT32 根目录文件
+# ============================================================================
+.do_fatls:
+    # 打印 FAT32 根目录标题
+    mov     esi, offset msg_fatls_header
+    call    uart_puts
+
+    # 调用 FAT32 列根目录函数
+    call    fat32_list_root
+
+    # 检查结果
+    cmp     eax, 0xFFFFFFFF
+    je      .fatls_fail
+
+    # 打印文件数量
+    push    eax
+    mov     esi, offset msg_fatls_count
+    call    uart_puts
+    pop     eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0D
+    call    uart_putc
+    mov     al, 0x0A
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.fatls_fail:
+    mov     esi, offset msg_fatls_fail
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_diskread: 读取磁盘扇区
 # ============================================================================
 .do_diskread:
@@ -7018,6 +7067,9 @@ cmd_diskread:
 cmd_diskwrite:
     .asciz  "diskwrite "
 
+cmd_fatls:
+    .asciz  "fatls"
+
 msg_ring3_entering:
     .asciz  "Entering Ring 3 (User Mode)...\r\n"
 msg_ring3_returned:
@@ -7078,6 +7130,18 @@ msg_disk_lba:
 msg_disk_ok:
     .ascii  "  ATA driver ready"
     .byte   13, 10, 0
+
+# FAT32 messages
+msg_fatls_header:
+    .ascii  "FAT32 Root Directory:"
+    .byte   13, 10, 0
+msg_fatls_count:
+    .ascii  "  Files found: "
+    .byte   0
+msg_fatls_fail:
+    .ascii  "FAT32 not initialized or read failed"
+    .byte   13, 10, 0
+
 msg_diskread_header:
     .ascii  "Reading sector "
     .byte   0
@@ -7280,7 +7344,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.01"
+    .ascii  "AI-ASM Kernel v1.02"
     .byte   13, 10, 0
 
 help_text:
@@ -7351,6 +7415,8 @@ help_text:
     .ascii  "  diskread <lba> - Read disk sector (hex LBA)"
     .byte   13, 10
     .ascii  "  diskwrite <lba> - Write test data to sector (hex LBA)"
+    .byte   13, 10
+    .ascii  "  fatls         - List FAT32 root directory files"
     .byte   13, 10, 0
 
 tick_prefix:
