@@ -28,6 +28,14 @@ shell_date_ticks:
 ping_target_ip:
     .space  4                   # target IP for ping command
 
+# WASM REPL buffer
+wasmrepl_buf:
+    .space  512                 # buffer for hex input -> WASM bytes
+wasmrepl_len:
+    .space  4                   # byte count in wasmrepl_buf
+wasmrepl_hex_buf:
+    .space  1024                # buffer for hex string input (e.g. "00 61 73 6D...")
+
 # UDP send parameters
 udp_send_dst_ip_tmp:
     .space  4
@@ -922,6 +930,12 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_wasmtest95
+
+    # "wasmrepl" - WASM interactive REPL
+    mov     edi, offset cmd_wasmrepl
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmrepl
 
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
@@ -4191,6 +4205,255 @@ shell_wasmtest21:
     pop     esi
     ret
 
+# ============================================================================
+# .do_wasmrepl: WASM Interactive REPL
+# ============================================================================
+.do_wasmrepl:
+    # Print header
+    mov     esi, offset msg_wasmrepl_header
+    call    uart_puts
+
+    # REPL loop
+.wasmrepl_loop:
+    # Print prompt "> "
+    mov     esi, offset msg_wasmrepl_prompt
+    call    uart_puts
+
+    # Clear hex buffer
+    xor     eax, eax
+    mov     [wasmrepl_len], eax
+
+    # Read input line
+    mov     esi, offset wasmrepl_hex_buf
+    mov     ecx, 0                    # character count
+.wasmrepl_read_loop:
+    call    uart_getc
+    cmp     al, 0x0D                  # Enter
+    je      .wasmrepl_process
+    cmp     al, 0x0A                  # LF
+    je      .wasmrepl_process
+    cmp     al, 0x08                  # Backspace
+    je      .wasmrepl_backspace
+    cmp     al, 0x7F                  # Delete
+    je      .wasmrepl_backspace
+    # Store character
+    cmp     ecx, 1023
+    jge     .wasmrepl_read_loop       # buffer full, ignore
+    mov     [esi + ecx], al
+    inc     ecx
+    # Echo
+    push    eax
+    call    uart_putc
+    pop     eax
+    jmp     .wasmrepl_read_loop
+
+.wasmrepl_backspace:
+    test    ecx, ecx
+    jz      .wasmrepl_read_loop       # empty buffer
+    dec     ecx
+    # Echo backspace sequence
+    mov     al, 0x08
+    call    uart_putc
+    mov     al, ' '
+    call    uart_putc
+    mov     al, 0x08
+    call    uart_putc
+    jmp     .wasmrepl_read_loop
+
+.wasmrepl_process:
+    # Null terminate
+    mov     byte ptr [esi + ecx], 0
+    # Print newline
+    mov     al, 0x0A
+    call    uart_putc
+    mov     al, 0x0D
+    call    uart_putc
+
+    # Check for empty input
+    test    ecx, ecx
+    jz      .wasmrepl_loop
+
+    # Check for "exit"
+    mov     edi, offset cmd_wasmrepl_exit
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmrepl_exit
+
+    # Parse hex string to bytes
+    # Input: esi = wasmrepl_hex_buf (hex string like "00 61 73 6D...")
+    # Output: wasmrepl_buf = bytes, wasmrepl_len = byte count
+    call    wasmrepl_hex_to_bytes
+    test    eax, eax
+    jnz     .wasmrepl_hex_err
+
+    # Load and execute WASM module
+    mov     esi, offset wasmrepl_buf
+    mov     ecx, [wasmrepl_len]
+    test    ecx, ecx
+    jz      .wasmrepl_loop            # empty module
+
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+
+    call    wasm_load_data
+
+    # Reset WASM state
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+
+    # Execute function 0
+    xor     eax, eax
+    call    wasm_exec_func
+
+    # Print result
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0A
+    call    uart_putc
+    mov     al, 0x0D
+    call    uart_putc
+
+    jmp     .wasmrepl_loop
+
+.wasmrepl_hex_err:
+    mov     esi, offset msg_wasmrepl_parse_err
+    call    uart_puts
+    jmp     .wasmrepl_loop
+
+.wasmrepl_exit:
+    mov     esi, offset msg_wasmrepl_exit
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# wasmrepl_hex_to_bytes: Parse hex string to bytes
+# Input: esi = hex string (e.g. "00 61 73 6D 01 00 00 00...")
+#       spaces are optional separators
+# Output: wasmrepl_buf = byte array, wasmrepl_len = byte count
+# Returns: eax = 0 success, eax = 1 error
+# ============================================================================
+wasmrepl_hex_to_bytes:
+    push    ebx
+    push    ecx
+    push    edx
+    push    edi
+
+    mov     edi, offset wasmrepl_buf   # destination buffer
+    xor     ebx, ebx                   # byte count
+
+.wasmrepl_hex_parse_loop:
+    # Skip spaces
+    movzx   eax, byte ptr [esi]
+    cmp     al, ' '
+    je      .wasmrepl_skip_space
+    cmp     al, 0                     # end of string
+    je      .wasmrepl_hex_done
+    jmp     .wasmrepl_parse_hex_digit
+
+.wasmrepl_skip_space:
+    inc     esi
+    jmp     .wasmrepl_hex_parse_loop
+
+.wasmrepl_parse_hex_digit:
+    # Parse first hex digit
+    call    wasmrepl_parse_hex_char
+    cmp     eax, -1
+    je      .wasmrepl_hex_error
+    mov     ecx, eax                   # first digit in ecx
+    shl     ecx, 4                     # shift to high nibble
+
+    # Parse second hex digit
+    inc     esi
+    movzx   eax, byte ptr [esi]
+    cmp     al, 0
+    je      .wasmrepl_hex_error       # incomplete byte (only 1 digit)
+    cmp     al, ' '
+    je      .wasmrepl_hex_error       # incomplete byte (space after 1 digit)
+    call    wasmrepl_parse_hex_char
+    cmp     eax, -1
+    je      .wasmrepl_hex_error
+    or      ecx, eax                   # combine nibbles
+
+    # Store byte
+    mov     [edi + ebx], cl
+    inc     ebx
+    cmp     ebx, 512
+    jge     .wasmrepl_hex_done         # buffer full
+
+    # Move to next
+    inc     esi
+    jmp     .wasmrepl_hex_parse_loop
+
+.wasmrepl_hex_done:
+    mov     [wasmrepl_len], ebx
+    xor     eax, eax                   # success
+    jmp     .wasmrepl_hex_ret
+
+.wasmrepl_hex_error:
+    mov     eax, 1                     # error
+
+.wasmrepl_hex_ret:
+    pop     edi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# ============================================================================
+# wasmrepl_parse_hex_char: Parse single hex char to value
+# Input: al = hex character ('0'-'9', 'a'-'f', 'A'-'F')
+# Output: eax = value (0-15), or eax = -1 if invalid
+# ============================================================================
+wasmrepl_parse_hex_char:
+    cmp     al, '0'
+    jl      .wasmrepl_hex_invalid
+    cmp     al, '9'
+    jle     .wasmrepl_hex_digit
+
+    cmp     al, 'a'
+    jl      .wasmrepl_check_upper
+    cmp     al, 'f'
+    jle     .wasmrepl_hex_lower
+
+.wasmrepl_check_upper:
+    cmp     al, 'A'
+    jl      .wasmrepl_hex_invalid
+    cmp     al, 'F'
+    jle     .wasmrepl_hex_upper
+
+.wasmrepl_hex_invalid:
+    mov     eax, -1
+    ret
+
+.wasmrepl_hex_digit:
+    sub     al, '0'
+    movzx   eax, al
+    ret
+
+.wasmrepl_hex_lower:
+    sub     al, 'a'
+    add     al, 10
+    movzx   eax, al
+    ret
+
+.wasmrepl_hex_upper:
+    sub     al, 'A'
+    add     al, 10
+    movzx   eax, al
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -6421,6 +6684,10 @@ cmd_wasmtest94:
     .asciz  "wasmtest94"
 cmd_wasmtest95:
     .asciz  "wasmtest95"
+cmd_wasmrepl:
+    .asciz  "wasmrepl"
+cmd_wasmrepl_exit:
+    .asciz  "exit"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -6800,6 +7067,14 @@ msg_wasm_test9:
     .asciz  "Running WASM test9 (i32.popcnt: popcnt(0xFF)=8)...\r\n"
 msg_wasm_result:
     .asciz  "Result: "
+msg_wasmrepl_header:
+    .asciz  "WASM REPL v0.95\r\n"
+msg_wasmrepl_prompt:
+    .asciz  "> "
+msg_wasmrepl_parse_err:
+    .asciz  "Hex parse error\r\n"
+msg_wasmrepl_exit:
+    .asciz  "Exiting WASM REPL\r\n"
 msg_wasm_parse_err:
     .asciz  "WASM parse error\r\n"
 msg_wasmrun_usage:
