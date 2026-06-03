@@ -285,7 +285,15 @@ wasm_code_end:
 
     .globl  wasm_return_value
 wasm_return_value:
-    .space  4                   # 返回值
+    .space  8                   # 返回值 (64-bit, 支持 i64)
+
+    # wasm_return_value_high is at wasm_return_value+4 (label for convenience)
+    .globl  wasm_return_value_high
+wasm_return_value_high = wasm_return_value + 4
+
+    .globl  wasm_current_func_idx
+wasm_current_func_idx:
+    .space  4                   # 当前执行的函数索引
 
     .globl  wasm_exec_error
 wasm_exec_error:
@@ -428,6 +436,8 @@ wasm_exec_func:
     # Save return address (at [esp+20] after 5 pushes)
     mov     ecx, [esp + 20]
     mov     [wasm_saved_ret_addr], ecx
+    # Save function index for i64 return type detection
+    mov     [wasm_current_func_idx], eax
 
     # 检查函数索引合法性
     cmp     eax, [wasm_func_count]
@@ -518,10 +528,45 @@ exec_code_loop:
     jmp     exec_code_loop
 
 exec_code_done:
-    # 从操作数栈弹出返回值
+    # 检查返回类型是否为 i64
+    # 从函数类型表获取返回类型
+    mov     ebx, [wasm_current_func_idx]
+    shl     ebx, 2
+    mov     ebx, [wasm_func_table + ebx]  # ebx = type_index
+    shl     ebx, 2
+    lea     ebx, [wasm_type_sigs + ebx]  # ebx = signature pointer
+
+    # 检查返回值数量和类型
+    # 签名格式: [param_count][first_param][result_count][first_result]
+    mov     al, [ebx + 2]  # result_count
+    test    al, al
+    jz      .no_return
+
+    # 检查第一个返回类型
+    mov     al, [ebx + 3]  # first result type (0x7E = i64, 0x7F = i32)
+    cmp     al, 0x7E       # i64?
+    je      .return_i64
+
+    # i32 返回（原有逻辑）
     call    _stack_pop
     mov     [wasm_return_value], eax
+    mov     dword ptr [wasm_return_value + 4], 0  # 高位清零
+    jmp     .return_done
 
+.return_i64:
+    # i64 返回：栈顶是 low，栈底是 high
+    # 先弹 low（栈顶），再弹 high
+    call    _stack_pop      # 弹出 low 32 位（栈顶）
+    mov     [wasm_return_value], eax
+    call    _stack_pop      # 弹出 high 32 位
+    mov     [wasm_return_value + 4], eax
+    jmp     .return_done
+
+.no_return:
+    mov     dword ptr [wasm_return_value], 0
+    mov     dword ptr [wasm_return_value + 4], 0
+
+.return_done:
     pop     edi
     pop     esi
     pop     edx
@@ -530,7 +575,7 @@ exec_code_done:
     # Restore saved return address (it got corrupted during WASM execution)
     mov     ecx, [wasm_saved_ret_addr]
     mov     [esp], ecx
-    mov     eax, [wasm_return_value]  # 加载返回值到 eax
+    mov     eax, [wasm_return_value]  # 加载返回值到 eax（兼容现有调用）
     ret
 
 exec_func_err:
@@ -2279,36 +2324,35 @@ do_i64_const:
 .i64c_byte:
     movzx   edi, byte ptr [esi]
     inc     esi
-    and     edi, 0x7F
+    and     edi, 0x7F             # edi = val (去掉继续位)
+
+    # 根据 shift 决定处理方式
     cmp     ebx, 32
     jae     .i64c_high
-    # shift < 32: 字节左移后可能跨越 low/high 边界
-    push    ecx
-    push    edx
-    mov     ecx, ebx
-    shl     edi, cl               # edi = byte << shift (可能超过32位)
-    # 检查是否跨越边界 (shift + 7 > 32)
-    cmp     ebx, 25
-    ja      .i64c_split
-    # 不跨越边界：全部加到 eax
-    pop     edx
-    or      eax, edi
-    pop     ecx
+
+    # shift < 32: 计算完整的 val << shift
+    push    eax                   # 保存原来的 eax
+    push    edx                   # 保存原来的 edx
+
+    # 计算 val << shift (使用乘法得到完整 64 位结果)
+    push    ecx                   # 保存循环计数器
+    push    ebx                   # 保存 shift
+    mov     ecx, ebx              # ecx = shift
+    mov     ebx, 1
+    shl     ebx, cl               # ebx = 1 << shift
+    mov     eax, edi              # eax = val
+    mul     ebx                   # edx:eax = val << shift
+    pop     ebx                   # 恢复 shift
+    pop     ecx                   # 恢复循环计数器
+
+    # 现在 edx:eax = val << shift 的完整结果
+    pop     edi                   # edi = 原来的 edx（高位累积）
+    add     edx, edi              # 加到新结果的 edx
+    pop     edi                   # edi = 原来的 eax（低位累积）
+    add     eax, edi              # 加到新结果的 eax
+
     jmp     .i64c_cont
-.i64c_split:
-    # 跨越边界：需要分割到 eax 和 edx
-    # edi 有高位部分（需要右移后加到 edx）
-    # BUG FIX: 不要修改 esi，使用 edi 保存移位值
-    pop     edx
-    push    edi                  # 保存完整的移位值
-    and     edi, 0xFFFFFFFF       # edi = 低32位部分
-    or      eax, edi              # 加到 eax
-    pop     edi                  # 恢复完整的移位值
-    shr     edi, 32               # edi = 高32位部分 (0-6位)
-    or      edx, edi              # 加到 edx
-    pop     ecx
-    # esi 已经正确递增（指向下一个字节），不需要恢复
-    jmp     .i64c_cont
+
 .i64c_high:
     # shift >= 32: 整个7位加到 edx
     push    ecx
@@ -2319,12 +2363,13 @@ do_i64_const:
     or      edx, edi
     jmp     .i64c_cont
 .i64c_cont:
+    add     ebx, 7               # 每个字节贡献 7 bits
     movzx   edi, byte ptr [esi - 1]
     test    edi, 0x80
     jz      .i64c_done
-    add     ebx, 7
     dec     ecx
     jnz     .i64c_byte
+    # 如果循环结束但没有找到 end byte，继续（错误情况）
 .i64c_done:
     # 符号扩展：如果最后字节的 bit 6 为 1，扩展高 32 位
     movzx   edi, byte ptr [esi - 1]
@@ -2333,21 +2378,18 @@ do_i64_const:
     # 如果已经读了 >= 63 位，不需要扩展
     cmp     ebx, 63
     jae     .i64c_no_extend
-    # 计算需要扩展的位数
-    mov     edi, ebx
-    add     edi, 7                # edi = 下一位的 shift
-    cmp     edi, 64
-    jae     .i64c_all_high
-    # 高 32 位需要符号扩展
-    mov     ecx, edi
-    sub     ecx, 32
-    jle     .i64c_all_high
-    mov     edi, -1
-    shl     edi, cl
-    or      edx, edi
-    jmp     .i64c_no_extend
-.i64c_all_high:
-    mov     edx, -1
+    # 符号扩展：value = decoded - (1 << shift)
+    # shift = ebx，需要减去 (1 << ebx)
+    # 计算 1 << ebx
+    push    ecx
+    mov     ecx, ebx
+    mov     edi, 1
+    shl     edi, cl               # edi = 1 << shift (low part)
+    xor     ecx, ecx              # ecx = 0 (high part, since shift < 63)
+    # 从 edx:eax 减去 ecx:edi
+    sub     eax, edi
+    sbb     edx, ecx              # edx:eax -= (1 << shift)
+    pop     ecx
 .i64c_no_extend:
     mov     [wasm_pc], esi
     # 推入栈：先高后低，保存 low 值
@@ -2633,10 +2675,10 @@ do_i64_mul:
     # Step 4: a_high * b_high → 只影响位 [127:64]，丢弃
     # 清理栈
     add     esp, 16
-    mov     eax, esi
-    call    _stack_push          # push result_low
-    mov     eax, edi
-    call    _stack_push          # push result_high
+    mov     eax, edi             # result_high
+    call    _stack_push          # push high FIRST (约定一致)
+    mov     eax, esi             # result_low
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 
 # i64.div_s: 有符号 64 位除法
@@ -2663,18 +2705,23 @@ do_i64_div_s:
     idiv    ecx                  # eax = a_low / b_low (有符号)
     cdq                          # sign extend to 64-bit
     add     esp, 4               # 清理保存的 a_high
-    # 推入商
-    push    edx
-    mov     eax, eax
-    push    eax
-    call    _stack_push          # high
-    pop     eax
-    call    _stack_push          # low
+    # 推入商 (edx:eax = high:low)
+    mov     ebx, eax             # 保存 quotient_low
+    mov     eax, edx             # quotient_high
+    call    _stack_push          # push high FIRST
+    mov     eax, ebx             # quotient_low
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .div_s_full:
     # 完整 64 位有符号除法
+    # 原始栈：[esp0-4]=a_high (push eax at 2696)
+    # 需要保存 b_low, b_high 并分配符号标记
+    push    edx                  # [esp-4] = b_high (相对于当前 esp)
+    push    ecx                  # [esp] = b_low, [esp+4] = b_high
+    sub     esp, 2               # esp -= 2, 分配符号标记空间
+    # 现在栈布局：[esp]=sign(2B), [esp+2]=b_low, [esp+6]=b_high, [esp+10]=a_high
     # 保存符号，取绝对值，用无符号除法，最后恢复符号
-    mov     esi, [esp]           # esi = a_high (被除数高)
+    mov     esi, [esp + 10]      # esi = a_high (被除数高)
     mov     edi, ebx             # edi = a_low (被除数低)
     # 检查被除数符号
     test    esi, esi
@@ -2684,13 +2731,14 @@ do_i64_div_s:
     not     esi
     add     edi, 1
     adc     esi, 0
-    mov     byte ptr [esp + 4], 1  # 标记被除数为负（复用栈上 b_high 位置）
+    mov     byte ptr [esp], 1    # 标记被除数为负
     jmp     .div_s_check_dvsign
 .div_s_pos_dividend:
-    mov     byte ptr [esp + 4], 0  # 被除数为正
+    mov     byte ptr [esp], 0    # 被除数为正
 .div_s_check_dvsign:
     # 检查除数符号
-    mov     eax, edx             # eax = b_high
+    mov     eax, [esp + 6]       # eax = b_high (从栈恢复)
+    mov     ecx, [esp + 2]       # ecx = b_low (从栈恢复)
     test    eax, eax
     jns     .div_s_pos_divisor
     # 除数为负，取反
@@ -2699,10 +2747,11 @@ do_i64_div_s:
     add     ecx, 1
     adc     eax, 0
     xor     edx, edx             # edx = 0 (divisor high now)
-    mov     byte ptr [esp + 5], 1  # 除数为负
+    mov     byte ptr [esp + 1], 1  # 除数为负
     jmp     .div_s_do_unsigned
 .div_s_pos_divisor:
-    mov     byte ptr [esp + 5], 0  # 除数为正
+    mov     edx, eax             # edx = b_high (positive divisor)
+    mov     byte ptr [esp + 1], 0  # 除数为正
 .div_s_do_unsigned:
     # 现在：被除数 {esi, edi} >= 0, 除数 {edx, ecx} >= 0
     # 如果除数高 32 位为 0，用 64/32 idiv
@@ -2766,8 +2815,11 @@ do_i64_div_s:
 .div_s_apply_sign:
     # esi:edi = 商（无符号）
     # 应用符号：如果被除数和除数符号不同，商为负
-    mov     al, [esp + 4]
-    mov     bl, [esp + 5]
+    # 栈布局：[esp]=sign(2B), [esp+2]=b_low, [esp+6]=b_high, [esp+10]=a_high
+    # 先保存 sign markers 再清理栈
+    mov     al, [esp]            # dividend_sign
+    mov     bl, [esp + 1]        # divisor_sign
+    add     esp, 14              # 清理 sign(2)+b_low(4)+b_high(4)+a_high(4)
     xor     al, bl
     test    al, al
     jz      .div_s_pos_result
@@ -2777,14 +2829,13 @@ do_i64_div_s:
     add     edi, 1
     adc     esi, 0
 .div_s_pos_result:
-    add     esp, 8               # 清理保存的 a_high 和符号标记
-    mov     eax, edi
-    call    _stack_push          # push quotient_low
-    mov     eax, esi
-    call    _stack_push          # push quotient_high
+    mov     eax, esi             # quotient_high
+    call    _stack_push          # push high FIRST
+    mov     eax, edi             # quotient_low
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .div_s_zero:
-    add     esp, 4               # 清理保存的 a_high
+    add     esp, 14              # 清理 sign(2)+b_low(4)+b_high(4)+a_high(4)
     mov     eax, 0xFFFFFFFF      # 除零返回最大值
     call    _stack_push
     call    _stack_push
@@ -2817,10 +2868,11 @@ do_i64_div_u:
     mov     eax, ebx
     div     ecx
     add     esp, 12
-    xor     edx, edx
-    call    _stack_push
-    mov     eax, eax
-    call    _stack_push
+    mov     ebx, eax             # save quotient
+    xor     eax, eax             # high = 0
+    call    _stack_push          # push high FIRST
+    mov     eax, ebx             # quotient
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .div_u_64:
     # 64/64 无符号除法（二进制恢复法）
@@ -2855,10 +2907,10 @@ do_i64_div_u:
     dec     ecx
     jnz     .div_u_64_loop
     add     esp, 8
-    mov     eax, edi
-    call    _stack_push
-    mov     eax, ebp
-    call    _stack_push
+    mov     eax, ebp             # quotient_high
+    call    _stack_push          # push high FIRST
+    mov     eax, edi             # quotient_low
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .div_u_zero:
     add     esp, 12
@@ -2887,12 +2939,14 @@ do_i64_rem_s:
     jz      .rem_s_zero
     mov     eax, ebx
     cdq
-    idiv    ecx                  # edx = remainder
-    cdq
+    idiv    ecx                  # eax = quotient, edx = remainder
+    mov     ebx, edx             # save remainder_low
+    cdq                          # sign-extend remainder to edx:eax
     add     esp, 4
-    call    _stack_push          # high
-    mov     eax, edx             # low = remainder
-    call    _stack_push
+    mov     eax, edx             # remainder_high
+    call    _stack_push          # push high FIRST
+    mov     eax, ebx             # remainder_low
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .rem_s_full:
     # 64/32 有符号取余: (a_high:a_low) % b_low
@@ -2902,12 +2956,15 @@ do_i64_rem_s:
     jnz     .rem_s_big_divisor
     mov     eax, ebx             # eax = a_low
     mov     edx, [esp]           # edx = a_high
-    idiv    ecx                  # edx = remainder
-    cdq
+    idiv    ecx                  # eax = quotient, edx = remainder
+    mov     ebx, edx             # save remainder_low
+    mov     eax, ebx
+    cdq                          # sign-extend remainder to edx:eax
     add     esp, 4
-    call    _stack_push          # high
-    mov     eax, edx             # remainder
-    call    _stack_push
+    mov     eax, edx             # remainder_high
+    call    _stack_push          # push high FIRST
+    mov     eax, ebx             # remainder_low
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .rem_s_big_divisor:
     # 64/64 有符号取余：余数符号与被除数相同
@@ -3038,12 +3095,12 @@ do_i64_rem_u:
     jz      .rem_u_zero
     xor     edx, edx
     mov     eax, ebx
-    div     ecx                  # edx = remainder
+    div     ecx                  # eax = quotient, edx = remainder
     add     esp, 4
-    xor     edx, edx
-    call    _stack_push          # high
-    mov     eax, edx             # remainder
-    call    _stack_push
+    xor     eax, eax             # high = 0
+    call    _stack_push          # push high FIRST
+    mov     eax, edx             # remainder (low)
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .rem_u_full:
     # 64/32 无符号取余: (a_high:a_low) % b_low
@@ -3053,12 +3110,12 @@ do_i64_rem_u:
     jnz     .rem_u_big_divisor
     mov     eax, ebx             # eax = a_low
     mov     edx, [esp]           # edx = a_high
-    div     ecx                  # edx = remainder
+    div     ecx                  # eax = quotient, edx = remainder
     add     esp, 4
-    xor     edx, edx
-    call    _stack_push          # high
-    mov     eax, edx             # remainder
-    call    _stack_push
+    xor     eax, eax             # high = 0
+    call    _stack_push          # push high FIRST
+    mov     eax, edx             # remainder (low)
+    call    _stack_push          # push low SECOND
     jmp     dispatch_done
 .rem_u_big_divisor:
     # 完整 64/64 无符号取余：remainder = dividend - quotient * divisor

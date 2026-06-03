@@ -1954,22 +1954,14 @@ shell_wasmtest21:
     # Print "i64 const = "
     mov     esi, offset msg_i64_const_result
     call    uart_puts
-    mov     edi, offset shell_cmd_buf
-    mov     dl, 10
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
+    call    print_i64_result
     pop     ecx
     pop     edi
     pop     esi
     ret
 
 .do_wasmtest31:
-    # WASM i64.add test: 0x12345678 + 0x87654321 = 0x99999999 (2566980377)
+    # WASM i64.add test: 0x12345678 + 0x87654321 = 0x99999999 (2576980377)
     mov     esi, offset msg_wasm_test31
     call    uart_puts
     mov     esi, offset wasm_test_i64_add_module
@@ -1986,15 +1978,7 @@ shell_wasmtest21:
     # Print "i64 add = "
     mov     esi, offset msg_i64_add_result
     call    uart_puts
-    mov     edi, offset shell_cmd_buf
-    mov     dl, 10
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
+    call    print_i64_result
     pop     ecx
     pop     edi
     pop     esi
@@ -2018,15 +2002,7 @@ shell_wasmtest21:
     # Print "i64 sub = "
     mov     esi, offset msg_i64_sub_result
     call    uart_puts
-    mov     edi, offset shell_cmd_buf
-    mov     dl, 10
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
+    call    print_i64_result
     pop     ecx
     pop     edi
     pop     esi
@@ -2050,15 +2026,7 @@ shell_wasmtest21:
     # Print "i64 mul = "
     mov     esi, offset msg_i64_mul_result
     call    uart_puts
-    mov     edi, offset shell_cmd_buf
-    mov     dl, 10
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
+    call    print_i64_result
     pop     ecx
     pop     edi
     pop     esi
@@ -2082,15 +2050,7 @@ shell_wasmtest21:
     # Print "i64 div_u = "
     mov     esi, offset msg_i64_div_u_result
     call    uart_puts
-    mov     edi, offset shell_cmd_buf
-    mov     dl, 10
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
+    call    print_i64_result
     pop     ecx
     pop     edi
     pop     esi
@@ -2114,15 +2074,7 @@ shell_wasmtest21:
     # Print "i64 div_s = "
     mov     esi, offset msg_i64_div_s_result
     call    uart_puts
-    mov     edi, offset shell_cmd_buf
-    mov     dl, 10
-    call    utils_itoa
-    mov     esi, eax
-    call    uart_puts
-    mov     al, 0x0a
-    call    uart_putc
-    mov     al, 0x0d
-    call    uart_putc
+    call    print_i64_result
     pop     ecx
     pop     edi
     pop     esi
@@ -2875,6 +2827,52 @@ print_hex_byte:
 .ph_low_done:
     call    uart_putc
     pop     ebx
+    pop     eax
+    ret
+
+# ============================================================================
+# print_i64_result: Print 64-bit return value from wasm_return_value
+# Handles both 32-bit (high=0) and full 64-bit values
+# ============================================================================
+    .globl  print_i64_result
+print_i64_result:
+    push    eax
+    push    edx
+    push    esi
+
+    # Read full 64-bit value
+    mov     eax, [wasm_return_value]      # low 32 bits
+    mov     edx, [wasm_return_value + 4]  # high 32 bits
+
+    # Check if high bits are non-zero (need full 64-bit print)
+    test    edx, edx
+    jnz     .print_hex64
+
+    # 32-bit value: print as decimal
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    jmp     .print_done
+
+.print_hex64:
+    # 64-bit value: print as 0xHHHHHHHHLLLLLLLL
+    mov     esi, offset msg_0x
+    call    uart_puts
+    mov     eax, edx
+    call    print_hex8        # print high 32 bits
+    mov     eax, [wasm_return_value]
+    call    print_hex8        # print low 32 bits
+    # print_hex8 already adds newline
+
+.print_done:
+    pop     esi
+    pop     edx
     pop     eax
     ret
 
@@ -4393,7 +4391,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.79"
+    .ascii  "AI-ASM Kernel v0.81"
     .byte   13, 10, 0
 
 help_text:
@@ -4674,6 +4672,8 @@ msg_wasm_test35:
     .asciz  "Running WASM test35 (i64.div_s)...\r\n"
 msg_i64_div_s_result:
     .asciz  "i64 div_s = "
+msg_0x:
+    .asciz  "0x"
 msg_kill_ok:
     .asciz  "Killed PID "
 msg_kill_usage:
@@ -5771,7 +5771,7 @@ wasm_test_i64_const_module:
 wasm_test_i64_const_size = . - wasm_test_i64_const_module
 
 # WASM 测试模块 31：i64.add 测试
-# 测试：i64.const 0x12345678 + i64.const 0x87654321 = 0x99999999 (2566980377)
+# 测试：i64.const 0x12345678 + i64.const 0x87654321 = 0x99999999 (2576980377)
 wasm_test_i64_add_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic
     .byte   0x01, 0x00, 0x00, 0x00  # version
@@ -5795,7 +5795,7 @@ wasm_test_i64_add_module:
     .byte   0x0F                   # body size = 15
     .byte   0x00                   # num locals
     .byte   0x42, 0xF8, 0xAC, 0xD1, 0x91, 0x01  # i64.const 0x12345678 (LEB128)
-    .byte   0x42, 0xB1, 0xE5, 0x9A, 0x86, 0x04  # i64.const 0x87654321 (LEB128)
+    .byte   0x42, 0xA1, 0x86, 0x95, 0xBB, 0x08  # i64.const 0x87654321 (LEB128)
     .byte   0x7C                   # i64.add
     .byte   0x0B                   # end
 wasm_test_i64_add_size = . - wasm_test_i64_add_module
@@ -5820,12 +5820,12 @@ wasm_test_i64_sub_module:
     .byte   0x00                   # type index 0
     # code section: i64.const 0x100000000, i64.const 1, i64.sub, end
     .byte   0x0A                   # section id
-    .byte   0x0E                   # section size = 14
+    .byte   0x0C                   # section size = 12
     .byte   0x01                   # num codes
-    .byte   0x0C                   # body size = 12
+    .byte   0x0A                   # body size = 10
     .byte   0x00                   # num locals
-    .byte   0x42, 0x80, 0x80, 0x80, 0x80, 0x08, 0x01  # i64.const 0x100000000 (LEB128)
-    .byte   0x42, 0x01                   # i64.const 1
+    .byte   0x42, 0x80, 0x80, 0x80, 0x80, 0x10  # i64.const 0x100000000 (LEB128)
+    .byte   0x42, 0x01             # i64.const 1
     .byte   0x7D                   # i64.sub
     .byte   0x0B                   # end
 wasm_test_i64_sub_size = . - wasm_test_i64_sub_module
@@ -5854,8 +5854,8 @@ wasm_test_i64_mul_module:
     .byte   0x01                   # num codes
     .byte   0x0B                   # body size = 11
     .byte   0x00                   # num locals
-    .byte   0x42, 0x80, 0x80, 0x02  # i64.const 0x10000 (LEB128)
-    .byte   0x42, 0x80, 0x80, 0x02  # i64.const 0x10000 (LEB128)
+    .byte   0x42, 0x80, 0x80, 0x04  # i64.const 0x10000 (LEB128)
+    .byte   0x42, 0x80, 0x80, 0x04  # i64.const 0x10000 (LEB128)
     .byte   0x7E                   # i64.mul
     .byte   0x0B                   # end
 wasm_test_i64_mul_size = . - wasm_test_i64_mul_module
