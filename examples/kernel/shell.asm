@@ -1303,6 +1303,20 @@ shell_dispatch:
     test    eax, eax
     jz      .wasmrun_hello_builtin
 
+    # 检查是否是内置 calc
+    lea     edi, [shell_cmd_buf + 8]
+    mov     esi, offset cmd_calc_wasm
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmrun_calc_builtin
+
+    # 检查是否是内置 print
+    lea     edi, [shell_cmd_buf + 8]
+    mov     esi, offset cmd_print_wasm
+    call    utils_strcmp
+    test    eax, eax
+    jz      .wasmrun_print_builtin
+
     # 使用 vfs_find_by_path 查找文件
     lea     esi, [shell_cmd_buf + 8]
     call    vfs_find_by_path
@@ -1377,6 +1391,94 @@ shell_dispatch:
     # 加载内置 wasm_test_add_module (返回42)
     mov     esi, offset wasm_test_add_module
     mov     ecx, 27              # wasm_test_add_module size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+
+    # 打印解析结果
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 执行函数 0 (main)
+    xor     eax, eax
+    call    wasm_exec_func
+
+    # 打印结果
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_calc_builtin:
+    # 使用内置 calc 模块（计算 2+3=5，使用 putchar 打印）
+    mov     esi, offset msg_wasmrun_calc
+    call    uart_puts
+
+    # 加载 calc_wasm_module
+    mov     esi, offset calc_wasm_module
+    mov     ecx, offset calc_wasm_module_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+
+    # 打印解析结果
+    call    wasm_print_info
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 执行函数 0 (main)
+    xor     eax, eax
+    call    wasm_exec_func
+
+    # 打印结果
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.wasmrun_print_builtin:
+    # 使用内置 print 模块（使用 print syscall 打印 "Hello WASM!\n"）
+    mov     esi, offset msg_wasmrun_print
+    call    uart_puts
+
+    # 加载 print_wasm_module
+    mov     esi, offset print_wasm_module
+    mov     ecx, offset print_wasm_module_size
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
@@ -6567,7 +6669,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.91"
+    .ascii  "AI-ASM Kernel v0.94"
     .byte   13, 10, 0
 
 help_text:
@@ -6714,6 +6816,14 @@ msg_wasmrun_hello:
     .asciz  "Running built-in hello.wasm (returns 42)...\r\n"
 cmd_hello_wasm:
     .asciz  "hello.wasm"
+msg_wasmrun_calc:
+    .asciz  "Running built-in calc (2+3=5, putchar '5')...\r\n"
+cmd_calc_wasm:
+    .asciz  "calc"
+msg_wasmrun_print:
+    .asciz  "Running built-in print (print syscall 'Hello WASM!')...\r\n"
+cmd_print_wasm:
+    .asciz  "print"
 msg_wasmapp_usage:
     .asciz  "Usage: wasmapp <uptime|sum|hello|fibonacci|factorial|multiply|countdown>\r\n"
 msg_wasmapp_unknown:
@@ -7309,6 +7419,132 @@ wasm_test_syscall_module:
     .byte   0x10, 0x03             # call 3 (host slot 2 = putchar, since func_count=1)
     .byte   0x0B                   # end
 wasm_test_syscall_size = . - wasm_test_syscall_module
+
+# ============================================================================
+# WASM syscall 应用测试模块 (v0.94)
+# ============================================================================
+
+# WASM 应用 calc: 计算 2+3=5，使用 putchar 打印 '5'
+# 计算: 2+3=5, 加上 '0'(48) 得到 '5'(53), 调用 putchar
+# host_putchar = slot 2, func_index = 1 + 2 = 3
+calc_wasm_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2): 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section (id=10): 2+3=5, +48='5', putchar, return 0
+    .byte   0x0A                   # section id
+    .byte   0x10                   # section size = 16
+    .byte   0x01                   # num codes
+    .byte   0x0E                   # code size = 14
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x02             # i32.const 2
+    .byte   0x41, 0x03             # i32.const 3
+    .byte   0x6A                   # i32.add (2+3=5)
+    .byte   0x41, 0x30             # i32.const 48 ('0')
+    .byte   0x6A                   # i32.add (5+48=53='5')
+    .byte   0x10, 0x03             # call 3 (putchar)
+    .byte   0x41, 0x00             # i32.const 0 (return value)
+    .byte   0x0B                   # end
+calc_wasm_module_size = . - calc_wasm_module
+
+# WASM 应用 print: 使用 print syscall 打印 "Hello WASM!\n"
+# 先存储字符串到内存，然后调用 print(ptr, len)
+# host_print = slot 0, func_index = 1 + 0 = 1
+# 字符串 "Hello WASM!\n" = 12 字符
+print_wasm_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section (id=1, size=4): () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section (id=3, size=2): 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: store string, call print, return 0
+    # 使用 i32.store8 存储每个字符到内存偏移 0-11
+    # i32.store8 格式: value, address, opcode(0x3A), align(0), offset(0)
+    # "Hello WASM!\n" = H(72) e(101) l(108) l(108) o(111) ' '(32) W(87) A(65) S(83) M(77) !(33) \n(10)
+    .byte   0x0A                   # section id
+    .byte   0x61                   # section size = 97
+    .byte   0x01                   # num codes
+    .byte   0x5F                   # code size = 95
+    .byte   0x00                   # num locals
+    # 存储 'H' (72) 到偏移 0
+    .byte   0x41, 0x48             # i32.const 72 ('H')
+    .byte   0x41, 0x00             # i32.const 0 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'e' (101) 到偏移 1
+    .byte   0x41, 0x65             # i32.const 101 ('e')
+    .byte   0x41, 0x01             # i32.const 1 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'l' (108) 到偏移 2
+    .byte   0x41, 0x6C             # i32.const 108 ('l')
+    .byte   0x41, 0x02             # i32.const 2 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'l' (108) 到偏移 3
+    .byte   0x41, 0x6C             # i32.const 108 ('l')
+    .byte   0x41, 0x03             # i32.const 3 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'o' (111) 到偏移 4
+    .byte   0x41, 0x6F             # i32.const 111 ('o')
+    .byte   0x41, 0x04             # i32.const 4 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 ' ' (32) 到偏移 5
+    .byte   0x41, 0x20             # i32.const 32 (' ')
+    .byte   0x41, 0x05             # i32.const 5 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'W' (87) 到偏移 6
+    .byte   0x41, 0x57             # i32.const 87 ('W')
+    .byte   0x41, 0x06             # i32.const 6 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'A' (65) 到偏移 7
+    .byte   0x41, 0x41             # i32.const 65 ('A')
+    .byte   0x41, 0x07             # i32.const 7 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'S' (83) 到偏移 8
+    .byte   0x41, 0x53             # i32.const 83 ('S')
+    .byte   0x41, 0x08             # i32.const 8 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 'M' (77) 到偏移 9
+    .byte   0x41, 0x4D             # i32.const 77 ('M')
+    .byte   0x41, 0x09             # i32.const 9 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 '!' (33) 到偏移 10
+    .byte   0x41, 0x21             # i32.const 33 ('!')
+    .byte   0x41, 0x0A             # i32.const 10 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 存储 '\n' (10) 到偏移 11
+    .byte   0x41, 0x0A             # i32.const 10 ('\n')
+    .byte   0x41, 0x0B             # i32.const 11 (address)
+    .byte   0x3A, 0x00, 0x00       # i32.store8
+    # 调用 print(ptr=0, len=12)
+    # WASM stack: push ptr first, then len (len is popped first)
+    .byte   0x41, 0x00             # i32.const 0 (ptr)
+    .byte   0x41, 0x0C             # i32.const 12 (len)
+    .byte   0x10, 0x01             # call 1 (print, host_id=0)
+    # return 0
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x0B                   # end
+print_wasm_module_size = . - print_wasm_module
 
 # ============================================================================
 # WASM 应用程序
