@@ -134,6 +134,11 @@ wasm_elem_count:
 wasm_table_entries:
     .space  256                 # 表条目（最多64个函数索引，每个4字节）
 
+    # Global 段信息（全局变量）
+    .globl  wasm_global_count
+wasm_global_count:
+    .space  4                   # 全局变量数量
+
     # 类型签名存储（用于 call_indirect 全签名比较）
     .globl  wasm_type_sigs
 wasm_type_sigs:
@@ -309,6 +314,8 @@ _parse_section_header:
     je      handle_table_sec
     cmp     ebx, SEC_ELEMENT
     je      handle_element_sec
+    cmp     ebx, SEC_GLOBAL
+    je      handle_global_sec
 
     # 未处理的 section，跳过
     jmp     skip_section
@@ -347,6 +354,10 @@ handle_table_sec:
 
 handle_element_sec:
     call    _parse_element_section
+    jmp     section_done_ok
+
+handle_global_sec:
+    call    _parse_global_section
     jmp     section_done_ok
 
 skip_section:
@@ -892,6 +903,75 @@ element_skip_end:
 element_section_done:
     xor     eax, eax
     pop     edi
+    pop     ecx
+    pop     ebx
+    pop     eax
+    ret
+
+# ============================================================================
+# _parse_global_section: 解析 global section
+# 输入：esi = section 内容, edx = section 大小
+# Global 格式: count, (type, mut, init_expr)*
+# type: i32=0x7F, i64=0x7E, f32=0x7D, f64=0x7C
+# mut: 0=immutable, 1=mutable
+# init_expr: i32.const value, end (or other const expr)
+# ============================================================================
+_parse_global_section:
+    push    eax
+    push    ebx
+    push    ecx
+    push    edx
+    push    edi
+
+    # 读取全局变量数量
+    call    _read_leb128_u32
+    mov     [wasm_global_count], eax
+    mov     ecx, eax              # ecx = 循环计数器
+
+    # edi = 全局变量存储指针
+    mov     edi, offset wasm_globals
+
+global_entry_loop:
+    test    ecx, ecx
+    jz      global_section_done
+
+    # 读取全局变量类型 (i32=0x7F, i64=0x7E, f32=0x7D, f64=0x7C)
+    movzx   eax, byte ptr [esi]
+    inc     esi
+
+    # 读取可变性 (0=immutable, 1=mutable)
+    movzx   ebx, byte ptr [esi]
+    inc     esi
+
+    # 解析初始化表达式
+    # 期望: i32.const value, end (opcode 0x41, leb128, 0x0B)
+    cmp     byte ptr [esi], 0x41  # i32.const
+    jne     global_init_skip
+
+    inc     esi
+    call    _read_leb128_u32      # 读取初始值
+    mov     [edi], eax            # 存储初始值到 wasm_globals
+
+    # 跳过 end (0x0B)
+    cmp     byte ptr [esi], 0x0B
+    jne     global_next
+    inc     esi
+
+global_next:
+    add     edi, 4                # 移动到下一个全局变量槽
+    dec     ecx
+    jmp     global_entry_loop
+
+global_init_skip:
+    # 跳过不支持的初始化表达式
+    add     edi, 4
+    dec     ecx
+    jmp     global_entry_loop
+
+global_section_done:
+    xor     eax, eax
+    pop     edi
+    pop     edx
     pop     ecx
     pop     ebx
     pop     eax
