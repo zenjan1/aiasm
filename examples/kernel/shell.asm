@@ -56,6 +56,12 @@ pciscan_func:
 pciscan_count:
     .space  4
 
+# FAT32 fatread 命令缓冲区
+fat32_filename_buf:
+    .space  12                  # 8.3 格式文件名 (11 bytes + null)
+fat32_file_buffer:
+    .space  512                 # 文件数据缓冲区
+
 # ============================================================================
 # shell_run: 主循环（串口终端）
 # ============================================================================
@@ -1089,6 +1095,14 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_fatls
+
+    # "fatread <filename>" - read FAT32 file
+    mov     edi, offset cmd_fatread
+    mov     esi, offset shell_cmd_buf
+    mov     ecx, 8                 # "fatread " length
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_fatread
 
     # 未知命令
     mov     esi, offset msg_unknown
@@ -6592,6 +6606,182 @@ shell_print_dec_byte:
     ret
 
 # ============================================================================
+# .do_fatread: 读取 FAT32 文件
+# ============================================================================
+.do_fatread:
+    # 获取文件名参数 (从 shell_cmd_buf + 8 开始)
+    mov     esi, offset shell_cmd_buf
+    add     esi, 8                 # 跳过 "fatread "
+
+    # 检查是否有参数
+    mov     al, [esi]
+    test    al, al
+    jz      .fatread_usage
+
+    # 保存文件名指针
+    push    esi
+
+    # 打印读取消息
+    mov     esi, offset msg_fatread_reading
+    call    uart_puts
+
+    # 恢复文件名指针并转换为 8.3 格式
+    pop     esi
+
+    # 将文件名转换为 FAT32 8.3 格式 (存在 fat32_filename_buf)
+    # esi = 输入文件名
+    call    convert_to_83_format    # 结果在 fat32_filename_buf
+
+    # 使用 fat32_get_file_info 查找文件
+    mov     esi, offset fat32_filename_buf
+    call    fat32_get_file_info
+
+    # 检查是否找到文件
+    cmp     eax, 0xFFFFFFFF
+    je      .fatread_not_found
+
+    # eax = 簇号, ecx = 文件大小
+    push    ecx                    # 保存文件大小
+
+    # 读取文件第一簇
+    mov     edi, offset fat32_file_buffer
+    call    fat32_read_cluster
+
+    # 恢复文件大小
+    pop     ecx
+
+    # 检查读取是否成功
+    cmp     eax, 0
+    jne     .fatread_read_fail
+
+    # 打印文件内容 (最多显示 min(文件大小, 512))
+    cmp     ecx, 512
+    jbe     .fatread_print
+    mov     ecx, 512
+
+.fatread_print:
+    mov     esi, offset fat32_file_buffer
+.fatread_print_loop:
+    test    ecx, ecx
+    jz      .fatread_done
+    movzx   eax, byte ptr [esi]
+    cmp     al, 0x0D              # 跳过 CR
+    je      .fatread_print_skip
+    cmp     al, 0x0A              # 保留 LF
+    je      .fatread_print_lf
+    cmp     al, 0x20
+    jb      .fatread_print_skip   # 跳过其他控制字符
+    call    uart_putc
+    jmp     .fatread_print_next
+.fatread_print_lf:
+    mov     al, 0x0D
+    call    uart_putc
+    mov     al, 0x0A
+    call    uart_putc
+    jmp     .fatread_print_next
+.fatread_print_skip:
+.fatread_print_next:
+    inc     esi
+    dec     ecx
+    jmp     .fatread_print_loop
+
+.fatread_done:
+    # 打印换行
+    mov     al, 0x0D
+    call    uart_putc
+    mov     al, 0x0A
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.fatread_usage:
+    mov     esi, offset msg_fatread_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.fatread_not_found:
+    mov     esi, offset msg_fatread_not_found
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.fatread_read_fail:
+    mov     esi, offset msg_fatread_fail
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# convert_to_83_format: 将文件名转换为 FAT32 8.3 格式
+# 输入: esi = 文件名指针 (如 "HELLO.TXT")
+# 输出: fat32_filename_buf = 11 字符 (如 "HELLO    TXT")
+# ============================================================================
+convert_to_83_format:
+    push    eax
+    push    ecx
+    push    edi
+
+    mov     edi, offset fat32_filename_buf
+
+    # 初始化为空格
+    mov     ecx, 11
+    mov     al, ' '
+    cld
+    rep     stosb
+
+    # 重置目标指针
+    mov     edi, offset fat32_filename_buf
+    mov     ecx, 0                 # 字符计数
+
+.cvt_loop:
+    movzx   eax, byte ptr [esi]
+    test    al, al
+    jz      .cvt_done              # 字符串结束
+
+    # 检查扩展名分隔符
+    cmp     al, '.'
+    je      .cvt_ext
+
+    # 转换为大写
+    cmp     al, 'a'
+    jb      .cvt_store
+    cmp     al, 'z'
+    ja      .cvt_store
+    sub     al, 32                 # 转大写
+
+.cvt_store:
+    # 存储字符
+    cmp     ecx, 8
+    jge     .cvt_next              # 文件名部分已满
+    mov     [edi + ecx], al
+
+.cvt_next:
+    inc     ecx
+    inc     esi
+    jmp     .cvt_loop
+
+.cvt_ext:
+    # 跳转到扩展名位置 (位置 8)
+    mov     ecx, 8
+    inc     esi
+    jmp     .cvt_loop
+
+.cvt_done:
+    pop     edi
+    pop     ecx
+    pop     eax
+    ret
+
+# ============================================================================
 # .do_diskread: 读取磁盘扇区
 # ============================================================================
 .do_diskread:
@@ -7070,6 +7260,9 @@ cmd_diskwrite:
 cmd_fatls:
     .asciz  "fatls"
 
+cmd_fatread:
+    .asciz  "fatread "
+
 msg_ring3_entering:
     .asciz  "Entering Ring 3 (User Mode)...\r\n"
 msg_ring3_returned:
@@ -7140,6 +7333,20 @@ msg_fatls_count:
     .byte   0
 msg_fatls_fail:
     .ascii  "FAT32 not initialized or read failed"
+    .byte   13, 10, 0
+
+# FAT32 fatread messages
+msg_fatread_reading:
+    .ascii  "Reading file..."
+    .byte   13, 10, 0
+msg_fatread_usage:
+    .ascii  "Usage: fatread <filename> (e.g. fatread HELLO.TXT)"
+    .byte   13, 10, 0
+msg_fatread_not_found:
+    .ascii  "File not found"
+    .byte   13, 10, 0
+msg_fatread_fail:
+    .ascii  "Failed to read file data"
     .byte   13, 10, 0
 
 msg_diskread_header:
@@ -7344,7 +7551,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.02"
+    .ascii  "AI-ASM Kernel v1.03"
     .byte   13, 10, 0
 
 help_text:
@@ -7417,6 +7624,8 @@ help_text:
     .ascii  "  diskwrite <lba> - Write test data to sector (hex LBA)"
     .byte   13, 10
     .ascii  "  fatls         - List FAT32 root directory files"
+    .byte   13, 10
+    .ascii  "  fatread <file> - Read FAT32 file content"
     .byte   13, 10, 0
 
 tick_prefix:

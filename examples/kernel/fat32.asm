@@ -40,6 +40,7 @@ num_fats:         .space 1          # FAT 表数量
 fat_sz32:         .space 4          # 每个 FAT 的扇区数
 root_clus:        .space 4          # 根目录簇号
 root_dir_lba:     .space 4          # 根目录 LBA 地址
+data_region_lba:  .space 4          # 数据区 LBA 地址
 
 # FAT32 缓冲区
 fat32_bpb_buffer: .space 512        # BPB 读取缓冲区
@@ -108,6 +109,10 @@ fat32_init:
     imul    ebx, dword ptr [fat_sz32]
     add     eax, ebx
     mov     [root_dir_lba], eax
+
+    # 计算 DataRegionLBA = RsvdSecCnt + (NumFATs * FATSz32)
+    # (已在 eax 中)
+    mov     [data_region_lba], eax
 
     # 标记已初始化
     mov     byte ptr [fat32_initialized], 1
@@ -319,5 +324,28 @@ fat32_get_exit:
     pop     esi
     pop     edi
     pop     edx
+    pop     ebx
+    ret
+
+# =============================================================================
+# fat32_read_cluster: 读取指定簇的数据
+# 参数: eax = 簇号, edi = 缓冲区
+# 返回: eax = 0 成功, -1 失败
+# =============================================================================
+    .globl fat32_read_cluster
+fat32_read_cluster:
+    push    ebx
+    push    ecx
+
+    # Cluster -> LBA: LBA = (Cluster - 2) * SecPerClus + DataRegionLBA
+    sub     eax, 2
+    movzx   ebx, byte ptr [sec_per_clus]
+    imul    eax, ebx
+    add     eax, [data_region_lba]
+
+    # 读取扇区
+    call    ata_read_sector
+
+    pop     ecx
     pop     ebx
     ret
