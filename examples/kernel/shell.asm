@@ -771,6 +771,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest70
 
+    # "wasmtest71" - WASM f32.max test
+    mov     edi, offset cmd_wasmtest71
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest71
+
+    # "wasmtest72" - WASM f32.trunc test
+    mov     edi, offset cmd_wasmtest72
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest72
+
+    # "wasmtest73" - WASM f32.nearest test
+    mov     edi, offset cmd_wasmtest73
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest73
+
+    # "wasmtest74" - WASM f64.max test
+    mov     edi, offset cmd_wasmtest74
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest74
+
+    # "wasmtest75" - WASM f64.trunc test
+    mov     edi, offset cmd_wasmtest75
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest75
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -3130,6 +3160,126 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest71:
+    # WASM f32.max test: max(1.0, 3.0) = 3.0
+    mov     esi, offset msg_wasm_test71
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_max_module
+    mov     ecx, offset wasm_test_f32_max_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.max = "
+    mov     esi, offset msg_f32_max_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest72:
+    # WASM f32.trunc test: trunc(2.7) = 2.0
+    mov     esi, offset msg_wasm_test72
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_trunc_module
+    mov     ecx, offset wasm_test_f32_trunc_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.trunc = "
+    mov     esi, offset msg_f32_trunc_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest73:
+    # WASM f32.nearest test: nearest(2.5) = 2.0
+    mov     esi, offset msg_wasm_test73
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_nearest_module
+    mov     ecx, offset wasm_test_f32_nearest_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.nearest = "
+    mov     esi, offset msg_f32_nearest_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest74:
+    # WASM f64.max test: max(1.0, 3.0) = 3.0
+    mov     esi, offset msg_wasm_test74
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_max_module
+    mov     ecx, offset wasm_test_f64_max_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.max = "
+    mov     esi, offset msg_f64_max_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest75:
+    # WASM f64.trunc test: trunc(2.7) = 2.0
+    mov     esi, offset msg_wasm_test75
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_trunc_module
+    mov     ecx, offset wasm_test_f64_trunc_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.trunc = "
+    mov     esi, offset msg_f64_trunc_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -5310,6 +5460,16 @@ cmd_wasmtest69:
     .asciz  "wasmtest69"
 cmd_wasmtest70:
     .asciz  "wasmtest70"
+cmd_wasmtest71:
+    .asciz  "wasmtest71"
+cmd_wasmtest72:
+    .asciz  "wasmtest72"
+cmd_wasmtest73:
+    .asciz  "wasmtest73"
+cmd_wasmtest74:
+    .asciz  "wasmtest74"
+cmd_wasmtest75:
+    .asciz  "wasmtest75"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -5979,6 +6139,26 @@ msg_wasm_test70:
     .asciz  "Running WASM test70 (f64.min)...\r\n"
 msg_f64_min_result:
     .asciz  "f64.min = "
+msg_wasm_test71:
+    .asciz  "Running WASM test71 (f32.max)...\r\n"
+msg_f32_max_result:
+    .asciz  "f32.max = "
+msg_wasm_test72:
+    .asciz  "Running WASM test72 (f32.trunc)...\r\n"
+msg_f32_trunc_result:
+    .asciz  "f32.trunc = "
+msg_wasm_test73:
+    .asciz  "Running WASM test73 (f32.nearest)...\r\n"
+msg_f32_nearest_result:
+    .asciz  "f32.nearest = "
+msg_wasm_test74:
+    .asciz  "Running WASM test74 (f64.max)...\r\n"
+msg_f64_max_result:
+    .asciz  "f64.max = "
+msg_wasm_test75:
+    .asciz  "Running WASM test75 (f64.trunc)...\r\n"
+msg_f64_trunc_result:
+    .asciz  "f64.trunc = "
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -8557,3 +8737,212 @@ wasm_test_f64_min_module:
     .byte   0xA4                   # f64.min
     .byte   0x0B                   # end
 wasm_test_f64_min_size = . - wasm_test_f64_min_module
+
+# =====================================================
+# wasmtest71: f32.max test - max(1.0, 3.0) = 3.0
+# =====================================================
+# f32.const 1.0: IEEE 754 = 0x3F800000 (little endian: 0x00, 0x00, 0x80, 0x3F)
+# f32.const 3.0: IEEE 754 = 0x40400000 (little endian: 0x00, 0x00, 0x40, 0x40)
+# f32.max opcode: 0x97
+# body: locals(1) + f32.const(5) + f32.const(5) + f32.max(1) + end(1) = 13
+wasm_test_f32_max_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 1.0, f32.const 3.0, f32.max, end
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x80, 0x3F  # f32.const 1.0
+    .byte   0x43, 0x00, 0x00, 0x40, 0x40  # f32.const 3.0
+    .byte   0x97                   # f32.max
+    .byte   0x0B                   # end
+wasm_test_f32_max_size = . - wasm_test_f32_max_module
+
+# =====================================================
+# wasmtest72: f32.trunc test - trunc(2.7) = 2.0
+# =====================================================
+# f32.const 2.7: IEEE 754 = 0x402CCCCD (little endian: 0xCD, 0xCC, 0x2C, 0x40)
+# f32.trunc opcode: 0x8F
+# body: locals(1) + f32.const(5) + f32.trunc(1) + end(1) = 8
+wasm_test_f32_trunc_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.7, f32.trunc, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0xCD, 0xCC, 0x2C, 0x40  # f32.const 2.7
+    .byte   0x8F                   # f32.trunc
+    .byte   0x0B                   # end
+wasm_test_f32_trunc_size = . - wasm_test_f32_trunc_module
+
+# =====================================================
+# wasmtest73: f32.nearest test - nearest(2.5) = 2.0
+# =====================================================
+# f32.const 2.5: IEEE 754 = 0x40200000 (little endian: 0x00, 0x00, 0x20, 0x40)
+# f32.nearest opcode: 0x90
+# body: locals(1) + f32.const(5) + f32.nearest(1) + end(1) = 8
+wasm_test_f32_nearest_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.5, f32.nearest, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x20, 0x40  # f32.const 2.5
+    .byte   0x90                   # f32.nearest
+    .byte   0x0B                   # end
+wasm_test_f32_nearest_size = . - wasm_test_f32_nearest_module
+
+# =====================================================
+# wasmtest74: f64.max test - max(1.0, 3.0) = 3.0
+# =====================================================
+# f64.const 1.0: IEEE 754 = 0x3FF0000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F)
+# f64.const 3.0: IEEE 754 = 0x4008000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40)
+# f64.max opcode: 0xA5
+# body: locals(1) + f64.const(9) + f64.const(9) + f64.max(1) + end(1) = 21
+wasm_test_f64_max_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 1.0, f64.const 3.0, f64.max, end
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F  # f64.const 1.0
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40  # f64.const 3.0
+    .byte   0xA5                   # f64.max
+    .byte   0x0B                   # end
+wasm_test_f64_max_size = . - wasm_test_f64_max_module
+
+# =====================================================
+# wasmtest75: f64.trunc test - trunc(2.7) = 2.0
+# =====================================================
+# f64.const 2.7: IEEE 754 = 0x400599999999999A (little endian: 9A 99 99 99 99 99 05 40)
+# f64.trunc opcode: 0x9D
+# body: locals(1) + f64.const(9) + f64.trunc(1) + end(1) = 12
+wasm_test_f64_trunc_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 2.7, f64.trunc, end
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0x05, 0x40  # f64.const 2.7
+    .byte   0x9D                   # f64.trunc
+    .byte   0x0B                   # end
+wasm_test_f64_trunc_size = . - wasm_test_f64_trunc_module

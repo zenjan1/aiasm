@@ -4382,10 +4382,12 @@ do_f64_floor:
 
 # f64.trunc: 64位向零舍入
 do_f64_trunc:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
+    call    _stack_pop           # low
+    mov     edx, eax             # save low
+    call    _stack_pop           # high
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
     sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]
     mov     ax, [esp]
@@ -4393,38 +4395,46 @@ do_f64_trunc:
     or      ax, 0x0C00           # trunc 模式
     mov     [esp + 2], ax        # 新 FCW
     fldcw   word ptr [esp + 2]
-    fld     qword ptr [esp + 4]
+    fld     qword ptr [esp + 4]  # 加载 64 位操作数 (low at esp+4, high at esp+8)
     frndint
     fstp    qword ptr [esp + 4]
     fldcw   word ptr [esp]
     add     esp, 4
-    pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # f64.nearest: 64位舍入到最近
 do_f64_nearest:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
+    call    _stack_pop           # low
+    mov     edx, eax             # save low
+    call    _stack_pop           # high
+    # Build x86 stack: [esp] = low, [esp+4] = high (correct for FPU)
+    push    eax                  # push high first (will be at [esp+4])
+    push    edx                  # push low second (will be at [esp])
     sub     esp, 4               # FCW 空间 (原FCW + 新FCW)
     fstcw   word ptr [esp]
     mov     ax, [esp]
     and     ax, 0xF3FF           # nearest (00)
     mov     [esp + 2], ax        # 新 FCW
     fldcw   word ptr [esp + 2]
-    fld     qword ptr [esp + 4]
+    fld     qword ptr [esp + 4]  # 加载 64 位操作数 (low at esp+4, high at esp+8)
     frndint
     fstp    qword ptr [esp + 4]
     fldcw   word ptr [esp]
     add     esp, 4
-    pop     eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # save result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high (WASM stack: high below)
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low (WASM stack: low on top)
     jmp     dispatch_done
 
 # ============================================================================
