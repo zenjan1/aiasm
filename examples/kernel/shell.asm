@@ -1,7 +1,7 @@
     .intel_syntax noprefix
 # -----------------------------------------------------------------------------
 # shell.asm - 命令行交互界面（串口终端）
-# v1.33 - 320 WASM tests milestone
+# v1.34 - 330 WASM tests milestone
 # -----------------------------------------------------------------------------
     .code32
 
@@ -2287,6 +2287,66 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_wasmtest320
+
+    # "wasmtest321" - i64.load32_s test
+    mov     edi, offset cmd_wasmtest321
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest321
+
+    # "wasmtest322" - i64.load32_u test
+    mov     edi, offset cmd_wasmtest322
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest322
+
+    # "wasmtest323" - i32.store8 test
+    mov     edi, offset cmd_wasmtest323
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest323
+
+    # "wasmtest324" - i32.store16 test
+    mov     edi, offset cmd_wasmtest324
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest324
+
+    # "wasmtest325" - i64.store8 test
+    mov     edi, offset cmd_wasmtest325
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest325
+
+    # "wasmtest326" - i64.store16 test
+    mov     edi, offset cmd_wasmtest326
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest326
+
+    # "wasmtest327" - i64.store32 test
+    mov     edi, offset cmd_wasmtest327
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest327
+
+    # "wasmtest328" - memory boundary test
+    mov     edi, offset cmd_wasmtest328
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest328
+
+    # "wasmtest329" - memory alignment test
+    mov     edi, offset cmd_wasmtest329
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest329
+
+    # "wasmtest330" - 330 tests milestone (returns 330)
+    mov     edi, offset cmd_wasmtest330
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest330
 
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
@@ -14132,6 +14192,397 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest321: i64.load32_s test - load 32-bit as signed i64
+# ============================================================================
+# Test: i32.const 0x80000001, i32.store, i32.const 0, i64.load32_s -> -2147483647
+.do_wasmtest321:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test321
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_load32_s_module
+    mov     ecx, offset wasm_test_i64_load32_s_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest322: i64.load32_u test - load 32-bit as unsigned i64
+# ============================================================================
+# Test: i32.const 0x80000001, i32.store, i32.const 0, i64.load32_u -> 2147483649
+.do_wasmtest322:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test322
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_load32_u_module
+    mov     ecx, offset wasm_test_i64_load32_u_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest323: i32.store8 test - store low 8 bits
+# ============================================================================
+# Test: i32.const 0x12345678, i32.const 0, i32.store8, i32.const 0, i32.load8_u -> 0x78
+.do_wasmtest323:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test323
+    call    uart_puts
+    mov     esi, offset wasm_test_i32_store8_module
+    mov     ecx, offset wasm_test_i32_store8_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest324: i32.store16 test - store low 16 bits
+# ============================================================================
+# Test: i32.const 0x12345678, i32.const 0, i32.store16, i32.const 0, i32.load16_u -> 0x5678
+.do_wasmtest324:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test324
+    call    uart_puts
+    mov     esi, offset wasm_test_i32_store16_module
+    mov     ecx, offset wasm_test_i32_store16_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest325: i64.store8 test - store low 8 bits from i64
+# ============================================================================
+# Test: i64.const 0x123456789ABCDEF0, i32.const 0, i64.store8, i32.const 0, i32.load8_u -> 0xF0
+.do_wasmtest325:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test325
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_store8_module
+    mov     ecx, offset wasm_test_i64_store8_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest326: i64.store16 test - store low 16 bits from i64
+# ============================================================================
+# Test: i64.const 0x123456789ABCDEF0, i32.const 0, i64.store16, i32.const 0, i32.load16_u -> 0xDEF0
+.do_wasmtest326:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test326
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_store16_module
+    mov     ecx, offset wasm_test_i64_store16_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest327: i64.store32 test - store low 32 bits from i64
+# ============================================================================
+# Test: i64.const 0x123456789ABCDEF0, i32.const 0, i64.store32, i32.const 0, i32.load -> 0x9ABCDEF0
+.do_wasmtest327:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test327
+    call    uart_puts
+    mov     esi, offset wasm_test_i64_store32_module
+    mov     ecx, offset wasm_test_i64_store32_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest328: memory boundary test
+# ============================================================================
+# Test: store and load at boundary address
+.do_wasmtest328:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test328
+    call    uart_puts
+    mov     esi, offset wasm_test_boundary_module
+    mov     ecx, offset wasm_test_boundary_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest329: memory alignment test
+# ============================================================================
+# Test: aligned vs unaligned memory access
+.do_wasmtest329:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test329
+    call    uart_puts
+    mov     esi, offset wasm_test_alignment_module
+    mov     ecx, offset wasm_test_alignment_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest330: 330 tests milestone (returns 330)
+# ============================================================================
+.do_wasmtest330:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test330
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone330_module
+    mov     ecx, offset wasm_test_milestone330_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone330
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -17548,6 +17999,26 @@ cmd_wasmtest319:
     .asciz  "wasmtest319"
 cmd_wasmtest320:
     .asciz  "wasmtest320"
+cmd_wasmtest321:
+    .asciz  "wasmtest321"
+cmd_wasmtest322:
+    .asciz  "wasmtest322"
+cmd_wasmtest323:
+    .asciz  "wasmtest323"
+cmd_wasmtest324:
+    .asciz  "wasmtest324"
+cmd_wasmtest325:
+    .asciz  "wasmtest325"
+cmd_wasmtest326:
+    .asciz  "wasmtest326"
+cmd_wasmtest327:
+    .asciz  "wasmtest327"
+cmd_wasmtest328:
+    .asciz  "wasmtest328"
+cmd_wasmtest329:
+    .asciz  "wasmtest329"
+cmd_wasmtest330:
+    .asciz  "wasmtest330"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -18795,6 +19266,39 @@ msg_wasm_test320:
 
 msg_wasm_milestone320:
     .asciz  "[320 WASM tests completed! v1.33 MILESTONE!]\r\n"
+
+msg_wasm_test321:
+    .asciz  "[WASMTEST321] i64.load32_s test\r\n"
+
+msg_wasm_test322:
+    .asciz  "[WASMTEST322] i64.load32_u test\r\n"
+
+msg_wasm_test323:
+    .asciz  "[WASMTEST323] i32.store8 test\r\n"
+
+msg_wasm_test324:
+    .asciz  "[WASMTEST324] i32.store16 test\r\n"
+
+msg_wasm_test325:
+    .asciz  "[WASMTEST325] i64.store8 test\r\n"
+
+msg_wasm_test326:
+    .asciz  "[WASMTEST326] i64.store16 test\r\n"
+
+msg_wasm_test327:
+    .asciz  "[WASMTEST327] i64.store32 test\r\n"
+
+msg_wasm_test328:
+    .asciz  "[WASMTEST328] memory boundary test\r\n"
+
+msg_wasm_test329:
+    .asciz  "[WASMTEST329] memory alignment test\r\n"
+
+msg_wasm_test330:
+    .asciz  "[WASMTEST330] 330 tests milestone\r\n"
+
+msg_wasm_milestone330:
+    .asciz  "[330 WASM tests completed! v1.34 MILESTONE!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -32766,3 +33270,445 @@ wasm_test_milestone320_module:
     .byte   0x41, 0xA0, 0x02       # i32.const 320 (LEB128: 0xA0, 0x02)
     .byte   0x0B                   # end
 wasm_test_milestone320_size = . - wasm_test_milestone320_module
+
+# =====================================================
+# wasmtest321: i64.load32_s test - load 32-bit as signed i64
+# =====================================================
+# Test: i32.const 0x80000001, i32.const 0, i32.store, i32.const 0, i64.load32_s
+# Expected: -2147483647 (0x80000001 sign-extended to i64)
+# Type: () -> i64
+wasm_test_i64_load32_s_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0x80000001, i32.const 0, i32.store, i32.const 0, i64.load32_s
+    # 0x80000001 LEB128 = 0x81, 0x80, 0x80, 0x80, 0x01
+    .byte   0x0A                   # section id
+    .byte   0x12                   # section size = 18
+    .byte   0x01                   # num codes
+    .byte   0x10                   # body size = 16
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x81, 0x80, 0x80, 0x80, 0x01  # i32.const -2147483647 (LEB128)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x36, 0x02, 0x00       # i32.store (align=2, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x34, 0x02, 0x00       # i64.load32_s (align=2, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i64_load32_s_size = . - wasm_test_i64_load32_s_module
+
+# =====================================================
+# wasmtest322: i64.load32_u test - load 32-bit as unsigned i64
+# =====================================================
+# Test: i32.const 0x80000001, i32.const 0, i32.store, i32.const 0, i64.load32_u
+# Expected: 2147483649 (0x80000001 zero-extended to i64)
+# Type: () -> i64
+wasm_test_i64_load32_u_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0x80000001, i32.const 0, i32.store, i32.const 0, i64.load32_u
+    .byte   0x0A                   # section id
+    .byte   0x12                   # section size = 18
+    .byte   0x01                   # num codes
+    .byte   0x10                   # body size = 16
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x81, 0x80, 0x80, 0x80, 0x01  # i32.const 2147483649 (LEB128)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x36, 0x02, 0x00       # i32.store (align=2, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x35, 0x02, 0x00       # i64.load32_u (align=2, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i64_load32_u_size = . - wasm_test_i64_load32_u_module
+
+# =====================================================
+# wasmtest323: i32.store8 test - store low 8 bits
+# =====================================================
+# Test: i32.const 0x78, i32.const 0, i32.store8, i32.const 0, i32.load8_u
+# Expected: 120 (0x78)
+# Type: () -> i32
+wasm_test_i32_store8_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0x78, i32.const 0, i32.store8, i32.const 0, i32.load8_u
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x78             # i32.const 120 (0x78)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3A, 0x00, 0x00       # i32.store8 (align=0, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x2D, 0x00, 0x00       # i32.load8_u (align=0, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i32_store8_size = . - wasm_test_i32_store8_module
+
+# =====================================================
+# wasmtest324: i32.store16 test - store low 16 bits
+# =====================================================
+# Test: i32.const 0x5678, i32.const 0, i32.store16, i32.const 0, i32.load16_u
+# Expected: 22136 (0x5678)
+# Type: () -> i32
+wasm_test_i32_store16_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0x5678, i32.const 0, i32.store16, i32.const 0, i32.load16_u
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xB8, 0xAC, 0x01 # i32.const 22136 (LEB128: 0xB8, 0xAC, 0x01)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3B, 0x01, 0x00       # i32.store16 (align=1, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x2F, 0x01, 0x00       # i32.load16_u (align=1, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i32_store16_size = . - wasm_test_i32_store16_module
+
+# =====================================================
+# wasmtest325: i64.store8 test - store low 8 bits from i64
+# =====================================================
+# Test: i64.const 0xF0, i32.const 0, i64.store8, i32.const 0, i32.load8_u
+# Expected: 240 (0xF0)
+# Type: () -> i32
+wasm_test_i64_store8_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i64.const 0xF0, i32.const 0, i64.store8, i32.const 0, i32.load8_u
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xF0, 0x01       # i64.const 240 (LEB128: 0xF0, 0x01)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3C, 0x00, 0x00       # i64.store8 (align=0, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x2D, 0x00, 0x00       # i32.load8_u (align=0, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i64_store8_size = . - wasm_test_i64_store8_module
+
+# =====================================================
+# wasmtest326: i64.store16 test - store low 16 bits from i64
+# =====================================================
+# Test: i64.const 0xDEF0, i32.const 0, i64.store16, i32.const 0, i32.load16_u
+# Expected: 57072 (0xDEF0)
+# Type: () -> i32
+wasm_test_i64_store16_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i64.const 0xDEF0, i32.const 0, i64.store16, i32.const 0, i32.load16_u
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xF0, 0xDD, 0x03 # i64.const 57072 (LEB128: 0xF0, 0xDD, 0x03)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3D, 0x01, 0x00       # i64.store16 (align=1, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x2F, 0x01, 0x00       # i32.load16_u (align=1, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i64_store16_size = . - wasm_test_i64_store16_module
+
+# =====================================================
+# wasmtest327: i64.store32 test - store low 32 bits from i64
+# =====================================================
+# Test: i64.const 0x9ABCDEF0, i32.const 0, i64.store32, i32.const 0, i32.load
+# Expected: -1690905600 (0x9ABCDEF0 as signed i32) = 2596060960 as unsigned
+# Type: () -> i32
+wasm_test_i64_store32_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i64.const 0x9ABCDEF0, i32.const 0, i64.store32, i32.const 0, i32.load
+    .byte   0x0A                   # section id
+    .byte   0x10                   # section size = 16
+    .byte   0x01                   # num codes
+    .byte   0x0E                   # body size = 14
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xF0, 0xDD, 0xBC, 0xB5, 0x09  # i64.const 2596060960 (LEB128)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x3E, 0x02, 0x00       # i64.store32 (align=2, offset=0)
+    .byte   0x41, 0x00             # i32.const 0 (addr)
+    .byte   0x28, 0x02, 0x00       # i32.load (align=2, offset=0)
+    .byte   0x0B                   # end
+wasm_test_i64_store32_size = . - wasm_test_i64_store32_module
+
+# =====================================================
+# wasmtest328: memory boundary test
+# =====================================================
+# Test: store at near-boundary address, verify proper operation
+# Expected: 42 (stored value)
+# Type: () -> i32
+wasm_test_boundary_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # memory section: 1 page (65536 bytes)
+    .byte   0x02                   # section id (memory)
+    .byte   0x03                   # section size = 3
+    .byte   0x01                   # num memories
+    .byte   0x00                   # limits flags (no max)
+    .byte   0x01                   # initial pages = 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: store at address 4, load back
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x2A             # i32.const 42
+    .byte   0x41, 0x04             # i32.const 4 (addr)
+    .byte   0x36, 0x02, 0x00       # i32.store (align=2, offset=0)
+    .byte   0x41, 0x04             # i32.const 4 (addr)
+    .byte   0x28, 0x02, 0x00       # i32.load (align=2, offset=0)
+    .byte   0x0B                   # end
+wasm_test_boundary_size = . - wasm_test_boundary_module
+
+# =====================================================
+# wasmtest329: memory alignment test
+# =====================================================
+# Test: aligned 4-byte store/load at address 8
+# Expected: 0x12345678 = 305419896
+# Type: () -> i32
+wasm_test_alignment_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: aligned store/load at address 8
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF8, 0xAC, 0x91, 0x09 # i32.const 305419896 (LEB128)
+    .byte   0x41, 0x08             # i32.const 8 (addr, aligned)
+    .byte   0x36, 0x02, 0x00       # i32.store (align=2, offset=0)
+    .byte   0x41, 0x08             # i32.const 8 (addr)
+    .byte   0x28, 0x02, 0x00       # i32.load (align=2, offset=0)
+    .byte   0x0B                   # end
+wasm_test_alignment_size = . - wasm_test_alignment_module
+
+# =====================================================
+# wasmtest330: 330 tests milestone - returns 330
+# =====================================================
+# v1.34 milestone: 330 WASM tests completed!
+# Type: () -> i32
+wasm_test_milestone330_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 330 (LEB128: 0x8A, 0x02)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x8A, 0x02       # i32.const 330 (LEB128: 0x8A, 0x02)
+    .byte   0x0B                   # end
+wasm_test_milestone330_size = . - wasm_test_milestone330_module
