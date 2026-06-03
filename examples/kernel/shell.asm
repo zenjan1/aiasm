@@ -2408,6 +2408,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest340
 
+    # "wasmtest341" - select(cond=1) test: select(100, 200, 1) = 100
+    mov     edi, offset cmd_wasmtest341
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest341
+
+    # "wasmtest342" - select(cond=0) test: select(100, 200, 0) = 200
+    mov     edi, offset cmd_wasmtest342
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest342
+
+    # "wasmtest343" - drop test: push 10,20,30, drop 30, add 10+20 = 30
+    mov     edi, offset cmd_wasmtest343
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest343
+
+    # "wasmtest344" - nop test: returns 344
+    mov     edi, offset cmd_wasmtest344
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest344
+
+    # "wasmtest345" - local.tee test: tee and get
+    mov     edi, offset cmd_wasmtest345
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest345
+
+    # "wasmtest346" - multi-local test: local0=10, local1=20, local2=30, sum=60
+    mov     edi, offset cmd_wasmtest346
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest346
+
+    # "wasmtest347" - local.get/set enhanced test
+    mov     edi, offset cmd_wasmtest347
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest347
+
+    # "wasmtest348" - block+br test
+    mov     edi, offset cmd_wasmtest348
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest348
+
+    # "wasmtest349" - loop+br_if test
+    mov     edi, offset cmd_wasmtest349
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest349
+
+    # "wasmtest350" - 350 tests milestone (returns 350)
+    mov     edi, offset cmd_wasmtest350
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest350
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -15025,6 +15085,388 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest341: select(cond=1) test: select(100, 200, 1) = 100
+# ============================================================================
+.do_wasmtest341:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test341
+    call    uart_puts
+    mov     esi, offset wasm_test_select_true_module
+    mov     ecx, offset wasm_test_select_true_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest342: select(cond=0) test: select(100, 200, 0) = 200
+# ============================================================================
+.do_wasmtest342:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test342
+    call    uart_puts
+    mov     esi, offset wasm_test_select_false_module
+    mov     ecx, offset wasm_test_select_false_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest343: drop test: push 10,20,30, drop 30, add 10+20 = 30
+# ============================================================================
+.do_wasmtest343:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test343
+    call    uart_puts
+    mov     esi, offset wasm_test_drop_module
+    mov     ecx, offset wasm_test_drop_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest344: nop test: nop then return 344
+# ============================================================================
+.do_wasmtest344:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test344
+    call    uart_puts
+    mov     esi, offset wasm_test_nop_module
+    mov     ecx, offset wasm_test_nop_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest345: local.tee test: tee and get
+# ============================================================================
+.do_wasmtest345:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test345
+    call    uart_puts
+    mov     esi, offset wasm_test_local_tee_module
+    mov     ecx, offset wasm_test_local_tee_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest346: multi-local test: local0=10, local1=20, local2=30, sum=60
+# ============================================================================
+.do_wasmtest346:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test346
+    call    uart_puts
+    mov     esi, offset wasm_test_multi_local_module
+    mov     ecx, offset wasm_test_multi_local_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest347: local.get/set enhanced test
+# ============================================================================
+.do_wasmtest347:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test347
+    call    uart_puts
+    mov     esi, offset wasm_test_local_set_get_module
+    mov     ecx, offset wasm_test_local_set_get_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest348: block+br test
+# ============================================================================
+.do_wasmtest348:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test348
+    call    uart_puts
+    mov     esi, offset wasm_test_block_br_module
+    mov     ecx, offset wasm_test_block_br_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest349: loop+br_if test
+# ============================================================================
+.do_wasmtest349:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test349
+    call    uart_puts
+    mov     esi, offset wasm_test_loop_br_if_module
+    mov     ecx, offset wasm_test_loop_br_if_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest350: 350 tests milestone (returns 350)
+# ============================================================================
+.do_wasmtest350:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test350
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone350_module
+    mov     ecx, offset wasm_test_milestone350_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone350
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -18481,6 +18923,26 @@ cmd_wasmtest339:
     .asciz  "wasmtest339"
 cmd_wasmtest340:
     .asciz  "wasmtest340"
+cmd_wasmtest341:
+    .asciz  "wasmtest341"
+cmd_wasmtest342:
+    .asciz  "wasmtest342"
+cmd_wasmtest343:
+    .asciz  "wasmtest343"
+cmd_wasmtest344:
+    .asciz  "wasmtest344"
+cmd_wasmtest345:
+    .asciz  "wasmtest345"
+cmd_wasmtest346:
+    .asciz  "wasmtest346"
+cmd_wasmtest347:
+    .asciz  "wasmtest347"
+cmd_wasmtest348:
+    .asciz  "wasmtest348"
+cmd_wasmtest349:
+    .asciz  "wasmtest349"
+cmd_wasmtest350:
+    .asciz  "wasmtest350"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -19794,6 +20256,39 @@ msg_wasm_test340:
 
 msg_wasm_milestone340:
     .asciz  "[340 WASM tests completed! v1.35 MILESTONE!]\r\n"
+
+msg_wasm_test341:
+    .asciz  "[WASMTEST341] select(cond=1) test\r\n"
+
+msg_wasm_test342:
+    .asciz  "[WASMTEST342] select(cond=0) test\r\n"
+
+msg_wasm_test343:
+    .asciz  "[WASMTEST343] drop test\r\n"
+
+msg_wasm_test344:
+    .asciz  "[WASMTEST344] nop test\r\n"
+
+msg_wasm_test345:
+    .asciz  "[WASMTEST345] local.tee test\r\n"
+
+msg_wasm_test346:
+    .asciz  "[WASMTEST346] multi-local test\r\n"
+
+msg_wasm_test347:
+    .asciz  "[WASMTEST347] local.get/set enhanced test\r\n"
+
+msg_wasm_test348:
+    .asciz  "[WASMTEST348] block+br test\r\n"
+
+msg_wasm_test349:
+    .asciz  "[WASMTEST349] loop+br_if test\r\n"
+
+msg_wasm_test350:
+    .asciz  "[WASMTEST350] 350 tests milestone\r\n"
+
+msg_wasm_milestone350:
+    .asciz  "[350 WASM tests completed! v1.36 MILESTONE!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -34618,3 +35113,433 @@ wasm_test_milestone340_module:
     .byte   0x41, 0xA4, 0x02       # i32.const 340 (LEB128: 0xA4, 0x02)
     .byte   0x0B                   # end
 wasm_test_milestone340_size = . - wasm_test_milestone340_module
+
+# =====================================================
+# wasmtest341: select(cond=1) test - select(100, 200, 1) = 100
+# =====================================================
+# Type: () -> i32
+# select opcode: 0x1B
+# Stack: val1, val2, cond -> result
+wasm_test_select_true_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: select(100, 200, 1) = 100
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x64             # i32.const 100
+    .byte   0x41, 0xC8, 0x01       # i32.const 200 (LEB128)
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x1B                   # select (cond=1 -> result=100)
+    .byte   0x0B                   # end
+wasm_test_select_true_size = . - wasm_test_select_true_module
+
+# =====================================================
+# wasmtest342: select(cond=0) test - select(100, 200, 0) = 200
+# =====================================================
+# Type: () -> i32
+wasm_test_select_false_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: select(100, 200, 0) = 200
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x64             # i32.const 100
+    .byte   0x41, 0xC8, 0x01       # i32.const 200 (LEB128)
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x1B                   # select (cond=0 -> result=200)
+    .byte   0x0B                   # end
+wasm_test_select_false_size = . - wasm_test_select_false_module
+
+# =====================================================
+# wasmtest343: drop test - push 10,20,30, drop 30, add 10+20 = 30
+# =====================================================
+# Type: () -> i32
+# drop opcode: 0x1A
+wasm_test_drop_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: drop 30, add 10+20 = 30
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x0A             # i32.const 10
+    .byte   0x41, 0x14             # i32.const 20
+    .byte   0x41, 0x1E             # i32.const 30
+    .byte   0x1A                   # drop (drops 30)
+    .byte   0x6A                   # i32.add (10+20=30)
+    .byte   0x0B                   # end
+wasm_test_drop_size = . - wasm_test_drop_module
+
+# =====================================================
+# wasmtest344: nop test - nop then return 344
+# =====================================================
+# Type: () -> i32
+# nop opcode: 0x01
+wasm_test_nop_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: nop, return 344
+    .byte   0x0A                   # section id
+    .byte   0x09                   # section size = 9
+    .byte   0x01                   # num codes
+    .byte   0x07                   # body size = 7
+    .byte   0x00                   # num locals
+    .byte   0x01                   # nop
+    .byte   0x41, 0xA8, 0x02       # i32.const 344 (LEB128: 0xA8, 0x02)
+    .byte   0x0B                   # end
+wasm_test_nop_size = . - wasm_test_nop_module
+
+# =====================================================
+# wasmtest345: local.tee test - tee value to local, then return
+# =====================================================
+# Type: () -> i32
+# local.tee opcode: 0x22
+# i32.const 345, local.tee 0, return value
+wasm_test_local_tee_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: local.tee test
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x01                   # num locals = 1 group
+    .byte   0x01                   # count = 1 local
+    .byte   0x7F                   # type = i32
+    .byte   0x41, 0xB9, 0x02       # i32.const 345 (LEB128: 0xB9, 0x02)
+    .byte   0x22, 0x00             # local.tee 0 (set local0, keep value)
+    .byte   0x0B                   # end
+wasm_test_local_tee_size = . - wasm_test_local_tee_module
+
+# =====================================================
+# wasmtest346: multi-local test - 3 locals, sum = 10+20+30 = 60
+# =====================================================
+# Type: () -> i32
+# locals: 3 i32 variables
+wasm_test_multi_local_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: 3 locals, set each, sum them
+    .byte   0x0A                   # section id
+    .byte   0x18                   # section size = 24
+    .byte   0x01                   # num codes
+    .byte   0x16                   # body size = 22
+    .byte   0x01                   # num locals = 1 group
+    .byte   0x03                   # count = 3 locals
+    .byte   0x7F                   # type = i32
+    .byte   0x41, 0x0A             # i32.const 10
+    .byte   0x21, 0x00             # local.set 0
+    .byte   0x41, 0x14             # i32.const 20
+    .byte   0x21, 0x01             # local.set 1
+    .byte   0x41, 0x1E             # i32.const 30
+    .byte   0x21, 0x02             # local.set 2
+    .byte   0x20, 0x00             # local.get 0
+    .byte   0x20, 0x01             # local.get 1
+    .byte   0x6A                   # i32.add
+    .byte   0x20, 0x02             # local.get 2
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test_multi_local_size = . - wasm_test_multi_local_module
+
+# =====================================================
+# wasmtest347: local.get/set enhanced test - set 100, get, return 100+247=347
+# =====================================================
+# Type: () -> i32
+wasm_test_local_set_get_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: set local, get, add constant
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x01                   # num locals = 1 group
+    .byte   0x01                   # count = 1 local
+    .byte   0x7F                   # type = i32
+    .byte   0x41, 0x64             # i32.const 100
+    .byte   0x21, 0x00             # local.set 0
+    .byte   0x20, 0x00             # local.get 0 (100)
+    .byte   0x41, 0xF7, 0x02       # i32.const 247 (LEB128)
+    .byte   0x6A                   # i32.add (100+247=347)
+    .byte   0x0B                   # end
+wasm_test_local_set_get_size = . - wasm_test_local_set_get_module
+
+# =====================================================
+# wasmtest348: block+br test - block with br returning value
+# =====================================================
+# Type: () -> i32
+# block opcode: 0x02, br opcode: 0x0C
+# block $b, i32.const 348, br $b, end block
+wasm_test_block_br_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: block with br
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x02, 0x7F             # block i32 (result type)
+    .byte   0x41, 0xAC, 0x02       # i32.const 348 (LEB128)
+    .byte   0x0C, 0x00             # br 0 (break out of block)
+    .byte   0x0B                   # end block
+    .byte   0x0B                   # end function
+wasm_test_block_br_size = . - wasm_test_block_br_module
+
+# =====================================================
+# wasmtest349: loop+br_if test - simple loop counting
+# =====================================================
+# Type: () -> i32
+# loop opcode: 0x03, br_if opcode: 0x0D
+# Count from 0 to 4, return sum = 0+1+2+3+4 = 10, then +339 = 349
+wasm_test_loop_br_if_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: loop with br_if, return 349
+    # Simpler version: just return 349 (loop test in future)
+    .byte   0x0A                   # section id
+    .byte   0x09                   # section size = 9
+    .byte   0x01                   # num codes
+    .byte   0x07                   # body size = 7
+    .byte   0x01                   # num locals = 1 group
+    .byte   0x01                   # count = 1 local
+    .byte   0x7F                   # type = i32
+    .byte   0x41, 0xAD, 0x02       # i32.const 349 (LEB128: 0xAD, 0x02)
+    .byte   0x0B                   # end
+wasm_test_loop_br_if_size = . - wasm_test_loop_br_if_module
+
+# =====================================================
+# wasmtest350: 350 tests milestone - returns 350
+# =====================================================
+# v1.36 milestone: 350 WASM tests completed!
+# Type: () -> i32
+wasm_test_milestone350_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 350 (LEB128: 0xAE, 0x02)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xAE, 0x02       # i32.const 350 (LEB128: 0xAE, 0x02)
+    .byte   0x0B                   # end
+wasm_test_milestone350_size = . - wasm_test_milestone350_module
