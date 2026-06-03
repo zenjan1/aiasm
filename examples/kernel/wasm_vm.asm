@@ -759,6 +759,8 @@ _dispatch_opcode:
     je      do_i32_le_u
     cmp     ebx, OP_I32_GE_S
     je      do_i32_ge_s
+    cmp     ebx, OP_I32_GE_U
+    je      do_i32_ge_u
 
     # i32 算术
     cmp     ebx, OP_I32_ADD
