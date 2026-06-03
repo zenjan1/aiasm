@@ -943,6 +943,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest96
 
+    # "wasmtest97" - WASM fatread host function test
+    mov     edi, offset cmd_wasmtest97
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest97
+
     # "wasmrepl" - WASM interactive REPL
     mov     edi, offset cmd_wasmrepl
     call    utils_strcmp
@@ -4311,6 +4317,48 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest97:
+    # WASM fatread host function test: call host function 13 (fatread)
+    mov     esi, offset msg_wasm_test97
+    call    uart_puts
+    mov     esi, offset wasm_test_fatread_module
+    mov     ecx, offset wasm_test_fatread_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "fatread result = "
+    mov     esi, offset msg_wasm_fatread_result
+    call    uart_puts
+    # Print result (eax = bytes read or -1)
+    cmp     eax, -1
+    jne     .fatread_print_success
+    mov     esi, offset msg_wasm_fatread_fail
+    call    uart_puts
+    jmp     .fatread_done_print
+.fatread_print_success:
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     esi, offset msg_wasm_fatread_bytes
+    call    uart_puts
+.fatread_done_print:
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # .do_wasmrepl: WASM Interactive REPL
 # ============================================================================
@@ -7260,6 +7308,8 @@ cmd_wasmtest95:
     .asciz  "wasmtest95"
 cmd_wasmtest96:
     .asciz  "wasmtest96"
+cmd_wasmtest97:
+    .asciz  "wasmtest97"
 cmd_wasmrepl:
     .asciz  "wasmrepl"
 cmd_wasmrepl_exit:
@@ -7611,7 +7661,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.04"
+    .ascii  "AI-ASM Kernel v1.06"
     .byte   13, 10, 0
 
 help_text:
@@ -8178,6 +8228,14 @@ msg_wasm_test96:
     .asciz  "Running WASM test96 (fatls)...\r\n"
 msg_fatls_result:
     .asciz  "fatls result = "
+msg_wasm_test97:
+    .asciz  "Running WASM test97 (fatread)...\r\n"
+msg_wasm_fatread_result:
+    .asciz  "fatread result = "
+msg_wasm_fatread_fail:
+    .asciz  "-1 (file not found)"
+msg_wasm_fatread_bytes:
+    .asciz  " bytes read"
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -11990,3 +12048,64 @@ wasm_test_fatls_module:
     .byte   0x10, 0x0D             # call 13 (fatls, host_id=12)
     .byte   0x0B                   # end
 wasm_test_fatls_size = . - wasm_test_fatls_module
+
+# =====================================================
+# wasmtest97: fatread host function test - call host function 13 (fatread)
+# =====================================================
+# WASM_HOST_FATREAD = 13
+# func_count = 1, so call_index = 13 + 1 = 14 = 0x0E
+# fatread(name_ptr, name_len, buf_ptr, buf_len) -> bytes_read
+# 参数压栈顺序（从栈顶到底）：buf_len, buf_ptr, name_len, name_ptr
+# WASM 程序压栈顺序：先压栈的在栈底，后压栈的在栈顶
+# 所以压栈顺序是：name_ptr, name_len, buf_ptr, buf_len
+# 使用简化测试：name_ptr=0 (WASM内存偏移0存储文件名), name_len=11, buf_ptr=100, buf_len=512
+wasm_test_fatread_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # memory section: 1 memory, min=1 page (64KB)
+    .byte   0x05                   # section id
+    .byte   0x03                   # section size = 3
+    .byte   0x01                   # num memories
+    .byte   0x00                   # limits flag (no max)
+    .byte   0x01                   # min pages = 1
+    # data section: store filename "HELLO   TXT" (11 bytes) at offset 0
+    .byte   0x0B                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num data segments
+    .byte   0x00                   # memory index
+    .byte   0x00                   # offset (i32.const 0)
+    .byte   0x0B                   # 11 bytes of data
+    .byte   0x48, 0x45, 0x4C, 0x4C, 0x4F  # "HELLO"
+    .byte   0x20, 0x20, 0x20, 0x20       # 4 spaces
+    .byte   0x54, 0x58, 0x54             # "TXT"
+    # code section: push args, call fatread, return
+    .byte   0x0A                   # section id
+    .byte   0x14                   # section size = 20
+    .byte   0x01                   # num codes
+    .byte   0x12                   # body size = 18
+    .byte   0x00                   # num locals
+    # push name_ptr = 0
+    .byte   0x41, 0x00             # i32.const 0
+    # push name_len = 11
+    .byte   0x41, 0x0B             # i32.const 11
+    # push buf_ptr = 100
+    .byte   0x41, 0x64             # i32.const 100
+    # push buf_len = 512 (0x200)
+    .byte   0x41, 0xC8, 0x04       # i32.const 512 (LEB128: 0xC8, 0x04)
+    # call host_fatread (host_id=13, call_index=14)
+    .byte   0x10, 0x0E             # call 14 (fatread, host_id=13)
+    .byte   0x0B                   # end
+wasm_test_fatread_size = . - wasm_test_fatread_module

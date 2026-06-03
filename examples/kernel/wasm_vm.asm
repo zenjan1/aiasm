@@ -221,6 +221,9 @@ WASM_HOST_NET_SEND   = 8
 WASM_HOST_NET_RECV   = 9
 WASM_HOST_NET_STATUS = 10
 WASM_HOST_NET_CONFIG = 11
+WASM_HOST_FATLS      = 12
+WASM_HOST_FATREAD    = 13
+WASM_HOST_FATOPEN    = 14
 
 # ============================================================================
 # 虚拟机状态（BSS）
@@ -1229,6 +1232,12 @@ do_call_host:
     je      .host_3arg
     cmp     ecx, WASM_HOST_NET_SEND
     je      .host_5arg
+    cmp     ecx, WASM_HOST_FATLS       # fatls() = 0 args
+    je      .host_0arg
+    cmp     ecx, WASM_HOST_FATOPEN     # fatopen(name_ptr, name_len) = 2 args
+    je      .host_2arg
+    cmp     ecx, WASM_HOST_FATREAD     # fatread(name_ptr, name_len, buf_ptr, buf_len) = 4 args
+    je      .host_4arg
     # default: print/println - 2 args
 .host_2arg:
     call    _stack_pop           # 参数2
@@ -1277,6 +1286,23 @@ do_call_host:
     # 把ptr和len压入x86栈（供wasm_host_call通过[ebp+16/20]访问）
     push    dword ptr [wasm_param_len]
     push    dword ptr [wasm_param_ptr]
+    # 恢复host_id到eax
+    mov     eax, [wasm_host_id_tmp]
+    jmp     .do_host_call
+.host_4arg:
+    # 4参数：name_ptr, name_len, buf_ptr, buf_len
+    # 先保存host_id（从x86栈顶pop），然后从WASM操作数栈pop 4个参数
+    pop     dword ptr [wasm_host_id_tmp]  # host_id → 内存
+    call    _stack_pop           # 参数4 (buf_len)
+    mov     [wasm_param_len], eax
+    call    _stack_pop           # 参数3 (buf_ptr)
+    mov     edx, eax
+    call    _stack_pop           # 参数2 (name_len)
+    mov     ecx, eax
+    call    _stack_pop           # 参数1 (name_ptr)
+    mov     ebx, eax
+    # 把buf_len压入x86栈（供wasm_host_call通过[ebp+8]访问）
+    push    dword ptr [wasm_param_len]
     # 恢复host_id到eax
     mov     eax, [wasm_host_id_tmp]
     jmp     .do_host_call

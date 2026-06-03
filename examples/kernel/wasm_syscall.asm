@@ -393,10 +393,72 @@ wasm_host_call:
 
 .host_fatread:
     # fatread(name_ptr, name_len, buf_ptr, buf_len) -> 读取文件内容
-    # ebx = name_ptr, ecx = name_len, edx = buf_ptr
+    # ebx = name_ptr (WASM线性内存偏移), ecx = name_len, edx = buf_ptr
     # [ebp+8] = buf_len (通过栈传递的第4个参数)
-    # 简化实现：暂不支持
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    # 保存参数
+    mov     esi, ebx              # esi = name_ptr (WASM偏移)
+    mov     edi, ecx              # edi = name_len
+    mov     ecx, edx              # ecx = buf_ptr (WASM偏移)
+    mov     edx, [ebp + 8]        # edx = buf_len
+
+    # 转换 WASM 指针到实际内存地址
+    # name_ptr: esi -> 实际地址
+    add     esi, offset wasm_linear_memory
+
+    # 查找文件: fat32_get_file_info(esi = filename) -> eax = cluster, ecx = size
+    call    fat32_get_file_info
+
+    # 检查是否找到文件 (eax = 0xFFFFFFFF 表示失败)
+    cmp     eax, 0xFFFFFFFF
+    je      .fatread_fail
+
+    # eax = cluster, ecx = file_size (保存在 fat32_get_file_info 返回的 ecx 中)
+    # 但我们需要保存这些值，因为后面的操作会修改寄存器
+    push    ecx                   # 保存 file_size
+    push    eax                   # 保存 cluster
+
+    # 计算读取长度：min(file_size, buf_len)
+    mov     eax, [esp + 4]        # eax = file_size (从栈恢复)
+    cmp     eax, edx              # 比较 file_size vs buf_len
+    jbe     .fatread_no_truncate
+    mov     eax, edx              # 使用 buf_len 作为读取长度
+.fatread_no_truncate:
+    # eax = 实际读取长度 (暂存)
+    push    eax                   # 保存 read_len
+
+    # 设置缓冲区地址: edi = buf_ptr + wasm_linear_memory
+    mov     edi, ecx              # 恢复 buf_ptr (之前保存在 ecx)
+    add     edi, offset wasm_linear_memory
+
+    # 读取簇数据: fat32_read_cluster(eax = cluster, edi = buffer)
+    mov     eax, [esp + 8]        # 恢复 cluster (从栈)
+    call    fat32_read_cluster
+
+    # 检查读取结果 (eax = 0 成功, -1 失败)
+    test    eax, eax
+    jnz     .fatread_fail_pop
+
+    # 返回实际读取长度
+    pop     eax                   # eax = read_len
+    add     esp, 8                # 清理 cluster 和 file_size
+    jmp     .fatread_done
+
+.fatread_fail_pop:
+    add     esp, 12               # 清理 read_len, cluster, file_size
+.fatread_fail:
     mov     eax, -1
+.fatread_done:
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
     jmp     .done
 
 .host_fatopen:
