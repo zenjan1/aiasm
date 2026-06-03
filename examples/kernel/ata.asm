@@ -298,3 +298,95 @@ ata_identify_done:
     pop     ebx
     pop     ebp
     ret
+
+# =============================================================================
+# ata_write_sector: 写入一个扇区
+# 参数: eax = LBA 地址 (28-bit), edi = 源缓冲区
+# 返回: eax = 0 成功, -1 失败
+# =============================================================================
+    .globl ata_write_sector
+ata_write_sector:
+    push    ebp
+    mov     ebp, esp
+    push    ebx
+    push    ecx
+    push    edx
+    push    edi
+
+    # 保存 LBA
+    mov     [ata_lba_temp], eax
+
+    # 1. 等待 BSY=0
+    call    ata_wait_ready
+    cmp     eax, 0
+    jne     ata_write_fail
+
+    # 2. 设置 LBA 地址 (28-bit mode)
+    mov     eax, [ata_lba_temp]
+    mov     ebx, eax             # 保存 LBA
+
+    # LBA low (bits 0-7) -> 0x1F3
+    mov     dx, 0x1F3
+    mov     al, bl
+    out     dx, al
+
+    # LBA mid (bits 8-15) -> 0x1F4
+    mov     dx, 0x1F4
+    mov     al, bh
+    out     dx, al
+
+    # LBA high (bits 16-23) -> 0x1F5
+    shr     ebx, 16
+    mov     dx, 0x1F5
+    mov     al, bl
+    out     dx, al
+
+    # Drive/LBA bits 24-27 + LBA mode + master -> 0x1F6
+    mov     dx, 0x1F6
+    mov     al, bh
+    and     al, 0x0F             # 只取 bits 24-27
+    or      al, 0xE0             # LBA mode (bit 6), master drive (bit 4)
+    out     dx, al
+
+    # 3. 设置扇区计数 = 1
+    mov     dx, 0x1F2
+    mov     al, 1
+    out     dx, al
+
+    # 4. 发送 WRITE SECTORS 命令 (0x30)
+    mov     dx, 0x1F7
+    mov     al, 0x30
+    out     dx, al
+
+    # 5. 等待数据就绪 (DRQ=1)
+    call    ata_wait_data
+    cmp     eax, 0
+    jne     ata_write_fail
+
+    # 6. 写入 256 个 16-bit 字
+    mov     dx, 0x1F0
+    mov     ecx, 256
+    mov     edi, [ebp + 8]       # 获取缓冲区指针 (第一个参数)
+
+ata_write_loop:
+    mov     ax, [edi]
+    out     dx, ax
+    add     edi, 2
+    dec     ecx
+    jnz     ata_write_loop
+
+    # 7. 等待写入完成 (BSY=0)
+    call    ata_wait_ready
+
+    xor     eax, eax              # 返回 0 表示成功
+    jmp     ata_write_done
+
+ata_write_fail:
+    mov     eax, 0xFFFFFFFF       # 返回 -1 表示失败
+ata_write_done:
+    pop     edi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    pop     ebp
+    ret

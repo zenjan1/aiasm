@@ -3850,7 +3850,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v1.00"
+    .ascii  "Server: aiasm/v1.01"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3859,7 +3859,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v1.00!"
+    .ascii  "Hello from AI-ASM Kernel v1.01!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3876,7 +3876,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v1.00"
+    .ascii  "AI-ASM Kernel v1.01"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3923,7 +3923,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v1.00 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v1.01 booting..."
 msg_udp_send_debug:
     .asciz  "[UDP_SEND] Calling e1000_send_udp\n"
 msg_udp_send_done:

@@ -1076,6 +1076,14 @@ shell_dispatch:
     test    eax, eax
     jz      .do_diskread
 
+    # "diskwrite <lba>" - write disk sector
+    mov     edi, offset cmd_diskwrite
+    mov     esi, offset shell_cmd_buf
+    mov     ecx, 10              # "diskwrite " length
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_diskwrite
+
     # 未知命令
     mov     esi, offset msg_unknown
     call    uart_puts
@@ -6627,6 +6635,111 @@ shell_print_dec_byte:
     pop     esi
     ret
 
+# ============================================================================
+# .do_diskwrite: 写入磁盘扇区
+# ============================================================================
+.do_diskwrite:
+    # 解析 LBA 参数 (从 shell_cmd_buf + 10 开始)
+    mov     esi, offset shell_cmd_buf
+    add     esi, 10              # 跳过 "diskwrite "
+
+    # 检查是否有参数
+    mov     al, [esi]
+    test    al, al
+    jz      .diskwrite_usage
+
+    # 解析十六进制 LBA
+    call    utils_parse_hex     # eax = LBA value
+
+    # 打印写入信息
+    push    eax                 # 保存 LBA
+    mov     esi, offset msg_diskwrite_header
+    call    uart_puts
+    mov     esi, offset msg_diskwrite_lba
+    call    uart_puts
+    pop     eax
+    push    eax                 # 再次保存 LBA
+    mov     edi, offset msg_diskread_hex  # 使用 hex buffer
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax            # utils_itoa 返回 buffer pointer
+    call    uart_puts
+
+    # 准备测试数据 - 填充 ata_buffer
+    mov     edi, offset ata_buffer
+    mov     ecx, 512
+    mov     al, 'A'
+.fill_buffer:
+    mov     [edi], al
+    inc     edi
+    dec     ecx
+    jnz     .fill_buffer
+
+    # 写入特定标记 "AIASM_V101_WRITE_TEST"
+    mov     edi, offset ata_buffer
+    mov     byte ptr [edi], 'A'
+    mov     byte ptr [edi + 1], 'I'
+    mov     byte ptr [edi + 2], 'A'
+    mov     byte ptr [edi + 3], 'S'
+    mov     byte ptr [edi + 4], 'M'
+    mov     byte ptr [edi + 5], '_'
+    mov     byte ptr [edi + 6], 'V'
+    mov     byte ptr [edi + 7], '1'
+    mov     byte ptr [edi + 8], '.'
+    mov     byte ptr [edi + 9], '0'
+    mov     byte ptr [edi + 10], '1'
+    mov     byte ptr [edi + 11], '_'
+    mov     byte ptr [edi + 12], 'W'
+    mov     byte ptr [edi + 13], 'R'
+    mov     byte ptr [edi + 14], 'I'
+    mov     byte ptr [edi + 15], 'T'
+    mov     byte ptr [edi + 16], 'E'
+    mov     byte ptr [edi + 17], '_'
+    mov     byte ptr [edi + 18], 'T'
+    mov     byte ptr [edi + 19], 'E'
+    mov     byte ptr [edi + 20], 'S'
+    mov     byte ptr [edi + 21], 'T'
+    mov     byte ptr [edi + 22], 0
+
+    # 写入扇区
+    pop     eax                 # LBA
+    push    offset ata_buffer   # 缓冲区指针作为参数
+    push    eax                 # 保存 LBA for later cleanup
+    mov     edi, offset ata_buffer
+    call    ata_write_sector
+    pop     eax                 # 恢复 LBA (清理栈)
+    add     esp, 4              # 清理缓冲区参数
+    test    eax, eax
+    jnz     .diskwrite_fail
+
+    # 打印成功消息
+    mov     esi, offset msg_diskwrite_done
+    call    uart_puts
+    mov     esi, offset msg_diskwrite_testdata
+    call    uart_puts
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.diskwrite_fail:
+    mov     esi, offset msg_diskwrite_fail
+    call    uart_puts
+    pop     eax
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.diskwrite_usage:
+    mov     esi, offset msg_diskwrite_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 shell_prompt:
     .asciz  "aiasm> "
 
@@ -6902,6 +7015,8 @@ cmd_diskinfo:
     .asciz  "diskinfo"
 cmd_diskread:
     .asciz  "diskread "
+cmd_diskwrite:
+    .asciz  "diskwrite "
 
 msg_ring3_entering:
     .asciz  "Entering Ring 3 (User Mode)...\r\n"
@@ -6983,6 +7098,24 @@ msg_diskread_data:
     .byte   0
 msg_diskread_hex:
     .space  8                   # hex buffer
+msg_diskwrite_header:
+    .ascii  "Writing sector "
+    .byte   0
+msg_diskwrite_lba:
+    .ascii  " at LBA 0x"
+    .byte   0
+msg_diskwrite_done:
+    .ascii  ": Write 512 bytes OK"
+    .byte   13, 10, 0
+msg_diskwrite_fail:
+    .ascii  "Write failed!"
+    .byte   13, 10, 0
+msg_diskwrite_usage:
+    .ascii  "Usage: diskwrite <lba> (hex, e.g. diskwrite 100)"
+    .byte   13, 10, 0
+msg_diskwrite_testdata:
+    .ascii  "Test data: 'AIASM_V101_WRITE_TEST'"
+    .byte   13, 10, 0
 
 msg_netinfo_header:
     .ascii  "Network device info:"
@@ -7147,7 +7280,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.00"
+    .ascii  "AI-ASM Kernel v1.01"
     .byte   13, 10, 0
 
 help_text:
@@ -7216,6 +7349,8 @@ help_text:
     .ascii  "  diskinfo      - Show ATA disk information"
     .byte   13, 10
     .ascii  "  diskread <lba> - Read disk sector (hex LBA)"
+    .byte   13, 10
+    .ascii  "  diskwrite <lba> - Write test data to sector (hex LBA)"
     .byte   13, 10, 0
 
 tick_prefix:
