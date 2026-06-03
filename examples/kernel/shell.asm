@@ -1379,23 +1379,41 @@ shell_dispatch:
     test    eax, eax
     jz      .wasmrun_print_builtin
 
-    # 使用 vfs_find_by_path 查找文件
+    # 尝试从 FAT32 磁盘加载 WASM 文件
+    # 获取文件名指针
     lea     esi, [shell_cmd_buf + 8]
-    call    vfs_find_by_path
-    cmp     eax, -1
+
+    # 将文件名转换为 FAT32 8.3 格式 (存在 fat32_filename_buf)
+    call    convert_to_83_format    # 结果在 fat32_filename_buf
+
+    # 使用 fat32_get_file_info 查找文件
+    mov     esi, offset fat32_filename_buf
+    call    fat32_get_file_info
+
+    # 检查是否找到文件
+    cmp     eax, 0xFFFFFFFF
     je      .wasmrun_not_found
 
-    # 读取文件内容
-    call    vfs_read_file
-    cmp     ecx, -1
-    je      .wasmrun_read_err
+    # eax = 簇号, ecx = 文件大小
+    push    ecx                    # 保存文件大小
+
+    # 读取文件第一簇到 fat32_file_buffer
+    mov     edi, offset fat32_file_buffer
+    call    fat32_read_cluster
+
+    # 恢复文件大小
+    pop     ecx
+
+    # 检查读取是否成功
+    cmp     eax, 0
+    jne     .wasmrun_read_err
+
+    # 检查文件大小
     test    ecx, ecx
     jz      .wasmrun_empty
 
-    # 保存文件大小
-    push    ecx
-
     # 打印加载信息
+    push    ecx                   # 保存文件大小
     mov     esi, offset msg_wasmrun_loading
     call    uart_puts
     lea     esi, [shell_cmd_buf + 8]
@@ -1405,10 +1423,11 @@ shell_dispatch:
     mov     al, 0x0d
     call    uart_putc
 
-    # 恢复文件大小到 ecx
+    # 恢复文件大小
     pop     ecx
 
-    # 解析WASM模块
+    # 解析WASM模块 (从 fat32_file_buffer)
+    mov     esi, offset fat32_file_buffer
     call    wasm_parse_module
     test    eax, eax
     jnz     .wasm_parse_err
@@ -7551,7 +7570,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.03"
+    .ascii  "AI-ASM Kernel v1.04"
     .byte   13, 10, 0
 
 help_text:
