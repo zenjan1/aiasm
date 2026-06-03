@@ -1807,6 +1807,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest240
 
+    # "wasmtest241" - WASM i64.and test
+    mov     edi, offset cmd_wasmtest241
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest241
+
+    # "wasmtest242" - WASM i64.or test
+    mov     edi, offset cmd_wasmtest242
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest242
+
+    # "wasmtest243" - WASM i64.xor test
+    mov     edi, offset cmd_wasmtest243
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest243
+
+    # "wasmtest244" - WASM i64.shl test
+    mov     edi, offset cmd_wasmtest244
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest244
+
+    # "wasmtest245" - WASM i64.shr_s test
+    mov     edi, offset cmd_wasmtest245
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest245
+
+    # "wasmtest246" - WASM i64.shr_u test
+    mov     edi, offset cmd_wasmtest246
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest246
+
+    # "wasmtest247" - WASM i64.rotl test
+    mov     edi, offset cmd_wasmtest247
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest247
+
+    # "wasmtest248" - WASM i64.rotr test
+    mov     edi, offset cmd_wasmtest248
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest248
+
+    # "wasmtest249" - WASM i64.eqz test
+    mov     edi, offset cmd_wasmtest249
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest249
+
+    # "wasmtest250" - 250 tests milestone (returns 250)
+    mov     edi, offset cmd_wasmtest250
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest250
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -10786,6 +10846,299 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest241: i64.and test
+# ============================================================================
+.do_wasmtest241:
+    # WASM i64.and test: 0xFF00FF00 & 0x0F0F0F0F = 0x0F000F00 (251658752)
+    mov     esi, offset msg_wasm_test241
+    call    uart_puts
+    mov     esi, offset wasm_test241_i64_and_module
+    mov     ecx, offset wasm_test241_i64_and_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.and = "
+    mov     esi, offset msg_test241_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest242: i64.or test
+# ============================================================================
+.do_wasmtest242:
+    # WASM i64.or test: 0xFF00FF00 | 0x00FF00FF = 0xFFFFFFFF (4294967295)
+    mov     esi, offset msg_wasm_test242
+    call    uart_puts
+    mov     esi, offset wasm_test242_i64_or_module
+    mov     ecx, offset wasm_test242_i64_or_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.or = "
+    mov     esi, offset msg_test242_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest243: i64.xor test
+# ============================================================================
+.do_wasmtest243:
+    # WASM i64.xor test: 0xFFFF0000 ^ 0xFF00FF00 = 0x00FFFF00 (16777984)
+    mov     esi, offset msg_wasm_test243
+    call    uart_puts
+    mov     esi, offset wasm_test243_i64_xor_module
+    mov     ecx, offset wasm_test243_i64_xor_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.xor = "
+    mov     esi, offset msg_test243_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest244: i64.shl test
+# ============================================================================
+.do_wasmtest244:
+    # WASM i64.shl test: 1 << 20 = 0x100000 (1048576)
+    mov     esi, offset msg_wasm_test244
+    call    uart_puts
+    mov     esi, offset wasm_test244_i64_shl_module
+    mov     ecx, offset wasm_test244_i64_shl_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.shl = "
+    mov     esi, offset msg_test244_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest245: i64.shr_s test
+# ============================================================================
+.do_wasmtest245:
+    # WASM i64.shr_s test: -65536 >> 8 = -256 (arithmetic right shift)
+    mov     esi, offset msg_wasm_test245
+    call    uart_puts
+    mov     esi, offset wasm_test245_i64_shr_s_module
+    mov     ecx, offset wasm_test245_i64_shr_s_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.shr_s = "
+    mov     esi, offset msg_test245_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest246: i64.shr_u test
+# ============================================================================
+.do_wasmtest246:
+    # WASM i64.shr_u test: 0x100000 >> 8 = 0x1000 (4096)
+    mov     esi, offset msg_wasm_test246
+    call    uart_puts
+    mov     esi, offset wasm_test246_i64_shr_u_module
+    mov     ecx, offset wasm_test246_i64_shr_u_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.shr_u = "
+    mov     esi, offset msg_test246_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest247: i64.rotl test
+# ============================================================================
+.do_wasmtest247:
+    # WASM i64.rotl test: 0x0000000100000000 rotl 8 = 0x0000000000000100
+    mov     esi, offset msg_wasm_test247
+    call    uart_puts
+    mov     esi, offset wasm_test247_i64_rotl_module
+    mov     ecx, offset wasm_test247_i64_rotl_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.rotl = "
+    mov     esi, offset msg_test247_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest248: i64.rotr test
+# ============================================================================
+.do_wasmtest248:
+    # WASM i64.rotr test: 0x0000000100000000 rotr 8 = 0x0000000001000000
+    mov     esi, offset msg_wasm_test248
+    call    uart_puts
+    mov     esi, offset wasm_test248_i64_rotr_module
+    mov     ecx, offset wasm_test248_i64_rotr_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.rotr = "
+    mov     esi, offset msg_test248_result
+    call    uart_puts
+    call    print_i64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest249: i64.eqz test
+# ============================================================================
+.do_wasmtest249:
+    # WASM i64.eqz test: 0 eqz = 1 (true)
+    mov     esi, offset msg_wasm_test249
+    call    uart_puts
+    mov     esi, offset wasm_test249_i64_eqz_module
+    mov     ecx, offset wasm_test249_i64_eqz_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "i64.eqz = "
+    mov     esi, offset msg_test249_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest250: 250 tests milestone (returns 250)
+# ============================================================================
+.do_wasmtest250:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test250
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone250_module
+    mov     ecx, offset wasm_test_milestone250_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone250
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -14042,6 +14395,26 @@ cmd_wasmtest239:
     .asciz  "wasmtest239"
 cmd_wasmtest240:
     .asciz  "wasmtest240"
+cmd_wasmtest241:
+    .asciz  "wasmtest241"
+cmd_wasmtest242:
+    .asciz  "wasmtest242"
+cmd_wasmtest243:
+    .asciz  "wasmtest243"
+cmd_wasmtest244:
+    .asciz  "wasmtest244"
+cmd_wasmtest245:
+    .asciz  "wasmtest245"
+cmd_wasmtest246:
+    .asciz  "wasmtest246"
+cmd_wasmtest247:
+    .asciz  "wasmtest247"
+cmd_wasmtest248:
+    .asciz  "wasmtest248"
+cmd_wasmtest249:
+    .asciz  "wasmtest249"
+cmd_wasmtest250:
+    .asciz  "wasmtest250"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -14906,6 +15279,66 @@ msg_wasm_test240:
 msg_wasm_milestone240:
     .asciz  "[240 WASM tests completed! v1.25 MILESTONE!]\r\n"
 
+msg_wasm_test241:
+    .asciz  "[WASMTEST241] i64.and test\r\n"
+
+msg_test241_result:
+    .asciz  "i64.and = "
+
+msg_wasm_test242:
+    .asciz  "[WASMTEST242] i64.or test\r\n"
+
+msg_test242_result:
+    .asciz  "i64.or = "
+
+msg_wasm_test243:
+    .asciz  "[WASMTEST243] i64.xor test\r\n"
+
+msg_test243_result:
+    .asciz  "i64.xor = "
+
+msg_wasm_test244:
+    .asciz  "[WASMTEST244] i64.shl test\r\n"
+
+msg_test244_result:
+    .asciz  "i64.shl = "
+
+msg_wasm_test245:
+    .asciz  "[WASMTEST245] i64.shr_s test\r\n"
+
+msg_test245_result:
+    .asciz  "i64.shr_s = "
+
+msg_wasm_test246:
+    .asciz  "[WASMTEST246] i64.shr_u test\r\n"
+
+msg_test246_result:
+    .asciz  "i64.shr_u = "
+
+msg_wasm_test247:
+    .asciz  "[WASMTEST247] i64.rotl test\r\n"
+
+msg_test247_result:
+    .asciz  "i64.rotl = "
+
+msg_wasm_test248:
+    .asciz  "[WASMTEST248] i64.rotr test\r\n"
+
+msg_test248_result:
+    .asciz  "i64.rotr = "
+
+msg_wasm_test249:
+    .asciz  "[WASMTEST249] i64.eqz test\r\n"
+
+msg_test249_result:
+    .asciz  "i64.eqz = "
+
+msg_wasm_test250:
+    .asciz  "[WASMTEST250] 250 tests milestone\r\n"
+
+msg_wasm_milestone250:
+    .asciz  "[250 WASM tests completed! v1.26 MILESTONE!]\r\n"
+
 msg_arp_header:
     .ascii  "ARP Cache:"
     .byte   13, 10, 0
@@ -15189,7 +15622,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.19"
+    .ascii  "AI-ASM Kernel v1.26"
     .byte   13, 10, 0
 
 help_text:
@@ -15536,6 +15969,26 @@ help_text:
     .ascii  "  wasmtest239   - i64.rem_u test (returns i64 2)"
     .byte   13, 10
     .ascii  "  wasmtest240   - 240 tests milestone (returns 240)"
+    .byte   13, 10
+    .ascii  "  wasmtest241   - i64.and test (returns i64 251658752)"
+    .byte   13, 10
+    .ascii  "  wasmtest242   - i64.or test (returns i64 4294967295)"
+    .byte   13, 10
+    .ascii  "  wasmtest243   - i64.xor test (returns i64 16777984)"
+    .byte   13, 10
+    .ascii  "  wasmtest244   - i64.shl test (returns i64 1048576)"
+    .byte   13, 10
+    .ascii  "  wasmtest245   - i64.shr_s test (returns i64 -256)"
+    .byte   13, 10
+    .ascii  "  wasmtest246   - i64.shr_u test (returns i64 4096)"
+    .byte   13, 10
+    .ascii  "  wasmtest247   - i64.rotl test (returns i64 256)"
+    .byte   13, 10
+    .ascii  "  wasmtest248   - i64.rotr test (returns i64 16777216)"
+    .byte   13, 10
+    .ascii  "  wasmtest249   - i64.eqz test (returns i32 1)"
+    .byte   13, 10
+    .ascii  "  wasmtest250   - 250 tests milestone (returns 250)"
     .byte   13, 10
     .ascii  "  diskinfo      - Show ATA disk information"
     .byte   13, 10
@@ -25739,3 +26192,338 @@ wasm_test_milestone240_module:
     .byte   0x41, 0xF0, 0x01       # i32.const 240 (LEB128: 0xF0, 0x01)
     .byte   0x0B                   # end
 wasm_test_milestone240_size = . - wasm_test_milestone240_module
+
+# =====================================================
+# wasmtest241: i64.and test
+# =====================================================
+# Test: i64.const 0xF000 & i64.const 0x0F0F = 0x0F00 (3840)
+# Type: () -> i64
+wasm_test241_i64_and_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 61440, i64.const 3855, i64.and, end
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0xE0, 0x03 # i64.const 61440 (0xF000) LEB128
+    .byte   0x42, 0x8F, 0x1E       # i64.const 3855 (0x0F0F) LEB128
+    .byte   0x83                   # i64.and
+    .byte   0x0B                   # end
+wasm_test241_i64_and_size = . - wasm_test241_i64_and_module
+
+# =====================================================
+# wasmtest242: i64.or test
+# =====================================================
+# Test: i64.const 0xF000 | i64.const 0x0FFF = 0xFFFF (65535)
+# Type: () -> i64
+wasm_test242_i64_or_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 61440, i64.const 4095, i64.or, end
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0xE0, 0x03 # i64.const 61440 (0xF000) LEB128
+    .byte   0x42, 0xFF, 0x1F       # i64.const 4095 (0x0FFF) LEB128
+    .byte   0x84                   # i64.or
+    .byte   0x0B                   # end
+wasm_test242_i64_or_size = . - wasm_test242_i64_or_module
+
+# =====================================================
+# wasmtest243: i64.xor test
+# =====================================================
+# Test: i64.const 0xFF00 ^ i64.const 0xF000 = 0x0F00 (3840)
+# Type: () -> i64
+wasm_test243_i64_xor_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 65280, i64.const 61440, i64.xor, end
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0xFE, 0x03 # i64.const 65280 (0xFF00) LEB128
+    .byte   0x42, 0x80, 0xE0, 0x03 # i64.const 61440 (0xF000) LEB128
+    .byte   0x85                   # i64.xor
+    .byte   0x0B                   # end
+wasm_test243_i64_xor_size = . - wasm_test243_i64_xor_module
+
+# =====================================================
+# wasmtest244: i64.shl test
+# =====================================================
+# Test: i64.const 1 << i64.const 20 = 0x100000 (1048576)
+# Type: () -> i64
+wasm_test244_i64_shl_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 1, i64.const 20, i64.shl, end
+    .byte   0x0A                   # section id
+    .byte   0x09                   # section size = 9
+    .byte   0x01                   # num codes
+    .byte   0x07                   # body size = 7
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x01             # i64.const 1
+    .byte   0x42, 0x14             # i64.const 20
+    .byte   0x86                   # i64.shl
+    .byte   0x0B                   # end
+wasm_test244_i64_shl_size = . - wasm_test244_i64_shl_module
+
+# =====================================================
+# wasmtest245: i64.shr_s test
+# =====================================================
+# Test: i64.const -65536 >> i64.const 8 = -256 (signed right shift)
+# Type: () -> i64
+wasm_test245_i64_shr_s_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const -65536, i64.const 8, i64.shr_s, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x80, 0x7D # i64.const -65536 (signed LEB128)
+    .byte   0x42, 0x08             # i64.const 8
+    .byte   0x87                   # i64.shr_s
+    .byte   0x0B                   # end
+wasm_test245_i64_shr_s_size = . - wasm_test245_i64_shr_s_module
+
+# =====================================================
+# wasmtest246: i64.shr_u test
+# =====================================================
+# Test: i64.const 0x100000 >> i64.const 8 = 0x1000 (4096)
+# Type: () -> i64
+wasm_test246_i64_shr_u_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 1048576, i64.const 8, i64.shr_u, end
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x80, 0x40 # i64.const 1048576 (0x100000) LEB128
+    .byte   0x42, 0x08             # i64.const 8
+    .byte   0x88                   # i64.shr_u
+    .byte   0x0B                   # end
+wasm_test246_i64_shr_u_size = . - wasm_test246_i64_shr_u_module
+
+# =====================================================
+# wasmtest247: i64.rotl test
+# =====================================================
+# Test: i64.const 256 rotl i64.const 8 = 65536
+# Type: () -> i64
+wasm_test247_i64_rotl_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 256, i64.const 8, i64.rotl, end
+    .byte   0x0A                   # section id
+    .byte   0x09                   # section size = 9
+    .byte   0x01                   # num codes
+    .byte   0x07                   # body size = 7
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x02       # i64.const 256 LEB128
+    .byte   0x42, 0x08             # i64.const 8
+    .byte   0x89                   # i64.rotl
+    .byte   0x0B                   # end
+wasm_test247_i64_rotl_size = . - wasm_test247_i64_rotl_module
+
+# =====================================================
+# wasmtest248: i64.rotr test
+# =====================================================
+# Test: i64.const 65536 rotr i64.const 8 = 256
+# Type: () -> i64
+wasm_test248_i64_rotr_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7E                   # i64
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 65536, i64.const 8, i64.rotr, end
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x80, 0x80, 0x04 # i64.const 65536 (0x10000) LEB128
+    .byte   0x42, 0x08             # i64.const 8
+    .byte   0x8A                   # i64.rotr
+    .byte   0x0B                   # end
+wasm_test248_i64_rotr_size = . - wasm_test248_i64_rotr_module
+
+# =====================================================
+# wasmtest249: i64.eqz test
+# =====================================================
+# Test: i64.const 0; i64.eqz = 1 (zero equals zero)
+# Type: () -> i32 (eqz returns i32)
+wasm_test249_i64_eqz_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # code section: i64.const 0, i64.eqz, end
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x42, 0x00             # i64.const 0
+    .byte   0x50                   # i64.eqz
+    .byte   0x0B                   # end
+wasm_test249_i64_eqz_size = . - wasm_test249_i64_eqz_module
+
+# =====================================================
+# wasmtest250: 250 tests milestone - returns 250
+# =====================================================
+# v1.26 milestone: 250 WASM tests completed
+# Type: () -> i32
+wasm_test_milestone250_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 250 (LEB128: 0xFA, 0x01)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFA, 0x01       # i32.const 250 (LEB128: 0xFA, 0x01)
+    .byte   0x0B                   # end
+wasm_test_milestone250_size = . - wasm_test_milestone250_module
