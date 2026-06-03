@@ -681,6 +681,36 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest55
 
+    # "wasmtest56" - WASM f32.add test
+    mov     edi, offset cmd_wasmtest56
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest56
+
+    # "wasmtest57" - WASM f32.mul test
+    mov     edi, offset cmd_wasmtest57
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest57
+
+    # "wasmtest58" - WASM f64.add test
+    mov     edi, offset cmd_wasmtest58
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest58
+
+    # "wasmtest59" - WASM f32.sqrt test
+    mov     edi, offset cmd_wasmtest59
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest59
+
+    # "wasmtest60" - WASM f64.mul test
+    mov     edi, offset cmd_wasmtest60
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest60
+
     # "kill <pid>" - 终止进程
     mov     edi, offset cmd_kill
     mov     ecx, 4
@@ -2680,6 +2710,126 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest56:
+    # WASM f32.add test: 1.5 + 2.5 = 4.0
+    mov     esi, offset msg_wasm_test56
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_add_module
+    mov     ecx, offset wasm_test_f32_add_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.add = "
+    mov     esi, offset msg_f32_add_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest57:
+    # WASM f32.mul test: 2.0 * 3.0 = 6.0
+    mov     esi, offset msg_wasm_test57
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_mul_module
+    mov     ecx, offset wasm_test_f32_mul_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.mul = "
+    mov     esi, offset msg_f32_mul_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest58:
+    # WASM f64.add test: 1.5 + 2.5 = 4.0
+    mov     esi, offset msg_wasm_test58
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_add_module
+    mov     ecx, offset wasm_test_f64_add_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.add = "
+    mov     esi, offset msg_f64_add_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest59:
+    # WASM f32.sqrt test: sqrt(4.0) = 2.0
+    mov     esi, offset msg_wasm_test59
+    call    uart_puts
+    mov     esi, offset wasm_test_f32_sqrt_module
+    mov     ecx, offset wasm_test_f32_sqrt_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f32.sqrt = "
+    mov     esi, offset msg_f32_sqrt_result
+    call    uart_puts
+    call    print_f32_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest60:
+    # WASM f64.mul test: 3.0 * 4.0 = 12.0
+    mov     esi, offset msg_wasm_test60
+    call    uart_puts
+    mov     esi, offset wasm_test_f64_mul_module
+    mov     ecx, offset wasm_test_f64_mul_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "f64.mul = "
+    mov     esi, offset msg_f64_mul_result
+    call    uart_puts
+    call    print_f64_result
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 .do_wasmapp:
     # 解析应用名称：跳过 "wasmapp " 前缀 (8 字符)
     mov     esi, offset shell_cmd_buf + 8
@@ -3471,6 +3621,53 @@ print_i64_result:
     # print_hex8 already adds newline
 
 .print_done:
+    pop     esi
+    pop     edx
+    pop     eax
+    ret
+
+# ============================================================================
+# print_f32_result: Print f32 return value as IEEE 754 hex
+# Reads 32-bit value from wasm_return_value and prints as 0xXXXXXXXX
+# ============================================================================
+    .globl  print_f32_result
+print_f32_result:
+    push    eax
+    push    esi
+
+    # Print 0x prefix
+    mov     esi, offset msg_0x
+    call    uart_puts
+
+    # Read 32-bit value and print as hex
+    mov     eax, [wasm_return_value]
+    call    print_hex8
+
+    pop     esi
+    pop     eax
+    ret
+
+# ============================================================================
+# print_f64_result: Print f64 return value as IEEE 754 hex
+# Reads 64-bit value from wasm_return_value and prints as 0xHHHHHHHHLLLLLLLL
+# ============================================================================
+    .globl  print_f64_result
+print_f64_result:
+    push    eax
+    push    edx
+    push    esi
+
+    # Print 0x prefix
+    mov     esi, offset msg_0x
+    call    uart_puts
+
+    # Read full 64-bit value and print high 32 bits first
+    mov     edx, [wasm_return_value + 4]  # high 32 bits
+    mov     eax, edx
+    call    print_hex8        # print high 32 bits
+    mov     eax, [wasm_return_value]      # low 32 bits
+    call    print_hex8        # print low 32 bits
+
     pop     esi
     pop     edx
     pop     eax
@@ -4783,6 +4980,16 @@ cmd_wasmtest54:
     .asciz  "wasmtest54"
 cmd_wasmtest55:
     .asciz  "wasmtest55"
+cmd_wasmtest56:
+    .asciz  "wasmtest56"
+cmd_wasmtest57:
+    .asciz  "wasmtest57"
+cmd_wasmtest58:
+    .asciz  "wasmtest58"
+cmd_wasmtest59:
+    .asciz  "wasmtest59"
+cmd_wasmtest60:
+    .asciz  "wasmtest60"
 cmd_wasmapp:
     .asciz  "wasmapp"
 cmd_wasmapp_uptime:
@@ -5031,7 +5238,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.82"
+    .ascii  "AI-ASM Kernel v0.86"
     .byte   13, 10, 0
 
 help_text:
@@ -5392,6 +5599,26 @@ msg_wasm_test55:
     .asciz  "Running WASM test55 (i32.wrap_i64)...\r\n"
 msg_i32_wrap_result:
     .asciz  "i32 wrap_i64 = "
+msg_wasm_test56:
+    .asciz  "Running WASM test56 (f32.add)...\r\n"
+msg_f32_add_result:
+    .asciz  "f32.add = "
+msg_wasm_test57:
+    .asciz  "Running WASM test57 (f32.mul)...\r\n"
+msg_f32_mul_result:
+    .asciz  "f32.mul = "
+msg_wasm_test58:
+    .asciz  "Running WASM test58 (f64.add)...\r\n"
+msg_f64_add_result:
+    .asciz  "f64.add = "
+msg_wasm_test59:
+    .asciz  "Running WASM test59 (f32.sqrt)...\r\n"
+msg_f32_sqrt_result:
+    .asciz  "f32.sqrt = "
+msg_wasm_test60:
+    .asciz  "Running WASM test60 (f64.mul)...\r\n"
+msg_f64_mul_result:
+    .asciz  "f64.mul = "
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -7357,3 +7584,205 @@ wasm_test_i32_wrap_module:
     .byte   0xA7                   # i32.wrap_i64
     .byte   0x0B                   # end
 wasm_test_i32_wrap_size = . - wasm_test_i32_wrap_module
+
+# WASM 测试模块 56：f32.add 测试
+# 测试：f32.const 1.5; f32.const 2.5; f32.add = 4.0
+# f32.const 1.5 = 0x3FC00000 (little endian: C0 3F -> 0x00, 0x00, 0xC0, 0x3F)
+# f32.const 2.5 = 0x40200000 (little endian: 0x00, 0x00, 0x20, 0x40)
+# body: locals(1) + f32.const(5) + f32.const(5) + f32.add(1) + end(1) = 13
+wasm_test_f32_add_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 1.5, f32.const 2.5, f32.add, end
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0xC0, 0x3F  # f32.const 1.5
+    .byte   0x43, 0x00, 0x00, 0x20, 0x40  # f32.const 2.5
+    .byte   0x92                   # f32.add
+    .byte   0x0B                   # end
+wasm_test_f32_add_size = . - wasm_test_f32_add_module
+
+# WASM 测试模块 57：f32.mul 测试
+# 测试：f32.const 2.0; f32.const 3.0; f32.mul = 6.0
+# f32.const 2.0 = 0x40000000 (little endian: 0x00, 0x00, 0x00, 0x40)
+# f32.const 3.0 = 0x40400000 (little endian: 0x00, 0x00, 0x40, 0x40)
+wasm_test_f32_mul_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 2.0, f32.const 3.0, f32.mul, end
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x00, 0x40  # f32.const 2.0
+    .byte   0x43, 0x00, 0x00, 0x40, 0x40  # f32.const 3.0
+    .byte   0x94                   # f32.mul
+    .byte   0x0B                   # end
+wasm_test_f32_mul_size = . - wasm_test_f32_mul_module
+
+# WASM 测试模块 58：f64.add 测试
+# 测试：f64.const 1.5; f64.const 2.5; f64.add = 4.0
+# f64.const 1.5 = 0x3FF8000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F)
+# f64.const 2.5 = 0x4004000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x40)
+# body: locals(1) + f64.const(9) + f64.const(9) + f64.add(1) + end(1) = 21
+wasm_test_f64_add_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 1.5, f64.const 2.5, f64.add, end
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF8, 0x3F  # f64.const 1.5
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x40  # f64.const 2.5
+    .byte   0xA0                   # f64.add
+    .byte   0x0B                   # end
+wasm_test_f64_add_size = . - wasm_test_f64_add_module
+
+# WASM 测试模块 59：f32.sqrt 测试
+# 测试：f32.const 4.0; f32.sqrt = 2.0
+# f32.const 4.0 = 0x40800000 (little endian: 0x00, 0x00, 0x80, 0x40)
+# body: locals(1) + f32.const(5) + f32.sqrt(1) + end(1) = 8
+wasm_test_f32_sqrt_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f32
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7C                   # f32
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f32.const 4.0, f32.sqrt, end
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x43, 0x00, 0x00, 0x80, 0x40  # f32.const 4.0
+    .byte   0x91                   # f32.sqrt (opcode 0x91, not 0x9E)
+    .byte   0x0B                   # end
+wasm_test_f32_sqrt_size = . - wasm_test_f32_sqrt_module
+
+# WASM 测试模块 60：f64.mul 测试
+# 测试：f64.const 3.0; f64.const 4.0; f64.mul = 12.0
+# f64.const 3.0 = 0x4008000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40)
+# f64.const 4.0 = 0x4010000000000000 (little endian: 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x40)
+# body: locals(1) + f64.const(9) + f64.const(9) + f64.mul(1) + end(1) = 21
+wasm_test_f64_mul_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic
+    .byte   0x01, 0x00, 0x00, 0x00  # version
+    # type section: () -> f64
+    .byte   0x01                   # section id
+    .byte   0x05                   # section size = 5
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7D                   # f64
+    # function section: 1 function, type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "test" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x74, 0x65, 0x73, 0x74 # "test"
+    .byte   0x00                   # export kind (func)
+    .byte   0x00                   # func index
+    # code section: f64.const 3.0, f64.const 4.0, f64.mul, end
+    .byte   0x0A                   # section id
+    .byte   0x17                   # section size = 23
+    .byte   0x01                   # num codes
+    .byte   0x15                   # body size = 21
+    .byte   0x00                   # num locals
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x40  # f64.const 3.0
+    .byte   0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x40  # f64.const 4.0
+    .byte   0xA2                   # f64.mul
+    .byte   0x0B                   # end
+wasm_test_f64_mul_size = . - wasm_test_f64_mul_module

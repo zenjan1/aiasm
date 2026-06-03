@@ -543,11 +543,22 @@ exec_code_done:
     jz      .no_return
 
     # 检查第一个返回类型
-    mov     al, [ebx + 3]  # first result type (0x7E = i64, 0x7F = i32)
+    mov     al, [ebx + 3]  # first result type (0x7C = f32, 0x7D = f64, 0x7E = i64, 0x7F = i32)
     cmp     al, 0x7E       # i64?
     je      .return_i64
+    cmp     al, 0x7D       # f64?
+    je      .return_f64
+    cmp     al, 0x7C       # f32?
+    je      .return_f32
 
     # i32 返回（原有逻辑）
+    call    _stack_pop
+    mov     [wasm_return_value], eax
+    mov     dword ptr [wasm_return_value + 4], 0  # 高位清零
+    jmp     .return_done
+
+.return_f32:
+    # f32 返回：弹出一个栈槽（位表示）
     call    _stack_pop
     mov     [wasm_return_value], eax
     mov     dword ptr [wasm_return_value + 4], 0  # 高位清零
@@ -557,6 +568,14 @@ exec_code_done:
     # i64 返回：栈顶是 low，栈底是 high
     # 先弹 low（栈顶），再弹 high
     call    _stack_pop      # 弹出 low 32 位（栈顶）
+    mov     [wasm_return_value], eax
+    call    _stack_pop      # 弹出 high 32 位
+    mov     [wasm_return_value + 4], eax
+    jmp     .return_done
+
+.return_f64:
+    # f64 返回：栈顶是 low，栈底是 high（同 i64）
+    call    _stack_pop      # 弹出 low 32 位
     mov     [wasm_return_value], eax
     call    _stack_pop      # 弹出 high 32 位
     mov     [wasm_return_value + 4], eax
@@ -3732,14 +3751,15 @@ do_f64_const:
 # f32.add: 弹出两个 f32，相加，压入结果
 do_f32_add:
     call    _stack_pop           # b (位表示)
-    push    eax
+    mov     edx, eax             # 保存 b
     call    _stack_pop           # a (位表示)
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = b, [esp+4] = a
     # 使用 x87 FPU
-    mov     dword ptr [esp + 4], eax  # [esp+4] = b
-    fld     dword ptr [esp]      # st0 = a (浮点数)
-    fadd    dword ptr [esp + 4]  # st0 = a + b
+    fld     dword ptr [esp + 4]  # st0 = a (浮点数)
+    fadd    dword ptr [esp]      # st0 = a + b
     fstp    dword ptr [esp + 4]  # 存储结果到 [esp+4]
-    pop     eax                  # 清理 a
+    pop     eax                  # 清理 b
     pop     eax                  # eax = 结果
     call    _stack_push
     jmp     dispatch_done
@@ -3747,129 +3767,157 @@ do_f32_add:
 # f32.sub: 弹出 a, b，计算 a - b
 do_f32_sub:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # 保存 b
     call    _stack_pop           # a
-    fld     dword ptr [esp]      # st0 = a
-    fsub    dword ptr [esp + 4]  # st0 = a - b
-    fstp    dword ptr [esp + 4]
-    pop     eax
-    pop     eax
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = b, [esp+4] = a
+    fld     dword ptr [esp + 4]  # st0 = a
+    fsub    dword ptr [esp]      # st0 = a - b
+    fstp    dword ptr [esp + 4]  # 存储结果
+    pop     eax                  # 清理 b
+    pop     eax                  # eax = 结果
     call    _stack_push
     jmp     dispatch_done
 
 # f32.mul: 弹出 a, b，计算 a * b
 do_f32_mul:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # 保存 b
     call    _stack_pop           # a
-    fld     dword ptr [esp]
-    fmul    dword ptr [esp + 4]
-    fstp    dword ptr [esp + 4]
-    pop     eax
-    pop     eax
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = b, [esp+4] = a
+    fld     dword ptr [esp + 4]  # st0 = a
+    fmul    dword ptr [esp]      # st0 = a * b
+    fstp    dword ptr [esp + 4]  # 存储结果
+    pop     eax                  # 清理 b
+    pop     eax                  # eax = 结果
     call    _stack_push
     jmp     dispatch_done
 
 # f32.div: 弹出 a, b，计算 a / b
 do_f32_div:
     call    _stack_pop           # b
-    push    eax
+    mov     edx, eax             # 保存 b
     call    _stack_pop           # a
-    fld     dword ptr [esp]
-    fdiv    dword ptr [esp + 4]
-    fstp    dword ptr [esp + 4]
-    pop     eax
-    pop     eax
+    push    edx                  # [esp] = b
+    push    eax                  # [esp] = b, [esp+4] = a
+    fld     dword ptr [esp + 4]  # st0 = a
+    fdiv    dword ptr [esp]      # st0 = a / b
+    fstp    dword ptr [esp + 4]  # 存储结果
+    pop     eax                  # 清理 b
+    pop     eax                  # eax = 结果
     call    _stack_push
     jmp     dispatch_done
 
 # f64.add: 弹出两个 f64（各 2 槽），相加，压入结果
 do_f64_add:
-    # f64 在栈上：high 在前，low 在后
-    # 弹出 b: b_high, b_low
+    # WASM栈：先压high，后压low。所以弹出顺序是：low先，high后
+    # 弹出 b: b_low, b_high
     call    _stack_pop           # b_low
-    push    eax
+    mov     edx, eax             # 保存 b_low
     call    _stack_pop           # b_high
-    push    eax
-    # 弹出 a: a_high, a_low
+    mov     ecx, eax             # 保存 b_high
+    # 弹出 a: a_low, a_high
     call    _stack_pop           # a_low
-    push    eax
+    mov     ebx, eax             # 保存 a_low
     call    _stack_pop           # a_high
-    push    eax
-    # 现在栈布局: [esp]=a_high, [esp+4]=a_low, [esp+8]=b_high, [esp+12]=b_low
-    # x87 FPU 加载 64 位浮点数
+    # 现在构建 x87 FPU 需要的小端序栈布局
+    # FPU 需要 [esp]=low, [esp+4]=high
+    push    ecx                  # b_high (at esp+12)
+    push    edx                  # b_low (at esp+8)
+    push    eax                  # a_high (at esp+4)
+    push    ebx                  # a_low (at esp)
+    # fld qword ptr [esp] 加载 a (a_low at [esp], a_high at [esp+4])
     fld     qword ptr [esp]      # st0 = a
     fadd    qword ptr [esp + 8]  # st0 = a + b
-    # 存储结果
-    fstp    qword ptr [esp]      # 存储到 a 的位置
-    # 清理并压入结果
-    add     esp, 12              # 清理 a_high, a_low, b_high
+    # 存储结果 (覆盖 a 的位置)
+    fstp    qword ptr [esp]      # result: [esp]=result_low, [esp+4]=result_high
+    # 弹出结果并压回 WASM 栈（先压high，后压low）
     pop     eax                  # result_low
-    push    eax                  # 保存
-    call    _stack_push          # push result_low
-    pop     eax
+    pop     edx                  # result_high
+    push    eax                  # 保存 result_low
+    mov     eax, edx             # result_high
     call    _stack_push          # push result_high
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low
+    # 清理 b 的栈空间
+    add     esp, 8               # 清理 b_high, b_low
     jmp     dispatch_done
 
 # f64.sub, mul, div 类似实现
 do_f64_sub:
     call    _stack_pop           # b_low
-    push    eax
+    mov     edx, eax             # 保存 b_low
     call    _stack_pop           # b_high
-    push    eax
+    mov     ecx, eax             # 保存 b_high
     call    _stack_pop           # a_low
-    push    eax
+    mov     ebx, eax             # 保存 a_low
     call    _stack_pop           # a_high
-    push    eax
-    fld     qword ptr [esp]
-    fsub    qword ptr [esp + 8]
-    fstp    qword ptr [esp]
-    add     esp, 12
-    pop     eax
-    push    eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    push    ecx                  # b_high (at esp+12)
+    push    edx                  # b_low (at esp+8)
+    push    eax                  # a_high (at esp+4)
+    push    ebx                  # a_low (at esp)
+    fld     qword ptr [esp]      # st0 = a
+    fsub    qword ptr [esp + 8]  # st0 = a - b
+    fstp    qword ptr [esp]      # result: [esp]=result_low, [esp+4]=result_high
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # 保存 result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low
+    add     esp, 8               # 清理 b_high, b_low
     jmp     dispatch_done
 
 do_f64_mul:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp]
-    fmul    qword ptr [esp + 8]
-    fstp    qword ptr [esp]
-    add     esp, 12
-    pop     eax
-    push    eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    call    _stack_pop           # b_low
+    mov     edx, eax             # 保存 b_low
+    call    _stack_pop           # b_high
+    mov     ecx, eax             # 保存 b_high
+    call    _stack_pop           # a_low
+    mov     ebx, eax             # 保存 a_low
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high (at esp+12)
+    push    edx                  # b_low (at esp+8)
+    push    eax                  # a_high (at esp+4)
+    push    ebx                  # a_low (at esp)
+    fld     qword ptr [esp]      # st0 = a
+    fmul    qword ptr [esp + 8]  # st0 = a * b
+    fstp    qword ptr [esp]      # result: [esp]=result_low, [esp+4]=result_high
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # 保存 result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low
+    add     esp, 8               # 清理 b_high, b_low
     jmp     dispatch_done
 
 do_f64_div:
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    call    _stack_pop
-    push    eax
-    fld     qword ptr [esp]
-    fdiv    qword ptr [esp + 8]
-    fstp    qword ptr [esp]
-    add     esp, 12
-    pop     eax
-    push    eax
-    call    _stack_push
-    pop     eax
-    call    _stack_push
+    call    _stack_pop           # b_low
+    mov     edx, eax             # 保存 b_low
+    call    _stack_pop           # b_high
+    mov     ecx, eax             # 保存 b_high
+    call    _stack_pop           # a_low
+    mov     ebx, eax             # 保存 a_low
+    call    _stack_pop           # a_high
+    push    ecx                  # b_high (at esp+12)
+    push    edx                  # b_low (at esp+8)
+    push    eax                  # a_high (at esp+4)
+    push    ebx                  # a_low (at esp)
+    fld     qword ptr [esp]      # st0 = a
+    fdiv    qword ptr [esp + 8]  # st0 = a / b
+    fstp    qword ptr [esp]      # result: [esp]=result_low, [esp+4]=result_high
+    pop     eax                  # result_low
+    pop     edx                  # result_high
+    push    eax                  # 保存 result_low
+    mov     eax, edx             # result_high
+    call    _stack_push          # push result_high
+    pop     eax                  # result_low
+    call    _stack_push          # push result_low
+    add     esp, 8               # 清理 b_high, b_low
     jmp     dispatch_done
 
 # ============================================================================
