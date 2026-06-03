@@ -3520,6 +3520,32 @@ enter_ring3:
     iret
 
 # ============================================================================
+# enter_wasm_ring3: 进入 WASM 用户模式 (ring 3)
+# 使用 wasm_user_stack 和 wasm_ring3_test
+# ============================================================================
+    .globl  enter_wasm_ring3
+enter_wasm_ring3:
+    # 设置 WASM 用户栈地址
+    mov     edx, offset wasm_user_stack_top
+
+    # 设置 iret 结构 (从栈顶向下)
+    # SS = 用户数据段选择子 | DPL=3 (0x20 | 3 = 0x23)
+    push    0x23
+    # ESP = WASM 用户栈顶
+    push    edx
+    # EFLAGS (当前值) - 使用 pushf (32位模式下 pushfd)
+    pushf
+    # 设置 IF 位 (bit 9) 开启中断
+    or      dword ptr [esp], 0x200
+    # CS = 用户代码段选择子 | DPL=3 (0x18 | 3 = 0x1B)
+    push    0x1B
+    # EIP = WASM ring3 测试代码入口
+    push    offset wasm_ring3_test
+
+    # 进入 ring 3
+    iret
+
+# ============================================================================
 # ring3_test: 用户模式测试代码
 # 在 ring 3 执行，使用 INT 0x80 系统调用
 # ============================================================================
@@ -3533,6 +3559,35 @@ ring3_test:
     int     0x80
 
     # 无限循环 (无法返回内核)
+1:  jmp     1b
+
+# ============================================================================
+# wasm_ring3_test: WASM 用户模式测试代码
+# 在 ring 3 执行，使用 INT 0x80 系统调用打印 "WASM"
+# ============================================================================
+    .globl  wasm_ring3_test
+wasm_ring3_test:
+    # 在 ring 3 执行简单 syscall 打印 "WASM"
+    mov     eax, 2              # putchar syscall
+    mov     ebx, 'W'            # 'W'
+    int     0x80
+    mov     eax, 2
+    mov     ebx, 'A'            # 'A'
+    int     0x80
+    mov     eax, 2
+    mov     ebx, 'S'            # 'S'
+    int     0x80
+    mov     eax, 2
+    mov     ebx, 'M'            # 'M'
+    int     0x80
+    # 打印换行
+    mov     eax, 2
+    mov     ebx, 0x0D           # CR
+    int     0x80
+    mov     eax, 2
+    mov     ebx, 0x0A           # LF
+    int     0x80
+    # 死循环
 1:  jmp     1b
 
 # ============================================================================
@@ -3841,6 +3896,14 @@ user_stack:
 user_stack_top:
     .globl  user_stack_top
 
+# WASM user mode stack (for ring 3 WASM execution)
+    .align  16
+wasm_user_stack:
+    .globl  wasm_user_stack
+    .space  4096               # 4KB WASM user stack
+wasm_user_stack_top:
+    .globl  wasm_user_stack_top
+
     .section .rodata
 
 # HTTP response header template (no body, dynamic Content-Length)
@@ -3851,7 +3914,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v1.09"
+    .ascii  "Server: aiasm/v1.10"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3860,7 +3923,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v1.09!"
+    .ascii  "Hello from AI-ASM Kernel v1.10!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3877,7 +3940,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v1.09"
+    .ascii  "AI-ASM Kernel v1.10"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
@@ -3924,7 +3987,7 @@ msg_dhcp_bound:.asciz "  DHCP Bound: IP="
 msg_dhcp_info:.asciz "  GW="
 msg_dhcp_noip:.asciz "  DHCP: No IP assigned\n"
 msg_dhcp_state:.asciz "  DHCP state="
-msg_boot:    .asciz  "AI-ASM Kernel v1.08 booting..."
+msg_boot:    .asciz  "AI-ASM Kernel v1.10 booting..."
 msg_udp_send_debug:
     .asciz  "[UDP_SEND] Calling e1000_send_udp\n"
 msg_udp_send_done:

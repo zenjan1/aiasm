@@ -967,6 +967,18 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest100
 
+    # "wasmtest101" - WASM user mode syscall test
+    mov     edi, offset cmd_wasmtest101
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest101
+
+    # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
+    mov     edi, offset cmd_wasmring3
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmring3
+
     # "wasmrepl" - WASM interactive REPL
     mov     edi, offset cmd_wasmrepl
     call    utils_strcmp
@@ -4511,6 +4523,65 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest101: WASM 用户模式 syscall 测试
+# ============================================================================
+.do_wasmtest101:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test101
+    call    uart_puts
+    mov     esi, offset wasm_test_ring3_module
+    mov     ecx, offset wasm_test_ring3_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmring3: 进入 WASM 用户模式 (ring 3)
+# ============================================================================
+.do_wasmring3:
+    # 打印进入消息
+    mov     esi, offset msg_wasmring3_entering
+    call    uart_puts
+
+    # 调用 enter_wasm_ring3 进入用户模式执行 WASM 测试
+    call    enter_wasm_ring3
+
+    # 如果从 ring3 返回（不应该发生）
+    mov     esi, offset msg_wasmring3_returned
+    call    uart_puts
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmrepl: WASM Interactive REPL
 # ============================================================================
 .do_wasmrepl:
@@ -7467,6 +7538,10 @@ cmd_wasmtest99:
     .asciz  "wasmtest99"
 cmd_wasmtest100:
     .asciz  "wasmtest100"
+cmd_wasmtest101:
+    .asciz  "wasmtest101"
+cmd_wasmring3:
+    .asciz  "wasmring3"
 cmd_wasmrepl:
     .asciz  "wasmrepl"
 cmd_wasmrepl_exit:
@@ -7534,6 +7609,14 @@ msg_ring3_entering:
     .asciz  "Entering Ring 3 (User Mode)...\r\n"
 msg_ring3_returned:
     .asciz  "Returned from Ring 3 (unexpected)\r\n"
+
+msg_wasmring3_entering:
+    .asciz  "Entering WASM Ring 3 (User Mode)...\r\n"
+msg_wasmring3_returned:
+    .asciz  "Returned from WASM Ring 3 (unexpected)\r\n"
+
+msg_wasm_test101:
+    .asciz  "Running WASM test101 (ring3 syscall test)...\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -7818,7 +7901,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.09"
+    .ascii  "AI-ASM Kernel v1.10"
     .byte   13, 10, 0
 
 help_text:
@@ -7883,6 +7966,10 @@ help_text:
     .ascii  "  arp           - Show ARP cache table"
     .byte   13, 10
     .ascii  "  ring3         - Enter user mode (ring 3)"
+    .byte   13, 10
+    .ascii  "  wasmring3     - Enter WASM user mode (ring 3)"
+    .byte   13, 10
+    .ascii  "  wasmtest101   - WASM ring3 syscall test"
     .byte   13, 10
     .ascii  "  diskinfo      - Show ATA disk information"
     .byte   13, 10
@@ -12440,3 +12527,54 @@ wasm_test_milestone_module:
     .byte   0x41, 0x64             # i32.const 100 (LEB128: 0x64)
     .byte   0x0B                   # end
 wasm_test_milestone_size = . - wasm_test_milestone_module
+
+# =====================================================
+# wasmtest101: Ring3 syscall test - user mode WASM
+# =====================================================
+# Calls host_putchar syscall (host_id=2) to print 'R', '3', '!'
+# Returns i32.const 101 to indicate test passed
+# Type: () -> i32
+wasm_test_ring3_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: putchar 'R', '3', '!', return 101
+    # host_putchar is host_id=2, call_index=4
+    .byte   0x0A                   # section id
+    .byte   0x0C                   # section size = 12
+    .byte   0x01                   # num codes
+    .byte   0x0A                   # body size = 10
+    .byte   0x00                   # num locals
+    # putchar 'R'
+    .byte   0x41, 0x52             # i32.const 'R' (0x52)
+    .byte   0x10, 0x04             # call 4 (host_putchar, host_id=2)
+    # putchar '3'
+    .byte   0x41, 0x33             # i32.const '3' (0x33)
+    .byte   0x10, 0x04             # call 4 (host_putchar)
+    # putchar '!'
+    .byte   0x41, 0x21             # i32.const '!' (0x21)
+    .byte   0x10, 0x04             # call 4 (host_putchar)
+    # return 101
+    .byte   0x41, 0x65             # i32.const 101 (LEB128: 0x65)
+    .byte   0x0B                   # end
+wasm_test_ring3_size = . - wasm_test_ring3_module
