@@ -1027,6 +1027,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest110
 
+    # "wasmtest111" - error test (returns -1)
+    mov     edi, offset cmd_wasmtest111
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest111
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -4970,6 +4976,49 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest111: 错误测试 (返回 -1)
+# ============================================================================
+.do_wasmtest111:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test111
+    call    uart_puts
+    mov     esi, offset wasm_test_error_module
+    mov     ecx, offset wasm_test_error_module_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    # Result is -1 (signed), print as signed integer
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    # Print error handling message
+    mov     esi, offset msg_wasm_error_test
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: 进入 WASM 用户模式 (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -7966,6 +8015,8 @@ cmd_wasmtest109:
     .asciz  "wasmtest109"
 cmd_wasmtest110:
     .asciz  "wasmtest110"
+cmd_wasmtest111:
+    .asciz  "wasmtest111"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -8073,6 +8124,12 @@ msg_wasm_test110:
 
 msg_wasm_milestone110:
     .asciz  "[110 WASM tests completed!]\r\n"
+
+msg_wasm_test111:
+    .asciz  "[WASMTEST111] Error test\r\n"
+
+msg_wasm_error_test:
+    .asciz  "[Error handling: module returned -1]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -8357,7 +8414,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.11"
+    .ascii  "AI-ASM Kernel v1.12"
     .byte   13, 10, 0
 
 help_text:
@@ -8444,6 +8501,8 @@ help_text:
     .ascii  "  wasmtest109   - comparison"
     .byte   13, 10
     .ascii  "  wasmtest110   - milestone (returns 110)"
+    .byte   13, 10
+    .ascii  "  wasmtest111   - error test (returns -1)"
     .byte   13, 10
     .ascii  "  diskinfo      - Show ATA disk information"
     .byte   13, 10
@@ -13282,3 +13341,42 @@ wasm_test_milestone110_module:
     .byte   0x41, 0x6E             # i32.const 110 (LEB128: 0x6E)
     .byte   0x0B                   # end
 wasm_test_milestone110_size = . - wasm_test_milestone110_module
+
+# =====================================================
+# wasmtest111: Error test - returns -1
+# =====================================================
+# Tests error handling: module returns negative value
+# Type: () -> i32
+wasm_test_error_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return -1
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7F             # i32.const -1 (LEB128: 0x7F = -1)
+    .byte   0x0B                   # end
+wasm_test_error_module_size = . - wasm_test_error_module
