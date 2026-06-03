@@ -1062,6 +1062,20 @@ shell_dispatch:
     test    eax, eax
     jz      .do_ring3
 
+    # "diskinfo" - show disk information
+    mov     edi, offset cmd_diskinfo
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_diskinfo
+
+    # "diskread <lba>" - read disk sector
+    mov     edi, offset cmd_diskread
+    mov     esi, offset shell_cmd_buf
+    mov     ecx, 9               # "diskread " length
+    call    utils_strncmp
+    test    eax, eax
+    jz      .do_diskread
+
     # 未知命令
     mov     esi, offset msg_unknown
     call    uart_puts
@@ -6485,9 +6499,133 @@ shell_print_dec_byte:
     ret
 
 # ============================================================================
-# 命令字符串
+# .do_diskinfo: 显示磁盘信息
 # ============================================================================
-    .section .rodata
+.do_diskinfo:
+    # 打印磁盘信息标题
+    mov     esi, offset msg_diskinfo_header
+    call    uart_puts
+
+    # 获取 ATA 状态
+    call    ata_get_status
+    movzx   eax, al              # 扩展到 32-bit
+    mov     esi, offset msg_disk_status
+    call    uart_puts
+    mov     edi, offset msg_diskread_hex  # 使用 hex buffer
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    # 打印 LBA 支持
+    mov     esi, offset msg_disk_lba
+    call    uart_puts
+
+    # 打印完成
+    mov     esi, offset msg_disk_ok
+    call    uart_puts
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_diskread: 读取磁盘扇区
+# ============================================================================
+.do_diskread:
+    # 解析 LBA 参数 (从 shell_cmd_buf + 9 开始)
+    mov     esi, offset shell_cmd_buf
+    add     esi, 9               # 跳过 "diskread "
+
+    # 检查是否有参数
+    mov     al, [esi]
+    test    al, al
+    jz      .diskread_usage
+
+    # 解析十六进制 LBA
+    call    utils_parse_hex     # eax = LBA value
+
+    # 打印读取信息
+    push    eax                 # 保存 LBA
+    mov     esi, offset msg_diskread_header
+    call    uart_puts
+    mov     esi, offset msg_diskread_lba
+    call    uart_puts
+    pop     eax
+    push    eax                 # 再次保存 LBA
+    mov     edi, offset msg_diskread_hex  # buffer for hex output
+    mov     dl, 16
+    call    utils_itoa
+    mov     esi, eax            # utils_itoa 返回 buffer pointer
+    call    uart_puts
+    mov     esi, offset msg_diskread_done
+    call    uart_puts
+
+    # 读取扇区到 ata_buffer
+    pop     eax                 # LBA
+    push    offset ata_buffer   # 缓冲区指针作为参数
+    push    eax                 # 保存 LBA for later cleanup
+    mov     edi, offset ata_buffer
+    call    ata_read_sector
+    pop     eax                 # 恢复 LBA (清理栈)
+    add     esp, 4              # 清理缓冲区参数
+    test    eax, eax
+    jnz     .diskread_fail
+
+    # 打印 hexdump (前 16 字节)
+    mov     esi, offset msg_diskread_data
+    call    uart_puts
+
+    mov     esi, offset ata_buffer
+    mov     ecx, 16
+    cld
+.hexdump_loop:
+    lodsb
+    push    ecx
+    push    esi
+    mov     esi, offset msg_diskread_hex
+    call    utils_itoa_single   # convert al to hex string
+    mov     esi, offset msg_diskread_hex
+    call    uart_puts
+    mov     al, ' '
+    call    uart_putc
+    pop     esi
+    pop     ecx
+    dec     ecx
+    jnz     .hexdump_loop
+
+    # 换行
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.diskread_fail:
+    mov     esi, offset msg_diskread_fail
+    call    uart_puts
+    pop     eax
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.diskread_usage:
+    mov     esi, offset msg_diskread_usage
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
 
 shell_prompt:
     .asciz  "aiasm> "
@@ -6760,6 +6898,11 @@ cmd_arp:
 cmd_ring3:
     .asciz  "ring3"
 
+cmd_diskinfo:
+    .asciz  "diskinfo"
+cmd_diskread:
+    .asciz  "diskread "
+
 msg_ring3_entering:
     .asciz  "Entering Ring 3 (User Mode)...\r\n"
 msg_ring3_returned:
@@ -6806,6 +6949,40 @@ msg_pci_device_id:
 msg_pci_none:
     .ascii  "No PCI devices found"
     .byte   13, 10, 0
+
+# Disk messages
+msg_diskinfo_header:
+    .ascii  "ATA Disk Information:"
+    .byte   13, 10, 0
+msg_disk_status:
+    .ascii  "  Status: 0x"
+    .byte   0
+msg_disk_lba:
+    .ascii  "  LBA mode supported (28-bit)"
+    .byte   13, 10, 0
+msg_disk_ok:
+    .ascii  "  ATA driver ready"
+    .byte   13, 10, 0
+msg_diskread_header:
+    .ascii  "Reading sector "
+    .byte   0
+msg_diskread_lba:
+    .ascii  " at LBA 0x"
+    .byte   0
+msg_diskread_done:
+    .ascii  ": Read 512 bytes"
+    .byte   13, 10, 0
+msg_diskread_fail:
+    .ascii  "Read failed!"
+    .byte   13, 10, 0
+msg_diskread_usage:
+    .ascii  "Usage: diskread <lba> (hex, e.g. diskread 0)"
+    .byte   13, 10, 0
+msg_diskread_data:
+    .ascii  "Data: "
+    .byte   0
+msg_diskread_hex:
+    .space  8                   # hex buffer
 
 msg_netinfo_header:
     .ascii  "Network device info:"
@@ -6970,7 +7147,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v0.98"
+    .ascii  "AI-ASM Kernel v0.99"
     .byte   13, 10, 0
 
 help_text:
@@ -7035,6 +7212,10 @@ help_text:
     .ascii  "  arp           - Show ARP cache table"
     .byte   13, 10
     .ascii  "  ring3         - Enter user mode (ring 3)"
+    .byte   13, 10
+    .ascii  "  diskinfo      - Show ATA disk information"
+    .byte   13, 10
+    .ascii  "  diskread <lba> - Read disk sector (hex LBA)"
     .byte   13, 10, 0
 
 tick_prefix:
@@ -7104,7 +7285,7 @@ msg_wasm_test9:
 msg_wasm_result:
     .asciz  "Result: "
 msg_wasmrepl_header:
-    .asciz  "WASM REPL v0.98\r\n"
+    .asciz  "WASM REPL v0.99\r\n"
 msg_wasmrepl_prompt:
     .asciz  "> "
 msg_wasmrepl_parse_err:

@@ -232,3 +232,115 @@ utils_atoi:
     pop     ecx
     pop     ebx
     ret
+
+# -----------------------------------------------------------------------------
+# parse_hex: 解析十六进制字符串
+# 输入：esi = 字符串指针 (支持 "0x" 前缀或直接 hex)
+# 输出：eax = 整数值
+# -----------------------------------------------------------------------------
+    .globl  utils_parse_hex
+utils_parse_hex:
+    push    ebx
+    push    ecx
+    push    edx
+
+    xor     eax, eax              # result = 0
+    xor     ecx, ecx              # digit count
+
+    # 检查 "0x" 前缀
+    movzx   edx, byte ptr [esi]
+    cmp     edx, '0'
+    jne     .parse_hex_start
+    inc     esi
+    movzx   edx, byte ptr [esi]
+    cmp     edx, 'x'
+    jne     .parse_hex_start
+    inc     esi
+
+.parse_hex_start:
+    movzx   edx, byte ptr [esi]
+    test    edx, edx
+    jz      .parse_hex_done
+
+    # 检查是否是有效的十六进制字符
+    cmp     edx, '0'
+    jl      .parse_hex_done
+    cmp     edx, '9'
+    jle     .hex_digit
+
+    cmp     edx, 'a'
+    jl      .check_upper
+    cmp     edx, 'f'
+    jle     .hex_lower
+
+.check_upper:
+    cmp     edx, 'A'
+    jl      .parse_hex_done
+    cmp     edx, 'F'
+    jle     .hex_upper
+
+    jmp     .parse_hex_done
+
+.hex_digit:
+    sub     edx, '0'
+    jmp     .hex_add
+
+.hex_lower:
+    sub     edx, 'a'
+    add     edx, 10
+    jmp     .hex_add
+
+.hex_upper:
+    sub     edx, 'A'
+    add     edx, 10
+
+.hex_add:
+    # eax = eax * 16 + digit
+    shl     eax, 4
+    add     eax, edx
+    inc     esi
+    jmp     .parse_hex_start
+
+.parse_hex_done:
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+# -----------------------------------------------------------------------------
+# itoa_single: 单字节转十六进制字符串
+# 输入：al = byte value, esi = buffer (至少 3 字节)
+# 输出：buffer 包含 2 字符 hex + null
+# -----------------------------------------------------------------------------
+    .globl  utils_itoa_single
+utils_itoa_single:
+    push    eax
+    push    ecx
+
+    mov     ecx, eax              # 保存原始值
+
+    # 高 4 位
+    shr     al, 4
+    cmp     al, 9
+    jle     .high_digit
+    add     al, 7                 # A-F
+.high_digit:
+    add     al, '0'
+    mov     [esi], al
+
+    # 低 4 位
+    mov     al, cl
+    and     al, 0x0F
+    cmp     al, 9
+    jle     .low_digit
+    add     al, 7
+.low_digit:
+    add     al, '0'
+    mov     [esi + 1], al
+
+    # null 终止
+    mov     byte ptr [esi + 2], 0
+
+    pop     ecx
+    pop     eax
+    ret
