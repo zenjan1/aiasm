@@ -961,6 +961,12 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest99
 
+    # "wasmtest100" - WASM milestone test - 100 tests completed!
+    mov     edi, offset cmd_wasmtest100
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest100
+
     # "wasmrepl" - WASM interactive REPL
     mov     edi, offset cmd_wasmrepl
     call    utils_strcmp
@@ -4463,6 +4469,47 @@ shell_wasmtest21:
     pop     esi
     ret
 
+.do_wasmtest100:
+    # WASM milestone test: 100 WASM tests completed!
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test100
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone_module
+    mov     ecx, offset wasm_test_milestone_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    # Print "Result: "
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    # Print result (should be 100)
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    # Print milestone message
+    mov     esi, offset msg_wasm_milestone
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # .do_wasmrepl: WASM Interactive REPL
 # ============================================================================
@@ -7418,6 +7465,8 @@ cmd_wasmtest98:
     .asciz  "wasmtest98"
 cmd_wasmtest99:
     .asciz  "wasmtest99"
+cmd_wasmtest100:
+    .asciz  "wasmtest100"
 cmd_wasmrepl:
     .asciz  "wasmrepl"
 cmd_wasmrepl_exit:
@@ -7769,7 +7818,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.08"
+    .ascii  "AI-ASM Kernel v1.09"
     .byte   13, 10, 0
 
 help_text:
@@ -8362,6 +8411,10 @@ msg_wasm_fatwrite_bytes:
     .asciz  ""
 msg_wasm_fatwrite_written:
     .asciz  " bytes written"
+msg_wasm_test100:
+    .asciz  "[WASMTEST100] Milestone test\r\n"
+msg_wasm_milestone:
+    .asciz  "[100 WASM tests completed!]\r\n"
 msg_0x:
     .asciz  "0x"
 msg_kill_ok:
@@ -12348,3 +12401,42 @@ wasm_test_fatwrite_module:
     .byte   0x10, 0x10             # call 16 (fatwrite, host_id=15)
     .byte   0x0B                   # end
 wasm_test_fatwrite_size = . - wasm_test_fatwrite_module
+
+# =====================================================
+# wasmtest100: Milestone test - 100 WASM tests completed!
+# =====================================================
+# Returns i32.const 100 to celebrate 100 tests
+# Simple test: () -> i32, returns 100
+wasm_test_milestone_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 100, end
+    .byte   0x0A                   # section id
+    .byte   0x06                   # section size = 6
+    .byte   0x01                   # num codes
+    .byte   0x04                   # body size = 4
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x64             # i32.const 100 (LEB128: 0x64)
+    .byte   0x0B                   # end
+wasm_test_milestone_size = . - wasm_test_milestone_module
