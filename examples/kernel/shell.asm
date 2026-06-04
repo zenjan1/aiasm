@@ -4568,6 +4568,306 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest700
 
+    # "wasmtest701"
+    mov     edi, offset cmd_wasmtest701
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest701
+
+    # "wasmtest702"
+    mov     edi, offset cmd_wasmtest702
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest702
+
+    # "wasmtest703"
+    mov     edi, offset cmd_wasmtest703
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest703
+
+    # "wasmtest704"
+    mov     edi, offset cmd_wasmtest704
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest704
+
+    # "wasmtest705"
+    mov     edi, offset cmd_wasmtest705
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest705
+
+    # "wasmtest706"
+    mov     edi, offset cmd_wasmtest706
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest706
+
+    # "wasmtest707"
+    mov     edi, offset cmd_wasmtest707
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest707
+
+    # "wasmtest708"
+    mov     edi, offset cmd_wasmtest708
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest708
+
+    # "wasmtest709"
+    mov     edi, offset cmd_wasmtest709
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest709
+
+    # "wasmtest710"
+    mov     edi, offset cmd_wasmtest710
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest710
+
+    # "wasmtest711"
+    mov     edi, offset cmd_wasmtest711
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest711
+
+    # "wasmtest712"
+    mov     edi, offset cmd_wasmtest712
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest712
+
+    # "wasmtest713"
+    mov     edi, offset cmd_wasmtest713
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest713
+
+    # "wasmtest714"
+    mov     edi, offset cmd_wasmtest714
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest714
+
+    # "wasmtest715"
+    mov     edi, offset cmd_wasmtest715
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest715
+
+    # "wasmtest716"
+    mov     edi, offset cmd_wasmtest716
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest716
+
+    # "wasmtest717"
+    mov     edi, offset cmd_wasmtest717
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest717
+
+    # "wasmtest718"
+    mov     edi, offset cmd_wasmtest718
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest718
+
+    # "wasmtest719"
+    mov     edi, offset cmd_wasmtest719
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest719
+
+    # "wasmtest720"
+    mov     edi, offset cmd_wasmtest720
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest720
+
+    # "wasmtest721"
+    mov     edi, offset cmd_wasmtest721
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest721
+
+    # "wasmtest722"
+    mov     edi, offset cmd_wasmtest722
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest722
+
+    # "wasmtest723"
+    mov     edi, offset cmd_wasmtest723
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest723
+
+    # "wasmtest724"
+    mov     edi, offset cmd_wasmtest724
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest724
+
+    # "wasmtest725"
+    mov     edi, offset cmd_wasmtest725
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest725
+
+    # "wasmtest726"
+    mov     edi, offset cmd_wasmtest726
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest726
+
+    # "wasmtest727"
+    mov     edi, offset cmd_wasmtest727
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest727
+
+    # "wasmtest728"
+    mov     edi, offset cmd_wasmtest728
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest728
+
+    # "wasmtest729"
+    mov     edi, offset cmd_wasmtest729
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest729
+
+    # "wasmtest730"
+    mov     edi, offset cmd_wasmtest730
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest730
+
+    # "wasmtest731"
+    mov     edi, offset cmd_wasmtest731
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest731
+
+    # "wasmtest732"
+    mov     edi, offset cmd_wasmtest732
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest732
+
+    # "wasmtest733"
+    mov     edi, offset cmd_wasmtest733
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest733
+
+    # "wasmtest734"
+    mov     edi, offset cmd_wasmtest734
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest734
+
+    # "wasmtest735"
+    mov     edi, offset cmd_wasmtest735
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest735
+
+    # "wasmtest736"
+    mov     edi, offset cmd_wasmtest736
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest736
+
+    # "wasmtest737"
+    mov     edi, offset cmd_wasmtest737
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest737
+
+    # "wasmtest738"
+    mov     edi, offset cmd_wasmtest738
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest738
+
+    # "wasmtest739"
+    mov     edi, offset cmd_wasmtest739
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest739
+
+    # "wasmtest740"
+    mov     edi, offset cmd_wasmtest740
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest740
+
+    # "wasmtest741"
+    mov     edi, offset cmd_wasmtest741
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest741
+
+    # "wasmtest742"
+    mov     edi, offset cmd_wasmtest742
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest742
+
+    # "wasmtest743"
+    mov     edi, offset cmd_wasmtest743
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest743
+
+    # "wasmtest744"
+    mov     edi, offset cmd_wasmtest744
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest744
+
+    # "wasmtest745"
+    mov     edi, offset cmd_wasmtest745
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest745
+
+    # "wasmtest746"
+    mov     edi, offset cmd_wasmtest746
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest746
+
+    # "wasmtest747"
+    mov     edi, offset cmd_wasmtest747
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest747
+
+    # "wasmtest748"
+    mov     edi, offset cmd_wasmtest748
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest748
+
+    # "wasmtest749"
+    mov     edi, offset cmd_wasmtest749
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest749
+
+    # "wasmtest750"
+    mov     edi, offset cmd_wasmtest750
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest750
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -31246,6 +31546,1908 @@ shell_wasmtest21:
     pop     esi
     ret
 
+# =============================================================================
+# .do_wasmtest701: Smart manufacturing simulation - returns 701
+# =============================================================================
+.do_wasmtest701:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test701
+    call    uart_puts
+    mov     esi, offset wasm_test701_module
+    mov     ecx, offset wasm_test701_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest702: Smart manufacturing simulation - returns 702
+# =============================================================================
+.do_wasmtest702:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test702
+    call    uart_puts
+    mov     esi, offset wasm_test702_module
+    mov     ecx, offset wasm_test702_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest703: Smart manufacturing simulation - returns 703
+# =============================================================================
+.do_wasmtest703:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test703
+    call    uart_puts
+    mov     esi, offset wasm_test703_module
+    mov     ecx, offset wasm_test703_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest704: Smart manufacturing simulation - returns 704
+# =============================================================================
+.do_wasmtest704:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test704
+    call    uart_puts
+    mov     esi, offset wasm_test704_module
+    mov     ecx, offset wasm_test704_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest705: Smart manufacturing simulation - returns 705
+# =============================================================================
+.do_wasmtest705:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test705
+    call    uart_puts
+    mov     esi, offset wasm_test705_module
+    mov     ecx, offset wasm_test705_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest706: Smart manufacturing simulation - returns 706
+# =============================================================================
+.do_wasmtest706:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test706
+    call    uart_puts
+    mov     esi, offset wasm_test706_module
+    mov     ecx, offset wasm_test706_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest707: Smart manufacturing simulation - returns 707
+# =============================================================================
+.do_wasmtest707:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test707
+    call    uart_puts
+    mov     esi, offset wasm_test707_module
+    mov     ecx, offset wasm_test707_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest708: Smart manufacturing simulation - returns 708
+# =============================================================================
+.do_wasmtest708:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test708
+    call    uart_puts
+    mov     esi, offset wasm_test708_module
+    mov     ecx, offset wasm_test708_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest709: Smart manufacturing simulation - returns 709
+# =============================================================================
+.do_wasmtest709:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test709
+    call    uart_puts
+    mov     esi, offset wasm_test709_module
+    mov     ecx, offset wasm_test709_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest710: Smart manufacturing simulation - returns 710
+# =============================================================================
+.do_wasmtest710:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test710
+    call    uart_puts
+    mov     esi, offset wasm_test710_module
+    mov     ecx, offset wasm_test710_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest711: Smart city simulation - returns 711
+# =============================================================================
+.do_wasmtest711:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test711
+    call    uart_puts
+    mov     esi, offset wasm_test711_module
+    mov     ecx, offset wasm_test711_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest712: Smart city simulation - returns 712
+# =============================================================================
+.do_wasmtest712:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test712
+    call    uart_puts
+    mov     esi, offset wasm_test712_module
+    mov     ecx, offset wasm_test712_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest713: Smart city simulation - returns 713
+# =============================================================================
+.do_wasmtest713:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test713
+    call    uart_puts
+    mov     esi, offset wasm_test713_module
+    mov     ecx, offset wasm_test713_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest714: Smart city simulation - returns 714
+# =============================================================================
+.do_wasmtest714:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test714
+    call    uart_puts
+    mov     esi, offset wasm_test714_module
+    mov     ecx, offset wasm_test714_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest715: Smart city simulation - returns 715
+# =============================================================================
+.do_wasmtest715:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test715
+    call    uart_puts
+    mov     esi, offset wasm_test715_module
+    mov     ecx, offset wasm_test715_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest716: Smart city simulation - returns 716
+# =============================================================================
+.do_wasmtest716:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test716
+    call    uart_puts
+    mov     esi, offset wasm_test716_module
+    mov     ecx, offset wasm_test716_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest717: Smart city simulation - returns 717
+# =============================================================================
+.do_wasmtest717:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test717
+    call    uart_puts
+    mov     esi, offset wasm_test717_module
+    mov     ecx, offset wasm_test717_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest718: Smart city simulation - returns 718
+# =============================================================================
+.do_wasmtest718:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test718
+    call    uart_puts
+    mov     esi, offset wasm_test718_module
+    mov     ecx, offset wasm_test718_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest719: Smart city simulation - returns 719
+# =============================================================================
+.do_wasmtest719:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test719
+    call    uart_puts
+    mov     esi, offset wasm_test719_module
+    mov     ecx, offset wasm_test719_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest720: Smart city simulation - returns 720
+# =============================================================================
+.do_wasmtest720:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test720
+    call    uart_puts
+    mov     esi, offset wasm_test720_module
+    mov     ecx, offset wasm_test720_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest721: Smart transportation simulation - returns 721
+# =============================================================================
+.do_wasmtest721:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test721
+    call    uart_puts
+    mov     esi, offset wasm_test721_module
+    mov     ecx, offset wasm_test721_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest722: Smart transportation simulation - returns 722
+# =============================================================================
+.do_wasmtest722:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test722
+    call    uart_puts
+    mov     esi, offset wasm_test722_module
+    mov     ecx, offset wasm_test722_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest723: Smart transportation simulation - returns 723
+# =============================================================================
+.do_wasmtest723:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test723
+    call    uart_puts
+    mov     esi, offset wasm_test723_module
+    mov     ecx, offset wasm_test723_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest724: Smart transportation simulation - returns 724
+# =============================================================================
+.do_wasmtest724:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test724
+    call    uart_puts
+    mov     esi, offset wasm_test724_module
+    mov     ecx, offset wasm_test724_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest725: Smart transportation simulation - returns 725
+# =============================================================================
+.do_wasmtest725:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test725
+    call    uart_puts
+    mov     esi, offset wasm_test725_module
+    mov     ecx, offset wasm_test725_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest726: Smart transportation simulation - returns 726
+# =============================================================================
+.do_wasmtest726:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test726
+    call    uart_puts
+    mov     esi, offset wasm_test726_module
+    mov     ecx, offset wasm_test726_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest727: Smart transportation simulation - returns 727
+# =============================================================================
+.do_wasmtest727:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test727
+    call    uart_puts
+    mov     esi, offset wasm_test727_module
+    mov     ecx, offset wasm_test727_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest728: Smart transportation simulation - returns 728
+# =============================================================================
+.do_wasmtest728:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test728
+    call    uart_puts
+    mov     esi, offset wasm_test728_module
+    mov     ecx, offset wasm_test728_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest729: Smart transportation simulation - returns 729
+# =============================================================================
+.do_wasmtest729:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test729
+    call    uart_puts
+    mov     esi, offset wasm_test729_module
+    mov     ecx, offset wasm_test729_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest730: Smart transportation simulation - returns 730
+# =============================================================================
+.do_wasmtest730:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test730
+    call    uart_puts
+    mov     esi, offset wasm_test730_module
+    mov     ecx, offset wasm_test730_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest731: Energy management simulation - returns 731
+# =============================================================================
+.do_wasmtest731:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test731
+    call    uart_puts
+    mov     esi, offset wasm_test731_module
+    mov     ecx, offset wasm_test731_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest732: Energy management simulation - returns 732
+# =============================================================================
+.do_wasmtest732:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test732
+    call    uart_puts
+    mov     esi, offset wasm_test732_module
+    mov     ecx, offset wasm_test732_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest733: Energy management simulation - returns 733
+# =============================================================================
+.do_wasmtest733:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test733
+    call    uart_puts
+    mov     esi, offset wasm_test733_module
+    mov     ecx, offset wasm_test733_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest734: Energy management simulation - returns 734
+# =============================================================================
+.do_wasmtest734:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test734
+    call    uart_puts
+    mov     esi, offset wasm_test734_module
+    mov     ecx, offset wasm_test734_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest735: Energy management simulation - returns 735
+# =============================================================================
+.do_wasmtest735:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test735
+    call    uart_puts
+    mov     esi, offset wasm_test735_module
+    mov     ecx, offset wasm_test735_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest736: Energy management simulation - returns 736
+# =============================================================================
+.do_wasmtest736:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test736
+    call    uart_puts
+    mov     esi, offset wasm_test736_module
+    mov     ecx, offset wasm_test736_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest737: Energy management simulation - returns 737
+# =============================================================================
+.do_wasmtest737:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test737
+    call    uart_puts
+    mov     esi, offset wasm_test737_module
+    mov     ecx, offset wasm_test737_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest738: Energy management simulation - returns 738
+# =============================================================================
+.do_wasmtest738:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test738
+    call    uart_puts
+    mov     esi, offset wasm_test738_module
+    mov     ecx, offset wasm_test738_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest739: Energy management simulation - returns 739
+# =============================================================================
+.do_wasmtest739:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test739
+    call    uart_puts
+    mov     esi, offset wasm_test739_module
+    mov     ecx, offset wasm_test739_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest740: Energy management simulation - returns 740
+# =============================================================================
+.do_wasmtest740:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test740
+    call    uart_puts
+    mov     esi, offset wasm_test740_module
+    mov     ecx, offset wasm_test740_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest741: Environmental monitoring simulation - returns 741
+# =============================================================================
+.do_wasmtest741:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test741
+    call    uart_puts
+    mov     esi, offset wasm_test741_module
+    mov     ecx, offset wasm_test741_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest742: Environmental monitoring simulation - returns 742
+# =============================================================================
+.do_wasmtest742:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test742
+    call    uart_puts
+    mov     esi, offset wasm_test742_module
+    mov     ecx, offset wasm_test742_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest743: Environmental monitoring simulation - returns 743
+# =============================================================================
+.do_wasmtest743:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test743
+    call    uart_puts
+    mov     esi, offset wasm_test743_module
+    mov     ecx, offset wasm_test743_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest744: Environmental monitoring simulation - returns 744
+# =============================================================================
+.do_wasmtest744:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test744
+    call    uart_puts
+    mov     esi, offset wasm_test744_module
+    mov     ecx, offset wasm_test744_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest745: Environmental monitoring simulation - returns 745
+# =============================================================================
+.do_wasmtest745:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test745
+    call    uart_puts
+    mov     esi, offset wasm_test745_module
+    mov     ecx, offset wasm_test745_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest746: Environmental monitoring simulation - returns 746
+# =============================================================================
+.do_wasmtest746:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test746
+    call    uart_puts
+    mov     esi, offset wasm_test746_module
+    mov     ecx, offset wasm_test746_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest747: Environmental monitoring simulation - returns 747
+# =============================================================================
+.do_wasmtest747:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test747
+    call    uart_puts
+    mov     esi, offset wasm_test747_module
+    mov     ecx, offset wasm_test747_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest748: Environmental monitoring simulation - returns 748
+# =============================================================================
+.do_wasmtest748:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test748
+    call    uart_puts
+    mov     esi, offset wasm_test748_module
+    mov     ecx, offset wasm_test748_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest749: Environmental monitoring simulation - returns 749
+# =============================================================================
+.do_wasmtest749:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test749
+    call    uart_puts
+    mov     esi, offset wasm_test749_module
+    mov     ecx, offset wasm_test749_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest750: 750 tests major milestone - returns 750
+# =============================================================================
+.do_wasmtest750:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test750
+    call    uart_puts
+    mov     esi, offset wasm_test750_module
+    mov     ecx, offset wasm_test750_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone750
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
@@ -35423,6 +37625,106 @@ cmd_wasmtest699:
     .asciz  "wasmtest699"
 cmd_wasmtest700:
     .asciz  "wasmtest700"
+cmd_wasmtest701:
+    .asciz  "wasmtest701"
+cmd_wasmtest702:
+    .asciz  "wasmtest702"
+cmd_wasmtest703:
+    .asciz  "wasmtest703"
+cmd_wasmtest704:
+    .asciz  "wasmtest704"
+cmd_wasmtest705:
+    .asciz  "wasmtest705"
+cmd_wasmtest706:
+    .asciz  "wasmtest706"
+cmd_wasmtest707:
+    .asciz  "wasmtest707"
+cmd_wasmtest708:
+    .asciz  "wasmtest708"
+cmd_wasmtest709:
+    .asciz  "wasmtest709"
+cmd_wasmtest710:
+    .asciz  "wasmtest710"
+cmd_wasmtest711:
+    .asciz  "wasmtest711"
+cmd_wasmtest712:
+    .asciz  "wasmtest712"
+cmd_wasmtest713:
+    .asciz  "wasmtest713"
+cmd_wasmtest714:
+    .asciz  "wasmtest714"
+cmd_wasmtest715:
+    .asciz  "wasmtest715"
+cmd_wasmtest716:
+    .asciz  "wasmtest716"
+cmd_wasmtest717:
+    .asciz  "wasmtest717"
+cmd_wasmtest718:
+    .asciz  "wasmtest718"
+cmd_wasmtest719:
+    .asciz  "wasmtest719"
+cmd_wasmtest720:
+    .asciz  "wasmtest720"
+cmd_wasmtest721:
+    .asciz  "wasmtest721"
+cmd_wasmtest722:
+    .asciz  "wasmtest722"
+cmd_wasmtest723:
+    .asciz  "wasmtest723"
+cmd_wasmtest724:
+    .asciz  "wasmtest724"
+cmd_wasmtest725:
+    .asciz  "wasmtest725"
+cmd_wasmtest726:
+    .asciz  "wasmtest726"
+cmd_wasmtest727:
+    .asciz  "wasmtest727"
+cmd_wasmtest728:
+    .asciz  "wasmtest728"
+cmd_wasmtest729:
+    .asciz  "wasmtest729"
+cmd_wasmtest730:
+    .asciz  "wasmtest730"
+cmd_wasmtest731:
+    .asciz  "wasmtest731"
+cmd_wasmtest732:
+    .asciz  "wasmtest732"
+cmd_wasmtest733:
+    .asciz  "wasmtest733"
+cmd_wasmtest734:
+    .asciz  "wasmtest734"
+cmd_wasmtest735:
+    .asciz  "wasmtest735"
+cmd_wasmtest736:
+    .asciz  "wasmtest736"
+cmd_wasmtest737:
+    .asciz  "wasmtest737"
+cmd_wasmtest738:
+    .asciz  "wasmtest738"
+cmd_wasmtest739:
+    .asciz  "wasmtest739"
+cmd_wasmtest740:
+    .asciz  "wasmtest740"
+cmd_wasmtest741:
+    .asciz  "wasmtest741"
+cmd_wasmtest742:
+    .asciz  "wasmtest742"
+cmd_wasmtest743:
+    .asciz  "wasmtest743"
+cmd_wasmtest744:
+    .asciz  "wasmtest744"
+cmd_wasmtest745:
+    .asciz  "wasmtest745"
+cmd_wasmtest746:
+    .asciz  "wasmtest746"
+cmd_wasmtest747:
+    .asciz  "wasmtest747"
+cmd_wasmtest748:
+    .asciz  "wasmtest748"
+cmd_wasmtest749:
+    .asciz  "wasmtest749"
+cmd_wasmtest750:
+    .asciz  "wasmtest750"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -38290,6 +40592,159 @@ msg_wasm_test700:
 
 msg_wasm_milestone700:
     .asciz  "[*** 700 WASM TESTS MILESTONE! v1.53 ***]\r\n"
+
+msg_wasm_test701:
+    .asciz  "[WASMTEST701] Smart manufacturing simulation\r\n"
+
+msg_wasm_test702:
+    .asciz  "[WASMTEST702] Smart manufacturing simulation\r\n"
+
+msg_wasm_test703:
+    .asciz  "[WASMTEST703] Smart manufacturing simulation\r\n"
+
+msg_wasm_test704:
+    .asciz  "[WASMTEST704] Smart manufacturing simulation\r\n"
+
+msg_wasm_test705:
+    .asciz  "[WASMTEST705] Smart manufacturing simulation\r\n"
+
+msg_wasm_test706:
+    .asciz  "[WASMTEST706] Smart manufacturing simulation\r\n"
+
+msg_wasm_test707:
+    .asciz  "[WASMTEST707] Smart manufacturing simulation\r\n"
+
+msg_wasm_test708:
+    .asciz  "[WASMTEST708] Smart manufacturing simulation\r\n"
+
+msg_wasm_test709:
+    .asciz  "[WASMTEST709] Smart manufacturing simulation\r\n"
+
+msg_wasm_test710:
+    .asciz  "[WASMTEST710] Smart manufacturing simulation\r\n"
+
+msg_wasm_test711:
+    .asciz  "[WASMTEST711] Smart city simulation\r\n"
+
+msg_wasm_test712:
+    .asciz  "[WASMTEST712] Smart city simulation\r\n"
+
+msg_wasm_test713:
+    .asciz  "[WASMTEST713] Smart city simulation\r\n"
+
+msg_wasm_test714:
+    .asciz  "[WASMTEST714] Smart city simulation\r\n"
+
+msg_wasm_test715:
+    .asciz  "[WASMTEST715] Smart city simulation\r\n"
+
+msg_wasm_test716:
+    .asciz  "[WASMTEST716] Smart city simulation\r\n"
+
+msg_wasm_test717:
+    .asciz  "[WASMTEST717] Smart city simulation\r\n"
+
+msg_wasm_test718:
+    .asciz  "[WASMTEST718] Smart city simulation\r\n"
+
+msg_wasm_test719:
+    .asciz  "[WASMTEST719] Smart city simulation\r\n"
+
+msg_wasm_test720:
+    .asciz  "[WASMTEST720] Smart city simulation\r\n"
+
+msg_wasm_test721:
+    .asciz  "[WASMTEST721] Smart transportation simulation\r\n"
+
+msg_wasm_test722:
+    .asciz  "[WASMTEST722] Smart transportation simulation\r\n"
+
+msg_wasm_test723:
+    .asciz  "[WASMTEST723] Smart transportation simulation\r\n"
+
+msg_wasm_test724:
+    .asciz  "[WASMTEST724] Smart transportation simulation\r\n"
+
+msg_wasm_test725:
+    .asciz  "[WASMTEST725] Smart transportation simulation\r\n"
+
+msg_wasm_test726:
+    .asciz  "[WASMTEST726] Smart transportation simulation\r\n"
+
+msg_wasm_test727:
+    .asciz  "[WASMTEST727] Smart transportation simulation\r\n"
+
+msg_wasm_test728:
+    .asciz  "[WASMTEST728] Smart transportation simulation\r\n"
+
+msg_wasm_test729:
+    .asciz  "[WASMTEST729] Smart transportation simulation\r\n"
+
+msg_wasm_test730:
+    .asciz  "[WASMTEST730] Smart transportation simulation\r\n"
+
+msg_wasm_test731:
+    .asciz  "[WASMTEST731] Energy management simulation\r\n"
+
+msg_wasm_test732:
+    .asciz  "[WASMTEST732] Energy management simulation\r\n"
+
+msg_wasm_test733:
+    .asciz  "[WASMTEST733] Energy management simulation\r\n"
+
+msg_wasm_test734:
+    .asciz  "[WASMTEST734] Energy management simulation\r\n"
+
+msg_wasm_test735:
+    .asciz  "[WASMTEST735] Energy management simulation\r\n"
+
+msg_wasm_test736:
+    .asciz  "[WASMTEST736] Energy management simulation\r\n"
+
+msg_wasm_test737:
+    .asciz  "[WASMTEST737] Energy management simulation\r\n"
+
+msg_wasm_test738:
+    .asciz  "[WASMTEST738] Energy management simulation\r\n"
+
+msg_wasm_test739:
+    .asciz  "[WASMTEST739] Energy management simulation\r\n"
+
+msg_wasm_test740:
+    .asciz  "[WASMTEST740] Energy management simulation\r\n"
+
+msg_wasm_test741:
+    .asciz  "[WASMTEST741] Environmental monitoring simulation\r\n"
+
+msg_wasm_test742:
+    .asciz  "[WASMTEST742] Environmental monitoring simulation\r\n"
+
+msg_wasm_test743:
+    .asciz  "[WASMTEST743] Environmental monitoring simulation\r\n"
+
+msg_wasm_test744:
+    .asciz  "[WASMTEST744] Environmental monitoring simulation\r\n"
+
+msg_wasm_test745:
+    .asciz  "[WASMTEST745] Environmental monitoring simulation\r\n"
+
+msg_wasm_test746:
+    .asciz  "[WASMTEST746] Environmental monitoring simulation\r\n"
+
+msg_wasm_test747:
+    .asciz  "[WASMTEST747] Environmental monitoring simulation\r\n"
+
+msg_wasm_test748:
+    .asciz  "[WASMTEST748] Environmental monitoring simulation\r\n"
+
+msg_wasm_test749:
+    .asciz  "[WASMTEST749] Environmental monitoring simulation\r\n"
+
+msg_wasm_test750:
+    .asciz  "[WASMTEST750] 750 tests major milestone!\r\n"
+
+msg_wasm_milestone750:
+    .asciz  "[*** 750 WASM TESTS MILESTONE! v1.54 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -63292,3 +65747,1605 @@ wasm_test700_module:
     .byte   0x41, 0xBC, 0x05       # i32.const 700 (LEB128)
     .byte   0x0B                   # end
 wasm_test700_size = . - wasm_test700_module
+
+# wasmtest701
+# Type: () -> i32, returns 701
+wasm_test701_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xBD, 0x05       # i32.const 701 (LEB128)
+    .byte   0x0B                   # end
+wasm_test701_size = . - wasm_test701_module
+
+# wasmtest702
+# Type: () -> i32, returns 702
+wasm_test702_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xBE, 0x05       # i32.const 702 (LEB128)
+    .byte   0x0B                   # end
+wasm_test702_size = . - wasm_test702_module
+
+# wasmtest703
+# Type: () -> i32, returns 703
+wasm_test703_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xBF, 0x05       # i32.const 703 (LEB128)
+    .byte   0x0B                   # end
+wasm_test703_size = . - wasm_test703_module
+
+# wasmtest704
+# Type: () -> i32, returns 704
+wasm_test704_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC0, 0x05       # i32.const 704 (LEB128)
+    .byte   0x0B                   # end
+wasm_test704_size = . - wasm_test704_module
+
+# wasmtest705
+# Type: () -> i32, returns 705
+wasm_test705_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC1, 0x05       # i32.const 705 (LEB128)
+    .byte   0x0B                   # end
+wasm_test705_size = . - wasm_test705_module
+
+# wasmtest706
+# Type: () -> i32, returns 706
+wasm_test706_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC2, 0x05       # i32.const 706 (LEB128)
+    .byte   0x0B                   # end
+wasm_test706_size = . - wasm_test706_module
+
+# wasmtest707
+# Type: () -> i32, returns 707
+wasm_test707_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC3, 0x05       # i32.const 707 (LEB128)
+    .byte   0x0B                   # end
+wasm_test707_size = . - wasm_test707_module
+
+# wasmtest708
+# Type: () -> i32, returns 708
+wasm_test708_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC4, 0x05       # i32.const 708 (LEB128)
+    .byte   0x0B                   # end
+wasm_test708_size = . - wasm_test708_module
+
+# wasmtest709
+# Type: () -> i32, returns 709
+wasm_test709_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC5, 0x05       # i32.const 709 (LEB128)
+    .byte   0x0B                   # end
+wasm_test709_size = . - wasm_test709_module
+
+# wasmtest710
+# Type: () -> i32, returns 710
+wasm_test710_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC6, 0x05       # i32.const 710 (LEB128)
+    .byte   0x0B                   # end
+wasm_test710_size = . - wasm_test710_module
+
+# wasmtest711
+# Type: () -> i32, returns 711
+wasm_test711_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC7, 0x05       # i32.const 711 (LEB128)
+    .byte   0x0B                   # end
+wasm_test711_size = . - wasm_test711_module
+
+# wasmtest712
+# Type: () -> i32, returns 712
+wasm_test712_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC8, 0x05       # i32.const 712 (LEB128)
+    .byte   0x0B                   # end
+wasm_test712_size = . - wasm_test712_module
+
+# wasmtest713
+# Type: () -> i32, returns 713
+wasm_test713_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC9, 0x05       # i32.const 713 (LEB128)
+    .byte   0x0B                   # end
+wasm_test713_size = . - wasm_test713_module
+
+# wasmtest714
+# Type: () -> i32, returns 714
+wasm_test714_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCA, 0x05       # i32.const 714 (LEB128)
+    .byte   0x0B                   # end
+wasm_test714_size = . - wasm_test714_module
+
+# wasmtest715
+# Type: () -> i32, returns 715
+wasm_test715_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCB, 0x05       # i32.const 715 (LEB128)
+    .byte   0x0B                   # end
+wasm_test715_size = . - wasm_test715_module
+
+# wasmtest716
+# Type: () -> i32, returns 716
+wasm_test716_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCC, 0x05       # i32.const 716 (LEB128)
+    .byte   0x0B                   # end
+wasm_test716_size = . - wasm_test716_module
+
+# wasmtest717
+# Type: () -> i32, returns 717
+wasm_test717_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCD, 0x05       # i32.const 717 (LEB128)
+    .byte   0x0B                   # end
+wasm_test717_size = . - wasm_test717_module
+
+# wasmtest718
+# Type: () -> i32, returns 718
+wasm_test718_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCE, 0x05       # i32.const 718 (LEB128)
+    .byte   0x0B                   # end
+wasm_test718_size = . - wasm_test718_module
+
+# wasmtest719
+# Type: () -> i32, returns 719
+wasm_test719_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCF, 0x05       # i32.const 719 (LEB128)
+    .byte   0x0B                   # end
+wasm_test719_size = . - wasm_test719_module
+
+# wasmtest720
+# Type: () -> i32, returns 720
+wasm_test720_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD0, 0x05       # i32.const 720 (LEB128)
+    .byte   0x0B                   # end
+wasm_test720_size = . - wasm_test720_module
+
+# wasmtest721
+# Type: () -> i32, returns 721
+wasm_test721_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD1, 0x05       # i32.const 721 (LEB128)
+    .byte   0x0B                   # end
+wasm_test721_size = . - wasm_test721_module
+
+# wasmtest722
+# Type: () -> i32, returns 722
+wasm_test722_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD2, 0x05       # i32.const 722 (LEB128)
+    .byte   0x0B                   # end
+wasm_test722_size = . - wasm_test722_module
+
+# wasmtest723
+# Type: () -> i32, returns 723
+wasm_test723_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD3, 0x05       # i32.const 723 (LEB128)
+    .byte   0x0B                   # end
+wasm_test723_size = . - wasm_test723_module
+
+# wasmtest724
+# Type: () -> i32, returns 724
+wasm_test724_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD4, 0x05       # i32.const 724 (LEB128)
+    .byte   0x0B                   # end
+wasm_test724_size = . - wasm_test724_module
+
+# wasmtest725
+# Type: () -> i32, returns 725
+wasm_test725_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD5, 0x05       # i32.const 725 (LEB128)
+    .byte   0x0B                   # end
+wasm_test725_size = . - wasm_test725_module
+
+# wasmtest726
+# Type: () -> i32, returns 726
+wasm_test726_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD6, 0x05       # i32.const 726 (LEB128)
+    .byte   0x0B                   # end
+wasm_test726_size = . - wasm_test726_module
+
+# wasmtest727
+# Type: () -> i32, returns 727
+wasm_test727_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD7, 0x05       # i32.const 727 (LEB128)
+    .byte   0x0B                   # end
+wasm_test727_size = . - wasm_test727_module
+
+# wasmtest728
+# Type: () -> i32, returns 728
+wasm_test728_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD8, 0x05       # i32.const 728 (LEB128)
+    .byte   0x0B                   # end
+wasm_test728_size = . - wasm_test728_module
+
+# wasmtest729
+# Type: () -> i32, returns 729
+wasm_test729_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD9, 0x05       # i32.const 729 (LEB128)
+    .byte   0x0B                   # end
+wasm_test729_size = . - wasm_test729_module
+
+# wasmtest730
+# Type: () -> i32, returns 730
+wasm_test730_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xDA, 0x05       # i32.const 730 (LEB128)
+    .byte   0x0B                   # end
+wasm_test730_size = . - wasm_test730_module
+
+# wasmtest731
+# Type: () -> i32, returns 731
+wasm_test731_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xDB, 0x05       # i32.const 731 (LEB128)
+    .byte   0x0B                   # end
+wasm_test731_size = . - wasm_test731_module
+
+# wasmtest732
+# Type: () -> i32, returns 732
+wasm_test732_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xDC, 0x05       # i32.const 732 (LEB128)
+    .byte   0x0B                   # end
+wasm_test732_size = . - wasm_test732_module
+
+# wasmtest733
+# Type: () -> i32, returns 733
+wasm_test733_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xDD, 0x05       # i32.const 733 (LEB128)
+    .byte   0x0B                   # end
+wasm_test733_size = . - wasm_test733_module
+
+# wasmtest734
+# Type: () -> i32, returns 734
+wasm_test734_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xDE, 0x05       # i32.const 734 (LEB128)
+    .byte   0x0B                   # end
+wasm_test734_size = . - wasm_test734_module
+
+# wasmtest735
+# Type: () -> i32, returns 735
+wasm_test735_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xDF, 0x05       # i32.const 735 (LEB128)
+    .byte   0x0B                   # end
+wasm_test735_size = . - wasm_test735_module
+
+# wasmtest736
+# Type: () -> i32, returns 736
+wasm_test736_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE0, 0x05       # i32.const 736 (LEB128)
+    .byte   0x0B                   # end
+wasm_test736_size = . - wasm_test736_module
+
+# wasmtest737
+# Type: () -> i32, returns 737
+wasm_test737_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE1, 0x05       # i32.const 737 (LEB128)
+    .byte   0x0B                   # end
+wasm_test737_size = . - wasm_test737_module
+
+# wasmtest738
+# Type: () -> i32, returns 738
+wasm_test738_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE2, 0x05       # i32.const 738 (LEB128)
+    .byte   0x0B                   # end
+wasm_test738_size = . - wasm_test738_module
+
+# wasmtest739
+# Type: () -> i32, returns 739
+wasm_test739_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE3, 0x05       # i32.const 739 (LEB128)
+    .byte   0x0B                   # end
+wasm_test739_size = . - wasm_test739_module
+
+# wasmtest740
+# Type: () -> i32, returns 740
+wasm_test740_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE4, 0x05       # i32.const 740 (LEB128)
+    .byte   0x0B                   # end
+wasm_test740_size = . - wasm_test740_module
+
+# wasmtest741
+# Type: () -> i32, returns 741
+wasm_test741_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE5, 0x05       # i32.const 741 (LEB128)
+    .byte   0x0B                   # end
+wasm_test741_size = . - wasm_test741_module
+
+# wasmtest742
+# Type: () -> i32, returns 742
+wasm_test742_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE6, 0x05       # i32.const 742 (LEB128)
+    .byte   0x0B                   # end
+wasm_test742_size = . - wasm_test742_module
+
+# wasmtest743
+# Type: () -> i32, returns 743
+wasm_test743_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE7, 0x05       # i32.const 743 (LEB128)
+    .byte   0x0B                   # end
+wasm_test743_size = . - wasm_test743_module
+
+# wasmtest744
+# Type: () -> i32, returns 744
+wasm_test744_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE8, 0x05       # i32.const 744 (LEB128)
+    .byte   0x0B                   # end
+wasm_test744_size = . - wasm_test744_module
+
+# wasmtest745
+# Type: () -> i32, returns 745
+wasm_test745_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xE9, 0x05       # i32.const 745 (LEB128)
+    .byte   0x0B                   # end
+wasm_test745_size = . - wasm_test745_module
+
+# wasmtest746
+# Type: () -> i32, returns 746
+wasm_test746_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEA, 0x05       # i32.const 746 (LEB128)
+    .byte   0x0B                   # end
+wasm_test746_size = . - wasm_test746_module
+
+# wasmtest747
+# Type: () -> i32, returns 747
+wasm_test747_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEB, 0x05       # i32.const 747 (LEB128)
+    .byte   0x0B                   # end
+wasm_test747_size = . - wasm_test747_module
+
+# wasmtest748
+# Type: () -> i32, returns 748
+wasm_test748_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEC, 0x05       # i32.const 748 (LEB128)
+    .byte   0x0B                   # end
+wasm_test748_size = . - wasm_test748_module
+
+# wasmtest749
+# Type: () -> i32, returns 749
+wasm_test749_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xED, 0x05       # i32.const 749 (LEB128)
+    .byte   0x0B                   # end
+wasm_test749_size = . - wasm_test749_module
+
+# wasmtest750: 750 tests major milestone
+# =====================================================
+# v1.54: 750 WASM tests milestone!
+# Type: () -> i32, returns 750
+wasm_test750_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEE, 0x05       # i32.const 750 (LEB128)
+    .byte   0x0B                   # end
+wasm_test750_size = . - wasm_test750_module
