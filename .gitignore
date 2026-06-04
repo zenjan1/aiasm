@@ -1,0 +1,29 @@
+# Build artifacts
+*.o
+*.elf
+*.bin
+interactive
+minimal_kernel
+hello
+calculator
+
+# Temporary files
+temp_gen/
+*.tmp
+*.log
+
+# IDE/Editor
+.vscode/
+.idea/
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# QEMU
+*.img
+
+# Release packages
+*.tar.gz
+*.iso

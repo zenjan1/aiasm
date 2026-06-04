@@ -2,6 +2,8 @@
 
 专为 AI 设计的最小汇编语言工具链，包含一个从零编写的 32 位 x86 交互操作系统内核，内置 WASM 字节码运行时引擎和完整网络协议栈。基于 GNU AS 汇编语法（Intel 模式），零依赖，纯汇编实现。
 
+**当前版本**: v0.62 | **内核版本**: v1.19 | **代码行数**: 254,065 行 | **测试状态**: ✅ 4000+ WASM 测试通过
+
 ## 目录
 
 - [安装](#安装)
@@ -151,30 +153,33 @@ bash run_gtk.sh
 
 ## 内核架构
 
-### 文件结构 (20 个文件, 19,308 行)
+### 文件结构 (22 个文件, 254,065 行)
 
 ```
 examples/kernel/
-  kernel.asm       # 内核核心 (107KB): 引导、e1000驱动、TCP/IP、HTTP服务器
-  gdt.asm          # 全局描述符表
-  idt.asm          # 中断描述符表 (256 向量)
-  pic.asm          # 8259A PIC 重映射
-  pit.asm          # PIT 定时器 (100Hz)
-  vga.asm          # VGA 文本驱动
-  keyboard.asm     # PS/2 键盘驱动
-  uart.asm         # 16550 UART 串口驱动
-  log.asm          # 内核日志系统
-  memory.asm       # 物理内存管理 (位图式)
-  paging.asm       # 虚拟内存分页 (两级页表)
-  process.asm      # 进程管理 (PCB+fork/yield/exit)
-  syscall.asm      # 系统调用 (INT 0x80)
-  shell.asm        # 命令行 Shell (28 命令)
-  utils.asm        # 工具函数
-  vfs.asm          # 虚拟文件系统
-  virtio_net.asm   # virtio-net 驱动框架
-  wasm_parser.asm  # WASM 字节码解析器
-  wasm_vm.asm      # WASM 虚拟机 (238 指令)
-  wasm_syscall.asm # WASM 系统调用桥接
+  kernel.asm       # 内核核心 (114KB): 引导、e1000驱动、TCP/IP、HTTP服务器
+  gdt.asm          # 全局描述符表 (4.3KB)
+  idt.asm          # 中断描述符表 (6.4KB, 256 向量)
+  pic.asm          # 8259A PIC 重映射 (1.9KB)
+  pit.asm          # PIT 定时器 (1.9KB, 100Hz)
+  vga.asm          # VGA 文本驱动 (5.8KB)
+  keyboard.asm     # PS/2 键盘驱动 (5.1KB)
+  uart.asm         # 16550 UART 串口驱动 (3.2KB)
+  log.asm          # 内核日志系统 (8.9KB)
+  memory.asm       # 物理内存管理 (6.7KB, 位图式)
+  paging.asm       # 虚拟内存分页 (8.5KB, 两级页表)
+  process.asm      # 进程管理 (14KB, PCB+fork/yield/exit)
+  syscall.asm      # 系统调用 (8.5KB, INT 0x80)
+  shell.asm        # 命令行 Shell (7.0MB, 28+ 命令)
+  utils.asm        # 工具函数 (7.8KB)
+  vfs.asm          # 虚拟文件系统 (16KB)
+  virtio_net.asm   # virtio-net 驱动框架 (21KB)
+  ata.asm          # ATA 磁盘驱动 (9.4KB)
+  fat32.asm        # FAT32 文件系统 (9.4KB)
+  wasm_parser.asm  # WASM 字节码解析器 (29KB)
+  wasm_vm.asm      # WASM 虚拟机 (170KB, 238 指令)
+  wasm_syscall.asm # WASM 系统调用桥接 (16KB)
+  linker.ld        # 链接脚本
 ```
 
 ### 引导流程
@@ -289,7 +294,12 @@ WASM 测试全部通过：wasmtest2-11 + wasmapp (fibonacci/factorial/multiply/s
 
 | 版本 | 主要特性 |
 |------|----------|
-| v0.62 | Prompt 更新，系统稳定 |
+| v0.62 | Prompt 更新，系统稳定，内核 v1.19 |
+| v1.68 | 4000 WASM 测试里程碑，wasmtest3501-4000 |
+| v1.67 | 3500 WASM 测试，wasmtest3001-3500 |
+| v1.66 | 3000 WASM 测试，wasmtest2501-3000 |
+| v1.65 | 2500 WASM 测试，wasmtest2101-2500 |
+| v1.64 | 2100 WASM 测试，wasmtest2001-2100 |
 | v0.61 | 移除二进制示例文件 |
 | v0.60 | Shell 版本一致性修复 |
 | v0.59 | Help 命令添加 arp 文档 |
