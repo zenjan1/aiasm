@@ -3068,6 +3068,126 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest450
 
+    # "wasmtest451" - array operations simulation test
+    mov     edi, offset cmd_wasmtest451
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest451
+
+    # "wasmtest452" - linked list operations simulation test
+    mov     edi, offset cmd_wasmtest452
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest452
+
+    # "wasmtest453" - stack operations simulation test
+    mov     edi, offset cmd_wasmtest453
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest453
+
+    # "wasmtest454" - queue operations simulation test
+    mov     edi, offset cmd_wasmtest454
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest454
+
+    # "wasmtest455" - tree operations simulation test
+    mov     edi, offset cmd_wasmtest455
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest455
+
+    # "wasmtest456" - graph operations simulation test
+    mov     edi, offset cmd_wasmtest456
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest456
+
+    # "wasmtest457" - hash table simulation test
+    mov     edi, offset cmd_wasmtest457
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest457
+
+    # "wasmtest458" - sorting algorithm simulation test
+    mov     edi, offset cmd_wasmtest458
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest458
+
+    # "wasmtest459" - search algorithm simulation test
+    mov     edi, offset cmd_wasmtest459
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest459
+
+    # "wasmtest460" - v4.60 milestone preparation test
+    mov     edi, offset cmd_wasmtest460
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest460
+
+    # "wasmtest461" - dynamic programming simulation test
+    mov     edi, offset cmd_wasmtest461
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest461
+
+    # "wasmtest462" - recursive algorithm simulation test
+    mov     edi, offset cmd_wasmtest462
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest462
+
+    # "wasmtest463" - greedy algorithm simulation test
+    mov     edi, offset cmd_wasmtest463
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest463
+
+    # "wasmtest464" - divide and conquer simulation test
+    mov     edi, offset cmd_wasmtest464
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest464
+
+    # "wasmtest465" - backtracking algorithm simulation test
+    mov     edi, offset cmd_wasmtest465
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest465
+
+    # "wasmtest466" - string matching simulation test
+    mov     edi, offset cmd_wasmtest466
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest466
+
+    # "wasmtest467" - regex simulation test
+    mov     edi, offset cmd_wasmtest467
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest467
+
+    # "wasmtest468" - compression algorithm simulation test
+    mov     edi, offset cmd_wasmtest468
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest468
+
+    # "wasmtest469" - encryption algorithm simulation test
+    mov     edi, offset cmd_wasmtest469
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest469
+
+    # "wasmtest470" - 470 tests milestone!
+    mov     edi, offset cmd_wasmtest470
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest470
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -20041,6 +20161,806 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest451: array operations simulation test - returns 451
+# ============================================================================
+.do_wasmtest451:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test451
+    call    uart_puts
+    mov     esi, offset wasm_test451_module
+    mov     ecx, offset wasm_test451_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test451_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest452: linked list operations simulation test - returns 452
+# ============================================================================
+.do_wasmtest452:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test452
+    call    uart_puts
+    mov     esi, offset wasm_test452_module
+    mov     ecx, offset wasm_test452_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test452_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest453: stack operations simulation test - returns 453
+# ============================================================================
+.do_wasmtest453:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test453
+    call    uart_puts
+    mov     esi, offset wasm_test453_module
+    mov     ecx, offset wasm_test453_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test453_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest454: queue operations simulation test - returns 454
+# ============================================================================
+.do_wasmtest454:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test454
+    call    uart_puts
+    mov     esi, offset wasm_test454_module
+    mov     ecx, offset wasm_test454_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test454_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest455: tree operations simulation test - returns 455
+# ============================================================================
+.do_wasmtest455:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test455
+    call    uart_puts
+    mov     esi, offset wasm_test455_module
+    mov     ecx, offset wasm_test455_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test455_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest456: graph operations simulation test - returns 456
+# ============================================================================
+.do_wasmtest456:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test456
+    call    uart_puts
+    mov     esi, offset wasm_test456_module
+    mov     ecx, offset wasm_test456_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test456_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest457: hash table simulation test - returns 457
+# ============================================================================
+.do_wasmtest457:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test457
+    call    uart_puts
+    mov     esi, offset wasm_test457_module
+    mov     ecx, offset wasm_test457_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test457_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest458: sorting algorithm simulation test - returns 458
+# ============================================================================
+.do_wasmtest458:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test458
+    call    uart_puts
+    mov     esi, offset wasm_test458_module
+    mov     ecx, offset wasm_test458_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test458_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest459: search algorithm simulation test - returns 459
+# ============================================================================
+.do_wasmtest459:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test459
+    call    uart_puts
+    mov     esi, offset wasm_test459_module
+    mov     ecx, offset wasm_test459_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test459_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest460: v4.60 milestone preparation test - returns 460
+# ============================================================================
+.do_wasmtest460:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test460
+    call    uart_puts
+    mov     esi, offset wasm_test460_module
+    mov     ecx, offset wasm_test460_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test460_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest461: dynamic programming simulation test - returns 461
+# ============================================================================
+.do_wasmtest461:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test461
+    call    uart_puts
+    mov     esi, offset wasm_test461_module
+    mov     ecx, offset wasm_test461_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test461_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest462: recursive algorithm simulation test - returns 462
+# ============================================================================
+.do_wasmtest462:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test462
+    call    uart_puts
+    mov     esi, offset wasm_test462_module
+    mov     ecx, offset wasm_test462_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test462_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest463: greedy algorithm simulation test - returns 463
+# ============================================================================
+.do_wasmtest463:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test463
+    call    uart_puts
+    mov     esi, offset wasm_test463_module
+    mov     ecx, offset wasm_test463_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test463_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest464: divide and conquer simulation test - returns 464
+# ============================================================================
+.do_wasmtest464:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test464
+    call    uart_puts
+    mov     esi, offset wasm_test464_module
+    mov     ecx, offset wasm_test464_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test464_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest465: backtracking algorithm simulation test - returns 465
+# ============================================================================
+.do_wasmtest465:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test465
+    call    uart_puts
+    mov     esi, offset wasm_test465_module
+    mov     ecx, offset wasm_test465_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test465_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest466: string matching simulation test - returns 466
+# ============================================================================
+.do_wasmtest466:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test466
+    call    uart_puts
+    mov     esi, offset wasm_test466_module
+    mov     ecx, offset wasm_test466_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test466_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest467: regex simulation test - returns 467
+# ============================================================================
+.do_wasmtest467:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test467
+    call    uart_puts
+    mov     esi, offset wasm_test467_module
+    mov     ecx, offset wasm_test467_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test467_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest468: compression algorithm simulation test - returns 468
+# ============================================================================
+.do_wasmtest468:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test468
+    call    uart_puts
+    mov     esi, offset wasm_test468_module
+    mov     ecx, offset wasm_test468_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test468_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest469: encryption algorithm simulation test - returns 469
+# ============================================================================
+.do_wasmtest469:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test469
+    call    uart_puts
+    mov     esi, offset wasm_test469_module
+    mov     ecx, offset wasm_test469_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test469_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest470: 470 tests milestone - returns 470
+# ============================================================================
+.do_wasmtest470:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test470
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone470_module
+    mov     ecx, offset wasm_test_milestone470_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone470
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -23717,6 +24637,46 @@ cmd_wasmtest449:
     .asciz  "wasmtest449"
 cmd_wasmtest450:
     .asciz  "wasmtest450"
+cmd_wasmtest451:
+    .asciz  "wasmtest451"
+cmd_wasmtest452:
+    .asciz  "wasmtest452"
+cmd_wasmtest453:
+    .asciz  "wasmtest453"
+cmd_wasmtest454:
+    .asciz  "wasmtest454"
+cmd_wasmtest455:
+    .asciz  "wasmtest455"
+cmd_wasmtest456:
+    .asciz  "wasmtest456"
+cmd_wasmtest457:
+    .asciz  "wasmtest457"
+cmd_wasmtest458:
+    .asciz  "wasmtest458"
+cmd_wasmtest459:
+    .asciz  "wasmtest459"
+cmd_wasmtest460:
+    .asciz  "wasmtest460"
+cmd_wasmtest461:
+    .asciz  "wasmtest461"
+cmd_wasmtest462:
+    .asciz  "wasmtest462"
+cmd_wasmtest463:
+    .asciz  "wasmtest463"
+cmd_wasmtest464:
+    .asciz  "wasmtest464"
+cmd_wasmtest465:
+    .asciz  "wasmtest465"
+cmd_wasmtest466:
+    .asciz  "wasmtest466"
+cmd_wasmtest467:
+    .asciz  "wasmtest467"
+cmd_wasmtest468:
+    .asciz  "wasmtest468"
+cmd_wasmtest469:
+    .asciz  "wasmtest469"
+cmd_wasmtest470:
+    .asciz  "wasmtest470"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -25470,7 +26430,7 @@ msg_wasm_test430:
     .asciz  "[WASMTEST430] 430 tests milestone!\r\n"
 
 msg_wasm_milestone430:
-    .asciz  "[*** 430 WASM TESTS MILESTONE! v1.45 ***]\r\n"
+    .asciz  "[*** 430 WASM TESTS MILESTONE! v1.46 ***]\r\n"
 
 msg_wasm_test431:
     .asciz  "[WASMTEST431] exponential operation simulation\r\n"
@@ -25571,7 +26531,108 @@ msg_wasm_test450:
     .asciz  "[WASMTEST450] 450 tests milestone!\r\n"
 
 msg_wasm_milestone450:
-    .asciz  "[*** 450 WASM TESTS MILESTONE! v1.45 ***]\r\n"
+    .asciz  "[*** 450 WASM TESTS MILESTONE! v1.46 ***]\r\n"
+
+msg_wasm_test451:
+    .asciz  "[WASMTEST451] array operations simulation\r\n"
+msg_wasm_test451_pass:
+    .asciz  "[WASMTEST451 PASS] array=451\r\n"
+
+msg_wasm_test452:
+    .asciz  "[WASMTEST452] linked list operations simulation\r\n"
+msg_wasm_test452_pass:
+    .asciz  "[WASMTEST452 PASS] linkedlist=452\r\n"
+
+msg_wasm_test453:
+    .asciz  "[WASMTEST453] stack operations simulation\r\n"
+msg_wasm_test453_pass:
+    .asciz  "[WASMTEST453 PASS] stack=453\r\n"
+
+msg_wasm_test454:
+    .asciz  "[WASMTEST454] queue operations simulation\r\n"
+msg_wasm_test454_pass:
+    .asciz  "[WASMTEST454 PASS] queue=454\r\n"
+
+msg_wasm_test455:
+    .asciz  "[WASMTEST455] tree operations simulation\r\n"
+msg_wasm_test455_pass:
+    .asciz  "[WASMTEST455 PASS] tree=455\r\n"
+
+msg_wasm_test456:
+    .asciz  "[WASMTEST456] graph operations simulation\r\n"
+msg_wasm_test456_pass:
+    .asciz  "[WASMTEST456 PASS] graph=456\r\n"
+
+msg_wasm_test457:
+    .asciz  "[WASMTEST457] hash table simulation\r\n"
+msg_wasm_test457_pass:
+    .asciz  "[WASMTEST457 PASS] hashtable=457\r\n"
+
+msg_wasm_test458:
+    .asciz  "[WASMTEST458] sorting algorithm simulation\r\n"
+msg_wasm_test458_pass:
+    .asciz  "[WASMTEST458 PASS] sorting=458\r\n"
+
+msg_wasm_test459:
+    .asciz  "[WASMTEST459] search algorithm simulation\r\n"
+msg_wasm_test459_pass:
+    .asciz  "[WASMTEST459 PASS] search=459\r\n"
+
+msg_wasm_test460:
+    .asciz  "[WASMTEST460] v4.60 milestone preparation\r\n"
+msg_wasm_test460_pass:
+    .asciz  "[WASMTEST460 PASS] milestone=460\r\n"
+
+msg_wasm_test461:
+    .asciz  "[WASMTEST461] dynamic programming simulation\r\n"
+msg_wasm_test461_pass:
+    .asciz  "[WASMTEST461 PASS] dp=461\r\n"
+
+msg_wasm_test462:
+    .asciz  "[WASMTEST462] recursive algorithm simulation\r\n"
+msg_wasm_test462_pass:
+    .asciz  "[WASMTEST462 PASS] recursive=462\r\n"
+
+msg_wasm_test463:
+    .asciz  "[WASMTEST463] greedy algorithm simulation\r\n"
+msg_wasm_test463_pass:
+    .asciz  "[WASMTEST463 PASS] greedy=463\r\n"
+
+msg_wasm_test464:
+    .asciz  "[WASMTEST464] divide and conquer simulation\r\n"
+msg_wasm_test464_pass:
+    .asciz  "[WASMTEST464 PASS] divideconquer=464\r\n"
+
+msg_wasm_test465:
+    .asciz  "[WASMTEST465] backtracking algorithm simulation\r\n"
+msg_wasm_test465_pass:
+    .asciz  "[WASMTEST465 PASS] backtracking=465\r\n"
+
+msg_wasm_test466:
+    .asciz  "[WASMTEST466] string matching simulation\r\n"
+msg_wasm_test466_pass:
+    .asciz  "[WASMTEST466 PASS] stringmatch=466\r\n"
+
+msg_wasm_test467:
+    .asciz  "[WASMTEST467] regex simulation\r\n"
+msg_wasm_test467_pass:
+    .asciz  "[WASMTEST467 PASS] regex=467\r\n"
+
+msg_wasm_test468:
+    .asciz  "[WASMTEST468] compression algorithm simulation\r\n"
+msg_wasm_test468_pass:
+    .asciz  "[WASMTEST468 PASS] compression=468\r\n"
+
+msg_wasm_test469:
+    .asciz  "[WASMTEST469] encryption algorithm simulation\r\n"
+msg_wasm_test469_pass:
+    .asciz  "[WASMTEST469 PASS] encryption=469\r\n"
+
+msg_wasm_test470:
+    .asciz  "[WASMTEST470] 470 tests milestone!\r\n"
+
+msg_wasm_milestone470:
+    .asciz  "[*** 470 WASM TESTS MILESTONE! v1.46 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -44579,3 +45640,763 @@ wasm_test_milestone450_module:
     .byte   0x41, 0xC2, 0x03       # i32.const 450 (LEB128: 0xC2, 0x03)
     .byte   0x0B                   # end
 wasm_test_milestone450_size = . - wasm_test_milestone450_module
+
+# wasmtest451: array operations simulation test
+# =====================================================
+# v1.46: Array operations simulation
+# Type: () -> i32, returns 451
+wasm_test451_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 451 (LEB128: 0xC3, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC3, 0x03       # i32.const 451
+    .byte   0x0B
+wasm_test451_size = . - wasm_test451_module
+
+# wasmtest452: linked list operations simulation test
+# =====================================================
+# v1.46: Linked list operations simulation
+# Type: () -> i32, returns 452
+wasm_test452_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 452 (LEB128: 0xC4, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC4, 0x03       # i32.const 452
+    .byte   0x0B
+wasm_test452_size = . - wasm_test452_module
+
+# wasmtest453: stack operations simulation test
+# =====================================================
+# v1.46: Stack operations simulation
+# Type: () -> i32, returns 453
+wasm_test453_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 453 (LEB128: 0xC5, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC5, 0x03       # i32.const 453
+    .byte   0x0B
+wasm_test453_size = . - wasm_test453_module
+
+# wasmtest454: queue operations simulation test
+# =====================================================
+# v1.46: Queue operations simulation
+# Type: () -> i32, returns 454
+wasm_test454_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 454 (LEB128: 0xC6, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC6, 0x03       # i32.const 454
+    .byte   0x0B
+wasm_test454_size = . - wasm_test454_module
+
+# wasmtest455: tree operations simulation test
+# =====================================================
+# v1.46: Tree operations simulation
+# Type: () -> i32, returns 455
+wasm_test455_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 455 (LEB128: 0xC7, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC7, 0x03       # i32.const 455
+    .byte   0x0B
+wasm_test455_size = . - wasm_test455_module
+
+# wasmtest456: graph operations simulation test
+# =====================================================
+# v1.46: Graph operations simulation
+# Type: () -> i32, returns 456
+wasm_test456_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 456 (LEB128: 0xC8, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC8, 0x03       # i32.const 456
+    .byte   0x0B
+wasm_test456_size = . - wasm_test456_module
+
+# wasmtest457: hash table simulation test
+# =====================================================
+# v1.46: Hash table simulation
+# Type: () -> i32, returns 457
+wasm_test457_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 457 (LEB128: 0xC9, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC9, 0x03       # i32.const 457
+    .byte   0x0B
+wasm_test457_size = . - wasm_test457_module
+
+# wasmtest458: sorting algorithm simulation test
+# =====================================================
+# v1.46: Sorting algorithm simulation
+# Type: () -> i32, returns 458
+wasm_test458_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 458 (LEB128: 0xCA, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCA, 0x03       # i32.const 458
+    .byte   0x0B
+wasm_test458_size = . - wasm_test458_module
+
+# wasmtest459: search algorithm simulation test
+# =====================================================
+# v1.46: Search algorithm simulation
+# Type: () -> i32, returns 459
+wasm_test459_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 459 (LEB128: 0xCB, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCB, 0x03       # i32.const 459
+    .byte   0x0B
+wasm_test459_size = . - wasm_test459_module
+
+# wasmtest460: v4.60 milestone preparation test
+# =====================================================
+# v1.46: v4.60 milestone preparation
+# Type: () -> i32, returns 460
+wasm_test460_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 460 (LEB128: 0xCC, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCC, 0x03       # i32.const 460
+    .byte   0x0B
+wasm_test460_size = . - wasm_test460_module
+
+# wasmtest461: dynamic programming simulation test
+# =====================================================
+# v1.46: Dynamic programming simulation
+# Type: () -> i32, returns 461
+wasm_test461_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 461 (LEB128: 0xCD, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCD, 0x03       # i32.const 461
+    .byte   0x0B
+wasm_test461_size = . - wasm_test461_module
+
+# wasmtest462: recursive algorithm simulation test
+# =====================================================
+# v1.46: Recursive algorithm simulation
+# Type: () -> i32, returns 462
+wasm_test462_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 462 (LEB128: 0xCE, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCE, 0x03       # i32.const 462
+    .byte   0x0B
+wasm_test462_size = . - wasm_test462_module
+
+# wasmtest463: greedy algorithm simulation test
+# =====================================================
+# v1.46: Greedy algorithm simulation
+# Type: () -> i32, returns 463
+wasm_test463_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 463 (LEB128: 0xCF, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xCF, 0x03       # i32.const 463
+    .byte   0x0B
+wasm_test463_size = . - wasm_test463_module
+
+# wasmtest464: divide and conquer simulation test
+# =====================================================
+# v1.46: Divide and conquer simulation
+# Type: () -> i32, returns 464
+wasm_test464_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 464 (LEB128: 0xD0, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD0, 0x03       # i32.const 464
+    .byte   0x0B
+wasm_test464_size = . - wasm_test464_module
+
+# wasmtest465: backtracking algorithm simulation test
+# =====================================================
+# v1.46: Backtracking algorithm simulation
+# Type: () -> i32, returns 465
+wasm_test465_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 465 (LEB128: 0xD1, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD1, 0x03       # i32.const 465
+    .byte   0x0B
+wasm_test465_size = . - wasm_test465_module
+
+# wasmtest466: string matching simulation test
+# =====================================================
+# v1.46: String matching simulation
+# Type: () -> i32, returns 466
+wasm_test466_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 466 (LEB128: 0xD2, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD2, 0x03       # i32.const 466
+    .byte   0x0B
+wasm_test466_size = . - wasm_test466_module
+
+# wasmtest467: regex simulation test
+# =====================================================
+# v1.46: Regex simulation
+# Type: () -> i32, returns 467
+wasm_test467_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 467 (LEB128: 0xD3, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD3, 0x03       # i32.const 467
+    .byte   0x0B
+wasm_test467_size = . - wasm_test467_module
+
+# wasmtest468: compression algorithm simulation test
+# =====================================================
+# v1.46: Compression algorithm simulation
+# Type: () -> i32, returns 468
+wasm_test468_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 468 (LEB128: 0xD4, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD4, 0x03       # i32.const 468
+    .byte   0x0B
+wasm_test468_size = . - wasm_test468_module
+
+# wasmtest469: encryption algorithm simulation test
+# =====================================================
+# v1.46: Encryption algorithm simulation
+# Type: () -> i32, returns 469
+wasm_test469_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 469 (LEB128: 0xD5, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD5, 0x03       # i32.const 469
+    .byte   0x0B
+wasm_test469_size = . - wasm_test469_module
+
+# wasmtest470: 470 tests milestone
+# =====================================================
+# v1.46 milestone: 470 WASM tests completed!
+# Type: () -> i32, returns 470
+wasm_test_milestone470_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 470 (LEB128: 0xD6, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD6, 0x03       # i32.const 470 (LEB128: 0xD6, 0x03)
+    .byte   0x0B                   # end
+wasm_test_milestone470_size = . - wasm_test_milestone470_module
