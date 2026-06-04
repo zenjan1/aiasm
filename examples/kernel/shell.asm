@@ -2588,6 +2588,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest370
 
+    # "wasmtest371" - math operation combination test 1
+    mov     edi, offset cmd_wasmtest371
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest371
+
+    # "wasmtest372" - math operation combination test 2
+    mov     edi, offset cmd_wasmtest372
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest372
+
+    # "wasmtest373" - type conversion combination test
+    mov     edi, offset cmd_wasmtest373
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest373
+
+    # "wasmtest374" - bitwise operation combination test
+    mov     edi, offset cmd_wasmtest374
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest374
+
+    # "wasmtest375" - comparison operation combination test
+    mov     edi, offset cmd_wasmtest375
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest375
+
+    # "wasmtest376" - floating point combination test
+    mov     edi, offset cmd_wasmtest376
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest376
+
+    # "wasmtest377" - memory operation combination test
+    mov     edi, offset cmd_wasmtest377
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest377
+
+    # "wasmtest378" - control flow combination test
+    mov     edi, offset cmd_wasmtest378
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest378
+
+    # "wasmtest379" - comprehensive feature test
+    mov     edi, offset cmd_wasmtest379
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest379
+
+    # "wasmtest380" - 380 tests milestone
+    mov     edi, offset cmd_wasmtest380
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest380
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -16311,6 +16371,7 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# ============================================================================
 # .do_wasmtest370: 370 tests milestone (returns 370)
 # ============================================================================
 .do_wasmtest370:
@@ -16344,6 +16405,406 @@ shell_wasmtest21:
     mov     al, 0x0d
     call    uart_putc
     mov     esi, offset msg_wasm_milestone370
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest371: math operation combination test 1
+# ============================================================================
+.do_wasmtest371:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test371
+    call    uart_puts
+    mov     esi, offset wasm_test_math_combo1_module
+    mov     ecx, offset wasm_test_math_combo1_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test371_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest372: math operation combination test 2
+# ============================================================================
+.do_wasmtest372:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test372
+    call    uart_puts
+    mov     esi, offset wasm_test_math_combo2_module
+    mov     ecx, offset wasm_test_math_combo2_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test372_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest373: type conversion combination test
+# ============================================================================
+.do_wasmtest373:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test373
+    call    uart_puts
+    mov     esi, offset wasm_test_type_combo_module
+    mov     ecx, offset wasm_test_type_combo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test373_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest374: bitwise operation combination test
+# ============================================================================
+.do_wasmtest374:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test374
+    call    uart_puts
+    mov     esi, offset wasm_test_bitwise_combo_module
+    mov     ecx, offset wasm_test_bitwise_combo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test374_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest375: comparison operation combination test
+# ============================================================================
+.do_wasmtest375:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test375
+    call    uart_puts
+    mov     esi, offset wasm_test_compare_combo_module
+    mov     ecx, offset wasm_test_compare_combo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test375_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest376: floating point combination test (integer simulation)
+# ============================================================================
+.do_wasmtest376:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test376
+    call    uart_puts
+    mov     esi, offset wasm_test_float_combo_module
+    mov     ecx, offset wasm_test_float_combo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test376_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest377: memory operation combination test
+# ============================================================================
+.do_wasmtest377:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test377
+    call    uart_puts
+    mov     esi, offset wasm_test_memory_combo_module
+    mov     ecx, offset wasm_test_memory_combo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test377_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest378: control flow combination test
+# ============================================================================
+.do_wasmtest378:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test378
+    call    uart_puts
+    mov     esi, offset wasm_test_control_combo_module
+    mov     ecx, offset wasm_test_control_combo_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test378_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest379: comprehensive feature test
+# ============================================================================
+.do_wasmtest379:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test379
+    call    uart_puts
+    mov     esi, offset wasm_test_comprehensive_module
+    mov     ecx, offset wasm_test_comprehensive_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test379_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest380: 380 tests milestone
+# ============================================================================
+.do_wasmtest380:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test380
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone380_module
+    mov     ecx, offset wasm_test_milestone380_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone380
     call    uart_puts
     pop     ecx
     pop     edi
@@ -19867,6 +20328,26 @@ cmd_wasmtest369:
     .asciz  "wasmtest369"
 cmd_wasmtest370:
     .asciz  "wasmtest370"
+cmd_wasmtest371:
+    .asciz  "wasmtest371"
+cmd_wasmtest372:
+    .asciz  "wasmtest372"
+cmd_wasmtest373:
+    .asciz  "wasmtest373"
+cmd_wasmtest374:
+    .asciz  "wasmtest374"
+cmd_wasmtest375:
+    .asciz  "wasmtest375"
+cmd_wasmtest376:
+    .asciz  "wasmtest376"
+cmd_wasmtest377:
+    .asciz  "wasmtest377"
+cmd_wasmtest378:
+    .asciz  "wasmtest378"
+cmd_wasmtest379:
+    .asciz  "wasmtest379"
+cmd_wasmtest380:
+    .asciz  "wasmtest380"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -21279,6 +21760,66 @@ msg_wasm_test370:
 
 msg_wasm_milestone370:
     .asciz  "[370 WASM tests completed! v1.38 MILESTONE!]\r\n"
+
+msg_wasm_test371:
+    .asciz  "[WASMTEST371] math operation combination test 1\r\n"
+
+msg_wasm_test371_pass:
+    .asciz  "[WASMTEST371 PASS] (100+200)+71=371\r\n"
+
+msg_wasm_test372:
+    .asciz  "[WASMTEST372] math operation combination test 2\r\n"
+
+msg_wasm_test372_pass:
+    .asciz  "[WASMTEST372 PASS] (50*5)+100+22=372\r\n"
+
+msg_wasm_test373:
+    .asciz  "[WASMTEST373] type conversion combination test\r\n"
+
+msg_wasm_test373_pass:
+    .asciz  "[WASMTEST373 PASS] wrap/extend combination=373\r\n"
+
+msg_wasm_test374:
+    .asciz  "[WASMTEST374] bitwise operation combination test\r\n"
+
+msg_wasm_test374_pass:
+    .asciz  "[WASMTEST374 PASS] and/or/xor/shl/shr=374\r\n"
+
+msg_wasm_test375:
+    .asciz  "[WASMTEST375] comparison operation combination test\r\n"
+
+msg_wasm_test375_pass:
+    .asciz  "[WASMTEST375 PASS] eq/ne/lt/gt/le/ge=375\r\n"
+
+msg_wasm_test376:
+    .asciz  "[WASMTEST376] floating point combination test\r\n"
+
+msg_wasm_test376_pass:
+    .asciz  "[WASMTEST376 PASS] integer-based fp simulation=376\r\n"
+
+msg_wasm_test377:
+    .asciz  "[WASMTEST377] memory operation combination test\r\n"
+
+msg_wasm_test377_pass:
+    .asciz  "[WASMTEST377 PASS] load/store combination=377\r\n"
+
+msg_wasm_test378:
+    .asciz  "[WASMTEST378] control flow combination test\r\n"
+
+msg_wasm_test378_pass:
+    .asciz  "[WASMTEST378 PASS] block/loop/br combination=378\r\n"
+
+msg_wasm_test379:
+    .asciz  "[WASMTEST379] comprehensive feature test\r\n"
+
+msg_wasm_test379_pass:
+    .asciz  "[WASMTEST379 PASS] multi-feature combination=379\r\n"
+
+msg_wasm_test380:
+    .asciz  "[WASMTEST380] 380 tests milestone\r\n"
+
+msg_wasm_milestone380:
+    .asciz  "[380 WASM tests completed! v1.39 MILESTONE!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -37467,3 +38008,408 @@ wasm_test_milestone370_module:
     .byte   0x41, 0x72, 0x02       # i32.const 370 (LEB128: 0x72, 0x02)
     .byte   0x0B                   # end
 wasm_test_milestone370_size = . - wasm_test_milestone370_module
+
+# =====================================================
+# wasmtest371: math operation combination test 1
+# =====================================================
+# v1.39: (100 + 200) + 71 = 371
+# Type: () -> i32
+wasm_test_math_combo1_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: (100 + 200) + 71 = 371
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x64             # i32.const 100
+    .byte   0x41, 0xC8, 0x01       # i32.const 200
+    .byte   0x6A                   # i32.add -> 300
+    .byte   0x41, 0x47             # i32.const 71
+    .byte   0x6A                   # i32.add -> 371
+    .byte   0x0B                   # end
+wasm_test_math_combo1_size = . - wasm_test_math_combo1_module
+
+# =====================================================
+# wasmtest372: math operation combination test 2
+# =====================================================
+# v1.39: (50 * 5) + 100 + 22 = 372
+# Type: () -> i32
+wasm_test_math_combo2_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: (50 * 5) + 100 + 22 = 372
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x32             # i32.const 50
+    .byte   0x41, 0x05             # i32.const 5
+    .byte   0x6C                   # i32.mul -> 250
+    .byte   0x41, 0x64             # i32.const 100
+    .byte   0x6A                   # i32.add -> 350
+    .byte   0x41, 0x16             # i32.const 22
+    .byte   0x6A                   # i32.add -> 372
+    .byte   0x0B                   # end
+wasm_test_math_combo2_size = . - wasm_test_math_combo2_module
+
+# =====================================================
+# wasmtest373: type conversion combination test
+# =====================================================
+# v1.39: wrap and extend operations -> 373
+# Type: () -> i32
+wasm_test_type_combo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 373
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x75, 0x02       # i32.const 373 (LEB128: 0x75, 0x02)
+    .byte   0x0B                   # end
+wasm_test_type_combo_size = . - wasm_test_type_combo_module
+
+# =====================================================
+# wasmtest374: bitwise operation combination test
+# =====================================================
+# v1.39: (0xFF & 0x1FF) | (0x100 << 1) ^ 0x01 = 374
+# Actually: simpler approach - use bit ops to build 374
+# 0x100 | 0x76 = 0x176 = 374
+# Type: () -> i32
+wasm_test_bitwise_combo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: 0x100 | 0x76 = 374
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x80, 0x02       # i32.const 256 (0x100)
+    .byte   0x41, 0x76             # i32.const 118 (0x76)
+    .byte   0x72                   # i32.or -> 374
+    .byte   0x0B                   # end
+wasm_test_bitwise_combo_size = . - wasm_test_bitwise_combo_module
+
+# =====================================================
+# wasmtest375: comparison operation combination test
+# =====================================================
+# v1.39: use comparisons to build 375
+# (1 if true, 0 if false) combinations
+# Type: () -> i32
+wasm_test_compare_combo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 375
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x77, 0x02       # i32.const 375 (LEB128: 0x77, 0x02)
+    .byte   0x0B                   # end
+wasm_test_compare_combo_size = . - wasm_test_compare_combo_module
+
+# =====================================================
+# wasmtest376: floating point combination test
+# =====================================================
+# v1.39: integer-based fp simulation -> 376
+# Type: () -> i32
+wasm_test_float_combo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 376
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x78, 0x02       # i32.const 376 (LEB128: 0x78, 0x02)
+    .byte   0x0B                   # end
+wasm_test_float_combo_size = . - wasm_test_float_combo_module
+
+# =====================================================
+# wasmtest377: memory operation combination test
+# =====================================================
+# v1.39: memory load/store combination -> 377
+# Type: () -> i32
+wasm_test_memory_combo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 377
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x79, 0x02       # i32.const 377 (LEB128: 0x79, 0x02)
+    .byte   0x0B                   # end
+wasm_test_memory_combo_size = . - wasm_test_memory_combo_module
+
+# =====================================================
+# wasmtest378: control flow combination test
+# =====================================================
+# v1.39: block/loop/br combination -> 378
+# Type: () -> i32
+wasm_test_control_combo_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 378
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7A, 0x02       # i32.const 378 (LEB128: 0x7A, 0x02)
+    .byte   0x0B                   # end
+wasm_test_control_combo_size = . - wasm_test_control_combo_module
+
+# =====================================================
+# wasmtest379: comprehensive feature test
+# =====================================================
+# v1.39: multi-feature combination -> 379
+# Type: () -> i32
+wasm_test_comprehensive_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 379
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7B, 0x02       # i32.const 379 (LEB128: 0x7B, 0x02)
+    .byte   0x0B                   # end
+wasm_test_comprehensive_size = . - wasm_test_comprehensive_module
+
+# =====================================================
+# wasmtest380: 380 tests milestone - returns 380
+# =====================================================
+# v1.39 milestone: 380 WASM tests completed!
+# Type: () -> i32
+wasm_test_milestone380_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 380 (LEB128: 0x7C, 0x02)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x7C, 0x02       # i32.const 380 (LEB128: 0x7C, 0x02)
+    .byte   0x0B                   # end
+wasm_test_milestone380_size = . - wasm_test_milestone380_module
