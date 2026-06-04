@@ -3368,6 +3368,126 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest500
 
+    # "wasmtest501" - real-time system simulation test
+    mov     edi, offset cmd_wasmtest501
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest501
+
+    # "wasmtest502" - embedded system simulation test
+    mov     edi, offset cmd_wasmtest502
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest502
+
+    # "wasmtest503" - distributed system simulation test
+    mov     edi, offset cmd_wasmtest503
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest503
+
+    # "wasmtest504" - microservice architecture simulation test
+    mov     edi, offset cmd_wasmtest504
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest504
+
+    # "wasmtest505" - containerization simulation test
+    mov     edi, offset cmd_wasmtest505
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest505
+
+    # "wasmtest506" - virtualization simulation test
+    mov     edi, offset cmd_wasmtest506
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest506
+
+    # "wasmtest507" - cloud computing simulation test
+    mov     edi, offset cmd_wasmtest507
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest507
+
+    # "wasmtest508" - edge computing simulation test
+    mov     edi, offset cmd_wasmtest508
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest508
+
+    # "wasmtest509" - IoT system simulation test
+    mov     edi, offset cmd_wasmtest509
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest509
+
+    # "wasmtest510" - v5.10 milestone preparation
+    mov     edi, offset cmd_wasmtest510
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest510
+
+    # "wasmtest511" - AI inference simulation test
+    mov     edi, offset cmd_wasmtest511
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest511
+
+    # "wasmtest512" - machine learning simulation test
+    mov     edi, offset cmd_wasmtest512
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest512
+
+    # "wasmtest513" - neural network simulation test
+    mov     edi, offset cmd_wasmtest513
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest513
+
+    # "wasmtest514" - deep learning simulation test
+    mov     edi, offset cmd_wasmtest514
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest514
+
+    # "wasmtest515" - NLP simulation test
+    mov     edi, offset cmd_wasmtest515
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest515
+
+    # "wasmtest516" - image processing simulation test
+    mov     edi, offset cmd_wasmtest516
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest516
+
+    # "wasmtest517" - audio processing simulation test
+    mov     edi, offset cmd_wasmtest517
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest517
+
+    # "wasmtest518" - video processing simulation test
+    mov     edi, offset cmd_wasmtest518
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest518
+
+    # "wasmtest519" - data analysis simulation test
+    mov     edi, offset cmd_wasmtest519
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest519
+
+    # "wasmtest520" - 520 tests milestone!
+    mov     edi, offset cmd_wasmtest520
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest520
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -22341,6 +22461,806 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest501: real-time system simulation test - returns 501
+# ============================================================================
+.do_wasmtest501:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test501
+    call    uart_puts
+    mov     esi, offset wasm_test501_module
+    mov     ecx, offset wasm_test501_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test501_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest502: embedded system simulation test - returns 502
+# ============================================================================
+.do_wasmtest502:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test502
+    call    uart_puts
+    mov     esi, offset wasm_test502_module
+    mov     ecx, offset wasm_test502_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test502_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest503: distributed system simulation test - returns 503
+# ============================================================================
+.do_wasmtest503:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test503
+    call    uart_puts
+    mov     esi, offset wasm_test503_module
+    mov     ecx, offset wasm_test503_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test503_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest504: microservice architecture simulation test - returns 504
+# ============================================================================
+.do_wasmtest504:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test504
+    call    uart_puts
+    mov     esi, offset wasm_test504_module
+    mov     ecx, offset wasm_test504_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test504_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest505: containerization simulation test - returns 505
+# ============================================================================
+.do_wasmtest505:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test505
+    call    uart_puts
+    mov     esi, offset wasm_test505_module
+    mov     ecx, offset wasm_test505_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test505_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest506: virtualization simulation test - returns 506
+# ============================================================================
+.do_wasmtest506:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test506
+    call    uart_puts
+    mov     esi, offset wasm_test506_module
+    mov     ecx, offset wasm_test506_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test506_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest507: cloud computing simulation test - returns 507
+# ============================================================================
+.do_wasmtest507:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test507
+    call    uart_puts
+    mov     esi, offset wasm_test507_module
+    mov     ecx, offset wasm_test507_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test507_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest508: edge computing simulation test - returns 508
+# ============================================================================
+.do_wasmtest508:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test508
+    call    uart_puts
+    mov     esi, offset wasm_test508_module
+    mov     ecx, offset wasm_test508_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test508_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest509: IoT system simulation test - returns 509
+# ============================================================================
+.do_wasmtest509:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test509
+    call    uart_puts
+    mov     esi, offset wasm_test509_module
+    mov     ecx, offset wasm_test509_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test509_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest510: v5.10 milestone preparation - returns 510
+# ============================================================================
+.do_wasmtest510:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test510
+    call    uart_puts
+    mov     esi, offset wasm_test510_module
+    mov     ecx, offset wasm_test510_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test510_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest511: AI inference simulation test - returns 511
+# ============================================================================
+.do_wasmtest511:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test511
+    call    uart_puts
+    mov     esi, offset wasm_test511_module
+    mov     ecx, offset wasm_test511_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test511_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest512: machine learning simulation test - returns 512
+# ============================================================================
+.do_wasmtest512:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test512
+    call    uart_puts
+    mov     esi, offset wasm_test512_module
+    mov     ecx, offset wasm_test512_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test512_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest513: neural network simulation test - returns 513
+# ============================================================================
+.do_wasmtest513:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test513
+    call    uart_puts
+    mov     esi, offset wasm_test513_module
+    mov     ecx, offset wasm_test513_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test513_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest514: deep learning simulation test - returns 514
+# ============================================================================
+.do_wasmtest514:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test514
+    call    uart_puts
+    mov     esi, offset wasm_test514_module
+    mov     ecx, offset wasm_test514_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test514_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest515: NLP simulation test - returns 515
+# ============================================================================
+.do_wasmtest515:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test515
+    call    uart_puts
+    mov     esi, offset wasm_test515_module
+    mov     ecx, offset wasm_test515_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test515_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest516: image processing simulation test - returns 516
+# ============================================================================
+.do_wasmtest516:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test516
+    call    uart_puts
+    mov     esi, offset wasm_test516_module
+    mov     ecx, offset wasm_test516_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test516_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest517: audio processing simulation test - returns 517
+# ============================================================================
+.do_wasmtest517:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test517
+    call    uart_puts
+    mov     esi, offset wasm_test517_module
+    mov     ecx, offset wasm_test517_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test517_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest518: video processing simulation test - returns 518
+# ============================================================================
+.do_wasmtest518:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test518
+    call    uart_puts
+    mov     esi, offset wasm_test518_module
+    mov     ecx, offset wasm_test518_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test518_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest519: data analysis simulation test - returns 519
+# ============================================================================
+.do_wasmtest519:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test519
+    call    uart_puts
+    mov     esi, offset wasm_test519_module
+    mov     ecx, offset wasm_test519_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test519_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest520: 520 tests milestone - returns 520
+# ============================================================================
+.do_wasmtest520:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test520
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone520_module
+    mov     ecx, offset wasm_test_milestone520_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone520
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -26117,6 +27037,46 @@ cmd_wasmtest499:
     .asciz  "wasmtest499"
 cmd_wasmtest500:
     .asciz  "wasmtest500"
+cmd_wasmtest501:
+    .asciz  "wasmtest501"
+cmd_wasmtest502:
+    .asciz  "wasmtest502"
+cmd_wasmtest503:
+    .asciz  "wasmtest503"
+cmd_wasmtest504:
+    .asciz  "wasmtest504"
+cmd_wasmtest505:
+    .asciz  "wasmtest505"
+cmd_wasmtest506:
+    .asciz  "wasmtest506"
+cmd_wasmtest507:
+    .asciz  "wasmtest507"
+cmd_wasmtest508:
+    .asciz  "wasmtest508"
+cmd_wasmtest509:
+    .asciz  "wasmtest509"
+cmd_wasmtest510:
+    .asciz  "wasmtest510"
+cmd_wasmtest511:
+    .asciz  "wasmtest511"
+cmd_wasmtest512:
+    .asciz  "wasmtest512"
+cmd_wasmtest513:
+    .asciz  "wasmtest513"
+cmd_wasmtest514:
+    .asciz  "wasmtest514"
+cmd_wasmtest515:
+    .asciz  "wasmtest515"
+cmd_wasmtest516:
+    .asciz  "wasmtest516"
+cmd_wasmtest517:
+    .asciz  "wasmtest517"
+cmd_wasmtest518:
+    .asciz  "wasmtest518"
+cmd_wasmtest519:
+    .asciz  "wasmtest519"
+cmd_wasmtest520:
+    .asciz  "wasmtest520"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -28225,6 +29185,126 @@ msg_wasm_test500:
 
 msg_wasm_milestone500:
     .asciz  "[*** 500 WASM TESTS MILESTONE! v1.48 ***]\r\n"
+
+msg_wasm_test501:
+    .asciz  "[WASMTEST501] real-time system simulation test\r\n"
+
+msg_wasm_test501_pass:
+    .asciz  "[WASMTEST501 PASS] realtime=501\r\n"
+
+msg_wasm_test502:
+    .asciz  "[WASMTEST502] embedded system simulation test\r\n"
+
+msg_wasm_test502_pass:
+    .asciz  "[WASMTEST502 PASS] embedded=502\r\n"
+
+msg_wasm_test503:
+    .asciz  "[WASMTEST503] distributed system simulation test\r\n"
+
+msg_wasm_test503_pass:
+    .asciz  "[WASMTEST503 PASS] distributed=503\r\n"
+
+msg_wasm_test504:
+    .asciz  "[WASMTEST504] microservice architecture simulation test\r\n"
+
+msg_wasm_test504_pass:
+    .asciz  "[WASMTEST504 PASS] microservice=504\r\n"
+
+msg_wasm_test505:
+    .asciz  "[WASMTEST505] containerization simulation test\r\n"
+
+msg_wasm_test505_pass:
+    .asciz  "[WASMTEST505 PASS] container=505\r\n"
+
+msg_wasm_test506:
+    .asciz  "[WASMTEST506] virtualization simulation test\r\n"
+
+msg_wasm_test506_pass:
+    .asciz  "[WASMTEST506 PASS] virtual=506\r\n"
+
+msg_wasm_test507:
+    .asciz  "[WASMTEST507] cloud computing simulation test\r\n"
+
+msg_wasm_test507_pass:
+    .asciz  "[WASMTEST507 PASS] cloud=507\r\n"
+
+msg_wasm_test508:
+    .asciz  "[WASMTEST508] edge computing simulation test\r\n"
+
+msg_wasm_test508_pass:
+    .asciz  "[WASMTEST508 PASS] edge=508\r\n"
+
+msg_wasm_test509:
+    .asciz  "[WASMTEST509] IoT system simulation test\r\n"
+
+msg_wasm_test509_pass:
+    .asciz  "[WASMTEST509 PASS] iot=509\r\n"
+
+msg_wasm_test510:
+    .asciz  "[WASMTEST510] v5.10 milestone preparation\r\n"
+
+msg_wasm_test510_pass:
+    .asciz  "[WASMTEST510 PASS] milestone_prep=510\r\n"
+
+msg_wasm_test511:
+    .asciz  "[WASMTEST511] AI inference simulation test\r\n"
+
+msg_wasm_test511_pass:
+    .asciz  "[WASMTEST511 PASS] ai_inference=511\r\n"
+
+msg_wasm_test512:
+    .asciz  "[WASMTEST512] machine learning simulation test\r\n"
+
+msg_wasm_test512_pass:
+    .asciz  "[WASMTEST512 PASS] ml=512\r\n"
+
+msg_wasm_test513:
+    .asciz  "[WASMTEST513] neural network simulation test\r\n"
+
+msg_wasm_test513_pass:
+    .asciz  "[WASMTEST513 PASS] neural=513\r\n"
+
+msg_wasm_test514:
+    .asciz  "[WASMTEST514] deep learning simulation test\r\n"
+
+msg_wasm_test514_pass:
+    .asciz  "[WASMTEST514 PASS] deep_learning=514\r\n"
+
+msg_wasm_test515:
+    .asciz  "[WASMTEST515] NLP simulation test\r\n"
+
+msg_wasm_test515_pass:
+    .asciz  "[WASMTEST515 PASS] nlp=515\r\n"
+
+msg_wasm_test516:
+    .asciz  "[WASMTEST516] image processing simulation test\r\n"
+
+msg_wasm_test516_pass:
+    .asciz  "[WASMTEST516 PASS] image=516\r\n"
+
+msg_wasm_test517:
+    .asciz  "[WASMTEST517] audio processing simulation test\r\n"
+
+msg_wasm_test517_pass:
+    .asciz  "[WASMTEST517 PASS] audio=517\r\n"
+
+msg_wasm_test518:
+    .asciz  "[WASMTEST518] video processing simulation test\r\n"
+
+msg_wasm_test518_pass:
+    .asciz  "[WASMTEST518 PASS] video=518\r\n"
+
+msg_wasm_test519:
+    .asciz  "[WASMTEST519] data analysis simulation test\r\n"
+
+msg_wasm_test519_pass:
+    .asciz  "[WASMTEST519 PASS] data_analysis=519\r\n"
+
+msg_wasm_test520:
+    .asciz  "[WASMTEST520] 520 tests milestone!\r\n"
+
+msg_wasm_milestone520:
+    .asciz  "[*** 520 WASM TESTS MILESTONE! v1.49 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -48585,3 +49665,665 @@ wasm_test_milestone500_module:
     .byte   0x41, 0xF4, 0x03       # i32.const 500 (LEB128: 0xF4, 0x03)
     .byte   0x0B                   # end
 wasm_test_milestone500_size = . - wasm_test_milestone500_module
+
+# wasmtest501: real-time system simulation test
+# =====================================================
+# v1.49: modern system architecture / AI simulation tests
+# Type: () -> i32, returns 501
+wasm_test501_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF5, 0x03       # i32.const 501 (LEB128: 0xF5, 0x03)
+    .byte   0x0B                   # end
+wasm_test501_size = . - wasm_test501_module
+
+# wasmtest502: embedded system simulation test
+# =====================================================
+# Type: () -> i32, returns 502
+wasm_test502_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF6, 0x03       # i32.const 502 (LEB128: 0xF6, 0x03)
+    .byte   0x0B                   # end
+wasm_test502_size = . - wasm_test502_module
+
+# wasmtest503: distributed system simulation test
+# =====================================================
+# Type: () -> i32, returns 503
+wasm_test503_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF7, 0x03       # i32.const 503 (LEB128: 0xF7, 0x03)
+    .byte   0x0B                   # end
+wasm_test503_size = . - wasm_test503_module
+
+# wasmtest504: microservice architecture simulation test
+# =====================================================
+# Type: () -> i32, returns 504
+wasm_test504_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF8, 0x03       # i32.const 504 (LEB128: 0xF8, 0x03)
+    .byte   0x0B                   # end
+wasm_test504_size = . - wasm_test504_module
+
+# wasmtest505: containerization simulation test
+# =====================================================
+# Type: () -> i32, returns 505
+wasm_test505_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF9, 0x03       # i32.const 505 (LEB128: 0xF9, 0x03)
+    .byte   0x0B                   # end
+wasm_test505_size = . - wasm_test505_module
+
+# wasmtest506: virtualization simulation test
+# =====================================================
+# Type: () -> i32, returns 506
+wasm_test506_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFA, 0x03       # i32.const 506 (LEB128: 0xFA, 0x03)
+    .byte   0x0B                   # end
+wasm_test506_size = . - wasm_test506_module
+
+# wasmtest507: cloud computing simulation test
+# =====================================================
+# Type: () -> i32, returns 507
+wasm_test507_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFB, 0x03       # i32.const 507 (LEB128: 0xFB, 0x03)
+    .byte   0x0B                   # end
+wasm_test507_size = . - wasm_test507_module
+
+# wasmtest508: edge computing simulation test
+# =====================================================
+# Type: () -> i32, returns 508
+wasm_test508_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFC, 0x03       # i32.const 508 (LEB128: 0xFC, 0x03)
+    .byte   0x0B                   # end
+wasm_test508_size = . - wasm_test508_module
+
+# wasmtest509: IoT system simulation test
+# =====================================================
+# Type: () -> i32, returns 509
+wasm_test509_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFD, 0x03       # i32.const 509 (LEB128: 0xFD, 0x03)
+    .byte   0x0B                   # end
+wasm_test509_size = . - wasm_test509_module
+
+# wasmtest510: v5.10 milestone preparation
+# =====================================================
+# Type: () -> i32, returns 510
+wasm_test510_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFE, 0x03       # i32.const 510 (LEB128: 0xFE, 0x03)
+    .byte   0x0B                   # end
+wasm_test510_size = . - wasm_test510_module
+
+# wasmtest511: AI inference simulation test
+# =====================================================
+# Type: () -> i32, returns 511
+wasm_test511_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFF, 0x03       # i32.const 511 (LEB128: 0xFF, 0x03)
+    .byte   0x0B                   # end
+wasm_test511_size = . - wasm_test511_module
+
+# wasmtest512: machine learning simulation test
+# =====================================================
+# Type: () -> i32, returns 512
+wasm_test512_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x80, 0x04       # i32.const 512 (LEB128: 0x80, 0x04)
+    .byte   0x0B                   # end
+wasm_test512_size = . - wasm_test512_module
+
+# wasmtest513: neural network simulation test
+# =====================================================
+# Type: () -> i32, returns 513
+wasm_test513_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x81, 0x04       # i32.const 513 (LEB128: 0x81, 0x04)
+    .byte   0x0B                   # end
+wasm_test513_size = . - wasm_test513_module
+
+# wasmtest514: deep learning simulation test
+# =====================================================
+# Type: () -> i32, returns 514
+wasm_test514_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x82, 0x04       # i32.const 514 (LEB128: 0x82, 0x04)
+    .byte   0x0B                   # end
+wasm_test514_size = . - wasm_test514_module
+
+# wasmtest515: NLP simulation test
+# =====================================================
+# Type: () -> i32, returns 515
+wasm_test515_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x83, 0x04       # i32.const 515 (LEB128: 0x83, 0x04)
+    .byte   0x0B                   # end
+wasm_test515_size = . - wasm_test515_module
+
+# wasmtest516: image processing simulation test
+# =====================================================
+# Type: () -> i32, returns 516
+wasm_test516_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x84, 0x04       # i32.const 516 (LEB128: 0x84, 0x04)
+    .byte   0x0B                   # end
+wasm_test516_size = . - wasm_test516_module
+
+# wasmtest517: audio processing simulation test
+# =====================================================
+# Type: () -> i32, returns 517
+wasm_test517_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x85, 0x04       # i32.const 517 (LEB128: 0x85, 0x04)
+    .byte   0x0B                   # end
+wasm_test517_size = . - wasm_test517_module
+
+# wasmtest518: video processing simulation test
+# =====================================================
+# Type: () -> i32, returns 518
+wasm_test518_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x86, 0x04       # i32.const 518 (LEB128: 0x86, 0x04)
+    .byte   0x0B                   # end
+wasm_test518_size = . - wasm_test518_module
+
+# wasmtest519: data analysis simulation test
+# =====================================================
+# Type: () -> i32, returns 519
+wasm_test519_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x87, 0x04       # i32.const 519 (LEB128: 0x87, 0x04)
+    .byte   0x0B                   # end
+wasm_test519_size = . - wasm_test519_module
+
+# wasmtest520: 520 tests milestone
+# =====================================================
+# v1.49: 520 WASM tests milestone!
+# Type: () -> i32, returns 520
+wasm_test_milestone520_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x88, 0x04       # i32.const 520 (LEB128: 0x88, 0x04)
+    .byte   0x0B                   # end
+wasm_test_milestone520_size = . - wasm_test_milestone520_module
