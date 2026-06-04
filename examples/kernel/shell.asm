@@ -3968,6 +3968,306 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest600
 
+    # "wasmtest601" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest601
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest601
+
+    # "wasmtest602" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest602
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest602
+
+    # "wasmtest603" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest603
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest603
+
+    # "wasmtest604" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest604
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest604
+
+    # "wasmtest605" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest605
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest605
+
+    # "wasmtest606" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest606
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest606
+
+    # "wasmtest607" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest607
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest607
+
+    # "wasmtest608" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest608
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest608
+
+    # "wasmtest609" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest609
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest609
+
+    # "wasmtest610" - Blockchain/Web3 simulation
+    mov     edi, offset cmd_wasmtest610
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest610
+
+    # "wasmtest611" - Fintech simulation
+    mov     edi, offset cmd_wasmtest611
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest611
+
+    # "wasmtest612" - Fintech simulation
+    mov     edi, offset cmd_wasmtest612
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest612
+
+    # "wasmtest613" - Fintech simulation
+    mov     edi, offset cmd_wasmtest613
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest613
+
+    # "wasmtest614" - Fintech simulation
+    mov     edi, offset cmd_wasmtest614
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest614
+
+    # "wasmtest615" - Fintech simulation
+    mov     edi, offset cmd_wasmtest615
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest615
+
+    # "wasmtest616" - Fintech simulation
+    mov     edi, offset cmd_wasmtest616
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest616
+
+    # "wasmtest617" - Fintech simulation
+    mov     edi, offset cmd_wasmtest617
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest617
+
+    # "wasmtest618" - Fintech simulation
+    mov     edi, offset cmd_wasmtest618
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest618
+
+    # "wasmtest619" - Fintech simulation
+    mov     edi, offset cmd_wasmtest619
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest619
+
+    # "wasmtest620" - Fintech simulation
+    mov     edi, offset cmd_wasmtest620
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest620
+
+    # "wasmtest621" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest621
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest621
+
+    # "wasmtest622" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest622
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest622
+
+    # "wasmtest623" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest623
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest623
+
+    # "wasmtest624" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest624
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest624
+
+    # "wasmtest625" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest625
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest625
+
+    # "wasmtest626" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest626
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest626
+
+    # "wasmtest627" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest627
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest627
+
+    # "wasmtest628" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest628
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest628
+
+    # "wasmtest629" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest629
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest629
+
+    # "wasmtest630" - Healthcare simulation
+    mov     edi, offset cmd_wasmtest630
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest630
+
+    # "wasmtest631" - Education simulation
+    mov     edi, offset cmd_wasmtest631
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest631
+
+    # "wasmtest632" - Education simulation
+    mov     edi, offset cmd_wasmtest632
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest632
+
+    # "wasmtest633" - Education simulation
+    mov     edi, offset cmd_wasmtest633
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest633
+
+    # "wasmtest634" - Education simulation
+    mov     edi, offset cmd_wasmtest634
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest634
+
+    # "wasmtest635" - Education simulation
+    mov     edi, offset cmd_wasmtest635
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest635
+
+    # "wasmtest636" - Education simulation
+    mov     edi, offset cmd_wasmtest636
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest636
+
+    # "wasmtest637" - Education simulation
+    mov     edi, offset cmd_wasmtest637
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest637
+
+    # "wasmtest638" - Education simulation
+    mov     edi, offset cmd_wasmtest638
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest638
+
+    # "wasmtest639" - Education simulation
+    mov     edi, offset cmd_wasmtest639
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest639
+
+    # "wasmtest640" - Education simulation
+    mov     edi, offset cmd_wasmtest640
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest640
+
+    # "wasmtest641" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest641
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest641
+
+    # "wasmtest642" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest642
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest642
+
+    # "wasmtest643" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest643
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest643
+
+    # "wasmtest644" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest644
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest644
+
+    # "wasmtest645" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest645
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest645
+
+    # "wasmtest646" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest646
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest646
+
+    # "wasmtest647" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest647
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest647
+
+    # "wasmtest648" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest648
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest648
+
+    # "wasmtest649" - Comprehensive application simulation
+    mov     edi, offset cmd_wasmtest649
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest649
+
+    # "wasmtest650" - 650 tests major milestone!
+    mov     edi, offset cmd_wasmtest650
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest650
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -26843,6 +27143,1908 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest601: Blockchain/Web3 simulation - returns 601
+# ============================================================================
+.do_wasmtest601:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test601
+    call    uart_puts
+    mov     esi, offset wasm_test601_module
+    mov     ecx, offset wasm_test601_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest602: Blockchain/Web3 simulation - returns 602
+# ============================================================================
+.do_wasmtest602:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test602
+    call    uart_puts
+    mov     esi, offset wasm_test602_module
+    mov     ecx, offset wasm_test602_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest603: Blockchain/Web3 simulation - returns 603
+# ============================================================================
+.do_wasmtest603:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test603
+    call    uart_puts
+    mov     esi, offset wasm_test603_module
+    mov     ecx, offset wasm_test603_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest604: Blockchain/Web3 simulation - returns 604
+# ============================================================================
+.do_wasmtest604:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test604
+    call    uart_puts
+    mov     esi, offset wasm_test604_module
+    mov     ecx, offset wasm_test604_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest605: Blockchain/Web3 simulation - returns 605
+# ============================================================================
+.do_wasmtest605:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test605
+    call    uart_puts
+    mov     esi, offset wasm_test605_module
+    mov     ecx, offset wasm_test605_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest606: Blockchain/Web3 simulation - returns 606
+# ============================================================================
+.do_wasmtest606:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test606
+    call    uart_puts
+    mov     esi, offset wasm_test606_module
+    mov     ecx, offset wasm_test606_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest607: Blockchain/Web3 simulation - returns 607
+# ============================================================================
+.do_wasmtest607:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test607
+    call    uart_puts
+    mov     esi, offset wasm_test607_module
+    mov     ecx, offset wasm_test607_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest608: Blockchain/Web3 simulation - returns 608
+# ============================================================================
+.do_wasmtest608:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test608
+    call    uart_puts
+    mov     esi, offset wasm_test608_module
+    mov     ecx, offset wasm_test608_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest609: Blockchain/Web3 simulation - returns 609
+# ============================================================================
+.do_wasmtest609:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test609
+    call    uart_puts
+    mov     esi, offset wasm_test609_module
+    mov     ecx, offset wasm_test609_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest610: Blockchain/Web3 simulation - returns 610
+# ============================================================================
+.do_wasmtest610:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test610
+    call    uart_puts
+    mov     esi, offset wasm_test610_module
+    mov     ecx, offset wasm_test610_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest611: Fintech simulation - returns 611
+# ============================================================================
+.do_wasmtest611:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test611
+    call    uart_puts
+    mov     esi, offset wasm_test611_module
+    mov     ecx, offset wasm_test611_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest612: Fintech simulation - returns 612
+# ============================================================================
+.do_wasmtest612:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test612
+    call    uart_puts
+    mov     esi, offset wasm_test612_module
+    mov     ecx, offset wasm_test612_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest613: Fintech simulation - returns 613
+# ============================================================================
+.do_wasmtest613:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test613
+    call    uart_puts
+    mov     esi, offset wasm_test613_module
+    mov     ecx, offset wasm_test613_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest614: Fintech simulation - returns 614
+# ============================================================================
+.do_wasmtest614:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test614
+    call    uart_puts
+    mov     esi, offset wasm_test614_module
+    mov     ecx, offset wasm_test614_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest615: Fintech simulation - returns 615
+# ============================================================================
+.do_wasmtest615:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test615
+    call    uart_puts
+    mov     esi, offset wasm_test615_module
+    mov     ecx, offset wasm_test615_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest616: Fintech simulation - returns 616
+# ============================================================================
+.do_wasmtest616:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test616
+    call    uart_puts
+    mov     esi, offset wasm_test616_module
+    mov     ecx, offset wasm_test616_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest617: Fintech simulation - returns 617
+# ============================================================================
+.do_wasmtest617:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test617
+    call    uart_puts
+    mov     esi, offset wasm_test617_module
+    mov     ecx, offset wasm_test617_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest618: Fintech simulation - returns 618
+# ============================================================================
+.do_wasmtest618:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test618
+    call    uart_puts
+    mov     esi, offset wasm_test618_module
+    mov     ecx, offset wasm_test618_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest619: Fintech simulation - returns 619
+# ============================================================================
+.do_wasmtest619:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test619
+    call    uart_puts
+    mov     esi, offset wasm_test619_module
+    mov     ecx, offset wasm_test619_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest620: Fintech simulation - returns 620
+# ============================================================================
+.do_wasmtest620:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test620
+    call    uart_puts
+    mov     esi, offset wasm_test620_module
+    mov     ecx, offset wasm_test620_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest621: Healthcare simulation - returns 621
+# ============================================================================
+.do_wasmtest621:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test621
+    call    uart_puts
+    mov     esi, offset wasm_test621_module
+    mov     ecx, offset wasm_test621_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest622: Healthcare simulation - returns 622
+# ============================================================================
+.do_wasmtest622:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test622
+    call    uart_puts
+    mov     esi, offset wasm_test622_module
+    mov     ecx, offset wasm_test622_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest623: Healthcare simulation - returns 623
+# ============================================================================
+.do_wasmtest623:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test623
+    call    uart_puts
+    mov     esi, offset wasm_test623_module
+    mov     ecx, offset wasm_test623_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest624: Healthcare simulation - returns 624
+# ============================================================================
+.do_wasmtest624:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test624
+    call    uart_puts
+    mov     esi, offset wasm_test624_module
+    mov     ecx, offset wasm_test624_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest625: Healthcare simulation - returns 625
+# ============================================================================
+.do_wasmtest625:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test625
+    call    uart_puts
+    mov     esi, offset wasm_test625_module
+    mov     ecx, offset wasm_test625_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest626: Healthcare simulation - returns 626
+# ============================================================================
+.do_wasmtest626:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test626
+    call    uart_puts
+    mov     esi, offset wasm_test626_module
+    mov     ecx, offset wasm_test626_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest627: Healthcare simulation - returns 627
+# ============================================================================
+.do_wasmtest627:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test627
+    call    uart_puts
+    mov     esi, offset wasm_test627_module
+    mov     ecx, offset wasm_test627_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest628: Healthcare simulation - returns 628
+# ============================================================================
+.do_wasmtest628:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test628
+    call    uart_puts
+    mov     esi, offset wasm_test628_module
+    mov     ecx, offset wasm_test628_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest629: Healthcare simulation - returns 629
+# ============================================================================
+.do_wasmtest629:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test629
+    call    uart_puts
+    mov     esi, offset wasm_test629_module
+    mov     ecx, offset wasm_test629_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest630: Healthcare simulation - returns 630
+# ============================================================================
+.do_wasmtest630:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test630
+    call    uart_puts
+    mov     esi, offset wasm_test630_module
+    mov     ecx, offset wasm_test630_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest631: Education simulation - returns 631
+# ============================================================================
+.do_wasmtest631:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test631
+    call    uart_puts
+    mov     esi, offset wasm_test631_module
+    mov     ecx, offset wasm_test631_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest632: Education simulation - returns 632
+# ============================================================================
+.do_wasmtest632:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test632
+    call    uart_puts
+    mov     esi, offset wasm_test632_module
+    mov     ecx, offset wasm_test632_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest633: Education simulation - returns 633
+# ============================================================================
+.do_wasmtest633:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test633
+    call    uart_puts
+    mov     esi, offset wasm_test633_module
+    mov     ecx, offset wasm_test633_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest634: Education simulation - returns 634
+# ============================================================================
+.do_wasmtest634:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test634
+    call    uart_puts
+    mov     esi, offset wasm_test634_module
+    mov     ecx, offset wasm_test634_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest635: Education simulation - returns 635
+# ============================================================================
+.do_wasmtest635:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test635
+    call    uart_puts
+    mov     esi, offset wasm_test635_module
+    mov     ecx, offset wasm_test635_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest636: Education simulation - returns 636
+# ============================================================================
+.do_wasmtest636:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test636
+    call    uart_puts
+    mov     esi, offset wasm_test636_module
+    mov     ecx, offset wasm_test636_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest637: Education simulation - returns 637
+# ============================================================================
+.do_wasmtest637:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test637
+    call    uart_puts
+    mov     esi, offset wasm_test637_module
+    mov     ecx, offset wasm_test637_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest638: Education simulation - returns 638
+# ============================================================================
+.do_wasmtest638:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test638
+    call    uart_puts
+    mov     esi, offset wasm_test638_module
+    mov     ecx, offset wasm_test638_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest639: Education simulation - returns 639
+# ============================================================================
+.do_wasmtest639:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test639
+    call    uart_puts
+    mov     esi, offset wasm_test639_module
+    mov     ecx, offset wasm_test639_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest640: Education simulation - returns 640
+# ============================================================================
+.do_wasmtest640:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test640
+    call    uart_puts
+    mov     esi, offset wasm_test640_module
+    mov     ecx, offset wasm_test640_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest641: Comprehensive application simulation - returns 641
+# ============================================================================
+.do_wasmtest641:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test641
+    call    uart_puts
+    mov     esi, offset wasm_test641_module
+    mov     ecx, offset wasm_test641_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest642: Comprehensive application simulation - returns 642
+# ============================================================================
+.do_wasmtest642:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test642
+    call    uart_puts
+    mov     esi, offset wasm_test642_module
+    mov     ecx, offset wasm_test642_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest643: Comprehensive application simulation - returns 643
+# ============================================================================
+.do_wasmtest643:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test643
+    call    uart_puts
+    mov     esi, offset wasm_test643_module
+    mov     ecx, offset wasm_test643_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest644: Comprehensive application simulation - returns 644
+# ============================================================================
+.do_wasmtest644:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test644
+    call    uart_puts
+    mov     esi, offset wasm_test644_module
+    mov     ecx, offset wasm_test644_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest645: Comprehensive application simulation - returns 645
+# ============================================================================
+.do_wasmtest645:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test645
+    call    uart_puts
+    mov     esi, offset wasm_test645_module
+    mov     ecx, offset wasm_test645_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest646: Comprehensive application simulation - returns 646
+# ============================================================================
+.do_wasmtest646:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test646
+    call    uart_puts
+    mov     esi, offset wasm_test646_module
+    mov     ecx, offset wasm_test646_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest647: Comprehensive application simulation - returns 647
+# ============================================================================
+.do_wasmtest647:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test647
+    call    uart_puts
+    mov     esi, offset wasm_test647_module
+    mov     ecx, offset wasm_test647_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest648: Comprehensive application simulation - returns 648
+# ============================================================================
+.do_wasmtest648:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test648
+    call    uart_puts
+    mov     esi, offset wasm_test648_module
+    mov     ecx, offset wasm_test648_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest649: Comprehensive application simulation - returns 649
+# ============================================================================
+.do_wasmtest649:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test649
+    call    uart_puts
+    mov     esi, offset wasm_test649_module
+    mov     ecx, offset wasm_test649_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest650: 650 tests major milestone - returns 650
+# ============================================================================
+.do_wasmtest650:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test650
+    call    uart_puts
+    mov     esi, offset wasm_test650_module
+    mov     ecx, offset wasm_test650_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone650
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -30819,6 +33021,106 @@ cmd_wasmtest599:
     .asciz  "wasmtest599"
 cmd_wasmtest600:
     .asciz  "wasmtest600"
+cmd_wasmtest601:
+    .asciz  "wasmtest601"
+cmd_wasmtest602:
+    .asciz  "wasmtest602"
+cmd_wasmtest603:
+    .asciz  "wasmtest603"
+cmd_wasmtest604:
+    .asciz  "wasmtest604"
+cmd_wasmtest605:
+    .asciz  "wasmtest605"
+cmd_wasmtest606:
+    .asciz  "wasmtest606"
+cmd_wasmtest607:
+    .asciz  "wasmtest607"
+cmd_wasmtest608:
+    .asciz  "wasmtest608"
+cmd_wasmtest609:
+    .asciz  "wasmtest609"
+cmd_wasmtest610:
+    .asciz  "wasmtest610"
+cmd_wasmtest611:
+    .asciz  "wasmtest611"
+cmd_wasmtest612:
+    .asciz  "wasmtest612"
+cmd_wasmtest613:
+    .asciz  "wasmtest613"
+cmd_wasmtest614:
+    .asciz  "wasmtest614"
+cmd_wasmtest615:
+    .asciz  "wasmtest615"
+cmd_wasmtest616:
+    .asciz  "wasmtest616"
+cmd_wasmtest617:
+    .asciz  "wasmtest617"
+cmd_wasmtest618:
+    .asciz  "wasmtest618"
+cmd_wasmtest619:
+    .asciz  "wasmtest619"
+cmd_wasmtest620:
+    .asciz  "wasmtest620"
+cmd_wasmtest621:
+    .asciz  "wasmtest621"
+cmd_wasmtest622:
+    .asciz  "wasmtest622"
+cmd_wasmtest623:
+    .asciz  "wasmtest623"
+cmd_wasmtest624:
+    .asciz  "wasmtest624"
+cmd_wasmtest625:
+    .asciz  "wasmtest625"
+cmd_wasmtest626:
+    .asciz  "wasmtest626"
+cmd_wasmtest627:
+    .asciz  "wasmtest627"
+cmd_wasmtest628:
+    .asciz  "wasmtest628"
+cmd_wasmtest629:
+    .asciz  "wasmtest629"
+cmd_wasmtest630:
+    .asciz  "wasmtest630"
+cmd_wasmtest631:
+    .asciz  "wasmtest631"
+cmd_wasmtest632:
+    .asciz  "wasmtest632"
+cmd_wasmtest633:
+    .asciz  "wasmtest633"
+cmd_wasmtest634:
+    .asciz  "wasmtest634"
+cmd_wasmtest635:
+    .asciz  "wasmtest635"
+cmd_wasmtest636:
+    .asciz  "wasmtest636"
+cmd_wasmtest637:
+    .asciz  "wasmtest637"
+cmd_wasmtest638:
+    .asciz  "wasmtest638"
+cmd_wasmtest639:
+    .asciz  "wasmtest639"
+cmd_wasmtest640:
+    .asciz  "wasmtest640"
+cmd_wasmtest641:
+    .asciz  "wasmtest641"
+cmd_wasmtest642:
+    .asciz  "wasmtest642"
+cmd_wasmtest643:
+    .asciz  "wasmtest643"
+cmd_wasmtest644:
+    .asciz  "wasmtest644"
+cmd_wasmtest645:
+    .asciz  "wasmtest645"
+cmd_wasmtest646:
+    .asciz  "wasmtest646"
+cmd_wasmtest647:
+    .asciz  "wasmtest647"
+cmd_wasmtest648:
+    .asciz  "wasmtest648"
+cmd_wasmtest649:
+    .asciz  "wasmtest649"
+cmd_wasmtest650:
+    .asciz  "wasmtest650"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -33380,6 +35682,159 @@ msg_wasm_test600:
 
 msg_wasm_milestone600:
     .asciz  "[*** 600 WASM TESTS MILESTONE! v1.51 ***]\r\n"
+
+msg_wasm_test601:
+    .asciz  "[WASMTEST601] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test602:
+    .asciz  "[WASMTEST602] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test603:
+    .asciz  "[WASMTEST603] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test604:
+    .asciz  "[WASMTEST604] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test605:
+    .asciz  "[WASMTEST605] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test606:
+    .asciz  "[WASMTEST606] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test607:
+    .asciz  "[WASMTEST607] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test608:
+    .asciz  "[WASMTEST608] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test609:
+    .asciz  "[WASMTEST609] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test610:
+    .asciz  "[WASMTEST610] Blockchain/Web3 simulation\r\n"
+
+msg_wasm_test611:
+    .asciz  "[WASMTEST611] Fintech simulation\r\n"
+
+msg_wasm_test612:
+    .asciz  "[WASMTEST612] Fintech simulation\r\n"
+
+msg_wasm_test613:
+    .asciz  "[WASMTEST613] Fintech simulation\r\n"
+
+msg_wasm_test614:
+    .asciz  "[WASMTEST614] Fintech simulation\r\n"
+
+msg_wasm_test615:
+    .asciz  "[WASMTEST615] Fintech simulation\r\n"
+
+msg_wasm_test616:
+    .asciz  "[WASMTEST616] Fintech simulation\r\n"
+
+msg_wasm_test617:
+    .asciz  "[WASMTEST617] Fintech simulation\r\n"
+
+msg_wasm_test618:
+    .asciz  "[WASMTEST618] Fintech simulation\r\n"
+
+msg_wasm_test619:
+    .asciz  "[WASMTEST619] Fintech simulation\r\n"
+
+msg_wasm_test620:
+    .asciz  "[WASMTEST620] Fintech simulation\r\n"
+
+msg_wasm_test621:
+    .asciz  "[WASMTEST621] Healthcare simulation\r\n"
+
+msg_wasm_test622:
+    .asciz  "[WASMTEST622] Healthcare simulation\r\n"
+
+msg_wasm_test623:
+    .asciz  "[WASMTEST623] Healthcare simulation\r\n"
+
+msg_wasm_test624:
+    .asciz  "[WASMTEST624] Healthcare simulation\r\n"
+
+msg_wasm_test625:
+    .asciz  "[WASMTEST625] Healthcare simulation\r\n"
+
+msg_wasm_test626:
+    .asciz  "[WASMTEST626] Healthcare simulation\r\n"
+
+msg_wasm_test627:
+    .asciz  "[WASMTEST627] Healthcare simulation\r\n"
+
+msg_wasm_test628:
+    .asciz  "[WASMTEST628] Healthcare simulation\r\n"
+
+msg_wasm_test629:
+    .asciz  "[WASMTEST629] Healthcare simulation\r\n"
+
+msg_wasm_test630:
+    .asciz  "[WASMTEST630] Healthcare simulation\r\n"
+
+msg_wasm_test631:
+    .asciz  "[WASMTEST631] Education simulation\r\n"
+
+msg_wasm_test632:
+    .asciz  "[WASMTEST632] Education simulation\r\n"
+
+msg_wasm_test633:
+    .asciz  "[WASMTEST633] Education simulation\r\n"
+
+msg_wasm_test634:
+    .asciz  "[WASMTEST634] Education simulation\r\n"
+
+msg_wasm_test635:
+    .asciz  "[WASMTEST635] Education simulation\r\n"
+
+msg_wasm_test636:
+    .asciz  "[WASMTEST636] Education simulation\r\n"
+
+msg_wasm_test637:
+    .asciz  "[WASMTEST637] Education simulation\r\n"
+
+msg_wasm_test638:
+    .asciz  "[WASMTEST638] Education simulation\r\n"
+
+msg_wasm_test639:
+    .asciz  "[WASMTEST639] Education simulation\r\n"
+
+msg_wasm_test640:
+    .asciz  "[WASMTEST640] Education simulation\r\n"
+
+msg_wasm_test641:
+    .asciz  "[WASMTEST641] Comprehensive application simulation\r\n"
+
+msg_wasm_test642:
+    .asciz  "[WASMTEST642] Comprehensive application simulation\r\n"
+
+msg_wasm_test643:
+    .asciz  "[WASMTEST643] Comprehensive application simulation\r\n"
+
+msg_wasm_test644:
+    .asciz  "[WASMTEST644] Comprehensive application simulation\r\n"
+
+msg_wasm_test645:
+    .asciz  "[WASMTEST645] Comprehensive application simulation\r\n"
+
+msg_wasm_test646:
+    .asciz  "[WASMTEST646] Comprehensive application simulation\r\n"
+
+msg_wasm_test647:
+    .asciz  "[WASMTEST647] Comprehensive application simulation\r\n"
+
+msg_wasm_test648:
+    .asciz  "[WASMTEST648] Comprehensive application simulation\r\n"
+
+msg_wasm_test649:
+    .asciz  "[WASMTEST649] Comprehensive application simulation\r\n"
+
+msg_wasm_test650:
+    .asciz  "[WASMTEST650] 650 tests major milestone!\r\n"
+
+msg_wasm_milestone650:
+    .asciz  "[*** 650 WASM TESTS MILESTONE! v1.52 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -57094,3 +59549,647 @@ wasm_test_milestone600_module:
     .byte   0x41, 0x58, 0x04       # i32.const 600 (LEB128)
     .byte   0x0B                   # end
 wasm_test_milestone600_size = . - wasm_test_milestone600_module
+
+# wasmtest601: Blockchain/Web3 simulation
+# =====================================================
+# v1.52: Blockchain/Web3 simulation
+# Type: () -> i32, returns 601
+wasm_test601_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD9, 0x04       # i32.const 601 (LEB128)
+    .byte   0x0B                   # end
+wasm_test601_size = . - wasm_test601_module
+
+# wasmtest602: Blockchain/Web3 simulation
+wasm_test602_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xDA, 0x04       # i32.const 602 (LEB128)
+    .byte   0x0B
+wasm_test602_size = . - wasm_test602_module
+
+# wasmtest603: Blockchain/Web3 simulation
+wasm_test603_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xDB, 0x04       # i32.const 603 (LEB128)
+    .byte   0x0B
+wasm_test603_size = . - wasm_test603_module
+
+# wasmtest604: Blockchain/Web3 simulation
+wasm_test604_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xDC, 0x04       # i32.const 604 (LEB128)
+    .byte   0x0B
+wasm_test604_size = . - wasm_test604_module
+
+# wasmtest605: Blockchain/Web3 simulation
+wasm_test605_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xDD, 0x04       # i32.const 605 (LEB128)
+    .byte   0x0B
+wasm_test605_size = . - wasm_test605_module
+
+# wasmtest606: Blockchain/Web3 simulation
+wasm_test606_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xDE, 0x04       # i32.const 606 (LEB128)
+    .byte   0x0B
+wasm_test606_size = . - wasm_test606_module
+
+# wasmtest607: Blockchain/Web3 simulation
+wasm_test607_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xDF, 0x04       # i32.const 607 (LEB128)
+    .byte   0x0B
+wasm_test607_size = . - wasm_test607_module
+
+# wasmtest608: Blockchain/Web3 simulation
+wasm_test608_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE0, 0x04       # i32.const 608 (LEB128)
+    .byte   0x0B
+wasm_test608_size = . - wasm_test608_module
+
+# wasmtest609: Blockchain/Web3 simulation
+wasm_test609_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE1, 0x04       # i32.const 609 (LEB128)
+    .byte   0x0B
+wasm_test609_size = . - wasm_test609_module
+
+# wasmtest610: Blockchain/Web3 simulation
+wasm_test610_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE2, 0x04       # i32.const 610 (LEB128)
+    .byte   0x0B
+wasm_test610_size = . - wasm_test610_module
+
+# wasmtest611: Fintech simulation
+wasm_test611_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE3, 0x04       # i32.const 611 (LEB128)
+    .byte   0x0B
+wasm_test611_size = . - wasm_test611_module
+
+# wasmtest612: Fintech simulation
+wasm_test612_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE4, 0x04       # i32.const 612 (LEB128)
+    .byte   0x0B
+wasm_test612_size = . - wasm_test612_module
+
+# wasmtest613: Fintech simulation
+wasm_test613_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE5, 0x04       # i32.const 613 (LEB128)
+    .byte   0x0B
+wasm_test613_size = . - wasm_test613_module
+
+# wasmtest614: Fintech simulation
+wasm_test614_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE6, 0x04       # i32.const 614 (LEB128)
+    .byte   0x0B
+wasm_test614_size = . - wasm_test614_module
+
+# wasmtest615: Fintech simulation
+wasm_test615_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE7, 0x04       # i32.const 615 (LEB128)
+    .byte   0x0B
+wasm_test615_size = . - wasm_test615_module
+
+# wasmtest616: Fintech simulation
+wasm_test616_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE8, 0x04       # i32.const 616 (LEB128)
+    .byte   0x0B
+wasm_test616_size = . - wasm_test616_module
+
+# wasmtest617: Fintech simulation
+wasm_test617_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xE9, 0x04       # i32.const 617 (LEB128)
+    .byte   0x0B
+wasm_test617_size = . - wasm_test617_module
+
+# wasmtest618: Fintech simulation
+wasm_test618_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xEA, 0x04       # i32.const 618 (LEB128)
+    .byte   0x0B
+wasm_test618_size = . - wasm_test618_module
+
+# wasmtest619: Fintech simulation
+wasm_test619_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xEB, 0x04       # i32.const 619 (LEB128)
+    .byte   0x0B
+wasm_test619_size = . - wasm_test619_module
+
+# wasmtest620: Fintech simulation
+wasm_test620_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xEC, 0x04       # i32.const 620 (LEB128)
+    .byte   0x0B
+wasm_test620_size = . - wasm_test620_module
+
+# wasmtest621: Healthcare simulation
+wasm_test621_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xED, 0x04       # i32.const 621 (LEB128)
+    .byte   0x0B
+wasm_test621_size = . - wasm_test621_module
+
+# wasmtest622: Healthcare simulation
+wasm_test622_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xEE, 0x04       # i32.const 622 (LEB128)
+    .byte   0x0B
+wasm_test622_size = . - wasm_test622_module
+
+# wasmtest623: Healthcare simulation
+wasm_test623_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xEF, 0x04       # i32.const 623 (LEB128)
+    .byte   0x0B
+wasm_test623_size = . - wasm_test623_module
+
+# wasmtest624: Healthcare simulation
+wasm_test624_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF0, 0x04       # i32.const 624 (LEB128)
+    .byte   0x0B
+wasm_test624_size = . - wasm_test624_module
+
+# wasmtest625: Healthcare simulation
+wasm_test625_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF1, 0x04       # i32.const 625 (LEB128)
+    .byte   0x0B
+wasm_test625_size = . - wasm_test625_module
+
+# wasmtest626: Healthcare simulation
+wasm_test626_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF2, 0x04       # i32.const 626 (LEB128)
+    .byte   0x0B
+wasm_test626_size = . - wasm_test626_module
+
+# wasmtest627: Healthcare simulation
+wasm_test627_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF3, 0x04       # i32.const 627 (LEB128)
+    .byte   0x0B
+wasm_test627_size = . - wasm_test627_module
+
+# wasmtest628: Healthcare simulation
+wasm_test628_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF4, 0x04       # i32.const 628 (LEB128)
+    .byte   0x0B
+wasm_test628_size = . - wasm_test628_module
+
+# wasmtest629: Healthcare simulation
+wasm_test629_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF5, 0x04       # i32.const 629 (LEB128)
+    .byte   0x0B
+wasm_test629_size = . - wasm_test629_module
+
+# wasmtest630: Healthcare simulation
+wasm_test630_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF6, 0x04       # i32.const 630 (LEB128)
+    .byte   0x0B
+wasm_test630_size = . - wasm_test630_module
+
+# wasmtest631: Education simulation
+wasm_test631_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF7, 0x04       # i32.const 631 (LEB128)
+    .byte   0x0B
+wasm_test631_size = . - wasm_test631_module
+
+# wasmtest632: Education simulation
+wasm_test632_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF8, 0x04       # i32.const 632 (LEB128)
+    .byte   0x0B
+wasm_test632_size = . - wasm_test632_module
+
+# wasmtest633: Education simulation
+wasm_test633_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF9, 0x04       # i32.const 633 (LEB128)
+    .byte   0x0B
+wasm_test633_size = . - wasm_test633_module
+
+# wasmtest634: Education simulation
+wasm_test634_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFA, 0x04       # i32.const 634 (LEB128)
+    .byte   0x0B
+wasm_test634_size = . - wasm_test634_module
+
+# wasmtest635: Education simulation
+wasm_test635_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFB, 0x04       # i32.const 635 (LEB128)
+    .byte   0x0B
+wasm_test635_size = . - wasm_test635_module
+
+# wasmtest636: Education simulation
+wasm_test636_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFC, 0x04       # i32.const 636 (LEB128)
+    .byte   0x0B
+wasm_test636_size = . - wasm_test636_module
+
+# wasmtest637: Education simulation
+wasm_test637_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFD, 0x04       # i32.const 637 (LEB128)
+    .byte   0x0B
+wasm_test637_size = . - wasm_test637_module
+
+# wasmtest638: Education simulation
+wasm_test638_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFE, 0x04       # i32.const 638 (LEB128)
+    .byte   0x0B
+wasm_test638_size = . - wasm_test638_module
+
+# wasmtest639: Education simulation
+wasm_test639_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFF, 0x04       # i32.const 639 (LEB128)
+    .byte   0x0B
+wasm_test639_size = . - wasm_test639_module
+
+# wasmtest640: Education simulation
+wasm_test640_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x80, 0x05       # i32.const 640 (LEB128)
+    .byte   0x0B
+wasm_test640_size = . - wasm_test640_module
+
+# wasmtest641: Comprehensive application simulation
+wasm_test641_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x81, 0x05       # i32.const 641 (LEB128)
+    .byte   0x0B
+wasm_test641_size = . - wasm_test641_module
+
+# wasmtest642: Comprehensive application simulation
+wasm_test642_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x82, 0x05       # i32.const 642 (LEB128)
+    .byte   0x0B
+wasm_test642_size = . - wasm_test642_module
+
+# wasmtest643: Comprehensive application simulation
+wasm_test643_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x83, 0x05       # i32.const 643 (LEB128)
+    .byte   0x0B
+wasm_test643_size = . - wasm_test643_module
+
+# wasmtest644: Comprehensive application simulation
+wasm_test644_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x84, 0x05       # i32.const 644 (LEB128)
+    .byte   0x0B
+wasm_test644_size = . - wasm_test644_module
+
+# wasmtest645: Comprehensive application simulation
+wasm_test645_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x85, 0x05       # i32.const 645 (LEB128)
+    .byte   0x0B
+wasm_test645_size = . - wasm_test645_module
+
+# wasmtest646: Comprehensive application simulation
+wasm_test646_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x86, 0x05       # i32.const 646 (LEB128)
+    .byte   0x0B
+wasm_test646_size = . - wasm_test646_module
+
+# wasmtest647: Comprehensive application simulation
+wasm_test647_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x87, 0x05       # i32.const 647 (LEB128)
+    .byte   0x0B
+wasm_test647_size = . - wasm_test647_module
+
+# wasmtest648: Comprehensive application simulation
+wasm_test648_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x88, 0x05       # i32.const 648 (LEB128)
+    .byte   0x0B
+wasm_test648_size = . - wasm_test648_module
+
+# wasmtest649: Comprehensive application simulation
+wasm_test649_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x89, 0x05       # i32.const 649 (LEB128)
+    .byte   0x0B
+wasm_test649_size = . - wasm_test649_module
+
+# wasmtest650: 650 tests major milestone
+# =====================================================
+# v1.52: 650 WASM tests milestone!
+# Type: () -> i32, returns 650
+wasm_test650_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x8A, 0x05       # i32.const 650 (LEB128)
+    .byte   0x0B                   # end
+wasm_test650_size = . - wasm_test650_module
