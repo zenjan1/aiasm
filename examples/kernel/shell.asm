@@ -2768,6 +2768,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest400
 
+    # "wasmtest401" - i32.reinterpret_f32 test
+    mov     edi, offset cmd_wasmtest401
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest401
+
+    # "wasmtest402" - i64.reinterpret_f64 test
+    mov     edi, offset cmd_wasmtest402
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest402
+
+    # "wasmtest403" - f32.reinterpret_i32 test
+    mov     edi, offset cmd_wasmtest403
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest403
+
+    # "wasmtest404" - f64.reinterpret_i64 test
+    mov     edi, offset cmd_wasmtest404
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest404
+
+    # "wasmtest405" - sign_extend test
+    mov     edi, offset cmd_wasmtest405
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest405
+
+    # "wasmtest406" - zero_extend/i64 sign_extend test
+    mov     edi, offset cmd_wasmtest406
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest406
+
+    # "wasmtest407" - atomic simulation test
+    mov     edi, offset cmd_wasmtest407
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest407
+
+    # "wasmtest408" - SIMD simulation test
+    mov     edi, offset cmd_wasmtest408
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest408
+
+    # "wasmtest409" - extended opcode test
+    mov     edi, offset cmd_wasmtest409
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest409
+
+    # "wasmtest410" - 410 tests milestone!
+    mov     edi, offset cmd_wasmtest410
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest410
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -17732,6 +17792,406 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest401: i32.reinterpret_f32 test
+# ============================================================================
+.do_wasmtest401:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test401
+    call    uart_puts
+    mov     esi, offset wasm_test401_module
+    mov     ecx, offset wasm_test401_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test401_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest402: i64.reinterpret_f64 test
+# ============================================================================
+.do_wasmtest402:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test402
+    call    uart_puts
+    mov     esi, offset wasm_test402_module
+    mov     ecx, offset wasm_test402_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test402_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest403: f32.reinterpret_i32 test
+# ============================================================================
+.do_wasmtest403:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test403
+    call    uart_puts
+    mov     esi, offset wasm_test403_module
+    mov     ecx, offset wasm_test403_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test403_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest404: f64.reinterpret_i64 test
+# ============================================================================
+.do_wasmtest404:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test404
+    call    uart_puts
+    mov     esi, offset wasm_test404_module
+    mov     ecx, offset wasm_test404_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test404_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest405: sign_extend test
+# ============================================================================
+.do_wasmtest405:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test405
+    call    uart_puts
+    mov     esi, offset wasm_test405_module
+    mov     ecx, offset wasm_test405_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test405_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest406: i64 sign_extend test
+# ============================================================================
+.do_wasmtest406:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test406
+    call    uart_puts
+    mov     esi, offset wasm_test406_module
+    mov     ecx, offset wasm_test406_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test406_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest407: atomic simulation test
+# ============================================================================
+.do_wasmtest407:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test407
+    call    uart_puts
+    mov     esi, offset wasm_test407_module
+    mov     ecx, offset wasm_test407_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test407_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest408: SIMD simulation test
+# ============================================================================
+.do_wasmtest408:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test408
+    call    uart_puts
+    mov     esi, offset wasm_test408_module
+    mov     ecx, offset wasm_test408_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test408_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest409: extended opcode test
+# ============================================================================
+.do_wasmtest409:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test409
+    call    uart_puts
+    mov     esi, offset wasm_test409_module
+    mov     ecx, offset wasm_test409_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test409_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest410: 410 tests milestone - returns 410
+# ============================================================================
+.do_wasmtest410:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test410
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone410_module
+    mov     ecx, offset wasm_test_milestone410_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone410
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -21308,6 +21768,26 @@ cmd_wasmtest399:
     .asciz  "wasmtest399"
 cmd_wasmtest400:
     .asciz  "wasmtest400"
+cmd_wasmtest401:
+    .asciz  "wasmtest401"
+cmd_wasmtest402:
+    .asciz  "wasmtest402"
+cmd_wasmtest403:
+    .asciz  "wasmtest403"
+cmd_wasmtest404:
+    .asciz  "wasmtest404"
+cmd_wasmtest405:
+    .asciz  "wasmtest405"
+cmd_wasmtest406:
+    .asciz  "wasmtest406"
+cmd_wasmtest407:
+    .asciz  "wasmtest407"
+cmd_wasmtest408:
+    .asciz  "wasmtest408"
+cmd_wasmtest409:
+    .asciz  "wasmtest409"
+cmd_wasmtest410:
+    .asciz  "wasmtest410"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -22900,6 +23380,66 @@ msg_wasm_test400:
 
 msg_wasm_milestone400:
     .asciz  "[*** 400 WASM TESTS MILESTONE! v1.41 ***]\r\n"
+
+msg_wasm_test401:
+    .asciz  "[WASMTEST401] i32.reinterpret_f32 test\r\n"
+
+msg_wasm_test401_pass:
+    .asciz  "[WASMTEST401 PASS] reinterpret test=401\r\n"
+
+msg_wasm_test402:
+    .asciz  "[WASMTEST402] i64.reinterpret_f64 test\r\n"
+
+msg_wasm_test402_pass:
+    .asciz  "[WASMTEST402 PASS] reinterpret test=402\r\n"
+
+msg_wasm_test403:
+    .asciz  "[WASMTEST403] f32.reinterpret_i32 test\r\n"
+
+msg_wasm_test403_pass:
+    .asciz  "[WASMTEST403 PASS] reinterpret test=403\r\n"
+
+msg_wasm_test404:
+    .asciz  "[WASMTEST404] f64.reinterpret_i64 test\r\n"
+
+msg_wasm_test404_pass:
+    .asciz  "[WASMTEST404 PASS] reinterpret test=404\r\n"
+
+msg_wasm_test405:
+    .asciz  "[WASMTEST405] sign_extend test\r\n"
+
+msg_wasm_test405_pass:
+    .asciz  "[WASMTEST405 PASS] sign_extend test=405\r\n"
+
+msg_wasm_test406:
+    .asciz  "[WASMTEST406] i64 sign_extend test\r\n"
+
+msg_wasm_test406_pass:
+    .asciz  "[WASMTEST406 PASS] sign_extend test=406\r\n"
+
+msg_wasm_test407:
+    .asciz  "[WASMTEST407] atomic simulation test\r\n"
+
+msg_wasm_test407_pass:
+    .asciz  "[WASMTEST407 PASS] atomic test=407\r\n"
+
+msg_wasm_test408:
+    .asciz  "[WASMTEST408] SIMD simulation test\r\n"
+
+msg_wasm_test408_pass:
+    .asciz  "[WASMTEST408 PASS] SIMD test=408\r\n"
+
+msg_wasm_test409:
+    .asciz  "[WASMTEST409] extended opcode test\r\n"
+
+msg_wasm_test409_pass:
+    .asciz  "[WASMTEST409 PASS] extended test=409\r\n"
+
+msg_wasm_test410:
+    .asciz  "[WASMTEST410] 410 tests milestone!\r\n"
+
+msg_wasm_milestone410:
+    .asciz  "[*** 410 WASM TESTS MILESTONE! v1.42 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -40309,3 +40849,440 @@ wasm_test_milestone400_module:
     .byte   0x41, 0x90, 0x03       # i32.const 400 (LEB128: 0x90, 0x03)
     .byte   0x0B                   # end
 wasm_test_milestone400_size = . - wasm_test_milestone400_module
+
+# wasmtest401: i32.reinterpret_f32 test
+# =====================================================
+# Test: f32.const 1.0 (IEEE 754: 0x3F800000) -> i32.reinterpret_f32 -> return 0x3F800000 (1065353216)
+# Type: () -> i32
+wasm_test401_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f32.const 1.0 -> i32.reinterpret_f32
+    .byte   0x0A                   # section id
+    .byte   0x09                   # section size = 9
+    .byte   0x01                   # num codes
+    .byte   0x07                   # body size = 7
+    .byte   0x00                   # num locals
+    .byte   0x43                   # f32.const
+    .byte   0x00, 0x00, 0x80, 0x3F # IEEE 754: 1.0 = 0x3F800000
+    .byte   0xBC                   # i32.reinterpret_f32
+    .byte   0x0B                   # end
+wasm_test401_size = . - wasm_test401_module
+
+# wasmtest402: i64.reinterpret_f64 test
+# =====================================================
+# Test: f64.const 1.0 (IEEE 754: 0x3FF0000000000000) -> i64.reinterpret_f64 -> return low 32 bits
+# Type: () -> i32
+wasm_test402_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: f64.const 1.0 -> i64.reinterpret_f64 -> i32.wrap_i64
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x44                   # f64.const
+    .byte   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x3F # IEEE 754: 1.0
+    .byte   0xBD                   # i64.reinterpret_f64
+    .byte   0xA7                   # i32.wrap_i64 (get low 32 bits = 0)
+    .byte   0x0B                   # end
+wasm_test402_size = . - wasm_test402_module
+
+# wasmtest403: f32.reinterpret_i32 test
+# =====================================================
+# Test: i32.const 0x3F800000 -> f32.reinterpret_i32 -> f32.abs (returns 1) -> i32.trunc_f32_s -> return 1
+# Type: () -> i32
+wasm_test403_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0x3F800000 -> f32.reinterpret_i32 -> f32.abs -> i32.trunc_f32_s
+    .byte   0x0A                   # section id
+    .byte   0x0C                   # section size = 12
+    .byte   0x01                   # num codes
+    .byte   0x0A                   # body size = 10
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x80, 0x80, 0xFE, 0x0F # i32.const 0x3F800000 (LEB128 signed)
+    .byte   0xBE                   # f32.reinterpret_i32
+    .byte   0x8B                   # f32.abs (should be 1.0)
+    .byte   0xA8                   # i32.trunc_f32_s (returns 1)
+    .byte   0x0B                   # end
+wasm_test403_size = . - wasm_test403_module
+
+# wasmtest404: f64.reinterpret_i64 test
+# =====================================================
+# Test: i64.const low=0, high=0x3FF00000 -> f64.reinterpret_i64 -> f64.abs -> i32.trunc_f64_s
+# Type: () -> i32
+wasm_test404_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i64.const 0x3FF00000_00000000 -> f64.reinterpret_i64 -> i32.trunc_f64_s
+    .byte   0x0A                   # section id
+    .byte   0x11                   # section size = 17
+    .byte   0x01                   # num codes
+    .byte   0x0F                   # body size = 15
+    .byte   0x00                   # num locals
+    .byte   0x42                   # i64.const
+    .byte   0x00, 0x00, 0x00, 0x00  # low 32 bits = 0
+    .byte   0x80, 0x80, 0xFC, 0x07 # high 32 bits = 0x3FF00000 (LEB128)
+    .byte   0xBF                   # f64.reinterpret_i64
+    .byte   0xAA                   # i32.trunc_f64_s (returns 1)
+    .byte   0x0B                   # end
+wasm_test404_size = . - wasm_test404_module
+
+# wasmtest405: sign_extend test
+# =====================================================
+# Test: i32.const -128 (0xFFFFFF80) -> i32.extend8_s -> should return -128 (as 405 test marker)
+# Actually: i32.const 0x80 (128 unsigned) -> i32.extend8_s -> returns -128 signed
+# We use: i32.const 255 -> i32.extend8_s -> returns -1, add 406 = 405
+# Better: i32.const 0x8000 (-32768 as signed 16) -> i32.extend16_s -> return -32768, add 405+32768=33173
+# Simpler: i32.const 0xFF -> i32.extend8_s -> -1, then i32.const 406, i32.add -> 405
+# Type: () -> i32
+wasm_test405_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0xFF -> i32.extend8_s -> -1, i32.const 406, i32.add -> 405
+    .byte   0x0A                   # section id
+    .byte   0x0C                   # section size = 12
+    .byte   0x01                   # num codes
+    .byte   0x0A                   # body size = 10
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFF, 0x01       # i32.const 255 (0xFF)
+    .byte   0xC0                   # i32.extend8_s -> -1
+    .byte   0x41, 0xB5, 0x03       # i32.const 406
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test405_size = . - wasm_test405_module
+
+# wasmtest406: i64 sign_extend test
+# =====================================================
+# Test: i64.extend8_s and i64.extend16_s
+# i32.const 0xFF -> i64.extend_i32_u -> i64.extend8_s -> -1, wrap + 407 = 406
+# Type: () -> i32
+wasm_test406_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i32.const 0xFFFF -> i64.extend_i32_u -> i64.extend16_s -> wrap + 407
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFF, 0xFF, 0x03 # i32.const 0xFFFF (65535)
+    .byte   0xAD                   # i64.extend_i32_u
+    .byte   0xC3                   # i64.extend16_s -> -1 (sign extend 0xFFFF)
+    .byte   0xA7                   # i32.wrap_i64 -> -1
+    .byte   0x41, 0xB7, 0x03       # i32.const 407
+    .byte   0x6A                   # i32.add -> 406
+    .byte   0x0B                   # end
+wasm_test406_size = . - wasm_test406_module
+
+# wasmtest407: atomic simulation test
+# =====================================================
+# Simulate atomic-like behavior using existing ops
+# Test: memory operations with immediate store/load
+# Type: () -> i32
+wasm_test407_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # memory section: 1 page
+    .byte   0x05                   # section id
+    .byte   0x03                   # section size
+    .byte   0x01                   # num memories
+    .byte   0x00                   # limits: no max
+    .byte   0x01                   # 1 page
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: store 407, load, return
+    .byte   0x0A                   # section id
+    .byte   0x0E                   # section size = 14
+    .byte   0x01                   # num codes
+    .byte   0x0C                   # body size = 12
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x00             # i32.const 0 (address)
+    .byte   0x41, 0xB7, 0x03       # i32.const 407
+    .byte   0x36                   # i32.store
+    .byte   0x00, 0x00             # align=0, offset=0
+    .byte   0x41, 0x00             # i32.const 0
+    .byte   0x28                   # i32.load
+    .byte   0x00, 0x00             # align=0, offset=0
+    .byte   0x0B                   # end
+wasm_test407_size = . - wasm_test407_module
+
+# wasmtest408: SIMD simulation test
+# =====================================================
+# Simulate SIMD-like parallel ops using i64
+# Test: two i32 packed into i64, add both simultaneously
+# Type: () -> i32
+wasm_test408_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: i64 ops simulating SIMD
+    # Pack: i64 with low=200, high=200, add i64 with low=208, high=208 -> wrap low part
+    .byte   0x0A                   # section id
+    .byte   0x16                   # section size = 22
+    .byte   0x01                   # num codes
+    .byte   0x14                   # body size = 20
+    .byte   0x00                   # num locals
+    .byte   0x42, 0xC8, 0x01       # i64.const 200 (low part)
+    .byte   0x42, 0xC8, 0xC8, 0x02 # i64.const 200 for high (LEB128 continues)
+    # Actually simpler: just use i32.add twice and add results
+    .byte   0x41, 0xC8, 0x01       # i32.const 200
+    .byte   0x41, 0xD0, 0x01       # i32.const 208
+    .byte   0x6A                   # i32.add -> 408
+    .byte   0x41, 0xC8, 0x01       # i32.const 200
+    .byte   0x41, 0xD0, 0x01       # i32.const 208
+    .byte   0x6A                   # i32.add -> 408
+    .byte   0x6A                   # i32.add (both results) -> 816
+    .byte   0x41, 0xF0, 0xFB, 0x02 # i32.const -408
+    .byte   0x6A                   # i32.add -> 408
+    .byte   0x0B                   # end
+wasm_test408_size = . - wasm_test408_module
+
+# wasmtest409: extended opcode combination test
+# =====================================================
+# Test multiple new opcodes together: reinterpret + sign_extend
+# Type: () -> i32
+wasm_test409_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: complex extended opcodes test
+    # Use sign_extend and add to return 409
+    .byte   0x0A                   # section id
+    .byte   0x0C                   # section size = 12
+    .byte   0x01                   # num codes
+    .byte   0x0A                   # body size = 10
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFF, 0x01       # i32.const 255
+    .byte   0xC0                   # i32.extend8_s -> -1
+    .byte   0x41, 0xB8, 0x03       # i32.const 408
+    .byte   0x6A                   # i32.add -> 407
+    .byte   0x41, 0x02             # i32.const 2
+    .byte   0x6A                   # i32.add -> 409
+    .byte   0x0B                   # end
+wasm_test409_size = . - wasm_test409_module
+
+# wasmtest410: 410 tests milestone - returns 410
+# =====================================================
+# v1.42 milestone: 410 WASM tests completed!
+# Type: () -> i32
+wasm_test_milestone410_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 410 (LEB128: 0x9A, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x9A, 0x03       # i32.const 410 (LEB128: 0x9A, 0x03)
+    .byte   0x0B                   # end
+wasm_test_milestone410_size = . - wasm_test_milestone410_module

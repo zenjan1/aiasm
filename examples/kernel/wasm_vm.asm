@@ -206,6 +206,19 @@ OP_F64_CONVERT_I64_S = 0xB9
 OP_F64_CONVERT_I64_U = 0xBA
 OP_F64_PROMOTE_F32  = 0xBB
 
+# reinterpret 指令（位转换，不改变位模式）
+OP_I32_REINTERPRET_F32 = 0xBC
+OP_I64_REINTERPRET_F64 = 0xBD
+OP_F32_REINTERPRET_I32 = 0xBE
+OP_F64_REINTERPRET_I64 = 0xBF
+
+# sign_extend 指令（符号扩展）
+OP_I32_EXTEND8_S  = 0xC0
+OP_I32_EXTEND16_S = 0xC1
+OP_I64_EXTEND8_S  = 0xC2
+OP_I64_EXTEND16_S = 0xC3
+OP_I64_EXTEND32_S = 0xC4
+
 # ============================================================================
 # WASM 宿主函数 ID（与 wasm_syscall.asm 保持一致）
 # ============================================================================
@@ -1007,6 +1020,28 @@ _dispatch_opcode:
     je      do_f64_convert_i64_u
     cmp     ebx, OP_F64_PROMOTE_F32
     je      do_f64_promote_f32
+
+    # reinterpret 指令（位转换）
+    cmp     ebx, OP_I32_REINTERPRET_F32
+    je      do_i32_reinterpret_f32
+    cmp     ebx, OP_I64_REINTERPRET_F64
+    je      do_i64_reinterpret_f64
+    cmp     ebx, OP_F32_REINTERPRET_I32
+    je      do_f32_reinterpret_i32
+    cmp     ebx, OP_F64_REINTERPRET_I64
+    je      do_f64_reinterpret_i64
+
+    # sign_extend 指令（符号扩展）
+    cmp     ebx, OP_I32_EXTEND8_S
+    je      do_i32_extend8_s
+    cmp     ebx, OP_I32_EXTEND16_S
+    je      do_i32_extend16_s
+    cmp     ebx, OP_I64_EXTEND8_S
+    je      do_i64_extend8_s
+    cmp     ebx, OP_I64_EXTEND16_S
+    je      do_i64_extend16_s
+    cmp     ebx, OP_I64_EXTEND32_S
+    je      do_i64_extend32_s
 
     # 未知操作码
     jmp     do_unknown
@@ -5102,6 +5137,109 @@ do_f64_promote_f32:
     pop     eax                   # f64 high
     call    _stack_push
     pop     eax                   # f64 low
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# reinterpret 指令（位转换，不改变位模式）
+# ============================================================================
+
+# i32.reinterpret_f32: 将 f32 的位模式解释为 i32
+do_i32_reinterpret_f32:
+    call    _stack_pop           # pop f32 (as bits)
+    # 直接将位模式作为 i32 返回，无需转换
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.reinterpret_f64: 将 f64 的位模式解释为 i64
+do_i64_reinterpret_f64:
+    call    _stack_pop           # pop f64 high (as bits)
+    push    eax                   # save high bits
+    call    _stack_pop           # pop f64 low (as bits)
+    push    eax                   # save low bits
+    # 组合为 i64 返回
+    pop     eax                   # i64 low
+    call    _stack_push
+    pop     eax                   # i64 high
+    call    _stack_push
+    jmp     dispatch_done
+
+# f32.reinterpret_i32: 将 i32 的位模式解释为 f32
+do_f32_reinterpret_i32:
+    call    _stack_pop           # pop i32 (as bits)
+    # 直接将位模式作为 f32 返回，无需转换
+    call    _stack_push
+    jmp     dispatch_done
+
+# f64.reinterpret_i64: 将 i64 的位模式解释为 f64
+do_f64_reinterpret_i64:
+    call    _stack_pop           # pop i64 high (as bits)
+    push    eax                   # save high bits
+    call    _stack_pop           # pop i64 low (as bits)
+    push    eax                   # save low bits
+    # 组合为 f64 返回
+    pop     eax                   # f64 low
+    call    _stack_push
+    pop     eax                   # f64 high
+    call    _stack_push
+    jmp     dispatch_done
+
+# ============================================================================
+# sign_extend 指令（符号扩展）
+# ============================================================================
+
+# i32.extend8_s: 将 i32 的低 8 位符号扩展为 i32
+do_i32_extend8_s:
+    call    _stack_pop           # pop i32
+    movsx   eax, al               # sign-extend byte to dword
+    call    _stack_push
+    jmp     dispatch_done
+
+# i32.extend16_s: 将 i32 的低 16 位符号扩展为 i32
+do_i32_extend16_s:
+    call    _stack_pop           # pop i32
+    movsx   eax, ax               # sign-extend word to dword
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.extend8_s: 将 i64 的低 8 位符号扩展为 i64
+do_i64_extend8_s:
+    call    _stack_pop           # pop i64 high
+    push    eax                   # save high
+    call    _stack_pop           # pop i64 low
+    movsx   eax, al               # sign-extend byte to dword
+    push    eax                   # save extended low
+    cdq                           # sign-extend eax to edx:eax
+    pop     eax                   # i64 low
+    call    _stack_push
+    pop     eax                   # i64 high (0 or -1)
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.extend16_s: 将 i64 的低 16 位符号扩展为 i64
+do_i64_extend16_s:
+    call    _stack_pop           # pop i64 high
+    push    eax                   # save high
+    call    _stack_pop           # pop i64 low
+    movsx   eax, ax               # sign-extend word to dword
+    push    eax                   # save extended low
+    cdq                           # sign-extend eax to edx:eax
+    pop     eax                   # i64 low
+    call    _stack_push
+    pop     eax                   # i64 high (0 or -1)
+    call    _stack_push
+    jmp     dispatch_done
+
+# i64.extend32_s: 将 i64 的低 32 位符号扩展为 i64
+do_i64_extend32_s:
+    call    _stack_pop           # pop i64 high
+    push    eax                   # save high
+    call    _stack_pop           # pop i64 low
+    push    eax                   # save low
+    cdq                           # sign-extend eax to edx:eax
+    pop     eax                   # i64 low
+    call    _stack_push
+    pop     eax                   # i64 high (0 or -1)
     call    _stack_push
     jmp     dispatch_done
 
