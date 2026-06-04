@@ -3940,7 +3940,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v1.37"
+    .ascii  "AI-ASM Kernel v1.38"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10
