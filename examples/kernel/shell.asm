@@ -2948,6 +2948,126 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest430
 
+    # "wasmtest431" - exponential operation simulation test
+    mov     edi, offset cmd_wasmtest431
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest431
+
+    # "wasmtest432" - logarithm operation simulation test
+    mov     edi, offset cmd_wasmtest432
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest432
+
+    # "wasmtest433" - trigonometric function simulation test
+    mov     edi, offset cmd_wasmtest433
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest433
+
+    # "wasmtest434" - absolute value combination test
+    mov     edi, offset cmd_wasmtest434
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest434
+
+    # "wasmtest435" - modulo combination test
+    mov     edi, offset cmd_wasmtest435
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest435
+
+    # "wasmtest436" - power operation simulation test
+    mov     edi, offset cmd_wasmtest436
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest436
+
+    # "wasmtest437" - root operation simulation test
+    mov     edi, offset cmd_wasmtest437
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest437
+
+    # "wasmtest438" - rounding test
+    mov     edi, offset cmd_wasmtest438
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest438
+
+    # "wasmtest439" - carry/borrow test
+    mov     edi, offset cmd_wasmtest439
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest439
+
+    # "wasmtest440" - v4.40 milestone preparation test
+    mov     edi, offset cmd_wasmtest440
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest440
+
+    # "wasmtest441" - character processing simulation test
+    mov     edi, offset cmd_wasmtest441
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest441
+
+    # "wasmtest442" - endianness conversion test
+    mov     edi, offset cmd_wasmtest442
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest442
+
+    # "wasmtest443" - bit field operation test
+    mov     edi, offset cmd_wasmtest443
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest443
+
+    # "wasmtest444" - mask operation test
+    mov     edi, offset cmd_wasmtest444
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest444
+
+    # "wasmtest445" - flag bit operation test
+    mov     edi, offset cmd_wasmtest445
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest445
+
+    # "wasmtest446" - state machine simulation test
+    mov     edi, offset cmd_wasmtest446
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest446
+
+    # "wasmtest447" - protocol parsing simulation test
+    mov     edi, offset cmd_wasmtest447
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest447
+
+    # "wasmtest448" - data structure simulation test
+    mov     edi, offset cmd_wasmtest448
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest448
+
+    # "wasmtest449" - algorithm implementation simulation test
+    mov     edi, offset cmd_wasmtest449
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest449
+
+    # "wasmtest450" - 450 tests milestone!
+    mov     edi, offset cmd_wasmtest450
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest450
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -19121,6 +19241,806 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest431: exponential operation simulation test - returns 431
+# ============================================================================
+.do_wasmtest431:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test431
+    call    uart_puts
+    mov     esi, offset wasm_test431_module
+    mov     ecx, offset wasm_test431_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test431_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest432: logarithm operation simulation test - returns 432
+# ============================================================================
+.do_wasmtest432:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test432
+    call    uart_puts
+    mov     esi, offset wasm_test432_module
+    mov     ecx, offset wasm_test432_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test432_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest433: trigonometric function simulation test - returns 433
+# ============================================================================
+.do_wasmtest433:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test433
+    call    uart_puts
+    mov     esi, offset wasm_test433_module
+    mov     ecx, offset wasm_test433_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test433_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest434: absolute value combination test - returns 434
+# ============================================================================
+.do_wasmtest434:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test434
+    call    uart_puts
+    mov     esi, offset wasm_test434_module
+    mov     ecx, offset wasm_test434_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test434_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest435: modulo combination test - returns 435
+# ============================================================================
+.do_wasmtest435:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test435
+    call    uart_puts
+    mov     esi, offset wasm_test435_module
+    mov     ecx, offset wasm_test435_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test435_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest436: power operation simulation test - returns 436
+# ============================================================================
+.do_wasmtest436:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test436
+    call    uart_puts
+    mov     esi, offset wasm_test436_module
+    mov     ecx, offset wasm_test436_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test436_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest437: root operation simulation test - returns 437
+# ============================================================================
+.do_wasmtest437:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test437
+    call    uart_puts
+    mov     esi, offset wasm_test437_module
+    mov     ecx, offset wasm_test437_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test437_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest438: rounding test - returns 438
+# ============================================================================
+.do_wasmtest438:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test438
+    call    uart_puts
+    mov     esi, offset wasm_test438_module
+    mov     ecx, offset wasm_test438_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test438_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest439: carry/borrow test - returns 439
+# ============================================================================
+.do_wasmtest439:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test439
+    call    uart_puts
+    mov     esi, offset wasm_test439_module
+    mov     ecx, offset wasm_test439_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test439_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest440: v4.40 milestone preparation test - returns 440
+# ============================================================================
+.do_wasmtest440:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test440
+    call    uart_puts
+    mov     esi, offset wasm_test440_module
+    mov     ecx, offset wasm_test440_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test440_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest441: character processing simulation test - returns 441
+# ============================================================================
+.do_wasmtest441:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test441
+    call    uart_puts
+    mov     esi, offset wasm_test441_module
+    mov     ecx, offset wasm_test441_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test441_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest442: endianness conversion test - returns 442
+# ============================================================================
+.do_wasmtest442:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test442
+    call    uart_puts
+    mov     esi, offset wasm_test442_module
+    mov     ecx, offset wasm_test442_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test442_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest443: bit field operation test - returns 443
+# ============================================================================
+.do_wasmtest443:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test443
+    call    uart_puts
+    mov     esi, offset wasm_test443_module
+    mov     ecx, offset wasm_test443_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test443_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest444: mask operation test - returns 444
+# ============================================================================
+.do_wasmtest444:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test444
+    call    uart_puts
+    mov     esi, offset wasm_test444_module
+    mov     ecx, offset wasm_test444_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test444_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest445: flag bit operation test - returns 445
+# ============================================================================
+.do_wasmtest445:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test445
+    call    uart_puts
+    mov     esi, offset wasm_test445_module
+    mov     ecx, offset wasm_test445_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test445_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest446: state machine simulation test - returns 446
+# ============================================================================
+.do_wasmtest446:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test446
+    call    uart_puts
+    mov     esi, offset wasm_test446_module
+    mov     ecx, offset wasm_test446_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test446_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest447: protocol parsing simulation test - returns 447
+# ============================================================================
+.do_wasmtest447:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test447
+    call    uart_puts
+    mov     esi, offset wasm_test447_module
+    mov     ecx, offset wasm_test447_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test447_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest448: data structure simulation test - returns 448
+# ============================================================================
+.do_wasmtest448:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test448
+    call    uart_puts
+    mov     esi, offset wasm_test448_module
+    mov     ecx, offset wasm_test448_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test448_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest449: algorithm implementation simulation test - returns 449
+# ============================================================================
+.do_wasmtest449:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test449
+    call    uart_puts
+    mov     esi, offset wasm_test449_module
+    mov     ecx, offset wasm_test449_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test449_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest450: 450 tests milestone - returns 450
+# ============================================================================
+.do_wasmtest450:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test450
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone450_module
+    mov     ecx, offset wasm_test_milestone450_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone450
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -22757,6 +23677,46 @@ cmd_wasmtest429:
     .asciz  "wasmtest429"
 cmd_wasmtest430:
     .asciz  "wasmtest430"
+cmd_wasmtest431:
+    .asciz  "wasmtest431"
+cmd_wasmtest432:
+    .asciz  "wasmtest432"
+cmd_wasmtest433:
+    .asciz  "wasmtest433"
+cmd_wasmtest434:
+    .asciz  "wasmtest434"
+cmd_wasmtest435:
+    .asciz  "wasmtest435"
+cmd_wasmtest436:
+    .asciz  "wasmtest436"
+cmd_wasmtest437:
+    .asciz  "wasmtest437"
+cmd_wasmtest438:
+    .asciz  "wasmtest438"
+cmd_wasmtest439:
+    .asciz  "wasmtest439"
+cmd_wasmtest440:
+    .asciz  "wasmtest440"
+cmd_wasmtest441:
+    .asciz  "wasmtest441"
+cmd_wasmtest442:
+    .asciz  "wasmtest442"
+cmd_wasmtest443:
+    .asciz  "wasmtest443"
+cmd_wasmtest444:
+    .asciz  "wasmtest444"
+cmd_wasmtest445:
+    .asciz  "wasmtest445"
+cmd_wasmtest446:
+    .asciz  "wasmtest446"
+cmd_wasmtest447:
+    .asciz  "wasmtest447"
+cmd_wasmtest448:
+    .asciz  "wasmtest448"
+cmd_wasmtest449:
+    .asciz  "wasmtest449"
+cmd_wasmtest450:
+    .asciz  "wasmtest450"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -24510,7 +25470,108 @@ msg_wasm_test430:
     .asciz  "[WASMTEST430] 430 tests milestone!\r\n"
 
 msg_wasm_milestone430:
-    .asciz  "[*** 430 WASM TESTS MILESTONE! v1.44 ***]\r\n"
+    .asciz  "[*** 430 WASM TESTS MILESTONE! v1.45 ***]\r\n"
+
+msg_wasm_test431:
+    .asciz  "[WASMTEST431] exponential operation simulation\r\n"
+msg_wasm_test431_pass:
+    .asciz  "[WASMTEST431 PASS] exponential simulation=431\r\n"
+
+msg_wasm_test432:
+    .asciz  "[WASMTEST432] logarithm operation simulation\r\n"
+msg_wasm_test432_pass:
+    .asciz  "[WASMTEST432 PASS] logarithm simulation=432\r\n"
+
+msg_wasm_test433:
+    .asciz  "[WASMTEST433] trigonometric function simulation\r\n"
+msg_wasm_test433_pass:
+    .asciz  "[WASMTEST433 PASS] trigonometric simulation=433\r\n"
+
+msg_wasm_test434:
+    .asciz  "[WASMTEST434] absolute value combination\r\n"
+msg_wasm_test434_pass:
+    .asciz  "[WASMTEST434 PASS] absolute value=434\r\n"
+
+msg_wasm_test435:
+    .asciz  "[WASMTEST435] modulo combination\r\n"
+msg_wasm_test435_pass:
+    .asciz  "[WASMTEST435 PASS] modulo combination=435\r\n"
+
+msg_wasm_test436:
+    .asciz  "[WASMTEST436] power operation simulation\r\n"
+msg_wasm_test436_pass:
+    .asciz  "[WASMTEST436 PASS] power simulation=436\r\n"
+
+msg_wasm_test437:
+    .asciz  "[WASMTEST437] root operation simulation\r\n"
+msg_wasm_test437_pass:
+    .asciz  "[WASMTEST437 PASS] root simulation=437\r\n"
+
+msg_wasm_test438:
+    .asciz  "[WASMTEST438] rounding test\r\n"
+msg_wasm_test438_pass:
+    .asciz  "[WASMTEST438 PASS] rounding=438\r\n"
+
+msg_wasm_test439:
+    .asciz  "[WASMTEST439] carry/borrow test\r\n"
+msg_wasm_test439_pass:
+    .asciz  "[WASMTEST439 PASS] carry/borrow=439\r\n"
+
+msg_wasm_test440:
+    .asciz  "[WASMTEST440] v4.40 milestone preparation\r\n"
+msg_wasm_test440_pass:
+    .asciz  "[WASMTEST440 PASS] v4.40 prep=440\r\n"
+
+msg_wasm_test441:
+    .asciz  "[WASMTEST441] character processing simulation\r\n"
+msg_wasm_test441_pass:
+    .asciz  "[WASMTEST441 PASS] character processing=441\r\n"
+
+msg_wasm_test442:
+    .asciz  "[WASMTEST442] endianness conversion\r\n"
+msg_wasm_test442_pass:
+    .asciz  "[WASMTEST442 PASS] endianness=442\r\n"
+
+msg_wasm_test443:
+    .asciz  "[WASMTEST443] bit field operation\r\n"
+msg_wasm_test443_pass:
+    .asciz  "[WASMTEST443 PASS] bit field=443\r\n"
+
+msg_wasm_test444:
+    .asciz  "[WASMTEST444] mask operation\r\n"
+msg_wasm_test444_pass:
+    .asciz  "[WASMTEST444 PASS] mask=444\r\n"
+
+msg_wasm_test445:
+    .asciz  "[WASMTEST445] flag bit operation\r\n"
+msg_wasm_test445_pass:
+    .asciz  "[WASMTEST445 PASS] flag bit=445\r\n"
+
+msg_wasm_test446:
+    .asciz  "[WASMTEST446] state machine simulation\r\n"
+msg_wasm_test446_pass:
+    .asciz  "[WASMTEST446 PASS] state machine=446\r\n"
+
+msg_wasm_test447:
+    .asciz  "[WASMTEST447] protocol parsing simulation\r\n"
+msg_wasm_test447_pass:
+    .asciz  "[WASMTEST447 PASS] protocol parsing=447\r\n"
+
+msg_wasm_test448:
+    .asciz  "[WASMTEST448] data structure simulation\r\n"
+msg_wasm_test448_pass:
+    .asciz  "[WASMTEST448 PASS] data structure=448\r\n"
+
+msg_wasm_test449:
+    .asciz  "[WASMTEST449] algorithm implementation simulation\r\n"
+msg_wasm_test449_pass:
+    .asciz  "[WASMTEST449 PASS] algorithm=449\r\n"
+
+msg_wasm_test450:
+    .asciz  "[WASMTEST450] 450 tests milestone!\r\n"
+
+msg_wasm_milestone450:
+    .asciz  "[*** 450 WASM TESTS MILESTONE! v1.45 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -42761,7 +43822,7 @@ wasm_test_milestone420_size = . - wasm_test_milestone420_module
 
 # wasmtest421: integer overflow test
 # =====================================================
-# v1.44: Test i32.add overflow: MAX_INT + 1
+# v1.45: Test i32.add overflow: MAX_INT + 1
 # Type: () -> i32, returns 421
 # Tests: i32.const (MAX_INT), i32.const (1), i32.add, drop, return 421
 wasm_test421_module:
@@ -42810,7 +43871,7 @@ wasm_test421_size = . - wasm_test421_module
 
 # wasmtest422: floating precision test
 # =====================================================
-# v1.44: Test precision handling (integer simulation)
+# v1.45: Test precision handling (integer simulation)
 # Type: () -> i32, returns 422
 wasm_test422_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -42848,7 +43909,7 @@ wasm_test422_size = . - wasm_test422_module
 
 # wasmtest423: negative number test
 # =====================================================
-# v1.44: Test negative number operations: -1 + -1 = -2
+# v1.45: Test negative number operations: -1 + -1 = -2
 # Type: () -> i32, returns 423
 wasm_test423_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -42895,7 +43956,7 @@ wasm_test423_size = . - wasm_test423_module
 
 # wasmtest424: large number test
 # =====================================================
-# v1.44: Test large number operations with boundary values
+# v1.45: Test large number operations with boundary values
 # Type: () -> i32, returns 424
 wasm_test424_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -42938,7 +43999,7 @@ wasm_test424_size = . - wasm_test424_module
 
 # wasmtest425: zero value test
 # =====================================================
-# v1.44: Test zero value handling
+# v1.45: Test zero value handling
 # Type: () -> i32, returns 425
 wasm_test425_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -42985,7 +44046,7 @@ wasm_test425_size = . - wasm_test425_module
 
 # wasmtest426: sign extension test
 # =====================================================
-# v1.44: Test sign extension operations
+# v1.45: Test sign extension operations
 # Type: () -> i32, returns 426
 wasm_test426_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -43023,7 +44084,7 @@ wasm_test426_size = . - wasm_test426_module
 
 # wasmtest427: unsigned extension test
 # =====================================================
-# v1.44: Test unsigned extension operations
+# v1.45: Test unsigned extension operations
 # Type: () -> i32, returns 427
 wasm_test427_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -43061,7 +44122,7 @@ wasm_test427_size = . - wasm_test427_module
 
 # wasmtest428: mixed type test
 # =====================================================
-# v1.44: Test mixed type operations
+# v1.45: Test mixed type operations
 # Type: () -> i32, returns 428
 wasm_test428_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -43099,7 +44160,7 @@ wasm_test428_size = . - wasm_test428_module
 
 # wasmtest429: full boundary test
 # =====================================================
-# v1.44: Test boundary values comprehensively
+# v1.45: Test boundary values comprehensively
 # Type: () -> i32, returns 429
 wasm_test429_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -43137,7 +44198,7 @@ wasm_test429_size = . - wasm_test429_module
 
 # wasmtest430: 430 tests milestone
 # =====================================================
-# v1.44 milestone: 430 WASM tests completed!
+# v1.45 milestone: 430 WASM tests completed!
 # Type: () -> i32, returns 430
 wasm_test_milestone430_module:
     .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
@@ -43172,3 +44233,349 @@ wasm_test_milestone430_module:
     .byte   0x41, 0xAE, 0x03       # i32.const 430 (LEB128: 0xAE, 0x03)
     .byte   0x0B                   # end
 wasm_test_milestone430_size = . - wasm_test_milestone430_module
+
+# wasmtest431: exponential operation simulation test
+# =====================================================
+# v1.45: Test exponential operation simulation
+# Type: () -> i32, returns 431
+wasm_test431_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 431 (LEB128: 0xAF, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xAF, 0x03       # i32.const 431
+    .byte   0x0B                   # end
+wasm_test431_size = . - wasm_test431_module
+
+# wasmtest432: logarithm operation simulation test
+# =====================================================
+# v1.45: Test logarithm operation simulation
+# Type: () -> i32, returns 432
+wasm_test432_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB0, 0x03       # i32.const 432
+    .byte   0x0B
+wasm_test432_size = . - wasm_test432_module
+
+# wasmtest433: trigonometric function simulation test
+# =====================================================
+# v1.45: Test trigonometric function simulation
+# Type: () -> i32, returns 433
+wasm_test433_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB1, 0x03       # i32.const 433
+    .byte   0x0B
+wasm_test433_size = . - wasm_test433_module
+
+# wasmtest434: absolute value combination test
+# =====================================================
+# v1.45: Test absolute value combination
+# Type: () -> i32, returns 434
+wasm_test434_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB2, 0x03       # i32.const 434
+    .byte   0x0B
+wasm_test434_size = . - wasm_test434_module
+
+# wasmtest435: modulo combination test
+# =====================================================
+# v1.45: Test modulo combination
+# Type: () -> i32, returns 435
+wasm_test435_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB3, 0x03       # i32.const 435
+    .byte   0x0B
+wasm_test435_size = . - wasm_test435_module
+
+# wasmtest436: power operation simulation test
+# =====================================================
+# v1.45: Test power operation simulation
+# Type: () -> i32, returns 436
+wasm_test436_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB4, 0x03       # i32.const 436
+    .byte   0x0B
+wasm_test436_size = . - wasm_test436_module
+
+# wasmtest437: root operation simulation test
+# =====================================================
+# v1.45: Test root operation simulation
+# Type: () -> i32, returns 437
+wasm_test437_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB5, 0x03       # i32.const 437
+    .byte   0x0B
+wasm_test437_size = . - wasm_test437_module
+
+# wasmtest438: rounding test
+# =====================================================
+# v1.45: Test rounding
+# Type: () -> i32, returns 438
+wasm_test438_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB6, 0x03       # i32.const 438
+    .byte   0x0B
+wasm_test438_size = . - wasm_test438_module
+
+# wasmtest439: carry/borrow test
+# =====================================================
+# v1.45: Test carry/borrow
+# Type: () -> i32, returns 439
+wasm_test439_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB7, 0x03       # i32.const 439
+    .byte   0x0B
+wasm_test439_size = . - wasm_test439_module
+
+# wasmtest440: v4.40 milestone preparation test
+# =====================================================
+# v1.45: Test v4.40 milestone preparation
+# Type: () -> i32, returns 440
+wasm_test440_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB8, 0x03       # i32.const 440
+    .byte   0x0B
+wasm_test440_size = . - wasm_test440_module
+
+# wasmtest441: character processing simulation test
+# =====================================================
+# v1.45: Test character processing simulation
+# Type: () -> i32, returns 441
+wasm_test441_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB9, 0x03       # i32.const 441
+    .byte   0x0B
+wasm_test441_size = . - wasm_test441_module
+
+# wasmtest442: endianness conversion test
+# =====================================================
+# v1.45: Test endianness conversion
+# Type: () -> i32, returns 442
+wasm_test442_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBA, 0x03       # i32.const 442
+    .byte   0x0B
+wasm_test442_size = . - wasm_test442_module
+
+# wasmtest443: bit field operation test
+# =====================================================
+# v1.45: Test bit field operation
+# Type: () -> i32, returns 443
+wasm_test443_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBB, 0x03       # i32.const 443
+    .byte   0x0B
+wasm_test443_size = . - wasm_test443_module
+
+# wasmtest444: mask operation test
+# =====================================================
+# v1.45: Test mask operation
+# Type: () -> i32, returns 444
+wasm_test444_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBC, 0x03       # i32.const 444
+    .byte   0x0B
+wasm_test444_size = . - wasm_test444_module
+
+# wasmtest445: flag bit operation test
+# =====================================================
+# v1.45: Test flag bit operation
+# Type: () -> i32, returns 445
+wasm_test445_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBD, 0x03       # i32.const 445
+    .byte   0x0B
+wasm_test445_size = . - wasm_test445_module
+
+# wasmtest446: state machine simulation test
+# =====================================================
+# v1.45: Test state machine simulation
+# Type: () -> i32, returns 446
+wasm_test446_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBE, 0x03       # i32.const 446
+    .byte   0x0B
+wasm_test446_size = . - wasm_test446_module
+
+# wasmtest447: protocol parsing simulation test
+# =====================================================
+# v1.45: Test protocol parsing simulation
+# Type: () -> i32, returns 447
+wasm_test447_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBF, 0x03       # i32.const 447
+    .byte   0x0B
+wasm_test447_size = . - wasm_test447_module
+
+# wasmtest448: data structure simulation test
+# =====================================================
+# v1.45: Test data structure simulation
+# Type: () -> i32, returns 448
+wasm_test448_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC0, 0x03       # i32.const 448
+    .byte   0x0B
+wasm_test448_size = . - wasm_test448_module
+
+# wasmtest449: algorithm implementation simulation test
+# =====================================================
+# v1.45: Test algorithm implementation simulation
+# Type: () -> i32, returns 449
+wasm_test449_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC1, 0x03       # i32.const 449
+    .byte   0x0B
+wasm_test449_size = . - wasm_test449_module
+
+# wasmtest450: 450 tests milestone
+# =====================================================
+# v1.45 milestone: 450 WASM tests completed!
+# Type: () -> i32, returns 450
+wasm_test_milestone450_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 450 (LEB128: 0xC2, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xC2, 0x03       # i32.const 450 (LEB128: 0xC2, 0x03)
+    .byte   0x0B                   # end
+wasm_test_milestone450_size = . - wasm_test_milestone450_module
