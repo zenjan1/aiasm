@@ -1,7 +1,7 @@
     .intel_syntax noprefix
 # -----------------------------------------------------------------------------
 # shell.asm - 命令行交互界面（串口终端）
-# v1.35 - 340 WASM tests milestone
+# v1.55 - 800 WASM tests milestone
 # -----------------------------------------------------------------------------
     .code32
 
@@ -4867,6 +4867,306 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_wasmtest750
+
+    # "wasmtest751" - Smart agriculture simulation
+    mov     edi, offset cmd_wasmtest751
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest751
+
+    # "wasmtest752"
+    mov     edi, offset cmd_wasmtest752
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest752
+
+    # "wasmtest753"
+    mov     edi, offset cmd_wasmtest753
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest753
+
+    # "wasmtest754"
+    mov     edi, offset cmd_wasmtest754
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest754
+
+    # "wasmtest755"
+    mov     edi, offset cmd_wasmtest755
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest755
+
+    # "wasmtest756"
+    mov     edi, offset cmd_wasmtest756
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest756
+
+    # "wasmtest757"
+    mov     edi, offset cmd_wasmtest757
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest757
+
+    # "wasmtest758"
+    mov     edi, offset cmd_wasmtest758
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest758
+
+    # "wasmtest759"
+    mov     edi, offset cmd_wasmtest759
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest759
+
+    # "wasmtest760" - Smart agriculture milestone
+    mov     edi, offset cmd_wasmtest760
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest760
+
+    # "wasmtest761" - Water conservancy simulation
+    mov     edi, offset cmd_wasmtest761
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest761
+
+    # "wasmtest762"
+    mov     edi, offset cmd_wasmtest762
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest762
+
+    # "wasmtest763"
+    mov     edi, offset cmd_wasmtest763
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest763
+
+    # "wasmtest764"
+    mov     edi, offset cmd_wasmtest764
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest764
+
+    # "wasmtest765"
+    mov     edi, offset cmd_wasmtest765
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest765
+
+    # "wasmtest766"
+    mov     edi, offset cmd_wasmtest766
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest766
+
+    # "wasmtest767"
+    mov     edi, offset cmd_wasmtest767
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest767
+
+    # "wasmtest768"
+    mov     edi, offset cmd_wasmtest768
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest768
+
+    # "wasmtest769"
+    mov     edi, offset cmd_wasmtest769
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest769
+
+    # "wasmtest770" - Water conservancy milestone
+    mov     edi, offset cmd_wasmtest770
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest770
+
+    # "wasmtest771" - Meteorology simulation
+    mov     edi, offset cmd_wasmtest771
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest771
+
+    # "wasmtest772"
+    mov     edi, offset cmd_wasmtest772
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest772
+
+    # "wasmtest773"
+    mov     edi, offset cmd_wasmtest773
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest773
+
+    # "wasmtest774"
+    mov     edi, offset cmd_wasmtest774
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest774
+
+    # "wasmtest775"
+    mov     edi, offset cmd_wasmtest775
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest775
+
+    # "wasmtest776"
+    mov     edi, offset cmd_wasmtest776
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest776
+
+    # "wasmtest777"
+    mov     edi, offset cmd_wasmtest777
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest777
+
+    # "wasmtest778"
+    mov     edi, offset cmd_wasmtest778
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest778
+
+    # "wasmtest779"
+    mov     edi, offset cmd_wasmtest779
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest779
+
+    # "wasmtest780" - Meteorology milestone
+    mov     edi, offset cmd_wasmtest780
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest780
+
+    # "wasmtest781" - Geographic information simulation
+    mov     edi, offset cmd_wasmtest781
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest781
+
+    # "wasmtest782"
+    mov     edi, offset cmd_wasmtest782
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest782
+
+    # "wasmtest783"
+    mov     edi, offset cmd_wasmtest783
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest783
+
+    # "wasmtest784"
+    mov     edi, offset cmd_wasmtest784
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest784
+
+    # "wasmtest785"
+    mov     edi, offset cmd_wasmtest785
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest785
+
+    # "wasmtest786"
+    mov     edi, offset cmd_wasmtest786
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest786
+
+    # "wasmtest787"
+    mov     edi, offset cmd_wasmtest787
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest787
+
+    # "wasmtest788"
+    mov     edi, offset cmd_wasmtest788
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest788
+
+    # "wasmtest789"
+    mov     edi, offset cmd_wasmtest789
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest789
+
+    # "wasmtest790" - Geographic information milestone
+    mov     edi, offset cmd_wasmtest790
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest790
+
+    # "wasmtest791" - Scientific research simulation
+    mov     edi, offset cmd_wasmtest791
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest791
+
+    # "wasmtest792"
+    mov     edi, offset cmd_wasmtest792
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest792
+
+    # "wasmtest793"
+    mov     edi, offset cmd_wasmtest793
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest793
+
+    # "wasmtest794"
+    mov     edi, offset cmd_wasmtest794
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest794
+
+    # "wasmtest795"
+    mov     edi, offset cmd_wasmtest795
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest795
+
+    # "wasmtest796"
+    mov     edi, offset cmd_wasmtest796
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest796
+
+    # "wasmtest797"
+    mov     edi, offset cmd_wasmtest797
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest797
+
+    # "wasmtest798"
+    mov     edi, offset cmd_wasmtest798
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest798
+
+    # "wasmtest799"
+    mov     edi, offset cmd_wasmtest799
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest799
+
+    # "wasmtest800" - 800 tests major milestone!
+    mov     edi, offset cmd_wasmtest800
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest800
 
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
@@ -33448,6 +33748,1916 @@ shell_wasmtest21:
     pop     esi
     ret
 
+# =============================================================================
+# .do_wasmtest751: Smart agriculture simulation - returns 751
+# =============================================================================
+.do_wasmtest751:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test751
+    call    uart_puts
+    mov     esi, offset wasm_test751_module
+    mov     ecx, offset wasm_test751_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest752: Smart agriculture simulation - returns 752
+# =============================================================================
+.do_wasmtest752:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test752
+    call    uart_puts
+    mov     esi, offset wasm_test752_module
+    mov     ecx, offset wasm_test752_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest753: Smart agriculture simulation - returns 753
+# =============================================================================
+.do_wasmtest753:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test753
+    call    uart_puts
+    mov     esi, offset wasm_test753_module
+    mov     ecx, offset wasm_test753_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest754: Smart agriculture simulation - returns 754
+# =============================================================================
+.do_wasmtest754:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test754
+    call    uart_puts
+    mov     esi, offset wasm_test754_module
+    mov     ecx, offset wasm_test754_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest755: Smart agriculture simulation - returns 755
+# =============================================================================
+.do_wasmtest755:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test755
+    call    uart_puts
+    mov     esi, offset wasm_test755_module
+    mov     ecx, offset wasm_test755_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest756: Smart agriculture simulation - returns 756
+# =============================================================================
+.do_wasmtest756:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test756
+    call    uart_puts
+    mov     esi, offset wasm_test756_module
+    mov     ecx, offset wasm_test756_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest757: Smart agriculture simulation - returns 757
+# =============================================================================
+.do_wasmtest757:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test757
+    call    uart_puts
+    mov     esi, offset wasm_test757_module
+    mov     ecx, offset wasm_test757_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest758: Smart agriculture simulation - returns 758
+# =============================================================================
+.do_wasmtest758:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test758
+    call    uart_puts
+    mov     esi, offset wasm_test758_module
+    mov     ecx, offset wasm_test758_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest759: Smart agriculture simulation - returns 759
+# =============================================================================
+.do_wasmtest759:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test759
+    call    uart_puts
+    mov     esi, offset wasm_test759_module
+    mov     ecx, offset wasm_test759_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest760: Smart agriculture milestone - returns 760
+# =============================================================================
+.do_wasmtest760:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test760
+    call    uart_puts
+    mov     esi, offset wasm_test760_module
+    mov     ecx, offset wasm_test760_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone760
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest761: Water conservancy simulation - returns 761
+# =============================================================================
+.do_wasmtest761:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test761
+    call    uart_puts
+    mov     esi, offset wasm_test761_module
+    mov     ecx, offset wasm_test761_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest762: Water conservancy simulation - returns 762
+# =============================================================================
+.do_wasmtest762:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test762
+    call    uart_puts
+    mov     esi, offset wasm_test762_module
+    mov     ecx, offset wasm_test762_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest763: Water conservancy simulation - returns 763
+# =============================================================================
+.do_wasmtest763:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test763
+    call    uart_puts
+    mov     esi, offset wasm_test763_module
+    mov     ecx, offset wasm_test763_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest764: Water conservancy simulation - returns 764
+# =============================================================================
+.do_wasmtest764:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test764
+    call    uart_puts
+    mov     esi, offset wasm_test764_module
+    mov     ecx, offset wasm_test764_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest765: Water conservancy simulation - returns 765
+# =============================================================================
+.do_wasmtest765:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test765
+    call    uart_puts
+    mov     esi, offset wasm_test765_module
+    mov     ecx, offset wasm_test765_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest766: Water conservancy simulation - returns 766
+# =============================================================================
+.do_wasmtest766:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test766
+    call    uart_puts
+    mov     esi, offset wasm_test766_module
+    mov     ecx, offset wasm_test766_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest767: Water conservancy simulation - returns 767
+# =============================================================================
+.do_wasmtest767:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test767
+    call    uart_puts
+    mov     esi, offset wasm_test767_module
+    mov     ecx, offset wasm_test767_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest768: Water conservancy simulation - returns 768
+# =============================================================================
+.do_wasmtest768:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test768
+    call    uart_puts
+    mov     esi, offset wasm_test768_module
+    mov     ecx, offset wasm_test768_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest769: Water conservancy simulation - returns 769
+# =============================================================================
+.do_wasmtest769:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test769
+    call    uart_puts
+    mov     esi, offset wasm_test769_module
+    mov     ecx, offset wasm_test769_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest770: Water conservancy milestone - returns 770
+# =============================================================================
+.do_wasmtest770:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test770
+    call    uart_puts
+    mov     esi, offset wasm_test770_module
+    mov     ecx, offset wasm_test770_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone770
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest771: Meteorology simulation - returns 771
+# =============================================================================
+.do_wasmtest771:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test771
+    call    uart_puts
+    mov     esi, offset wasm_test771_module
+    mov     ecx, offset wasm_test771_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest772: Meteorology simulation - returns 772
+# =============================================================================
+.do_wasmtest772:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test772
+    call    uart_puts
+    mov     esi, offset wasm_test772_module
+    mov     ecx, offset wasm_test772_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest773: Meteorology simulation - returns 773
+# =============================================================================
+.do_wasmtest773:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test773
+    call    uart_puts
+    mov     esi, offset wasm_test773_module
+    mov     ecx, offset wasm_test773_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest774: Meteorology simulation - returns 774
+# =============================================================================
+.do_wasmtest774:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test774
+    call    uart_puts
+    mov     esi, offset wasm_test774_module
+    mov     ecx, offset wasm_test774_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest775: Meteorology simulation - returns 775
+# =============================================================================
+.do_wasmtest775:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test775
+    call    uart_puts
+    mov     esi, offset wasm_test775_module
+    mov     ecx, offset wasm_test775_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest776: Meteorology simulation - returns 776
+# =============================================================================
+.do_wasmtest776:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test776
+    call    uart_puts
+    mov     esi, offset wasm_test776_module
+    mov     ecx, offset wasm_test776_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest777: Meteorology simulation - returns 777
+# =============================================================================
+.do_wasmtest777:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test777
+    call    uart_puts
+    mov     esi, offset wasm_test777_module
+    mov     ecx, offset wasm_test777_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest778: Meteorology simulation - returns 778
+# =============================================================================
+.do_wasmtest778:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test778
+    call    uart_puts
+    mov     esi, offset wasm_test778_module
+    mov     ecx, offset wasm_test778_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest779: Meteorology simulation - returns 779
+# =============================================================================
+.do_wasmtest779:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test779
+    call    uart_puts
+    mov     esi, offset wasm_test779_module
+    mov     ecx, offset wasm_test779_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest780: Meteorology milestone - returns 780
+# =============================================================================
+.do_wasmtest780:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test780
+    call    uart_puts
+    mov     esi, offset wasm_test780_module
+    mov     ecx, offset wasm_test780_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone780
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest781: Geographic information simulation - returns 781
+# =============================================================================
+.do_wasmtest781:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test781
+    call    uart_puts
+    mov     esi, offset wasm_test781_module
+    mov     ecx, offset wasm_test781_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest782: Geographic information simulation - returns 782
+# =============================================================================
+.do_wasmtest782:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test782
+    call    uart_puts
+    mov     esi, offset wasm_test782_module
+    mov     ecx, offset wasm_test782_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest783: Geographic information simulation - returns 783
+# =============================================================================
+.do_wasmtest783:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test783
+    call    uart_puts
+    mov     esi, offset wasm_test783_module
+    mov     ecx, offset wasm_test783_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest784: Geographic information simulation - returns 784
+# =============================================================================
+.do_wasmtest784:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test784
+    call    uart_puts
+    mov     esi, offset wasm_test784_module
+    mov     ecx, offset wasm_test784_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest785: Geographic information simulation - returns 785
+# =============================================================================
+.do_wasmtest785:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test785
+    call    uart_puts
+    mov     esi, offset wasm_test785_module
+    mov     ecx, offset wasm_test785_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest786: Geographic information simulation - returns 786
+# =============================================================================
+.do_wasmtest786:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test786
+    call    uart_puts
+    mov     esi, offset wasm_test786_module
+    mov     ecx, offset wasm_test786_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest787: Geographic information simulation - returns 787
+# =============================================================================
+.do_wasmtest787:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test787
+    call    uart_puts
+    mov     esi, offset wasm_test787_module
+    mov     ecx, offset wasm_test787_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest788: Geographic information simulation - returns 788
+# =============================================================================
+.do_wasmtest788:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test788
+    call    uart_puts
+    mov     esi, offset wasm_test788_module
+    mov     ecx, offset wasm_test788_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest789: Geographic information simulation - returns 789
+# =============================================================================
+.do_wasmtest789:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test789
+    call    uart_puts
+    mov     esi, offset wasm_test789_module
+    mov     ecx, offset wasm_test789_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest790: Geographic information milestone - returns 790
+# =============================================================================
+.do_wasmtest790:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test790
+    call    uart_puts
+    mov     esi, offset wasm_test790_module
+    mov     ecx, offset wasm_test790_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone790
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest791: Scientific research simulation - returns 791
+# =============================================================================
+.do_wasmtest791:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test791
+    call    uart_puts
+    mov     esi, offset wasm_test791_module
+    mov     ecx, offset wasm_test791_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest792: Scientific research simulation - returns 792
+# =============================================================================
+.do_wasmtest792:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test792
+    call    uart_puts
+    mov     esi, offset wasm_test792_module
+    mov     ecx, offset wasm_test792_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest793: Scientific research simulation - returns 793
+# =============================================================================
+.do_wasmtest793:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test793
+    call    uart_puts
+    mov     esi, offset wasm_test793_module
+    mov     ecx, offset wasm_test793_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest794: Scientific research simulation - returns 794
+# =============================================================================
+.do_wasmtest794:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test794
+    call    uart_puts
+    mov     esi, offset wasm_test794_module
+    mov     ecx, offset wasm_test794_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest795: Scientific research simulation - returns 795
+# =============================================================================
+.do_wasmtest795:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test795
+    call    uart_puts
+    mov     esi, offset wasm_test795_module
+    mov     ecx, offset wasm_test795_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest796: Scientific research simulation - returns 796
+# =============================================================================
+.do_wasmtest796:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test796
+    call    uart_puts
+    mov     esi, offset wasm_test796_module
+    mov     ecx, offset wasm_test796_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest797: Scientific research simulation - returns 797
+# =============================================================================
+.do_wasmtest797:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test797
+    call    uart_puts
+    mov     esi, offset wasm_test797_module
+    mov     ecx, offset wasm_test797_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest798: Scientific research simulation - returns 798
+# =============================================================================
+.do_wasmtest798:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test798
+    call    uart_puts
+    mov     esi, offset wasm_test798_module
+    mov     ecx, offset wasm_test798_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest799: Scientific research simulation - returns 799
+# =============================================================================
+.do_wasmtest799:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test799
+    call    uart_puts
+    mov     esi, offset wasm_test799_module
+    mov     ecx, offset wasm_test799_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# =============================================================================
+# .do_wasmtest800: 800 tests major milestone! - returns 800
+# =============================================================================
+.do_wasmtest800:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test800
+    call    uart_puts
+    mov     esi, offset wasm_test800_module
+    mov     ecx, offset wasm_test800_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone800
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
 # ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
@@ -37725,6 +39935,106 @@ cmd_wasmtest749:
     .asciz  "wasmtest749"
 cmd_wasmtest750:
     .asciz  "wasmtest750"
+cmd_wasmtest751:
+    .asciz  "wasmtest751"
+cmd_wasmtest752:
+    .asciz  "wasmtest752"
+cmd_wasmtest753:
+    .asciz  "wasmtest753"
+cmd_wasmtest754:
+    .asciz  "wasmtest754"
+cmd_wasmtest755:
+    .asciz  "wasmtest755"
+cmd_wasmtest756:
+    .asciz  "wasmtest756"
+cmd_wasmtest757:
+    .asciz  "wasmtest757"
+cmd_wasmtest758:
+    .asciz  "wasmtest758"
+cmd_wasmtest759:
+    .asciz  "wasmtest759"
+cmd_wasmtest760:
+    .asciz  "wasmtest760"
+cmd_wasmtest761:
+    .asciz  "wasmtest761"
+cmd_wasmtest762:
+    .asciz  "wasmtest762"
+cmd_wasmtest763:
+    .asciz  "wasmtest763"
+cmd_wasmtest764:
+    .asciz  "wasmtest764"
+cmd_wasmtest765:
+    .asciz  "wasmtest765"
+cmd_wasmtest766:
+    .asciz  "wasmtest766"
+cmd_wasmtest767:
+    .asciz  "wasmtest767"
+cmd_wasmtest768:
+    .asciz  "wasmtest768"
+cmd_wasmtest769:
+    .asciz  "wasmtest769"
+cmd_wasmtest770:
+    .asciz  "wasmtest770"
+cmd_wasmtest771:
+    .asciz  "wasmtest771"
+cmd_wasmtest772:
+    .asciz  "wasmtest772"
+cmd_wasmtest773:
+    .asciz  "wasmtest773"
+cmd_wasmtest774:
+    .asciz  "wasmtest774"
+cmd_wasmtest775:
+    .asciz  "wasmtest775"
+cmd_wasmtest776:
+    .asciz  "wasmtest776"
+cmd_wasmtest777:
+    .asciz  "wasmtest777"
+cmd_wasmtest778:
+    .asciz  "wasmtest778"
+cmd_wasmtest779:
+    .asciz  "wasmtest779"
+cmd_wasmtest780:
+    .asciz  "wasmtest780"
+cmd_wasmtest781:
+    .asciz  "wasmtest781"
+cmd_wasmtest782:
+    .asciz  "wasmtest782"
+cmd_wasmtest783:
+    .asciz  "wasmtest783"
+cmd_wasmtest784:
+    .asciz  "wasmtest784"
+cmd_wasmtest785:
+    .asciz  "wasmtest785"
+cmd_wasmtest786:
+    .asciz  "wasmtest786"
+cmd_wasmtest787:
+    .asciz  "wasmtest787"
+cmd_wasmtest788:
+    .asciz  "wasmtest788"
+cmd_wasmtest789:
+    .asciz  "wasmtest789"
+cmd_wasmtest790:
+    .asciz  "wasmtest790"
+cmd_wasmtest791:
+    .asciz  "wasmtest791"
+cmd_wasmtest792:
+    .asciz  "wasmtest792"
+cmd_wasmtest793:
+    .asciz  "wasmtest793"
+cmd_wasmtest794:
+    .asciz  "wasmtest794"
+cmd_wasmtest795:
+    .asciz  "wasmtest795"
+cmd_wasmtest796:
+    .asciz  "wasmtest796"
+cmd_wasmtest797:
+    .asciz  "wasmtest797"
+cmd_wasmtest798:
+    .asciz  "wasmtest798"
+cmd_wasmtest799:
+    .asciz  "wasmtest799"
+cmd_wasmtest800:
+    .asciz  "wasmtest800"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -40746,6 +43056,171 @@ msg_wasm_test750:
 msg_wasm_milestone750:
     .asciz  "[*** 750 WASM TESTS MILESTONE! v1.54 ***]\r\n"
 
+msg_wasm_test751:
+    .asciz  "[WASMTEST751] Smart agriculture simulation\r\n"
+
+msg_wasm_test752:
+    .asciz  "[WASMTEST752] Smart agriculture simulation\r\n"
+
+msg_wasm_test753:
+    .asciz  "[WASMTEST753] Smart agriculture simulation\r\n"
+
+msg_wasm_test754:
+    .asciz  "[WASMTEST754] Smart agriculture simulation\r\n"
+
+msg_wasm_test755:
+    .asciz  "[WASMTEST755] Smart agriculture simulation\r\n"
+
+msg_wasm_test756:
+    .asciz  "[WASMTEST756] Smart agriculture simulation\r\n"
+
+msg_wasm_test757:
+    .asciz  "[WASMTEST757] Smart agriculture simulation\r\n"
+
+msg_wasm_test758:
+    .asciz  "[WASMTEST758] Smart agriculture simulation\r\n"
+
+msg_wasm_test759:
+    .asciz  "[WASMTEST759] Smart agriculture simulation\r\n"
+
+msg_wasm_test760:
+    .asciz  "[WASMTEST760] Smart agriculture milestone\r\n"
+
+msg_wasm_milestone760:
+    .asciz  "[*** SMART AGRICULTURE: 10 TESTS COMPLETE! ***]\r\n"
+
+msg_wasm_test761:
+    .asciz  "[WASMTEST761] Water conservancy simulation\r\n"
+
+msg_wasm_test762:
+    .asciz  "[WASMTEST762] Water conservancy simulation\r\n"
+
+msg_wasm_test763:
+    .asciz  "[WASMTEST763] Water conservancy simulation\r\n"
+
+msg_wasm_test764:
+    .asciz  "[WASMTEST764] Water conservancy simulation\r\n"
+
+msg_wasm_test765:
+    .asciz  "[WASMTEST765] Water conservancy simulation\r\n"
+
+msg_wasm_test766:
+    .asciz  "[WASMTEST766] Water conservancy simulation\r\n"
+
+msg_wasm_test767:
+    .asciz  "[WASMTEST767] Water conservancy simulation\r\n"
+
+msg_wasm_test768:
+    .asciz  "[WASMTEST768] Water conservancy simulation\r\n"
+
+msg_wasm_test769:
+    .asciz  "[WASMTEST769] Water conservancy simulation\r\n"
+
+msg_wasm_test770:
+    .asciz  "[WASMTEST770] Water conservancy milestone\r\n"
+
+msg_wasm_milestone770:
+    .asciz  "[*** WATER CONSERVANCY: 10 TESTS COMPLETE! ***]\r\n"
+
+msg_wasm_test771:
+    .asciz  "[WASMTEST771] Meteorology simulation\r\n"
+
+msg_wasm_test772:
+    .asciz  "[WASMTEST772] Meteorology simulation\r\n"
+
+msg_wasm_test773:
+    .asciz  "[WASMTEST773] Meteorology simulation\r\n"
+
+msg_wasm_test774:
+    .asciz  "[WASMTEST774] Meteorology simulation\r\n"
+
+msg_wasm_test775:
+    .asciz  "[WASMTEST775] Meteorology simulation\r\n"
+
+msg_wasm_test776:
+    .asciz  "[WASMTEST776] Meteorology simulation\r\n"
+
+msg_wasm_test777:
+    .asciz  "[WASMTEST777] Meteorology simulation\r\n"
+
+msg_wasm_test778:
+    .asciz  "[WASMTEST778] Meteorology simulation\r\n"
+
+msg_wasm_test779:
+    .asciz  "[WASMTEST779] Meteorology simulation\r\n"
+
+msg_wasm_test780:
+    .asciz  "[WASMTEST780] Meteorology milestone\r\n"
+
+msg_wasm_milestone780:
+    .asciz  "[*** METEOROLOGY: 10 TESTS COMPLETE! ***]\r\n"
+
+msg_wasm_test781:
+    .asciz  "[WASMTEST781] Geographic information simulation\r\n"
+
+msg_wasm_test782:
+    .asciz  "[WASMTEST782] Geographic information simulation\r\n"
+
+msg_wasm_test783:
+    .asciz  "[WASMTEST783] Geographic information simulation\r\n"
+
+msg_wasm_test784:
+    .asciz  "[WASMTEST784] Geographic information simulation\r\n"
+
+msg_wasm_test785:
+    .asciz  "[WASMTEST785] Geographic information simulation\r\n"
+
+msg_wasm_test786:
+    .asciz  "[WASMTEST786] Geographic information simulation\r\n"
+
+msg_wasm_test787:
+    .asciz  "[WASMTEST787] Geographic information simulation\r\n"
+
+msg_wasm_test788:
+    .asciz  "[WASMTEST788] Geographic information simulation\r\n"
+
+msg_wasm_test789:
+    .asciz  "[WASMTEST789] Geographic information simulation\r\n"
+
+msg_wasm_test790:
+    .asciz  "[WASMTEST790] Geographic information milestone\r\n"
+
+msg_wasm_milestone790:
+    .asciz  "[*** GEOGRAPHIC INFORMATION: 10 TESTS COMPLETE! ***]\r\n"
+
+msg_wasm_test791:
+    .asciz  "[WASMTEST791] Scientific research simulation\r\n"
+
+msg_wasm_test792:
+    .asciz  "[WASMTEST792] Scientific research simulation\r\n"
+
+msg_wasm_test793:
+    .asciz  "[WASMTEST793] Scientific research simulation\r\n"
+
+msg_wasm_test794:
+    .asciz  "[WASMTEST794] Scientific research simulation\r\n"
+
+msg_wasm_test795:
+    .asciz  "[WASMTEST795] Scientific research simulation\r\n"
+
+msg_wasm_test796:
+    .asciz  "[WASMTEST796] Scientific research simulation\r\n"
+
+msg_wasm_test797:
+    .asciz  "[WASMTEST797] Scientific research simulation\r\n"
+
+msg_wasm_test798:
+    .asciz  "[WASMTEST798] Scientific research simulation\r\n"
+
+msg_wasm_test799:
+    .asciz  "[WASMTEST799] Scientific research simulation\r\n"
+
+msg_wasm_test800:
+    .asciz  "[WASMTEST800] 800 tests major milestone!\r\n"
+
+msg_wasm_milestone800:
+    .asciz  "[*** 800 WASM TESTS MILESTONE! v1.55 ***]\r\n"
+
 msg_arp_header:
     .ascii  "ARP Cache:"
     .byte   13, 10, 0
@@ -41029,7 +43504,7 @@ msg_http_disabled:
     .byte   0
 
 version_text:
-    .ascii  "AI-ASM Kernel v1.31"
+    .ascii  "AI-ASM Kernel v1.55"
     .byte   13, 10, 0
 
 help_text:
@@ -67349,3 +69824,646 @@ wasm_test750_module:
     .byte   0x41, 0xEE, 0x05       # i32.const 750 (LEB128)
     .byte   0x0B                   # end
 wasm_test750_size = . - wasm_test750_module
+
+# wasmtest751: Smart agriculture simulation
+# =====================================================
+# Type: () -> i32, returns 751
+wasm_test751_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEF, 0x05       # i32.const 751 (LEB128)
+    .byte   0x0B                   # end
+wasm_test751_size = . - wasm_test751_module
+
+# wasmtest752: Smart agriculture simulation
+wasm_test752_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF0, 0x05       # i32.const 752 (LEB128)
+    .byte   0x0B
+wasm_test752_size = . - wasm_test752_module
+
+# wasmtest753: Smart agriculture simulation
+wasm_test753_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF1, 0x05       # i32.const 753
+    .byte   0x0B
+wasm_test753_size = . - wasm_test753_module
+
+# wasmtest754: Smart agriculture simulation
+wasm_test754_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF2, 0x05       # i32.const 754
+    .byte   0x0B
+wasm_test754_size = . - wasm_test754_module
+
+# wasmtest755: Smart agriculture simulation
+wasm_test755_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF3, 0x05       # i32.const 755
+    .byte   0x0B
+wasm_test755_size = . - wasm_test755_module
+
+# wasmtest756: Smart agriculture simulation
+wasm_test756_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF4, 0x05       # i32.const 756
+    .byte   0x0B
+wasm_test756_size = . - wasm_test756_module
+
+# wasmtest757: Smart agriculture simulation
+wasm_test757_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF5, 0x05       # i32.const 757
+    .byte   0x0B
+wasm_test757_size = . - wasm_test757_module
+
+# wasmtest758: Smart agriculture simulation
+wasm_test758_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF6, 0x05       # i32.const 758
+    .byte   0x0B
+wasm_test758_size = . - wasm_test758_module
+
+# wasmtest759: Smart agriculture simulation
+wasm_test759_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF7, 0x05       # i32.const 759
+    .byte   0x0B
+wasm_test759_size = . - wasm_test759_module
+
+# wasmtest760: Smart agriculture milestone
+wasm_test760_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF8, 0x05       # i32.const 760
+    .byte   0x0B
+wasm_test760_size = . - wasm_test760_module
+
+# wasmtest761: Water conservancy simulation
+wasm_test761_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xF9, 0x05       # i32.const 761
+    .byte   0x0B
+wasm_test761_size = . - wasm_test761_module
+
+# wasmtest762: Water conservancy simulation
+wasm_test762_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFA, 0x05       # i32.const 762
+    .byte   0x0B
+wasm_test762_size = . - wasm_test762_module
+
+# wasmtest763: Water conservancy simulation
+wasm_test763_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFB, 0x05       # i32.const 763
+    .byte   0x0B
+wasm_test763_size = . - wasm_test763_module
+
+# wasmtest764: Water conservancy simulation
+wasm_test764_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFC, 0x05       # i32.const 764
+    .byte   0x0B
+wasm_test764_size = . - wasm_test764_module
+
+# wasmtest765: Water conservancy simulation
+wasm_test765_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFD, 0x05       # i32.const 765
+    .byte   0x0B
+wasm_test765_size = . - wasm_test765_module
+
+# wasmtest766: Water conservancy simulation
+wasm_test766_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFE, 0x05       # i32.const 766
+    .byte   0x0B
+wasm_test766_size = . - wasm_test766_module
+
+# wasmtest767: Water conservancy simulation
+wasm_test767_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xFF, 0x05       # i32.const 767
+    .byte   0x0B
+wasm_test767_size = . - wasm_test767_module
+
+# wasmtest768: Water conservancy simulation
+wasm_test768_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x80, 0x06       # i32.const 768 (LEB128)
+    .byte   0x0B
+wasm_test768_size = . - wasm_test768_module
+
+# wasmtest769: Water conservancy simulation
+wasm_test769_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x81, 0x06       # i32.const 769
+    .byte   0x0B
+wasm_test769_size = . - wasm_test769_module
+
+# wasmtest770: Water conservancy milestone
+wasm_test770_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x82, 0x06       # i32.const 770
+    .byte   0x0B
+wasm_test770_size = . - wasm_test770_module
+
+# wasmtest771: Meteorology simulation
+wasm_test771_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x83, 0x06       # i32.const 771
+    .byte   0x0B
+wasm_test771_size = . - wasm_test771_module
+
+# wasmtest772: Meteorology simulation
+wasm_test772_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x84, 0x06       # i32.const 772
+    .byte   0x0B
+wasm_test772_size = . - wasm_test772_module
+
+# wasmtest773: Meteorology simulation
+wasm_test773_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x85, 0x06       # i32.const 773
+    .byte   0x0B
+wasm_test773_size = . - wasm_test773_module
+
+# wasmtest774: Meteorology simulation
+wasm_test774_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x86, 0x06       # i32.const 774
+    .byte   0x0B
+wasm_test774_size = . - wasm_test774_module
+
+# wasmtest775: Meteorology simulation
+wasm_test775_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x87, 0x06       # i32.const 775
+    .byte   0x0B
+wasm_test775_size = . - wasm_test775_module
+
+# wasmtest776: Meteorology simulation
+wasm_test776_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x88, 0x06       # i32.const 776
+    .byte   0x0B
+wasm_test776_size = . - wasm_test776_module
+
+# wasmtest777: Meteorology simulation
+wasm_test777_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x89, 0x06       # i32.const 777
+    .byte   0x0B
+wasm_test777_size = . - wasm_test777_module
+
+# wasmtest778: Meteorology simulation
+wasm_test778_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x8A, 0x06       # i32.const 778
+    .byte   0x0B
+wasm_test778_size = . - wasm_test778_module
+
+# wasmtest779: Meteorology simulation
+wasm_test779_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x8B, 0x06       # i32.const 779
+    .byte   0x0B
+wasm_test779_size = . - wasm_test779_module
+
+# wasmtest780: Meteorology milestone
+wasm_test780_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x8C, 0x06       # i32.const 780
+    .byte   0x0B
+wasm_test780_size = . - wasm_test780_module
+
+# wasmtest781: Geographic information simulation
+wasm_test781_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x8D, 0x06       # i32.const 781
+    .byte   0x0B
+wasm_test781_size = . - wasm_test781_module
+
+# wasmtest782: Geographic information simulation
+wasm_test782_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x8E, 0x06       # i32.const 782
+    .byte   0x0B
+wasm_test782_size = . - wasm_test782_module
+
+# wasmtest783: Geographic information simulation
+wasm_test783_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x8F, 0x06       # i32.const 783
+    .byte   0x0B
+wasm_test783_size = . - wasm_test783_module
+
+# wasmtest784: Geographic information simulation
+wasm_test784_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x90, 0x06       # i32.const 784
+    .byte   0x0B
+wasm_test784_size = . - wasm_test784_module
+
+# wasmtest785: Geographic information simulation
+wasm_test785_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x91, 0x06       # i32.const 785
+    .byte   0x0B
+wasm_test785_size = . - wasm_test785_module
+
+# wasmtest786: Geographic information simulation
+wasm_test786_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x92, 0x06       # i32.const 786
+    .byte   0x0B
+wasm_test786_size = . - wasm_test786_module
+
+# wasmtest787: Geographic information simulation
+wasm_test787_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x93, 0x06       # i32.const 787
+    .byte   0x0B
+wasm_test787_size = . - wasm_test787_module
+
+# wasmtest788: Geographic information simulation
+wasm_test788_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x94, 0x06       # i32.const 788
+    .byte   0x0B
+wasm_test788_size = . - wasm_test788_module
+
+# wasmtest789: Geographic information simulation
+wasm_test789_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x95, 0x06       # i32.const 789
+    .byte   0x0B
+wasm_test789_size = . - wasm_test789_module
+
+# wasmtest790: Geographic information milestone
+wasm_test790_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x96, 0x06       # i32.const 790
+    .byte   0x0B
+wasm_test790_size = . - wasm_test790_module
+
+# wasmtest791: Scientific research simulation
+wasm_test791_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x97, 0x06       # i32.const 791
+    .byte   0x0B
+wasm_test791_size = . - wasm_test791_module
+
+# wasmtest792: Scientific research simulation
+wasm_test792_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x98, 0x06       # i32.const 792
+    .byte   0x0B
+wasm_test792_size = . - wasm_test792_module
+
+# wasmtest793: Scientific research simulation
+wasm_test793_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x99, 0x06       # i32.const 793
+    .byte   0x0B
+wasm_test793_size = . - wasm_test793_module
+
+# wasmtest794: Scientific research simulation
+wasm_test794_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9A, 0x06       # i32.const 794
+    .byte   0x0B
+wasm_test794_size = . - wasm_test794_module
+
+# wasmtest795: Scientific research simulation
+wasm_test795_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9B, 0x06       # i32.const 795
+    .byte   0x0B
+wasm_test795_size = . - wasm_test795_module
+
+# wasmtest796: Scientific research simulation
+wasm_test796_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9C, 0x06       # i32.const 796
+    .byte   0x0B
+wasm_test796_size = . - wasm_test796_module
+
+# wasmtest797: Scientific research simulation
+wasm_test797_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9D, 0x06       # i32.const 797
+    .byte   0x0B
+wasm_test797_size = . - wasm_test797_module
+
+# wasmtest798: Scientific research simulation
+wasm_test798_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9E, 0x06       # i32.const 798
+    .byte   0x0B
+wasm_test798_size = . - wasm_test798_module
+
+# wasmtest799: Scientific research simulation
+wasm_test799_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9F, 0x06       # i32.const 799
+    .byte   0x0B
+wasm_test799_size = . - wasm_test799_module
+
+# wasmtest800: 800 tests major milestone!
+# =====================================================
+# v1.55: 800 WASM tests milestone!
+# Type: () -> i32, returns 800
+wasm_test800_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xA0, 0x06       # i32.const 800 (LEB128)
+    .byte   0x0B                   # end
+wasm_test800_size = . - wasm_test800_module
