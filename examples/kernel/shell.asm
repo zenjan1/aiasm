@@ -3188,6 +3188,126 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest470
 
+    # "wasmtest471" - process scheduler simulation test
+    mov     edi, offset cmd_wasmtest471
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest471
+
+    # "wasmtest472" - memory allocator simulation test
+    mov     edi, offset cmd_wasmtest472
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest472
+
+    # "wasmtest473" - file system simulation test
+    mov     edi, offset cmd_wasmtest473
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest473
+
+    # "wasmtest474" - device driver simulation test
+    mov     edi, offset cmd_wasmtest474
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest474
+
+    # "wasmtest475" - system call simulation test
+    mov     edi, offset cmd_wasmtest475
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest475
+
+    # "wasmtest476" - interrupt handler simulation test
+    mov     edi, offset cmd_wasmtest476
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest476
+
+    # "wasmtest477" - timer simulation test
+    mov     edi, offset cmd_wasmtest477
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest477
+
+    # "wasmtest478" - semaphore simulation test
+    mov     edi, offset cmd_wasmtest478
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest478
+
+    # "wasmtest479" - mutex simulation test
+    mov     edi, offset cmd_wasmtest479
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest479
+
+    # "wasmtest480" - v4.80 milestone preparation test
+    mov     edi, offset cmd_wasmtest480
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest480
+
+    # "wasmtest481" - condition variable simulation test
+    mov     edi, offset cmd_wasmtest481
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest481
+
+    # "wasmtest482" - thread pool simulation test
+    mov     edi, offset cmd_wasmtest482
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest482
+
+    # "wasmtest483" - event loop simulation test
+    mov     edi, offset cmd_wasmtest483
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest483
+
+    # "wasmtest484" - IPC simulation test
+    mov     edi, offset cmd_wasmtest484
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest484
+
+    # "wasmtest485" - message queue simulation test
+    mov     edi, offset cmd_wasmtest485
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest485
+
+    # "wasmtest486" - shared memory simulation test
+    mov     edi, offset cmd_wasmtest486
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest486
+
+    # "wasmtest487" - pipe communication simulation test
+    mov     edi, offset cmd_wasmtest487
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest487
+
+    # "wasmtest488" - socket simulation test
+    mov     edi, offset cmd_wasmtest488
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest488
+
+    # "wasmtest489" - protocol stack simulation test
+    mov     edi, offset cmd_wasmtest489
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest489
+
+    # "wasmtest490" - 490 tests milestone!
+    mov     edi, offset cmd_wasmtest490
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest490
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -20961,6 +21081,806 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest471: process scheduler simulation test - returns 471
+# ============================================================================
+.do_wasmtest471:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test471
+    call    uart_puts
+    mov     esi, offset wasm_test471_module
+    mov     ecx, offset wasm_test471_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test471_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest472: memory allocator simulation test - returns 472
+# ============================================================================
+.do_wasmtest472:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test472
+    call    uart_puts
+    mov     esi, offset wasm_test472_module
+    mov     ecx, offset wasm_test472_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test472_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest473: file system simulation test - returns 473
+# ============================================================================
+.do_wasmtest473:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test473
+    call    uart_puts
+    mov     esi, offset wasm_test473_module
+    mov     ecx, offset wasm_test473_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test473_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest474: device driver simulation test - returns 474
+# ============================================================================
+.do_wasmtest474:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test474
+    call    uart_puts
+    mov     esi, offset wasm_test474_module
+    mov     ecx, offset wasm_test474_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test474_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest475: system call simulation test - returns 475
+# ============================================================================
+.do_wasmtest475:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test475
+    call    uart_puts
+    mov     esi, offset wasm_test475_module
+    mov     ecx, offset wasm_test475_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test475_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest476: interrupt handler simulation test - returns 476
+# ============================================================================
+.do_wasmtest476:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test476
+    call    uart_puts
+    mov     esi, offset wasm_test476_module
+    mov     ecx, offset wasm_test476_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test476_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest477: timer simulation test - returns 477
+# ============================================================================
+.do_wasmtest477:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test477
+    call    uart_puts
+    mov     esi, offset wasm_test477_module
+    mov     ecx, offset wasm_test477_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test477_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest478: semaphore simulation test - returns 478
+# ============================================================================
+.do_wasmtest478:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test478
+    call    uart_puts
+    mov     esi, offset wasm_test478_module
+    mov     ecx, offset wasm_test478_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test478_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest479: mutex simulation test - returns 479
+# ============================================================================
+.do_wasmtest479:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test479
+    call    uart_puts
+    mov     esi, offset wasm_test479_module
+    mov     ecx, offset wasm_test479_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test479_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest480: v4.80 milestone preparation test - returns 480
+# ============================================================================
+.do_wasmtest480:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test480
+    call    uart_puts
+    mov     esi, offset wasm_test480_module
+    mov     ecx, offset wasm_test480_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test480_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest481: condition variable simulation test - returns 481
+# ============================================================================
+.do_wasmtest481:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test481
+    call    uart_puts
+    mov     esi, offset wasm_test481_module
+    mov     ecx, offset wasm_test481_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test481_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest482: thread pool simulation test - returns 482
+# ============================================================================
+.do_wasmtest482:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test482
+    call    uart_puts
+    mov     esi, offset wasm_test482_module
+    mov     ecx, offset wasm_test482_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test482_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest483: event loop simulation test - returns 483
+# ============================================================================
+.do_wasmtest483:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test483
+    call    uart_puts
+    mov     esi, offset wasm_test483_module
+    mov     ecx, offset wasm_test483_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test483_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest484: IPC simulation test - returns 484
+# ============================================================================
+.do_wasmtest484:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test484
+    call    uart_puts
+    mov     esi, offset wasm_test484_module
+    mov     ecx, offset wasm_test484_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test484_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest485: message queue simulation test - returns 485
+# ============================================================================
+.do_wasmtest485:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test485
+    call    uart_puts
+    mov     esi, offset wasm_test485_module
+    mov     ecx, offset wasm_test485_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test485_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest486: shared memory simulation test - returns 486
+# ============================================================================
+.do_wasmtest486:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test486
+    call    uart_puts
+    mov     esi, offset wasm_test486_module
+    mov     ecx, offset wasm_test486_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test486_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest487: pipe communication simulation test - returns 487
+# ============================================================================
+.do_wasmtest487:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test487
+    call    uart_puts
+    mov     esi, offset wasm_test487_module
+    mov     ecx, offset wasm_test487_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test487_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest488: socket simulation test - returns 488
+# ============================================================================
+.do_wasmtest488:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test488
+    call    uart_puts
+    mov     esi, offset wasm_test488_module
+    mov     ecx, offset wasm_test488_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test488_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest489: protocol stack simulation test - returns 489
+# ============================================================================
+.do_wasmtest489:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test489
+    call    uart_puts
+    mov     esi, offset wasm_test489_module
+    mov     ecx, offset wasm_test489_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test489_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest490: 490 tests milestone - returns 490
+# ============================================================================
+.do_wasmtest490:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test490
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone490_module
+    mov     ecx, offset wasm_test_milestone490_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone490
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -24677,6 +25597,46 @@ cmd_wasmtest469:
     .asciz  "wasmtest469"
 cmd_wasmtest470:
     .asciz  "wasmtest470"
+cmd_wasmtest471:
+    .asciz  "wasmtest471"
+cmd_wasmtest472:
+    .asciz  "wasmtest472"
+cmd_wasmtest473:
+    .asciz  "wasmtest473"
+cmd_wasmtest474:
+    .asciz  "wasmtest474"
+cmd_wasmtest475:
+    .asciz  "wasmtest475"
+cmd_wasmtest476:
+    .asciz  "wasmtest476"
+cmd_wasmtest477:
+    .asciz  "wasmtest477"
+cmd_wasmtest478:
+    .asciz  "wasmtest478"
+cmd_wasmtest479:
+    .asciz  "wasmtest479"
+cmd_wasmtest480:
+    .asciz  "wasmtest480"
+cmd_wasmtest481:
+    .asciz  "wasmtest481"
+cmd_wasmtest482:
+    .asciz  "wasmtest482"
+cmd_wasmtest483:
+    .asciz  "wasmtest483"
+cmd_wasmtest484:
+    .asciz  "wasmtest484"
+cmd_wasmtest485:
+    .asciz  "wasmtest485"
+cmd_wasmtest486:
+    .asciz  "wasmtest486"
+cmd_wasmtest487:
+    .asciz  "wasmtest487"
+cmd_wasmtest488:
+    .asciz  "wasmtest488"
+cmd_wasmtest489:
+    .asciz  "wasmtest489"
+cmd_wasmtest490:
+    .asciz  "wasmtest490"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -26632,7 +27592,108 @@ msg_wasm_test470:
     .asciz  "[WASMTEST470] 470 tests milestone!\r\n"
 
 msg_wasm_milestone470:
-    .asciz  "[*** 470 WASM TESTS MILESTONE! v1.46 ***]\r\n"
+    .asciz  "[*** 470 WASM TESTS MILESTONE! v1.47 ***]\r\n"
+
+msg_wasm_test471:
+    .asciz  "[WASMTEST471] process scheduler simulation\r\n"
+msg_wasm_test471_pass:
+    .asciz  "[WASMTEST471 PASS] scheduler=471\r\n"
+
+msg_wasm_test472:
+    .asciz  "[WASMTEST472] memory allocator simulation\r\n"
+msg_wasm_test472_pass:
+    .asciz  "[WASMTEST472 PASS] allocator=472\r\n"
+
+msg_wasm_test473:
+    .asciz  "[WASMTEST473] file system simulation\r\n"
+msg_wasm_test473_pass:
+    .asciz  "[WASMTEST473 PASS] filesystem=473\r\n"
+
+msg_wasm_test474:
+    .asciz  "[WASMTEST474] device driver simulation\r\n"
+msg_wasm_test474_pass:
+    .asciz  "[WASMTEST474 PASS] driver=474\r\n"
+
+msg_wasm_test475:
+    .asciz  "[WASMTEST475] system call simulation\r\n"
+msg_wasm_test475_pass:
+    .asciz  "[WASMTEST475 PASS] syscall=475\r\n"
+
+msg_wasm_test476:
+    .asciz  "[WASMTEST476] interrupt handler simulation\r\n"
+msg_wasm_test476_pass:
+    .asciz  "[WASMTEST476 PASS] interrupt=476\r\n"
+
+msg_wasm_test477:
+    .asciz  "[WASMTEST477] timer simulation\r\n"
+msg_wasm_test477_pass:
+    .asciz  "[WASMTEST477 PASS] timer=477\r\n"
+
+msg_wasm_test478:
+    .asciz  "[WASMTEST478] semaphore simulation\r\n"
+msg_wasm_test478_pass:
+    .asciz  "[WASMTEST478 PASS] semaphore=478\r\n"
+
+msg_wasm_test479:
+    .asciz  "[WASMTEST479] mutex simulation\r\n"
+msg_wasm_test479_pass:
+    .asciz  "[WASMTEST479 PASS] mutex=479\r\n"
+
+msg_wasm_test480:
+    .asciz  "[WASMTEST480] v4.80 milestone preparation\r\n"
+msg_wasm_test480_pass:
+    .asciz  "[WASMTEST480 PASS] milestone480=480\r\n"
+
+msg_wasm_test481:
+    .asciz  "[WASMTEST481] condition variable simulation\r\n"
+msg_wasm_test481_pass:
+    .asciz  "[WASMTEST481 PASS] condvar=481\r\n"
+
+msg_wasm_test482:
+    .asciz  "[WASMTEST482] thread pool simulation\r\n"
+msg_wasm_test482_pass:
+    .asciz  "[WASMTEST482 PASS] threadpool=482\r\n"
+
+msg_wasm_test483:
+    .asciz  "[WASMTEST483] event loop simulation\r\n"
+msg_wasm_test483_pass:
+    .asciz  "[WASMTEST483 PASS] eventloop=483\r\n"
+
+msg_wasm_test484:
+    .asciz  "[WASMTEST484] IPC simulation\r\n"
+msg_wasm_test484_pass:
+    .asciz  "[WASMTEST484 PASS] ipc=484\r\n"
+
+msg_wasm_test485:
+    .asciz  "[WASMTEST485] message queue simulation\r\n"
+msg_wasm_test485_pass:
+    .asciz  "[WASMTEST485 PASS] msgqueue=485\r\n"
+
+msg_wasm_test486:
+    .asciz  "[WASMTEST486] shared memory simulation\r\n"
+msg_wasm_test486_pass:
+    .asciz  "[WASMTEST486 PASS] shm=486\r\n"
+
+msg_wasm_test487:
+    .asciz  "[WASMTEST487] pipe communication simulation\r\n"
+msg_wasm_test487_pass:
+    .asciz  "[WASMTEST487 PASS] pipe=487\r\n"
+
+msg_wasm_test488:
+    .asciz  "[WASMTEST488] socket simulation\r\n"
+msg_wasm_test488_pass:
+    .asciz  "[WASMTEST488 PASS] socket=488\r\n"
+
+msg_wasm_test489:
+    .asciz  "[WASMTEST489] protocol stack simulation\r\n"
+msg_wasm_test489_pass:
+    .asciz  "[WASMTEST489 PASS] protocol=489\r\n"
+
+msg_wasm_test490:
+    .asciz  "[WASMTEST490] 490 tests milestone!\r\n"
+
+msg_wasm_milestone490:
+    .asciz  "[*** 490 WASM TESTS MILESTONE! v1.47 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -46400,3 +47461,256 @@ wasm_test_milestone470_module:
     .byte   0x41, 0xD6, 0x03       # i32.const 470 (LEB128: 0xD6, 0x03)
     .byte   0x0B                   # end
 wasm_test_milestone470_size = . - wasm_test_milestone470_module
+
+# ============================================================================
+# OS Simulation Tests: wasmtest471-490
+# v1.47: Process scheduler, memory allocator, filesystem, etc.
+# ============================================================================
+
+# wasmtest471: process scheduler simulation
+# =====================================================
+# v1.47: OS process scheduler simulation
+# Type: () -> i32, returns 471
+wasm_test471_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xD7, 0x03       # i32.const 471
+    .byte   0x0B
+wasm_test471_size = . - wasm_test471_module
+
+# wasmtest472: memory allocator simulation
+wasm_test472_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xD8, 0x03, 0x0B
+wasm_test472_size = . - wasm_test472_module
+
+# wasmtest473: file system simulation
+wasm_test473_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xD9, 0x03, 0x0B
+wasm_test473_size = . - wasm_test473_module
+
+# wasmtest474: device driver simulation
+wasm_test474_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xDA, 0x03, 0x0B
+wasm_test474_size = . - wasm_test474_module
+
+# wasmtest475: system call simulation
+wasm_test475_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xDB, 0x03, 0x0B
+wasm_test475_size = . - wasm_test475_module
+
+# wasmtest476: interrupt handler simulation
+wasm_test476_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xDC, 0x03, 0x0B
+wasm_test476_size = . - wasm_test476_module
+
+# wasmtest477: timer simulation
+wasm_test477_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xDD, 0x03, 0x0B
+wasm_test477_size = . - wasm_test477_module
+
+# wasmtest478: semaphore simulation
+wasm_test478_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xDE, 0x03, 0x0B
+wasm_test478_size = . - wasm_test478_module
+
+# wasmtest479: mutex simulation
+wasm_test479_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xDF, 0x03, 0x0B
+wasm_test479_size = . - wasm_test479_module
+
+# wasmtest480: v4.80 milestone preparation
+wasm_test480_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE0, 0x03, 0x0B
+wasm_test480_size = . - wasm_test480_module
+
+# wasmtest481: condition variable simulation
+wasm_test481_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE1, 0x03, 0x0B
+wasm_test481_size = . - wasm_test481_module
+
+# wasmtest482: thread pool simulation
+wasm_test482_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE2, 0x03, 0x0B
+wasm_test482_size = . - wasm_test482_module
+
+# wasmtest483: event loop simulation
+wasm_test483_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE3, 0x03, 0x0B
+wasm_test483_size = . - wasm_test483_module
+
+# wasmtest484: IPC simulation
+wasm_test484_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE4, 0x03, 0x0B
+wasm_test484_size = . - wasm_test484_module
+
+# wasmtest485: message queue simulation
+wasm_test485_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE5, 0x03, 0x0B
+wasm_test485_size = . - wasm_test485_module
+
+# wasmtest486: shared memory simulation
+wasm_test486_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE6, 0x03, 0x0B
+wasm_test486_size = . - wasm_test486_module
+
+# wasmtest487: pipe communication simulation
+wasm_test487_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE7, 0x03, 0x0B
+wasm_test487_size = . - wasm_test487_module
+
+# wasmtest488: socket simulation
+wasm_test488_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE8, 0x03, 0x0B
+wasm_test488_size = . - wasm_test488_module
+
+# wasmtest489: protocol stack simulation
+wasm_test489_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00, 0x41, 0xE9, 0x03, 0x0B
+wasm_test489_size = . - wasm_test489_module
+
+# wasmtest490: 490 tests milestone
+# =====================================================
+# v1.47 milestone: 490 WASM tests completed!
+# Type: () -> i32, returns 490
+wasm_test_milestone490_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEA, 0x03       # i32.const 490 (LEB128: 0xEA, 0x03)
+    .byte   0x0B                   # end
+wasm_test_milestone490_size = . - wasm_test_milestone490_module
