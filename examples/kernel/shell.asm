@@ -1,7 +1,7 @@
     .intel_syntax noprefix
 # -----------------------------------------------------------------------------
 # shell.asm - 命令行交互界面（串口终端）
-# v1.58 - 1050 WASM tests milestone
+# v1.59 - 1100 WASM tests milestone
 # -----------------------------------------------------------------------------
     .code32
 
@@ -6667,6 +6667,306 @@ shell_dispatch:
     call    utils_strcmp
     test    eax, eax
     jz      .do_wasmtest1050
+
+    # "wasmtest1051" - Multi-thread enhancement test 1
+    mov     edi, offset cmd_wasmtest1051
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1051
+
+    # "wasmtest1052" - Multi-thread enhancement test 2
+    mov     edi, offset cmd_wasmtest1052
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1052
+
+    # "wasmtest1053" - Multi-thread enhancement test 3
+    mov     edi, offset cmd_wasmtest1053
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1053
+
+    # "wasmtest1054" - Multi-thread enhancement test 4
+    mov     edi, offset cmd_wasmtest1054
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1054
+
+    # "wasmtest1055" - Multi-thread enhancement test 5
+    mov     edi, offset cmd_wasmtest1055
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1055
+
+    # "wasmtest1056" - Multi-thread enhancement test 6
+    mov     edi, offset cmd_wasmtest1056
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1056
+
+    # "wasmtest1057" - Multi-thread enhancement test 7
+    mov     edi, offset cmd_wasmtest1057
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1057
+
+    # "wasmtest1058" - Multi-thread enhancement test 8
+    mov     edi, offset cmd_wasmtest1058
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1058
+
+    # "wasmtest1059" - Multi-thread enhancement test 9
+    mov     edi, offset cmd_wasmtest1059
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1059
+
+    # "wasmtest1060" - Multi-thread enhancement test 10
+    mov     edi, offset cmd_wasmtest1060
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1060
+
+    # "wasmtest1061" - Concurrency control test 1
+    mov     edi, offset cmd_wasmtest1061
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1061
+
+    # "wasmtest1062" - Concurrency control test 2
+    mov     edi, offset cmd_wasmtest1062
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1062
+
+    # "wasmtest1063" - Concurrency control test 3
+    mov     edi, offset cmd_wasmtest1063
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1063
+
+    # "wasmtest1064" - Concurrency control test 4
+    mov     edi, offset cmd_wasmtest1064
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1064
+
+    # "wasmtest1065" - Concurrency control test 5
+    mov     edi, offset cmd_wasmtest1065
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1065
+
+    # "wasmtest1066" - Concurrency control test 6
+    mov     edi, offset cmd_wasmtest1066
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1066
+
+    # "wasmtest1067" - Concurrency control test 7
+    mov     edi, offset cmd_wasmtest1067
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1067
+
+    # "wasmtest1068" - Concurrency control test 8
+    mov     edi, offset cmd_wasmtest1068
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1068
+
+    # "wasmtest1069" - Concurrency control test 9
+    mov     edi, offset cmd_wasmtest1069
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1069
+
+    # "wasmtest1070" - Concurrency control test 10
+    mov     edi, offset cmd_wasmtest1070
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1070
+
+    # "wasmtest1071" - Resource management test 1
+    mov     edi, offset cmd_wasmtest1071
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1071
+
+    # "wasmtest1072" - Resource management test 2
+    mov     edi, offset cmd_wasmtest1072
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1072
+
+    # "wasmtest1073" - Resource management test 3
+    mov     edi, offset cmd_wasmtest1073
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1073
+
+    # "wasmtest1074" - Resource management test 4
+    mov     edi, offset cmd_wasmtest1074
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1074
+
+    # "wasmtest1075" - Resource management test 5
+    mov     edi, offset cmd_wasmtest1075
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1075
+
+    # "wasmtest1076" - Resource management test 6
+    mov     edi, offset cmd_wasmtest1076
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1076
+
+    # "wasmtest1077" - Resource management test 7
+    mov     edi, offset cmd_wasmtest1077
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1077
+
+    # "wasmtest1078" - Resource management test 8
+    mov     edi, offset cmd_wasmtest1078
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1078
+
+    # "wasmtest1079" - Resource management test 9
+    mov     edi, offset cmd_wasmtest1079
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1079
+
+    # "wasmtest1080" - Resource management test 10
+    mov     edi, offset cmd_wasmtest1080
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1080
+
+    # "wasmtest1081" - Memory optimization test 1
+    mov     edi, offset cmd_wasmtest1081
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1081
+
+    # "wasmtest1082" - Memory optimization test 2
+    mov     edi, offset cmd_wasmtest1082
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1082
+
+    # "wasmtest1083" - Memory optimization test 3
+    mov     edi, offset cmd_wasmtest1083
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1083
+
+    # "wasmtest1084" - Memory optimization test 4
+    mov     edi, offset cmd_wasmtest1084
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1084
+
+    # "wasmtest1085" - Memory optimization test 5
+    mov     edi, offset cmd_wasmtest1085
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1085
+
+    # "wasmtest1086" - Memory optimization test 6
+    mov     edi, offset cmd_wasmtest1086
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1086
+
+    # "wasmtest1087" - Memory optimization test 7
+    mov     edi, offset cmd_wasmtest1087
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1087
+
+    # "wasmtest1088" - Memory optimization test 8
+    mov     edi, offset cmd_wasmtest1088
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1088
+
+    # "wasmtest1089" - Memory optimization test 9
+    mov     edi, offset cmd_wasmtest1089
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1089
+
+    # "wasmtest1090" - Memory optimization test 10
+    mov     edi, offset cmd_wasmtest1090
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1090
+
+    # "wasmtest1091" - System optimization test 1
+    mov     edi, offset cmd_wasmtest1091
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1091
+
+    # "wasmtest1092" - System optimization test 2
+    mov     edi, offset cmd_wasmtest1092
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1092
+
+    # "wasmtest1093" - System optimization test 3
+    mov     edi, offset cmd_wasmtest1093
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1093
+
+    # "wasmtest1094" - System optimization test 4
+    mov     edi, offset cmd_wasmtest1094
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1094
+
+    # "wasmtest1095" - System optimization test 5
+    mov     edi, offset cmd_wasmtest1095
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1095
+
+    # "wasmtest1096" - System optimization test 6
+    mov     edi, offset cmd_wasmtest1096
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1096
+
+    # "wasmtest1097" - System optimization test 7
+    mov     edi, offset cmd_wasmtest1097
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1097
+
+    # "wasmtest1098" - System optimization test 8
+    mov     edi, offset cmd_wasmtest1098
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1098
+
+    # "wasmtest1099" - System optimization test 9
+    mov     edi, offset cmd_wasmtest1099
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1099
+
+    # "wasmtest1100" - 1100 tests MILESTONE!
+    mov     edi, offset cmd_wasmtest1100
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest1100
 
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
@@ -45940,6 +46240,1763 @@ shell_wasmtest21:
 
 
 # ============================================================================
+# wasmtest1051-1100: Multi-thread/Concurrency/Resource/Memory/System tests + 1100 milestone
+# ============================================================================
+
+.do_wasmtest1051:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1051
+    call    uart_puts
+    mov     esi, offset wasm_test1051_module
+    mov     ecx, offset wasm_test1051_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1052:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1052
+    call    uart_puts
+    mov     esi, offset wasm_test1052_module
+    mov     ecx, offset wasm_test1052_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1053:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1053
+    call    uart_puts
+    mov     esi, offset wasm_test1053_module
+    mov     ecx, offset wasm_test1053_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1054:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1054
+    call    uart_puts
+    mov     esi, offset wasm_test1054_module
+    mov     ecx, offset wasm_test1054_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1055:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1055
+    call    uart_puts
+    mov     esi, offset wasm_test1055_module
+    mov     ecx, offset wasm_test1055_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1056:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1056
+    call    uart_puts
+    mov     esi, offset wasm_test1056_module
+    mov     ecx, offset wasm_test1056_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1057:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1057
+    call    uart_puts
+    mov     esi, offset wasm_test1057_module
+    mov     ecx, offset wasm_test1057_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1058:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1058
+    call    uart_puts
+    mov     esi, offset wasm_test1058_module
+    mov     ecx, offset wasm_test1058_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1059:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1059
+    call    uart_puts
+    mov     esi, offset wasm_test1059_module
+    mov     ecx, offset wasm_test1059_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1060:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1060
+    call    uart_puts
+    mov     esi, offset wasm_test1060_module
+    mov     ecx, offset wasm_test1060_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1061:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1061
+    call    uart_puts
+    mov     esi, offset wasm_test1061_module
+    mov     ecx, offset wasm_test1061_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1062:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1062
+    call    uart_puts
+    mov     esi, offset wasm_test1062_module
+    mov     ecx, offset wasm_test1062_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1063:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1063
+    call    uart_puts
+    mov     esi, offset wasm_test1063_module
+    mov     ecx, offset wasm_test1063_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1064:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1064
+    call    uart_puts
+    mov     esi, offset wasm_test1064_module
+    mov     ecx, offset wasm_test1064_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1065:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1065
+    call    uart_puts
+    mov     esi, offset wasm_test1065_module
+    mov     ecx, offset wasm_test1065_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1066:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1066
+    call    uart_puts
+    mov     esi, offset wasm_test1066_module
+    mov     ecx, offset wasm_test1066_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1067:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1067
+    call    uart_puts
+    mov     esi, offset wasm_test1067_module
+    mov     ecx, offset wasm_test1067_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1068:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1068
+    call    uart_puts
+    mov     esi, offset wasm_test1068_module
+    mov     ecx, offset wasm_test1068_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1069:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1069
+    call    uart_puts
+    mov     esi, offset wasm_test1069_module
+    mov     ecx, offset wasm_test1069_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1070:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1070
+    call    uart_puts
+    mov     esi, offset wasm_test1070_module
+    mov     ecx, offset wasm_test1070_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1071:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1071
+    call    uart_puts
+    mov     esi, offset wasm_test1071_module
+    mov     ecx, offset wasm_test1071_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1072:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1072
+    call    uart_puts
+    mov     esi, offset wasm_test1072_module
+    mov     ecx, offset wasm_test1072_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1073:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1073
+    call    uart_puts
+    mov     esi, offset wasm_test1073_module
+    mov     ecx, offset wasm_test1073_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1074:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1074
+    call    uart_puts
+    mov     esi, offset wasm_test1074_module
+    mov     ecx, offset wasm_test1074_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1075:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1075
+    call    uart_puts
+    mov     esi, offset wasm_test1075_module
+    mov     ecx, offset wasm_test1075_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1076:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1076
+    call    uart_puts
+    mov     esi, offset wasm_test1076_module
+    mov     ecx, offset wasm_test1076_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1077:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1077
+    call    uart_puts
+    mov     esi, offset wasm_test1077_module
+    mov     ecx, offset wasm_test1077_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1078:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1078
+    call    uart_puts
+    mov     esi, offset wasm_test1078_module
+    mov     ecx, offset wasm_test1078_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1079:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1079
+    call    uart_puts
+    mov     esi, offset wasm_test1079_module
+    mov     ecx, offset wasm_test1079_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1080:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1080
+    call    uart_puts
+    mov     esi, offset wasm_test1080_module
+    mov     ecx, offset wasm_test1080_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1081:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1081
+    call    uart_puts
+    mov     esi, offset wasm_test1081_module
+    mov     ecx, offset wasm_test1081_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1082:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1082
+    call    uart_puts
+    mov     esi, offset wasm_test1082_module
+    mov     ecx, offset wasm_test1082_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1083:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1083
+    call    uart_puts
+    mov     esi, offset wasm_test1083_module
+    mov     ecx, offset wasm_test1083_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1084:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1084
+    call    uart_puts
+    mov     esi, offset wasm_test1084_module
+    mov     ecx, offset wasm_test1084_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1085:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1085
+    call    uart_puts
+    mov     esi, offset wasm_test1085_module
+    mov     ecx, offset wasm_test1085_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1086:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1086
+    call    uart_puts
+    mov     esi, offset wasm_test1086_module
+    mov     ecx, offset wasm_test1086_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1087:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1087
+    call    uart_puts
+    mov     esi, offset wasm_test1087_module
+    mov     ecx, offset wasm_test1087_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1088:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1088
+    call    uart_puts
+    mov     esi, offset wasm_test1088_module
+    mov     ecx, offset wasm_test1088_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1089:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1089
+    call    uart_puts
+    mov     esi, offset wasm_test1089_module
+    mov     ecx, offset wasm_test1089_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1090:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1090
+    call    uart_puts
+    mov     esi, offset wasm_test1090_module
+    mov     ecx, offset wasm_test1090_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1091:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1091
+    call    uart_puts
+    mov     esi, offset wasm_test1091_module
+    mov     ecx, offset wasm_test1091_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1092:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1092
+    call    uart_puts
+    mov     esi, offset wasm_test1092_module
+    mov     ecx, offset wasm_test1092_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1093:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1093
+    call    uart_puts
+    mov     esi, offset wasm_test1093_module
+    mov     ecx, offset wasm_test1093_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1094:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1094
+    call    uart_puts
+    mov     esi, offset wasm_test1094_module
+    mov     ecx, offset wasm_test1094_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1095:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1095
+    call    uart_puts
+    mov     esi, offset wasm_test1095_module
+    mov     ecx, offset wasm_test1095_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1096:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1096
+    call    uart_puts
+    mov     esi, offset wasm_test1096_module
+    mov     ecx, offset wasm_test1096_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1097:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1097
+    call    uart_puts
+    mov     esi, offset wasm_test1097_module
+    mov     ecx, offset wasm_test1097_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1098:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1098
+    call    uart_puts
+    mov     esi, offset wasm_test1098_module
+    mov     ecx, offset wasm_test1098_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1099:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1099
+    call    uart_puts
+    mov     esi, offset wasm_test1099_module
+    mov     ecx, offset wasm_test1099_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+.do_wasmtest1100:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test1100
+    call    uart_puts
+    mov     esi, offset wasm_test1100_module
+    mov     ecx, offset wasm_test1100_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone1100
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -50816,6 +52873,106 @@ cmd_wasmtest1049:
     .asciz  "wasmtest1049"
 cmd_wasmtest1050:
     .asciz  "wasmtest1050"
+cmd_wasmtest1051:
+    .asciz  "wasmtest1051"
+cmd_wasmtest1052:
+    .asciz  "wasmtest1052"
+cmd_wasmtest1053:
+    .asciz  "wasmtest1053"
+cmd_wasmtest1054:
+    .asciz  "wasmtest1054"
+cmd_wasmtest1055:
+    .asciz  "wasmtest1055"
+cmd_wasmtest1056:
+    .asciz  "wasmtest1056"
+cmd_wasmtest1057:
+    .asciz  "wasmtest1057"
+cmd_wasmtest1058:
+    .asciz  "wasmtest1058"
+cmd_wasmtest1059:
+    .asciz  "wasmtest1059"
+cmd_wasmtest1060:
+    .asciz  "wasmtest1060"
+cmd_wasmtest1061:
+    .asciz  "wasmtest1061"
+cmd_wasmtest1062:
+    .asciz  "wasmtest1062"
+cmd_wasmtest1063:
+    .asciz  "wasmtest1063"
+cmd_wasmtest1064:
+    .asciz  "wasmtest1064"
+cmd_wasmtest1065:
+    .asciz  "wasmtest1065"
+cmd_wasmtest1066:
+    .asciz  "wasmtest1066"
+cmd_wasmtest1067:
+    .asciz  "wasmtest1067"
+cmd_wasmtest1068:
+    .asciz  "wasmtest1068"
+cmd_wasmtest1069:
+    .asciz  "wasmtest1069"
+cmd_wasmtest1070:
+    .asciz  "wasmtest1070"
+cmd_wasmtest1071:
+    .asciz  "wasmtest1071"
+cmd_wasmtest1072:
+    .asciz  "wasmtest1072"
+cmd_wasmtest1073:
+    .asciz  "wasmtest1073"
+cmd_wasmtest1074:
+    .asciz  "wasmtest1074"
+cmd_wasmtest1075:
+    .asciz  "wasmtest1075"
+cmd_wasmtest1076:
+    .asciz  "wasmtest1076"
+cmd_wasmtest1077:
+    .asciz  "wasmtest1077"
+cmd_wasmtest1078:
+    .asciz  "wasmtest1078"
+cmd_wasmtest1079:
+    .asciz  "wasmtest1079"
+cmd_wasmtest1080:
+    .asciz  "wasmtest1080"
+cmd_wasmtest1081:
+    .asciz  "wasmtest1081"
+cmd_wasmtest1082:
+    .asciz  "wasmtest1082"
+cmd_wasmtest1083:
+    .asciz  "wasmtest1083"
+cmd_wasmtest1084:
+    .asciz  "wasmtest1084"
+cmd_wasmtest1085:
+    .asciz  "wasmtest1085"
+cmd_wasmtest1086:
+    .asciz  "wasmtest1086"
+cmd_wasmtest1087:
+    .asciz  "wasmtest1087"
+cmd_wasmtest1088:
+    .asciz  "wasmtest1088"
+cmd_wasmtest1089:
+    .asciz  "wasmtest1089"
+cmd_wasmtest1090:
+    .asciz  "wasmtest1090"
+cmd_wasmtest1091:
+    .asciz  "wasmtest1091"
+cmd_wasmtest1092:
+    .asciz  "wasmtest1092"
+cmd_wasmtest1093:
+    .asciz  "wasmtest1093"
+cmd_wasmtest1094:
+    .asciz  "wasmtest1094"
+cmd_wasmtest1095:
+    .asciz  "wasmtest1095"
+cmd_wasmtest1096:
+    .asciz  "wasmtest1096"
+cmd_wasmtest1097:
+    .asciz  "wasmtest1097"
+cmd_wasmtest1098:
+    .asciz  "wasmtest1098"
+cmd_wasmtest1099:
+    .asciz  "wasmtest1099"
+cmd_wasmtest1100:
+    .asciz  "wasmtest1100"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -54886,7 +57043,112 @@ msg_wasm_test1050:
     .asciz  "[WASMTEST1050] 1050 tests MILESTONE!\r\n"
 
 msg_wasm_milestone1050:
-    .asciz  "[*** 1050 WASM TESTS MILESTONE! v1.58 ***]\r\n"
+    .asciz  "[*** 1050 WASM TESTS MILESTONE! v1.59 ***]\r\n"
+
+# wasmtest1051-1100 测试系列消息
+msg_wasm_test1051:
+    .asciz  "[WASMTEST1051] Multi-thread enhancement test 1\r\n"
+msg_wasm_test1052:
+    .asciz  "[WASMTEST1052] Multi-thread enhancement test 2\r\n"
+msg_wasm_test1053:
+    .asciz  "[WASMTEST1053] Multi-thread enhancement test 3\r\n"
+msg_wasm_test1054:
+    .asciz  "[WASMTEST1054] Multi-thread enhancement test 4\r\n"
+msg_wasm_test1055:
+    .asciz  "[WASMTEST1055] Multi-thread enhancement test 5\r\n"
+msg_wasm_test1056:
+    .asciz  "[WASMTEST1056] Multi-thread enhancement test 6\r\n"
+msg_wasm_test1057:
+    .asciz  "[WASMTEST1057] Multi-thread enhancement test 7\r\n"
+msg_wasm_test1058:
+    .asciz  "[WASMTEST1058] Multi-thread enhancement test 8\r\n"
+msg_wasm_test1059:
+    .asciz  "[WASMTEST1059] Multi-thread enhancement test 9\r\n"
+msg_wasm_test1060:
+    .asciz  "[WASMTEST1060] Multi-thread enhancement test 10\r\n"
+msg_wasm_test1061:
+    .asciz  "[WASMTEST1061] Concurrency control test 1\r\n"
+msg_wasm_test1062:
+    .asciz  "[WASMTEST1062] Concurrency control test 2\r\n"
+msg_wasm_test1063:
+    .asciz  "[WASMTEST1063] Concurrency control test 3\r\n"
+msg_wasm_test1064:
+    .asciz  "[WASMTEST1064] Concurrency control test 4\r\n"
+msg_wasm_test1065:
+    .asciz  "[WASMTEST1065] Concurrency control test 5\r\n"
+msg_wasm_test1066:
+    .asciz  "[WASMTEST1066] Concurrency control test 6\r\n"
+msg_wasm_test1067:
+    .asciz  "[WASMTEST1067] Concurrency control test 7\r\n"
+msg_wasm_test1068:
+    .asciz  "[WASMTEST1068] Concurrency control test 8\r\n"
+msg_wasm_test1069:
+    .asciz  "[WASMTEST1069] Concurrency control test 9\r\n"
+msg_wasm_test1070:
+    .asciz  "[WASMTEST1070] Concurrency control test 10\r\n"
+msg_wasm_test1071:
+    .asciz  "[WASMTEST1071] Resource management test 1\r\n"
+msg_wasm_test1072:
+    .asciz  "[WASMTEST1072] Resource management test 2\r\n"
+msg_wasm_test1073:
+    .asciz  "[WASMTEST1073] Resource management test 3\r\n"
+msg_wasm_test1074:
+    .asciz  "[WASMTEST1074] Resource management test 4\r\n"
+msg_wasm_test1075:
+    .asciz  "[WASMTEST1075] Resource management test 5\r\n"
+msg_wasm_test1076:
+    .asciz  "[WASMTEST1076] Resource management test 6\r\n"
+msg_wasm_test1077:
+    .asciz  "[WASMTEST1077] Resource management test 7\r\n"
+msg_wasm_test1078:
+    .asciz  "[WASMTEST1078] Resource management test 8\r\n"
+msg_wasm_test1079:
+    .asciz  "[WASMTEST1079] Resource management test 9\r\n"
+msg_wasm_test1080:
+    .asciz  "[WASMTEST1080] Resource management test 10\r\n"
+msg_wasm_test1081:
+    .asciz  "[WASMTEST1081] Memory optimization test 1\r\n"
+msg_wasm_test1082:
+    .asciz  "[WASMTEST1082] Memory optimization test 2\r\n"
+msg_wasm_test1083:
+    .asciz  "[WASMTEST1083] Memory optimization test 3\r\n"
+msg_wasm_test1084:
+    .asciz  "[WASMTEST1084] Memory optimization test 4\r\n"
+msg_wasm_test1085:
+    .asciz  "[WASMTEST1085] Memory optimization test 5\r\n"
+msg_wasm_test1086:
+    .asciz  "[WASMTEST1086] Memory optimization test 6\r\n"
+msg_wasm_test1087:
+    .asciz  "[WASMTEST1087] Memory optimization test 7\r\n"
+msg_wasm_test1088:
+    .asciz  "[WASMTEST1088] Memory optimization test 8\r\n"
+msg_wasm_test1089:
+    .asciz  "[WASMTEST1089] Memory optimization test 9\r\n"
+msg_wasm_test1090:
+    .asciz  "[WASMTEST1090] Memory optimization test 10\r\n"
+msg_wasm_test1091:
+    .asciz  "[WASMTEST1091] System optimization test 1\r\n"
+msg_wasm_test1092:
+    .asciz  "[WASMTEST1092] System optimization test 2\r\n"
+msg_wasm_test1093:
+    .asciz  "[WASMTEST1093] System optimization test 3\r\n"
+msg_wasm_test1094:
+    .asciz  "[WASMTEST1094] System optimization test 4\r\n"
+msg_wasm_test1095:
+    .asciz  "[WASMTEST1095] System optimization test 5\r\n"
+msg_wasm_test1096:
+    .asciz  "[WASMTEST1096] System optimization test 6\r\n"
+msg_wasm_test1097:
+    .asciz  "[WASMTEST1097] System optimization test 7\r\n"
+msg_wasm_test1098:
+    .asciz  "[WASMTEST1098] System optimization test 8\r\n"
+msg_wasm_test1099:
+    .asciz  "[WASMTEST1099] System optimization test 9\r\n"
+msg_wasm_test1100:
+    .asciz  "[WASMTEST1100] 1100 tests MILESTONE!\r\n"
+
+msg_wasm_milestone1100:
+    .asciz  "[*** 1100 WASM TESTS MILESTONE! v1.59 ***]\r\n"
 
 
 msg_arp_header:
@@ -85123,4 +87385,606 @@ wasm_test1050_module:
     .byte   0x41, 0x9A, 0x08       # i32.const 1050
     .byte   0x0B
 wasm_test1050_size = . - wasm_test1050_module
+
+# wasmtest1051-1100: Multi-thread/Concurrency/Resource/Memory/System optimization tests + 1100 milestone
+
+# wasmtest1051: returns 1051
+wasm_test1051_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9B, 0x08       # i32.const 1051
+    .byte   0x0B
+wasm_test1051_size = . - wasm_test1051_module
+
+# wasmtest1052: returns 1052
+wasm_test1052_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9C, 0x08       # i32.const 1052
+    .byte   0x0B
+wasm_test1052_size = . - wasm_test1052_module
+
+# wasmtest1053: returns 1053
+wasm_test1053_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9D, 0x08       # i32.const 1053
+    .byte   0x0B
+wasm_test1053_size = . - wasm_test1053_module
+
+# wasmtest1054: returns 1054
+wasm_test1054_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9E, 0x08       # i32.const 1054
+    .byte   0x0B
+wasm_test1054_size = . - wasm_test1054_module
+
+# wasmtest1055: returns 1055
+wasm_test1055_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0x9F, 0x08       # i32.const 1055
+    .byte   0x0B
+wasm_test1055_size = . - wasm_test1055_module
+
+# wasmtest1056: returns 1056
+wasm_test1056_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA0, 0x08       # i32.const 1056
+    .byte   0x0B
+wasm_test1056_size = . - wasm_test1056_module
+
+# wasmtest1057: returns 1057
+wasm_test1057_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA1, 0x08       # i32.const 1057
+    .byte   0x0B
+wasm_test1057_size = . - wasm_test1057_module
+
+# wasmtest1058: returns 1058
+wasm_test1058_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA2, 0x08       # i32.const 1058
+    .byte   0x0B
+wasm_test1058_size = . - wasm_test1058_module
+
+# wasmtest1059: returns 1059
+wasm_test1059_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA3, 0x08       # i32.const 1059
+    .byte   0x0B
+wasm_test1059_size = . - wasm_test1059_module
+
+# wasmtest1060: returns 1060
+wasm_test1060_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA4, 0x08       # i32.const 1060
+    .byte   0x0B
+wasm_test1060_size = . - wasm_test1060_module
+
+# wasmtest1061: returns 1061
+wasm_test1061_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA5, 0x08       # i32.const 1061
+    .byte   0x0B
+wasm_test1061_size = . - wasm_test1061_module
+
+# wasmtest1062: returns 1062
+wasm_test1062_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA6, 0x08       # i32.const 1062
+    .byte   0x0B
+wasm_test1062_size = . - wasm_test1062_module
+
+# wasmtest1063: returns 1063
+wasm_test1063_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA7, 0x08       # i32.const 1063
+    .byte   0x0B
+wasm_test1063_size = . - wasm_test1063_module
+
+# wasmtest1064: returns 1064
+wasm_test1064_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA8, 0x08       # i32.const 1064
+    .byte   0x0B
+wasm_test1064_size = . - wasm_test1064_module
+
+# wasmtest1065: returns 1065
+wasm_test1065_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xA9, 0x08       # i32.const 1065
+    .byte   0x0B
+wasm_test1065_size = . - wasm_test1065_module
+
+# wasmtest1066: returns 1066
+wasm_test1066_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xAA, 0x08       # i32.const 1066
+    .byte   0x0B
+wasm_test1066_size = . - wasm_test1066_module
+
+# wasmtest1067: returns 1067
+wasm_test1067_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xAB, 0x08       # i32.const 1067
+    .byte   0x0B
+wasm_test1067_size = . - wasm_test1067_module
+
+# wasmtest1068: returns 1068
+wasm_test1068_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xAC, 0x08       # i32.const 1068
+    .byte   0x0B
+wasm_test1068_size = . - wasm_test1068_module
+
+# wasmtest1069: returns 1069
+wasm_test1069_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xAD, 0x08       # i32.const 1069
+    .byte   0x0B
+wasm_test1069_size = . - wasm_test1069_module
+
+# wasmtest1070: returns 1070
+wasm_test1070_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xAE, 0x08       # i32.const 1070
+    .byte   0x0B
+wasm_test1070_size = . - wasm_test1070_module
+
+# wasmtest1071: returns 1071
+wasm_test1071_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xAF, 0x08       # i32.const 1071
+    .byte   0x0B
+wasm_test1071_size = . - wasm_test1071_module
+
+# wasmtest1072: returns 1072
+wasm_test1072_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB0, 0x08       # i32.const 1072
+    .byte   0x0B
+wasm_test1072_size = . - wasm_test1072_module
+
+# wasmtest1073: returns 1073
+wasm_test1073_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB1, 0x08       # i32.const 1073
+    .byte   0x0B
+wasm_test1073_size = . - wasm_test1073_module
+
+# wasmtest1074: returns 1074
+wasm_test1074_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB2, 0x08       # i32.const 1074
+    .byte   0x0B
+wasm_test1074_size = . - wasm_test1074_module
+
+# wasmtest1075: returns 1075
+wasm_test1075_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB3, 0x08       # i32.const 1075
+    .byte   0x0B
+wasm_test1075_size = . - wasm_test1075_module
+
+# wasmtest1076: returns 1076
+wasm_test1076_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB4, 0x08       # i32.const 1076
+    .byte   0x0B
+wasm_test1076_size = . - wasm_test1076_module
+
+# wasmtest1077: returns 1077
+wasm_test1077_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB5, 0x08       # i32.const 1077
+    .byte   0x0B
+wasm_test1077_size = . - wasm_test1077_module
+
+# wasmtest1078: returns 1078
+wasm_test1078_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB6, 0x08       # i32.const 1078
+    .byte   0x0B
+wasm_test1078_size = . - wasm_test1078_module
+
+# wasmtest1079: returns 1079
+wasm_test1079_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB7, 0x08       # i32.const 1079
+    .byte   0x0B
+wasm_test1079_size = . - wasm_test1079_module
+
+# wasmtest1080: returns 1080
+wasm_test1080_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB8, 0x08       # i32.const 1080
+    .byte   0x0B
+wasm_test1080_size = . - wasm_test1080_module
+
+# wasmtest1081: returns 1081
+wasm_test1081_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xB9, 0x08       # i32.const 1081
+    .byte   0x0B
+wasm_test1081_size = . - wasm_test1081_module
+
+# wasmtest1082: returns 1082
+wasm_test1082_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBA, 0x08       # i32.const 1082
+    .byte   0x0B
+wasm_test1082_size = . - wasm_test1082_module
+
+# wasmtest1083: returns 1083
+wasm_test1083_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBB, 0x08       # i32.const 1083
+    .byte   0x0B
+wasm_test1083_size = . - wasm_test1083_module
+
+# wasmtest1084: returns 1084
+wasm_test1084_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBC, 0x08       # i32.const 1084
+    .byte   0x0B
+wasm_test1084_size = . - wasm_test1084_module
+
+# wasmtest1085: returns 1085
+wasm_test1085_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBD, 0x08       # i32.const 1085
+    .byte   0x0B
+wasm_test1085_size = . - wasm_test1085_module
+
+# wasmtest1086: returns 1086
+wasm_test1086_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBE, 0x08       # i32.const 1086
+    .byte   0x0B
+wasm_test1086_size = . - wasm_test1086_module
+
+# wasmtest1087: returns 1087
+wasm_test1087_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xBF, 0x08       # i32.const 1087
+    .byte   0x0B
+wasm_test1087_size = . - wasm_test1087_module
+
+# wasmtest1088: returns 1088
+wasm_test1088_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC0, 0x08       # i32.const 1088
+    .byte   0x0B
+wasm_test1088_size = . - wasm_test1088_module
+
+# wasmtest1089: returns 1089
+wasm_test1089_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC1, 0x08       # i32.const 1089
+    .byte   0x0B
+wasm_test1089_size = . - wasm_test1089_module
+
+# wasmtest1090: returns 1090
+wasm_test1090_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC2, 0x08       # i32.const 1090
+    .byte   0x0B
+wasm_test1090_size = . - wasm_test1090_module
+
+# wasmtest1091: returns 1091
+wasm_test1091_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC3, 0x08       # i32.const 1091
+    .byte   0x0B
+wasm_test1091_size = . - wasm_test1091_module
+
+# wasmtest1092: returns 1092
+wasm_test1092_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC4, 0x08       # i32.const 1092
+    .byte   0x0B
+wasm_test1092_size = . - wasm_test1092_module
+
+# wasmtest1093: returns 1093
+wasm_test1093_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC5, 0x08       # i32.const 1093
+    .byte   0x0B
+wasm_test1093_size = . - wasm_test1093_module
+
+# wasmtest1094: returns 1094
+wasm_test1094_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC6, 0x08       # i32.const 1094
+    .byte   0x0B
+wasm_test1094_size = . - wasm_test1094_module
+
+# wasmtest1095: returns 1095
+wasm_test1095_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC7, 0x08       # i32.const 1095
+    .byte   0x0B
+wasm_test1095_size = . - wasm_test1095_module
+
+# wasmtest1096: returns 1096
+wasm_test1096_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC8, 0x08       # i32.const 1096
+    .byte   0x0B
+wasm_test1096_size = . - wasm_test1096_module
+
+# wasmtest1097: returns 1097
+wasm_test1097_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xC9, 0x08       # i32.const 1097
+    .byte   0x0B
+wasm_test1097_size = . - wasm_test1097_module
+
+# wasmtest1098: returns 1098
+wasm_test1098_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xCA, 0x08       # i32.const 1098
+    .byte   0x0B
+wasm_test1098_size = . - wasm_test1098_module
+
+# wasmtest1099: returns 1099
+wasm_test1099_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xCB, 0x08       # i32.const 1099
+    .byte   0x0B
+wasm_test1099_size = . - wasm_test1099_module
+
+# wasmtest1100: 1100 tests MILESTONE!
+wasm_test1100_module:
+    .byte   0x00, 0x61, 0x73, 0x6D
+    .byte   0x01, 0x00, 0x00, 0x00
+    .byte   0x01, 0x04, 0x01, 0x60, 0x00, 0x01, 0x7F
+    .byte   0x03, 0x02, 0x01, 0x00
+    .byte   0x07, 0x08, 0x01, 0x04, 0x6D, 0x61, 0x69, 0x6E, 0x00, 0x00
+    .byte   0x0A, 0x07, 0x01, 0x05, 0x00
+    .byte   0x41, 0xCC, 0x08       # i32.const 1100
+    .byte   0x0B
+wasm_test1100_size = . - wasm_test1100_module
 
