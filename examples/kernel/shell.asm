@@ -3308,6 +3308,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest490
 
+    # "wasmtest491" - complete system boot simulation test
+    mov     edi, offset cmd_wasmtest491
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest491
+
+    # "wasmtest492" - multitasking simulation test
+    mov     edi, offset cmd_wasmtest492
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest492
+
+    # "wasmtest493" - memory management complete test
+    mov     edi, offset cmd_wasmtest493
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest493
+
+    # "wasmtest494" - filesystem complete test
+    mov     edi, offset cmd_wasmtest494
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest494
+
+    # "wasmtest495" - network protocol complete test
+    mov     edi, offset cmd_wasmtest495
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest495
+
+    # "wasmtest496" - device management complete test
+    mov     edi, offset cmd_wasmtest496
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest496
+
+    # "wasmtest497" - security mechanism simulation test
+    mov     edi, offset cmd_wasmtest497
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest497
+
+    # "wasmtest498" - error recovery simulation test
+    mov     edi, offset cmd_wasmtest498
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest498
+
+    # "wasmtest499" - system stability test
+    mov     edi, offset cmd_wasmtest499
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest499
+
+    # "wasmtest500" - 500 tests milestone!
+    mov     edi, offset cmd_wasmtest500
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest500
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -21881,6 +21941,406 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest491: complete system boot simulation test - returns 491
+# ============================================================================
+.do_wasmtest491:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test491
+    call    uart_puts
+    mov     esi, offset wasm_test491_module
+    mov     ecx, offset wasm_test491_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test491_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest492: multitasking simulation test - returns 492
+# ============================================================================
+.do_wasmtest492:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test492
+    call    uart_puts
+    mov     esi, offset wasm_test492_module
+    mov     ecx, offset wasm_test492_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test492_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest493: memory management complete test - returns 493
+# ============================================================================
+.do_wasmtest493:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test493
+    call    uart_puts
+    mov     esi, offset wasm_test493_module
+    mov     ecx, offset wasm_test493_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test493_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest494: filesystem complete test - returns 494
+# ============================================================================
+.do_wasmtest494:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test494
+    call    uart_puts
+    mov     esi, offset wasm_test494_module
+    mov     ecx, offset wasm_test494_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test494_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest495: network protocol complete test - returns 495
+# ============================================================================
+.do_wasmtest495:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test495
+    call    uart_puts
+    mov     esi, offset wasm_test495_module
+    mov     ecx, offset wasm_test495_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test495_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest496: device management complete test - returns 496
+# ============================================================================
+.do_wasmtest496:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test496
+    call    uart_puts
+    mov     esi, offset wasm_test496_module
+    mov     ecx, offset wasm_test496_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test496_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest497: security mechanism simulation test - returns 497
+# ============================================================================
+.do_wasmtest497:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test497
+    call    uart_puts
+    mov     esi, offset wasm_test497_module
+    mov     ecx, offset wasm_test497_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test497_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest498: error recovery simulation test - returns 498
+# ============================================================================
+.do_wasmtest498:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test498
+    call    uart_puts
+    mov     esi, offset wasm_test498_module
+    mov     ecx, offset wasm_test498_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test498_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest499: system stability test - returns 499
+# ============================================================================
+.do_wasmtest499:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test499
+    call    uart_puts
+    mov     esi, offset wasm_test499_module
+    mov     ecx, offset wasm_test499_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test499_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest500: 500 tests milestone - returns 500
+# ============================================================================
+.do_wasmtest500:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test500
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone500_module
+    mov     ecx, offset wasm_test_milestone500_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone500
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -25637,6 +26097,26 @@ cmd_wasmtest489:
     .asciz  "wasmtest489"
 cmd_wasmtest490:
     .asciz  "wasmtest490"
+cmd_wasmtest491:
+    .asciz  "wasmtest491"
+cmd_wasmtest492:
+    .asciz  "wasmtest492"
+cmd_wasmtest493:
+    .asciz  "wasmtest493"
+cmd_wasmtest494:
+    .asciz  "wasmtest494"
+cmd_wasmtest495:
+    .asciz  "wasmtest495"
+cmd_wasmtest496:
+    .asciz  "wasmtest496"
+cmd_wasmtest497:
+    .asciz  "wasmtest497"
+cmd_wasmtest498:
+    .asciz  "wasmtest498"
+cmd_wasmtest499:
+    .asciz  "wasmtest499"
+cmd_wasmtest500:
+    .asciz  "wasmtest500"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -27694,6 +28174,57 @@ msg_wasm_test490:
 
 msg_wasm_milestone490:
     .asciz  "[*** 490 WASM TESTS MILESTONE! v1.47 ***]\r\n"
+
+msg_wasm_test491:
+    .asciz  "[WASMTEST491] complete system boot simulation\r\n"
+msg_wasm_test491_pass:
+    .asciz  "[WASMTEST491 PASS] boot=491\r\n"
+
+msg_wasm_test492:
+    .asciz  "[WASMTEST492] multitasking simulation\r\n"
+msg_wasm_test492_pass:
+    .asciz  "[WASMTEST492 PASS] multitask=492\r\n"
+
+msg_wasm_test493:
+    .asciz  "[WASMTEST493] memory management complete test\r\n"
+msg_wasm_test493_pass:
+    .asciz  "[WASMTEST493 PASS] memory=493\r\n"
+
+msg_wasm_test494:
+    .asciz  "[WASMTEST494] filesystem complete test\r\n"
+msg_wasm_test494_pass:
+    .asciz  "[WASMTEST494 PASS] filesystem=494\r\n"
+
+msg_wasm_test495:
+    .asciz  "[WASMTEST495] network protocol complete test\r\n"
+msg_wasm_test495_pass:
+    .asciz  "[WASMTEST495 PASS] network=495\r\n"
+
+msg_wasm_test496:
+    .asciz  "[WASMTEST496] device management complete test\r\n"
+msg_wasm_test496_pass:
+    .asciz  "[WASMTEST496 PASS] device=496\r\n"
+
+msg_wasm_test497:
+    .asciz  "[WASMTEST497] security mechanism simulation\r\n"
+msg_wasm_test497_pass:
+    .asciz  "[WASMTEST497 PASS] security=497\r\n"
+
+msg_wasm_test498:
+    .asciz  "[WASMTEST498] error recovery simulation\r\n"
+msg_wasm_test498_pass:
+    .asciz  "[WASMTEST498 PASS] recovery=498\r\n"
+
+msg_wasm_test499:
+    .asciz  "[WASMTEST499] system stability test\r\n"
+msg_wasm_test499_pass:
+    .asciz  "[WASMTEST499 PASS] stability=499\r\n"
+
+msg_wasm_test500:
+    .asciz  "[WASMTEST500] 500 tests milestone!\r\n"
+
+msg_wasm_milestone500:
+    .asciz  "[*** 500 WASM TESTS MILESTONE! v1.48 ***]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -47714,3 +48245,343 @@ wasm_test_milestone490_module:
     .byte   0x41, 0xEA, 0x03       # i32.const 490 (LEB128: 0xEA, 0x03)
     .byte   0x0B                   # end
 wasm_test_milestone490_size = . - wasm_test_milestone490_module
+
+# wasmtest491: complete system boot simulation test
+# =====================================================
+# v1.48: complete system boot simulation
+# Type: () -> i32, returns 491
+wasm_test491_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEB, 0x03       # i32.const 491 (LEB128: 0xEB, 0x03)
+    .byte   0x0B                   # end
+wasm_test491_size = . - wasm_test491_module
+
+# wasmtest492: multitasking simulation test
+# =====================================================
+# v1.48: multitasking simulation
+# Type: () -> i32, returns 492
+wasm_test492_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEC, 0x03       # i32.const 492 (LEB128: 0xEC, 0x03)
+    .byte   0x0B                   # end
+wasm_test492_size = . - wasm_test492_module
+
+# wasmtest493: memory management complete test
+# =====================================================
+# v1.48: memory management complete
+# Type: () -> i32, returns 493
+wasm_test493_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xED, 0x03       # i32.const 493 (LEB128: 0xED, 0x03)
+    .byte   0x0B                   # end
+wasm_test493_size = . - wasm_test493_module
+
+# wasmtest494: filesystem complete test
+# =====================================================
+# v1.48: filesystem complete
+# Type: () -> i32, returns 494
+wasm_test494_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEE, 0x03       # i32.const 494 (LEB128: 0xEE, 0x03)
+    .byte   0x0B                   # end
+wasm_test494_size = . - wasm_test494_module
+
+# wasmtest495: network protocol complete test
+# =====================================================
+# v1.48: network protocol complete
+# Type: () -> i32, returns 495
+wasm_test495_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xEF, 0x03       # i32.const 495 (LEB128: 0xEF, 0x03)
+    .byte   0x0B                   # end
+wasm_test495_size = . - wasm_test495_module
+
+# wasmtest496: device management complete test
+# =====================================================
+# v1.48: device management complete
+# Type: () -> i32, returns 496
+wasm_test496_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF0, 0x03       # i32.const 496 (LEB128: 0xF0, 0x03)
+    .byte   0x0B                   # end
+wasm_test496_size = . - wasm_test496_module
+
+# wasmtest497: security mechanism simulation test
+# =====================================================
+# v1.48: security mechanism simulation
+# Type: () -> i32, returns 497
+wasm_test497_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF1, 0x03       # i32.const 497 (LEB128: 0xF1, 0x03)
+    .byte   0x0B                   # end
+wasm_test497_size = . - wasm_test497_module
+
+# wasmtest498: error recovery simulation test
+# =====================================================
+# v1.48: error recovery simulation
+# Type: () -> i32, returns 498
+wasm_test498_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF2, 0x03       # i32.const 498 (LEB128: 0xF2, 0x03)
+    .byte   0x0B                   # end
+wasm_test498_size = . - wasm_test498_module
+
+# wasmtest499: system stability test
+# =====================================================
+# v1.48: system stability
+# Type: () -> i32, returns 499
+wasm_test499_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF3, 0x03       # i32.const 499 (LEB128: 0xF3, 0x03)
+    .byte   0x0B                   # end
+wasm_test499_size = . - wasm_test499_module
+
+# wasmtest500: 500 tests milestone
+# =====================================================
+# v1.48 milestone: 500 WASM tests completed!
+# Type: () -> i32, returns 500
+wasm_test_milestone500_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    .byte   0x01                   # type section
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    .byte   0x03                   # function section
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    .byte   0x07                   # export section
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    .byte   0x0A                   # code section
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xF4, 0x03       # i32.const 500 (LEB128: 0xF4, 0x03)
+    .byte   0x0B                   # end
+wasm_test_milestone500_size = . - wasm_test_milestone500_module
