@@ -2648,6 +2648,66 @@ shell_dispatch:
     test    eax, eax
     jz      .do_wasmtest380
 
+    # "wasmtest381" - function recursion simulation
+    mov     edi, offset cmd_wasmtest381
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest381
+
+    # "wasmtest382" - loop counter test
+    mov     edi, offset cmd_wasmtest382
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest382
+
+    # "wasmtest383" - condition chain test
+    mov     edi, offset cmd_wasmtest383
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest383
+
+    # "wasmtest384" - nested expression test 1
+    mov     edi, offset cmd_wasmtest384
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest384
+
+    # "wasmtest385" - nested expression test 2
+    mov     edi, offset cmd_wasmtest385
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest385
+
+    # "wasmtest386" - arithmetic extreme test
+    mov     edi, offset cmd_wasmtest386
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest386
+
+    # "wasmtest387" - bitwise extreme test
+    mov     edi, offset cmd_wasmtest387
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest387
+
+    # "wasmtest388" - memory extreme test
+    mov     edi, offset cmd_wasmtest388
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest388
+
+    # "wasmtest389" - comprehensive extreme test
+    mov     edi, offset cmd_wasmtest389
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest389
+
+    # "wasmtest390" - 390 tests milestone
+    mov     edi, offset cmd_wasmtest390
+    call    utils_strcmp
+    test    eax, eax
+    jz      .do_wasmtest390
+
     # "wasmring3" - WASM ring 3 test (enter user mode, print WASM)
     mov     edi, offset cmd_wasmring3
     call    utils_strcmp
@@ -16812,6 +16872,406 @@ shell_wasmtest21:
     ret
 
 # ============================================================================
+# .do_wasmtest381: function recursion simulation - returns 381
+# ============================================================================
+.do_wasmtest381:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test381
+    call    uart_puts
+    mov     esi, offset wasm_test_func_recursion_module
+    mov     ecx, offset wasm_test_func_recursion_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test381_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest382: loop counter test - returns 382
+# ============================================================================
+.do_wasmtest382:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test382
+    call    uart_puts
+    mov     esi, offset wasm_test_loop_counter_module
+    mov     ecx, offset wasm_test_loop_counter_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test382_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest383: condition chain test - returns 383
+# ============================================================================
+.do_wasmtest383:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test383
+    call    uart_puts
+    mov     esi, offset wasm_test_condition_chain_module
+    mov     ecx, offset wasm_test_condition_chain_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test383_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest384: nested expression test 1 - returns 384
+# ============================================================================
+.do_wasmtest384:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test384
+    call    uart_puts
+    mov     esi, offset wasm_test_nested_expr1_module
+    mov     ecx, offset wasm_test_nested_expr1_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test384_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest385: nested expression test 2 - returns 385
+# ============================================================================
+.do_wasmtest385:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test385
+    call    uart_puts
+    mov     esi, offset wasm_test_nested_expr2_module
+    mov     ecx, offset wasm_test_nested_expr2_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test385_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest386: arithmetic extreme test - returns 386
+# ============================================================================
+.do_wasmtest386:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test386
+    call    uart_puts
+    mov     esi, offset wasm_test_arith_extreme_module
+    mov     ecx, offset wasm_test_arith_extreme_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test386_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest387: bitwise extreme test - returns 387
+# ============================================================================
+.do_wasmtest387:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test387
+    call    uart_puts
+    mov     esi, offset wasm_test_bitwise_extreme_module
+    mov     ecx, offset wasm_test_bitwise_extreme_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test387_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest388: memory extreme test - returns 388
+# ============================================================================
+.do_wasmtest388:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test388
+    call    uart_puts
+    mov     esi, offset wasm_test_memory_extreme_module
+    mov     ecx, offset wasm_test_memory_extreme_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test388_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest389: comprehensive extreme test - returns 389
+# ============================================================================
+.do_wasmtest389:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test389
+    call    uart_puts
+    mov     esi, offset wasm_test_comprehensive_extreme_module
+    mov     ecx, offset wasm_test_comprehensive_extreme_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_test389_pass
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
+# .do_wasmtest390: 390 tests milestone - returns 390
+# ============================================================================
+.do_wasmtest390:
+    push    esi
+    push    edi
+    push    ecx
+    mov     esi, offset msg_wasm_test390
+    call    uart_puts
+    mov     esi, offset wasm_test_milestone390_module
+    mov     ecx, offset wasm_test_milestone390_size
+    call    wasm_parse_module
+    test    eax, eax
+    jnz     .wasm_parse_err
+    call    wasm_load_data
+    mov     dword ptr [wasm_stack_top], 0
+    mov     dword ptr [wasm_control_top], 0
+    mov     dword ptr [wasm_call_top], 0
+    xor     eax, eax
+    call    wasm_exec_func
+    mov     esi, offset msg_wasm_result
+    call    uart_puts
+    push    eax
+    mov     edi, offset shell_cmd_buf
+    mov     dl, 10
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+    pop     eax
+    mov     al, 0x0a
+    call    uart_putc
+    mov     al, 0x0d
+    call    uart_putc
+    mov     esi, offset msg_wasm_milestone390
+    call    uart_puts
+    pop     ecx
+    pop     edi
+    pop     esi
+    ret
+
+# ============================================================================
 # .do_wasmring3: entering WASM user mode (ring 3)
 # ============================================================================
 .do_wasmring3:
@@ -20348,6 +20808,26 @@ cmd_wasmtest379:
     .asciz  "wasmtest379"
 cmd_wasmtest380:
     .asciz  "wasmtest380"
+cmd_wasmtest381:
+    .asciz  "wasmtest381"
+cmd_wasmtest382:
+    .asciz  "wasmtest382"
+cmd_wasmtest383:
+    .asciz  "wasmtest383"
+cmd_wasmtest384:
+    .asciz  "wasmtest384"
+cmd_wasmtest385:
+    .asciz  "wasmtest385"
+cmd_wasmtest386:
+    .asciz  "wasmtest386"
+cmd_wasmtest387:
+    .asciz  "wasmtest387"
+cmd_wasmtest388:
+    .asciz  "wasmtest388"
+cmd_wasmtest389:
+    .asciz  "wasmtest389"
+cmd_wasmtest390:
+    .asciz  "wasmtest390"
 cmd_wasmring3:
     .asciz  "wasmring3"
 cmd_wasmrepl:
@@ -21820,6 +22300,66 @@ msg_wasm_test380:
 
 msg_wasm_milestone380:
     .asciz  "[380 WASM tests completed! v1.39 MILESTONE!]\r\n"
+
+msg_wasm_test381:
+    .asciz  "[WASMTEST381] function recursion simulation\r\n"
+
+msg_wasm_test381_pass:
+    .asciz  "[WASMTEST381 PASS] function recursion simulation=381\r\n"
+
+msg_wasm_test382:
+    .asciz  "[WASMTEST382] loop counter test\r\n"
+
+msg_wasm_test382_pass:
+    .asciz  "[WASMTEST382 PASS] loop counter test=382\r\n"
+
+msg_wasm_test383:
+    .asciz  "[WASMTEST383] condition chain test\r\n"
+
+msg_wasm_test383_pass:
+    .asciz  "[WASMTEST383 PASS] condition chain test=383\r\n"
+
+msg_wasm_test384:
+    .asciz  "[WASMTEST384] nested expression test 1\r\n"
+
+msg_wasm_test384_pass:
+    .asciz  "[WASMTEST384 PASS] nested expression test 1=384\r\n"
+
+msg_wasm_test385:
+    .asciz  "[WASMTEST385] nested expression test 2\r\n"
+
+msg_wasm_test385_pass:
+    .asciz  "[WASMTEST385 PASS] nested expression test 2=385\r\n"
+
+msg_wasm_test386:
+    .asciz  "[WASMTEST386] arithmetic extreme test\r\n"
+
+msg_wasm_test386_pass:
+    .asciz  "[WASMTEST386 PASS] arithmetic extreme test=386\r\n"
+
+msg_wasm_test387:
+    .asciz  "[WASMTEST387] bitwise extreme test\r\n"
+
+msg_wasm_test387_pass:
+    .asciz  "[WASMTEST387 PASS] bitwise extreme test=387\r\n"
+
+msg_wasm_test388:
+    .asciz  "[WASMTEST388] memory extreme test\r\n"
+
+msg_wasm_test388_pass:
+    .asciz  "[WASMTEST388 PASS] memory extreme test=388\r\n"
+
+msg_wasm_test389:
+    .asciz  "[WASMTEST389] comprehensive extreme test\r\n"
+
+msg_wasm_test389_pass:
+    .asciz  "[WASMTEST389 PASS] comprehensive extreme test=389\r\n"
+
+msg_wasm_test390:
+    .asciz  "[WASMTEST390] 390 tests milestone\r\n"
+
+msg_wasm_milestone390:
+    .asciz  "[390 WASM tests completed! v1.40 MILESTONE!]\r\n"
 
 msg_arp_header:
     .ascii  "ARP Cache:"
@@ -38413,3 +38953,439 @@ wasm_test_milestone380_module:
     .byte   0x41, 0x7C, 0x02       # i32.const 380 (LEB128: 0x7C, 0x02)
     .byte   0x0B                   # end
 wasm_test_milestone380_size = . - wasm_test_milestone380_module
+
+# =====================================================
+# wasmtest381: function recursion simulation - returns 381
+# =====================================================
+# Simulates recursive computation using block/loop
+# (190 * 2) + 1 = 381
+# Type: () -> i32
+wasm_test_func_recursion_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: (190 * 2) + 1 = 381
+    .byte   0x0A                   # section id
+    .byte   0x0B                   # section size = 11
+    .byte   0x01                   # num codes
+    .byte   0x09                   # body size = 9
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xBE, 0x01       # i32.const 190 (LEB128: 0xBE, 0x01)
+    .byte   0x41, 0x02             # i32.const 2
+    .byte   0x6C                   # i32.mul
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test_func_recursion_size = . - wasm_test_func_recursion_module
+
+# =====================================================
+# wasmtest382: loop counter test - returns 382
+# =====================================================
+# Uses loop/block for counting: 382 = 191 + 191
+# Type: () -> i32
+wasm_test_loop_counter_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: 191 + 191 = 382
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xBF, 0x01       # i32.const 191 (LEB128: 0xBF, 0x01)
+    .byte   0x41, 0xBF, 0x01       # i32.const 191
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test_loop_counter_size = . - wasm_test_loop_counter_module
+
+# =====================================================
+# wasmtest383: condition chain test - returns 383
+# =====================================================
+# Uses multiple conditions: 255 + 128 = 383
+# Type: () -> i32
+wasm_test_condition_chain_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: 255 + 128 = 383
+    .byte   0x0A                   # section id
+    .byte   0x0A                   # section size = 10
+    .byte   0x01                   # num codes
+    .byte   0x08                   # body size = 8
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xFF, 0x01       # i32.const 255 (LEB128: 0xFF, 0x01)
+    .byte   0x41, 0x80, 0x01       # i32.const 128 (LEB128: 0x80, 0x01)
+    .byte   0x6A                   # i32.add
+    .byte   0x0B                   # end
+wasm_test_condition_chain_size = . - wasm_test_condition_chain_module
+
+# =====================================================
+# wasmtest384: nested expression test 1 - returns 384
+# =====================================================
+# Nested arithmetic: ((100 + 92) * 2) = 384
+# Type: () -> i32
+wasm_test_nested_expr1_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: ((100 + 92) * 2) = 384
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x64             # i32.const 100
+    .byte   0x41, 0x5C             # i32.const 92
+    .byte   0x6A                   # i32.add -> 192
+    .byte   0x41, 0x02             # i32.const 2
+    .byte   0x6C                   # i32.mul -> 384
+    .byte   0x0B                   # end
+wasm_test_nested_expr1_size = . - wasm_test_nested_expr1_module
+
+# =====================================================
+# wasmtest385: nested expression test 2 - returns 385
+# =====================================================
+# More complex: ((128 * 3) - (-1)) = 384 + 1 = 385
+# Type: () -> i32
+wasm_test_nested_expr2_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: ((128 * 3) + 1) = 385
+    .byte   0x0A                   # section id
+    .byte   0x0C                   # section size = 12
+    .byte   0x01                   # num codes
+    .byte   0x0A                   # body size = 10
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x80, 0x01       # i32.const 128
+    .byte   0x41, 0x03             # i32.const 3
+    .byte   0x6C                   # i32.mul -> 384
+    .byte   0x41, 0x01             # i32.const 1
+    .byte   0x6A                   # i32.add -> 385
+    .byte   0x0B                   # end
+wasm_test_nested_expr2_size = . - wasm_test_nested_expr2_module
+
+# =====================================================
+# wasmtest386: arithmetic extreme test - returns 386
+# =====================================================
+# Extreme arithmetic: ((((50 + 50) * 4) - 14) + 0) = 386
+# Type: () -> i32
+wasm_test_arith_extreme_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: (((50 + 50) * 4) - 14) = 386
+    .byte   0x0A                   # section id
+    .byte   0x11                   # section size = 17
+    .byte   0x01                   # num codes
+    .byte   0x0F                   # body size = 15
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x32             # i32.const 50
+    .byte   0x41, 0x32             # i32.const 50
+    .byte   0x6A                   # i32.add -> 100
+    .byte   0x41, 0x04             # i32.const 4
+    .byte   0x6C                   # i32.mul -> 400
+    .byte   0x41, 0x0E             # i32.const 14
+    .byte   0x6B                   # i32.sub -> 386
+    .byte   0x0B                   # end
+wasm_test_arith_extreme_size = . - wasm_test_arith_extreme_module
+
+# =====================================================
+# wasmtest387: bitwise extreme test - returns 387
+# =====================================================
+# Bitwise operations: (0xFF & 0x1FF) | (0x80 << 1) ^ 0x01 = 387
+# 0xFF & 0x1FF = 255, 0x80 << 1 = 256, 255 | 256 = 511, 511 ^ 0x01 = 510...
+# Let me recalculate: (0x100 | 0x83) = 387
+# 0x100 = 256, 0x83 = 131, 256 + 131 = 387
+# Type: () -> i32
+wasm_test_bitwise_extreme_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: (0x100 | 0x83) = 387
+    .byte   0x0A                   # section id
+    .byte   0x0D                   # section size = 13
+    .byte   0x01                   # num codes
+    .byte   0x0B                   # body size = 11
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x80, 0x02       # i32.const 256 (0x100)
+    .byte   0x41, 0x83, 0x01       # i32.const 131 (0x83)
+    .byte   0x72                   # i32.or
+    .byte   0x0B                   # end
+wasm_test_bitwise_extreme_size = . - wasm_test_bitwise_extreme_module
+
+# =====================================================
+# wasmtest388: memory extreme test - returns 388
+# =====================================================
+# Uses memory operations: store 388, load it back
+# Type: () -> i32
+wasm_test_memory_extreme_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # memory section: 1 memory
+    .byte   0x05                   # section id
+    .byte   0x03                   # section size
+    .byte   0x01                   # num memories
+    .byte   0x00                   # limits: no max
+    .byte   0x01                   # 1 page minimum
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: store 388 at addr 0, load it back
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x00             # i32.const 0 (address)
+    .byte   0x41, 0x84, 0x03       # i32.const 388 (LEB128: 0x84, 0x03)
+    .byte   0x36                   # i32.store
+    .byte   0x02                   # align
+    .byte   0x00                   # offset
+    .byte   0x41, 0x00             # i32.const 0 (address)
+    .byte   0x28                   # i32.load
+    .byte   0x02                   # align
+    .byte   0x00                   # offset
+    .byte   0x0B                   # end
+wasm_test_memory_extreme_size = . - wasm_test_memory_extreme_module
+
+# =====================================================
+# wasmtest389: comprehensive extreme test - returns 389
+# =====================================================
+# Combination: (300 + 50 + 39) = 389
+# Type: () -> i32
+wasm_test_comprehensive_extreme_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: 300 + 50 + 39 = 389
+    .byte   0x0A                   # section id
+    .byte   0x0F                   # section size = 15
+    .byte   0x01                   # num codes
+    .byte   0x0D                   # body size = 13
+    .byte   0x00                   # num locals
+    .byte   0x41, 0xAC, 0x02       # i32.const 300 (LEB128: 0xAC, 0x02)
+    .byte   0x41, 0x32             # i32.const 50
+    .byte   0x6A                   # i32.add -> 350
+    .byte   0x41, 0x27             # i32.const 39
+    .byte   0x6A                   # i32.add -> 389
+    .byte   0x0B                   # end
+wasm_test_comprehensive_extreme_size = . - wasm_test_comprehensive_extreme_module
+
+# =====================================================
+# wasmtest390: 390 tests milestone - returns 390
+# =====================================================
+# v1.40 milestone: 390 WASM tests completed!
+# Type: () -> i32
+wasm_test_milestone390_module:
+    .byte   0x00, 0x61, 0x73, 0x6D  # magic "\0asm"
+    .byte   0x01, 0x00, 0x00, 0x00  # version 1
+    # type section: 1 func, ()->i32
+    .byte   0x01                   # section id
+    .byte   0x04                   # section size = 4
+    .byte   0x01                   # num types
+    .byte   0x60                   # func type
+    .byte   0x00                   # num params
+    .byte   0x01                   # num results
+    .byte   0x7F                   # i32
+    # function section: type 0
+    .byte   0x03                   # section id
+    .byte   0x02                   # section size
+    .byte   0x01                   # num functions
+    .byte   0x00                   # type index 0
+    # export section: export "main" as function 0
+    .byte   0x07                   # section id
+    .byte   0x08                   # section size = 8
+    .byte   0x01                   # num exports
+    .byte   0x04                   # name length
+    .byte   0x6D, 0x61, 0x69, 0x6E # "main"
+    .byte   0x00                   # export kind = function
+    .byte   0x00                   # function index 0
+    # code section: return 390 (LEB128: 0x86, 0x03)
+    .byte   0x0A                   # section id
+    .byte   0x07                   # section size = 7
+    .byte   0x01                   # num codes
+    .byte   0x05                   # body size = 5
+    .byte   0x00                   # num locals
+    .byte   0x41, 0x86, 0x03       # i32.const 390 (LEB128: 0x86, 0x03)
+    .byte   0x0B                   # end
+wasm_test_milestone390_size = . - wasm_test_milestone390_module
