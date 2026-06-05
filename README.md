@@ -1,8 +1,8 @@
-# AI-ASM v0.62
+# AI-ASM v1.00
 
 专为 AI 设计的最小汇编语言工具链，包含一个从零编写的 32 位 x86 交互操作系统内核，内置 WASM 字节码运行时引擎和完整网络协议栈。基于 GNU AS 汇编语法（Intel 模式），零依赖，纯汇编实现。
 
-**当前版本**: v0.62 | **内核版本**: v1.19 | **代码行数**: 254,065 行 | **测试状态**: ✅ 4000+ WASM 测试通过
+**当前版本**: v1.00 | **内核版本**: v1.19 | **代码行数**: 254,065 行 | **测试状态**: ✅ 4000+ WASM 测试通过
 
 ## 目录
 
@@ -294,23 +294,24 @@ WASM 测试全部通过：wasmtest2-11 + wasmapp (fibonacci/factorial/multiply/s
 
 | 版本 | 主要特性 |
 |------|----------|
-| v0.62 | Prompt 更新，系统稳定，内核 v1.19 |
+| v1.00 | 🎉 正式发布 - README 完善 + 项目发布准备 + .gitignore |
+| v1.69 | 内核 HTTP 响应头版本更新 |
 | v1.68 | 4000 WASM 测试里程碑，wasmtest3501-4000 |
 | v1.67 | 3500 WASM 测试，wasmtest3001-3500 |
 | v1.66 | 3000 WASM 测试，wasmtest2501-3000 |
 | v1.65 | 2500 WASM 测试，wasmtest2101-2500 |
 | v1.64 | 2100 WASM 测试，wasmtest2001-2100 |
-| v0.61 | 移除二进制示例文件 |
-| v0.60 | Shell 版本一致性修复 |
-| v0.59 | Help 命令添加 arp 文档 |
-| v0.58 | UDP checksum bug 修复 |
-| v0.57 | netstat esi 保护 bug 修复 |
-| v0.56 | ARP 命令 esi 保护 bug 修复 |
-| v0.55 | netstat 命令 + TCP 连接表显示 |
-| v0.50-0.54 | ICMP ping + DHCP + TCP/IP 完善 |
-| v0.30-0.49 | e1000 驱动 + UDP/TCP 协议栈 |
-| v0.16-0.29 | WASM 运行时完善 (i64/f32/f64) |
-| v0.01-0.15 | 内核核心 + WASM 基础 |
+| v0.99 | ATA 磁盘驱动 (diskinfo/diskread 命令) |
+| v0.98 | 用户模式进入 (ring 3) |
+| v0.97 | TSS 任务状态段支持 |
+| v0.96 | Multiboot 引导加载器支持 |
+| v0.95 | WASM 交互式 REPL |
+| v0.94 | WASM syscall 应用测试 |
+| v0.93 | WASM 文件加载功能 |
+| v0.92 | wasmtest86-95 完整转换运算测试 |
+| v0.91 | wasmtest81-85 f32/f64 copysign和转换测试 |
+| v0.50-0.90 | 网络协议栈 + WASM 运行时完善 |
+| v0.01-0.49 | 内核核心 + WASM 基础 |
 
 ## 许可证
 
