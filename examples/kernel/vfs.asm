@@ -96,6 +96,7 @@ vfs_file_table:
     .space  27 * VFS_ENTRY_SIZE
 
 # 文件数据区也在 .data 段
+    .globl  vfs_file_data
 vfs_file_data:
     .space  256                   # entry 0 (root): no data
     .space  256                   # entry 1 (etc): no data

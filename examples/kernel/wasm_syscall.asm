@@ -415,19 +415,21 @@ wasm_host_call:
     add     esi, offset wasm_linear_memory
 
     # 查找文件: fat32_get_file_info(esi = filename) -> eax = cluster, ecx = size
+    push    ecx                   # 保存 buf_ptr（ecx 会被 clobber）
     call    fat32_get_file_info
+    pop     edi                   # edi = buf_ptr（恢复）
 
     # 检查是否找到文件 (eax = 0xFFFFFFFF 表示失败)
     cmp     eax, 0xFFFFFFFF
     je      .fatread_fail
 
-    # eax = cluster, ecx = file_size (保存在 fat32_get_file_info 返回的 ecx 中)
-    # 但我们需要保存这些值，因为后面的操作会修改寄存器
+    # eax = cluster, ecx = file_size
     push    ecx                   # 保存 file_size
     push    eax                   # 保存 cluster
+    push    edi                   # 保存 buf_ptr
 
     # 计算读取长度：min(file_size, buf_len)
-    mov     eax, [esp + 4]        # eax = file_size (从栈恢复)
+    mov     eax, [esp + 8]        # eax = file_size (从栈恢复)
     cmp     eax, edx              # 比较 file_size vs buf_len
     jbe     .fatread_no_truncate
     mov     eax, edx              # 使用 buf_len 作为读取长度
@@ -436,7 +438,7 @@ wasm_host_call:
     push    eax                   # 保存 read_len
 
     # 设置缓冲区地址: edi = buf_ptr + wasm_linear_memory
-    mov     edi, ecx              # 恢复 buf_ptr (之前保存在 ecx)
+    mov     edi, [esp + 12]       # 恢复 buf_ptr (从栈)
     add     edi, offset wasm_linear_memory
 
     # 读取簇数据: fat32_read_cluster(eax = cluster, edi = buffer)
@@ -449,11 +451,11 @@ wasm_host_call:
 
     # 返回实际读取长度
     pop     eax                   # eax = read_len
-    add     esp, 8                # 清理 cluster 和 file_size
+    add     esp, 12               # 清理 buf_ptr, cluster, file_size
     jmp     .fatread_done
 
 .fatread_fail_pop:
-    add     esp, 12               # 清理 read_len, cluster, file_size
+    add     esp, 16               # 清理 read_len, buf_ptr, cluster, file_size
 .fatread_fail:
     mov     eax, -1
 .fatread_done:

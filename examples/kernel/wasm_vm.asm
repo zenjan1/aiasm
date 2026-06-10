@@ -1528,6 +1528,11 @@ do_i32_load:
     mov     ebx, eax             # ebx = offset
     call    _stack_pop           # eax = address
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     # 对齐检查: if align != 0, check (addr & ((1<<align)-1)) == 0
     test    ecx, ecx
     jz      .load_skip_align
@@ -1554,6 +1559,11 @@ do_i32_store:
     mov     edx, eax             # edx = base address
     call    _stack_pop           # eax = value
     add     edx, ebx             # edx = effective address (base + offset)
+    # Bounds check: effective address must be within linear memory
+    mov     edi, [wasm_memory_pages]
+    shl     edi, 16               # pages * 65536 = memory bound in bytes
+    cmp     edx, edi
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .store_skip_align
     mov     esi, 1
@@ -1577,6 +1587,11 @@ do_i32_load8_s:
     mov     ebx, eax
     call    _stack_pop           # eax = address
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .load8s_skip_align
     mov     edx, 1
@@ -1605,6 +1620,11 @@ do_i32_load8_u:
     mov     ebx, eax
     call    _stack_pop           # eax = address
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .load8u_skip_align
     mov     edx, 1
@@ -1628,6 +1648,11 @@ do_i32_load16_s:
     mov     ebx, eax
     call    _stack_pop           # eax = address
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .load16s_skip_align
     cmp     ecx, 1
@@ -1657,6 +1682,11 @@ do_i32_load16_u:
     mov     ebx, eax
     call    _stack_pop           # eax = address
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .load16u_skip_align
     cmp     ecx, 1
@@ -1684,6 +1714,11 @@ do_i32_store8:
     mov     edx, eax             # edx = base address
     call    _stack_pop           # eax = value
     add     edx, ebx             # edx = effective address (base + offset)
+    # Bounds check: effective address must be within linear memory
+    mov     edi, [wasm_memory_pages]
+    shl     edi, 16               # pages * 65536 = memory bound in bytes
+    cmp     edx, edi
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .store8_skip_align
     mov     esi, 1
@@ -1708,6 +1743,11 @@ do_i32_store16:
     mov     edx, eax             # edx = base address
     call    _stack_pop           # eax = value
     add     edx, ebx             # edx = effective address (base + offset)
+    # Bounds check: effective address must be within linear memory
+    mov     edi, [wasm_memory_pages]
+    shl     edi, 16               # pages * 65536 = memory bound in bytes
+    cmp     edx, edi
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .store16_skip_align
     cmp     ecx, 1
@@ -1733,6 +1773,11 @@ do_i64_load:
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .i64l_skip_align
     cmp     ecx, 3
@@ -1761,6 +1806,11 @@ do_i64_load8_s:
     mov     ebx, eax
     call    _stack_pop
     add     eax, ebx
+    # Bounds check: effective address must be within linear memory
+    mov     ecx, [wasm_memory_pages]
+    shl     ecx, 16               # pages * 65536 = memory bound in bytes
+    cmp     eax, ecx
+    jae     .wasm_trap            # out of bounds -> trap
     test    ecx, ecx
     jz      .i64l8s_skip
     mov     edx, 1
@@ -2331,6 +2381,15 @@ do_i32_div_s:
     call    _stack_pop
     test    ecx, ecx
     jz      div_zero_err
+    # 处理 INT_MIN / -1 溢出（x86 idiv 会触发 #DE）
+    cmp     eax, 0x80000000
+    jne     .do_div
+    cmp     ecx, 0xFFFFFFFF
+    jne     .do_div
+    # INT_MIN / -1 = INT_MIN（WASM 规范，不溢出）
+    call    _stack_push
+    jmp     dispatch_done
+.do_div:
     cdq
     idiv    ecx
     call    _stack_push

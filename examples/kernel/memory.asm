@@ -130,10 +130,12 @@ alloc_page:
     jge     .wrap_around
 
     # 检查页号 ebx 对应的位
+    push    edx                 # save next_alloc_page across div
     mov     eax, ebx
     mov     ecx, 8
     xor     edx, edx
     div     ecx                 # eax=字节偏移, edx=位号
+    pop     edx                 # restore next_alloc_page
     mov     ecx, eax
 
     movzx   eax, byte ptr [mem_bitmap + ecx]
@@ -211,7 +213,8 @@ free_page:
     mov     ecx, ebx
     shr     ecx, 3
     movzx   eax, byte ptr [mem_bitmap + ecx]
-    xor     eax, edx
+    not     edx
+    and     eax, edx
     mov     [mem_bitmap + ecx], al
 
     inc     dword ptr [free_pages]

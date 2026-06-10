@@ -43,12 +43,6 @@ uart_init:
     mov     al, 0x03
     out     dx, al
 
-    # 4. Set 8N1, disable DLAB (LCR = 0x03)
-    mov     dx, UART_BASE + 3
-    mov     al, 0x03
-    out     dx, al
-
-    # 5. Set DTR+RTS (MCR = 0x03)
     mov     dx, UART_BASE + 4
     mov     al, 0x03
     out     dx, al

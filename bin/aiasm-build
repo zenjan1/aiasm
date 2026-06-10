@@ -70,6 +70,8 @@ if [[ -z "$OUTPUT" ]]; then
     OUTPUT="${INPUT%.asm}"
 fi
 
+AS="${AS:-as}"
+LD="${LD:-ld}"
 TMP_OBJ="${OUTPUT}.o"
 
 info "Building: $INPUT -> $OUTPUT"
@@ -103,9 +105,9 @@ ok "Format validation passed"
 
 # ── 汇编 ──
 if [[ $VERBOSE -eq 1 ]]; then
-    info "Assembling: as -o $TMP_OBJ $INPUT"
+    info "Assembling: $AS -o $TMP_OBJ $INPUT"
 fi
-if ! as -o "$TMP_OBJ" "$INPUT" 2>&1; then
+if ! $AS -o "$TMP_OBJ" "$INPUT" 2>&1; then
     error "Assembly failed"
     rm -f "$TMP_OBJ"
     exit 1
@@ -114,10 +116,10 @@ ok "Assembly successful"
 
 # ── 链接 ──
 if [[ $STATIC_LINK -eq 1 ]]; then
-    LDCMD="ld -static -o $OUTPUT $TMP_OBJ"
+    LDCMD="$LD -static -o $OUTPUT $TMP_OBJ"
 else
     # 动态链接，但用-nostdlib因为我们用系统调用
-    LDCMD="ld -o $OUTPUT $TMP_OBJ"
+    LDCMD="$LD -o $OUTPUT $TMP_OBJ"
 fi
 
 if [[ $VERBOSE -eq 1 ]]; then

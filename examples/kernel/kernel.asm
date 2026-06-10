@@ -169,6 +169,7 @@ _start:
     call    pit_init; mov esi, offset msg_pit; mov edi, 1; call log_print
     call    keyboard_init; mov esi, offset msg_kbd; mov edi, 1; call log_print
     call    memory_init; mov esi, offset msg_mem; mov edi, 1; call log_print
+    call    paging_init
     call    process_init; mov esi, offset msg_proc; mov edi, 1; call log_print
     call    syscall_init; mov esi, offset msg_syscall; mov edi, 1; call log_print
     call    vfs_init; mov esi, offset msg_vfs; mov edi, 1; call log_print
@@ -316,7 +317,7 @@ e1000_init:
     # Set up RX descriptor ring
     mov     eax, offset e1000_rx_desc
     mov     [ebx + 0x2800], eax      # RDBAL
-    shr     eax, 32
+    xor     eax, eax                 # 32-bit kernel: upper 32 bits = 0
     mov     [ebx + 0x2804], eax      # RDBAH
 
     # RDLEN: 128 bytes (8 descriptors)
@@ -362,7 +363,7 @@ e1000_init:
     # TX descriptor ring
     mov     eax, offset e1000_tx_desc
     mov     [ebx + 0x3800], eax      # TDBAL
-    shr     eax, 32
+    xor     eax, eax                 # 32-bit kernel: upper 32 bits = 0
     mov     [ebx + 0x3804], eax      # TDBAH
 
     # TDLEN: 128 bytes
@@ -470,10 +471,6 @@ e1000_transmit:
     in      al, 0x40
     jmp     .tx_poll2
 
-    mov     [e1000_tx_len], ecx
-    xor     eax, eax             # success
-    jmp     .tx_done
-
 # ============================================================================
 # e1000_poll: Check for received packets, process ICMP
 # Output: eax = number of packets received
@@ -529,9 +526,15 @@ e1000_poll:
     call    e1000_handle_arp
 
 .poll_next:
-    # Reset the descriptor and update RDT
-    # Re-give all descriptors to hardware
-    mov     dword ptr [ebx + 0x2818], 7
+    # 更新 RDT：递增并回绕到 8（描述符总数）
+    mov     eax, [e1000_rx_idx]
+    inc     eax
+    cmp     eax, 8
+    jl      .rdt_ok
+    xor     eax, eax
+.rdt_ok:
+    mov     [e1000_rx_idx], eax
+    mov     [ebx + 0x2818], eax    # 更新 RDT 到下一个描述符
 
     mov     eax, 1               # 1 packet processed
     jmp     .poll_done
@@ -3914,7 +3917,7 @@ http_response_header:
     .byte   13, 10
     .ascii  "Content-Length: XXXXX"
     .byte   13, 10
-    .ascii  "Server: aiasm/v1.70"
+    .ascii  "Server: aiasm/v1.71"
     .byte   13, 10
     .ascii  "Connection: close"
     .byte   13, 10, 13, 10
@@ -3923,7 +3926,7 @@ http_response_header_len = http_response_header_end - http_response_header
 
 # Route response bodies
 http_body_hello:
-    .ascii  "Hello from AI-ASM Kernel v1.70!"
+    .ascii  "Hello from AI-ASM Kernel v1.71!"
     .byte   13, 10
 http_body_hello_end:
 http_body_hello_len = http_body_hello_end - http_body_hello
@@ -3940,7 +3943,7 @@ http_body_status_end:
 http_body_status_len = http_body_status_end - http_body_status
 
 http_body_version:
-    .ascii  "AI-ASM Kernel v1.70"
+    .ascii  "AI-ASM Kernel v1.71"
     .byte   13, 10
     .ascii  "x86 32-bit + WASM runtime"
     .byte   13, 10

@@ -53,6 +53,7 @@ log_init:
     mov     [log_ring_head], eax
     mov     [log_ring_tail], eax
     mov     byte ptr [log_min_level], LOG_DEBUG
+    mov     byte ptr [vga_attr], 0x07    # default: light gray on black
 
     # 清零环形缓冲区
     mov     edi, offset log_ring_buf

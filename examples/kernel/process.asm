@@ -12,7 +12,6 @@
 # 常量定义
 # ============================================================================
 MAX_PROCS       = 16            # 最大进程数
-PCB_SIZE        = 256           # PCB 大小（字节）
 KERNEL_STACK_SIZE = 4096        # 每个进程内核栈 4KB
 TIME_SLICE      = 10            # 时间片（PIT tick 数）
 
@@ -46,6 +45,24 @@ PCB_PARENT_PID  = 76
 PCB_EXIT_CODE   = 80
 PCB_STACK_BASE  = 84            # 栈基址（释放用）
 PCB_TICKS_LEFT  = 88            # 剩余时间片
+PCB_FPU_SAVED   = 92            # FPU 状态是否已保存（标志）
+PCB_FPU_STATE   = 96            # FPU 状态保存区（108 字节，fnsave 格式）
+PCB_FD_TABLE    = 208           # 文件描述符表偏移（8 个 FD × 8 字节 = 64 字节）
+PCB_SIZE        = 272           # PCB 大小（字节）- 扩展到 272（含 FD 表）
+
+# 文件描述符结构（8 字节/项）
+FD_TYPE         = 0             # 类型：0=空闲, 1=stdin, 2=stdout, 3=stderr, 4=VFS文件, 5=FAT32文件
+FD_FILE_IDX     = 4             # 文件索引（VFS entry 或 FAT32 cluster）
+# FD 表：8 个条目 × 8 字节 = 64 字节，偏移 PCB_FD_TABLE
+# FD 0-2 = 标准流, FD 3+ = 文件
+
+# 文件描述符类型常量
+FD_TYPE_FREE    = 0
+FD_TYPE_STDIN   = 1
+FD_TYPE_STDOUT  = 2
+FD_TYPE_STDERR  = 3
+FD_TYPE_VFS     = 4
+FD_TYPE_FAT32   = 5
 
 # ============================================================================
 # BSS 变量
@@ -111,15 +128,31 @@ process_init:
     inc     esi
     loop    1b
 
+    # 3. 初始化 PID 0 的文件描述符（0=stdin, 1=stdout, 2=stderr）
+    mov     edi, offset proc_table + PCB_FD_TABLE
+    mov     dword ptr [edi], FD_TYPE_STDIN        # FD 0 = stdin
+    mov     dword ptr [edi + 4], 0
+    mov     dword ptr [edi + 8], FD_TYPE_STDOUT   # FD 1 = stdout
+    mov     dword ptr [edi + 12], 0
+    mov     dword ptr [edi + 16], FD_TYPE_STDERR  # FD 2 = stderr
+    mov     dword ptr [edi + 20], 0
+    # FD 3-7 = 空闲
+    mov     dword ptr [edi + 24], FD_TYPE_FREE
+    mov     dword ptr [edi + 28], 0
+    mov     dword ptr [edi + 32], FD_TYPE_FREE
+    mov     dword ptr [edi + 36], 0
+    mov     dword ptr [edi + 40], FD_TYPE_FREE
+    mov     dword ptr [edi + 44], 0
+    mov     dword ptr [edi + 48], FD_TYPE_FREE
+    mov     dword ptr [edi + 52], 0
+    mov     dword ptr [edi + 56], FD_TYPE_FREE
+    mov     dword ptr [edi + 60], 0
+
     mov     dword ptr [current_pid], 0
     mov     dword ptr [next_pid], 1
     mov     byte ptr [scheduler_active], 1
 
-    # 注册 PIT IRQ 中的调度钩子
-    # 修改 pit_irq_handler 调用 schedule_tick
-    mov     edi, 14               # IRQ14 (page fault)
-    mov     eax, offset page_fault_handler
-    call    idt_set_gate
+    # 调度器由 pit_irq_handler 直接调用，无需注册 IDT gate
 
     pop     edi
     pop     esi
@@ -167,6 +200,37 @@ fork:
     imul    esi, PCB_SIZE
     add     esi, offset proc_table  # esi = 当前进程 PCB
 
+    # 2b. 保存当前寄存器到父进程 PCB（fork 调用时 PCB 可能已过时）
+    mov     eax, [esi + PCB_PID]    # 保存 PID（后面会用 eax）
+    push    eax
+
+    # 保存 EFLAGS
+    pushfd
+    pop     eax
+    mov     [esi + PCB_REGS_EFLAGS], eax
+
+    # 保存 EIP（返回地址）
+    mov     eax, [ebp + 4]
+    mov     [esi + PCB_REGS_EIP], eax
+
+    # 保存 ESP
+    mov     eax, ebp
+    mov     [esi + PCB_REGS_ESP], eax
+
+    # 保存通用寄存器
+    mov     eax, ebx
+    mov     [esi + PCB_REGS_EBX], eax
+    mov     eax, ecx
+    mov     [esi + PCB_REGS_ECX], eax
+    mov     eax, edx
+    mov     [esi + PCB_REGS_EDX], eax
+    mov     eax, ebp
+    mov     [esi + PCB_REGS_EBP], eax
+
+    pop     eax                     # 恢复 PID
+    imul    eax, PCB_SIZE
+    add     eax, offset proc_table  # esi = 当前进程 PCB（更新）
+
     # 3. 获取子进程 PCB 指针
     mov     edi, ebx
     imul    edi, PCB_SIZE
@@ -198,6 +262,7 @@ fork:
     mov     [edi + PCB_PID], ecx
     mov     dword ptr [edi + PCB_STATE], PROC_READY
     mov     dword ptr [edi + PCB_TICKS_LEFT], TIME_SLICE
+    mov     dword ptr [edi + PCB_FPU_SAVED], 0    # 子进程无 FPU 状态
 
     # 获取父进程 PID
     mov     eax, [esi + PCB_PID]
@@ -205,6 +270,16 @@ fork:
 
     # 子进程 fork 返回值为 0
     mov     dword ptr [edi + PCB_REGS_EAX], 0
+
+    # 6b. 继承父进程的文件描述符表（64 字节 = 16 dwords）
+    mov     esi, [current_pid]
+    imul    esi, PCB_SIZE
+    add     esi, offset proc_table
+    mov     ecx, 16             # 16 dwords = 64 bytes
+    lea     esi, [esi + PCB_FD_TABLE]
+    lea     edi, [edi + PCB_FD_TABLE]
+    cld
+    rep     movsd
 
     # 7. 递增 next_pid
     inc     dword ptr [next_pid]
@@ -235,6 +310,11 @@ fork:
 # ============================================================================
     .globl  yield
 yield:
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
     push    ebp
     mov     ebp, esp
 
@@ -243,26 +323,26 @@ yield:
     imul    eax, PCB_SIZE
     add     eax, offset proc_table
 
-    # 保存通用寄存器
-    mov     ebx, [ebp - 4]      # 保存调用者的 ebx
+    # 保存通用寄存器（从栈帧读取，偏移基于 push ebx ecx edx esi edi ebp）
+    mov     ebx, [ebp - 28]     # 保存调用者的 ebx
     mov     [eax + PCB_REGS_EBX], ebx
-    mov     ebx, [ebp - 8]      # ecx
+    mov     ebx, [ebp - 24]     # ecx
     mov     [eax + PCB_REGS_ECX], ebx
-    mov     ebx, [ebp - 12]     # edx
+    mov     ebx, [ebp - 20]     # edx
     mov     [eax + PCB_REGS_EDX], ebx
     mov     ebx, [ebp - 16]     # esi
     mov     [eax + PCB_REGS_ESI], ebx
-    mov     ebx, [ebp - 20]     # edi
+    mov     ebx, [ebp - 12]     # edi
     mov     [eax + PCB_REGS_EDI], ebx
-    mov     ebx, [ebp - 24]     # ebp
+    mov     ebx, [ebp - 8]      # ebp (caller's)
     mov     [eax + PCB_REGS_EBP], ebx
 
     # 保存栈指针（当前 esp）
-    mov     ebx, ebp
+    mov     ebx, esp
     mov     [eax + PCB_REGS_ESP], ebx
 
     # 保存 EIP（返回地址）
-    mov     ebx, [ebp + 0]      # 返回地址
+    mov     ebx, [ebp + 4]      # 返回地址
     mov     [eax + PCB_REGS_EIP], ebx
 
     # 保存 EFLAGS
@@ -282,17 +362,17 @@ yield:
     add     eax, offset proc_table
 
     mov     ebx, [eax + PCB_REGS_EBX]
-    mov     [ebp - 4], ebx
+    mov     [esp + 20], ebx     # restore ebx at stack slot
     mov     ebx, [eax + PCB_REGS_ECX]
-    mov     [ebp - 8], ebx
+    mov     [esp + 24], ebx
     mov     ebx, [eax + PCB_REGS_EDX]
-    mov     [ebp - 12], ebx
+    mov     [esp + 28], ebx
     mov     ebx, [eax + PCB_REGS_ESI]
-    mov     [ebp - 16], ebx
+    mov     [esp + 32], ebx
     mov     ebx, [eax + PCB_REGS_EDI]
-    mov     [ebp - 20], ebx
+    mov     [esp + 36], ebx
     mov     ebx, [eax + PCB_REGS_EBP]
-    mov     [ebp - 24], ebx
+    mov     [esp + 40], ebx
 
     pop     ebp
     ret
@@ -307,16 +387,31 @@ exit:
     push    eax
     push    ecx
 
+    # 如果是 PID 0，不能退出（内核主线程）
+    cmp     dword ptr [current_pid], 0
+    je      .cant_exit
+
+    # 关闭所有打开的文件描述符 (FD 3-7)
+    mov     eax, [current_pid]
+    imul    eax, PCB_SIZE
+    add     eax, offset proc_table
+    add     eax, PCB_FD_TABLE + 24   # FD 3 起始偏移 (每个 FD 8 字节)
+    mov     ecx, 5                   # FD 3-7 共 5 个
+.close_fd_loop:
+    cmp     dword ptr [eax], FD_TYPE_FREE
+    je      .next_fd
+    mov     dword ptr [eax], FD_TYPE_FREE
+    mov     dword ptr [eax + 4], 0
+.next_fd:
+    add     eax, 8
+    loop    .close_fd_loop
+
     # 标记当前进程为 ZOMBIE
     mov     eax, [current_pid]
     imul    eax, PCB_SIZE
     add     eax, offset proc_table
     mov     dword ptr [eax + PCB_STATE], PROC_ZOMBIE
     mov     [eax + PCB_EXIT_CODE], ebx
-
-    # 如果是 PID 0，不能退出（内核主线程）
-    cmp     dword ptr [current_pid], 0
-    je      .cant_exit
 
     # 尝试回收僵尸子进程
     call    _reap_zombies
@@ -386,16 +481,33 @@ _schedule:
     # 设置新进程的内核栈
     mov     esp, [proc_table + eax + PCB_KSTACK]
 
+    # 保存当前进程的 FPU 状态（如果已使用）
+    mov     edi, [current_pid]
+    imul    edi, PCB_SIZE
+    cmp     dword ptr [proc_table + edi + PCB_FPU_SAVED], 0
+    je      .fpu_skip_save
+    fnsave  [proc_table + edi + PCB_FPU_STATE]
+.fpu_skip_save:
+
     # 恢复新进程的寄存器
-    mov     edx, [proc_table + eax + PCB_REGS_EBX]
-    mov     ebx, [proc_table + eax + PCB_REGS_ECX]
-    mov     ecx, [proc_table + eax + PCB_REGS_EDX]
+    mov     ebx, [proc_table + eax + PCB_REGS_EBX]
+    mov     ecx, [proc_table + eax + PCB_REGS_ECX]
+    mov     edx, [proc_table + eax + PCB_REGS_EDX]
+
+    # 恢复新进程的 FPU 状态（如果已保存）
+    cmp     dword ptr [proc_table + eax + PCB_FPU_SAVED], 0
+    je      .fpu_skip_restore
+    frstor  [proc_table + eax + PCB_FPU_STATE]
+    mov     dword ptr [proc_table + eax + PCB_FPU_SAVED], 1
+.fpu_skip_restore:
+
+    # 标记新进程 FPU 状态为已保存
+    mov     dword ptr [proc_table + eax + PCB_FPU_SAVED], 1
 
     # 跳转到新进程的 EIP
     mov     eax, [proc_table + eax + PCB_REGS_EIP]
     test    eax, eax
     jz      .no_eip
-    mov     esp, edx            # 切换栈
     push    eax                 # 返回地址压栈
     ret                         # 跳转到 EIP
 
@@ -412,39 +524,39 @@ _schedule:
 _reap_zombies:
     push    eax
     push    ecx
+    push    esi
+    push    edi
 
     mov     ecx, MAX_PROCS
-    xor     eax, eax
-1:  mov     edx, eax
+    xor     esi, esi            # esi = loop index (preserved across rep stosd)
+1:  mov     edx, esi
     imul    edx, PCB_SIZE
     mov     ebx, [proc_table + edx + PCB_STATE]
     cmp     ebx, PROC_ZOMBIE
     jne     .next_zombie
 
-    # 清零 PCB
-    push    ecx
-    push    esi
-    push    edi
+    # Zero PCB (rep stosd clobbers ecx and edi, but not esi or eax)
+    push    ecx                 # save loop counter
     mov     edi, edx
     add     edi, offset proc_table
     mov     ecx, PCB_SIZE / 4
     xor     eax, eax
     cld
     rep     stosd
-    pop     edi
-    pop     esi
-    pop     ecx
+    pop     ecx                 # restore loop counter
 
-    # 标记为 FREE
-    mov     edx, eax
+    # Mark as FREE
+    mov     edx, esi
     imul    edx, PCB_SIZE
     mov     dword ptr [proc_table + edx + PCB_PID], -1
     mov     dword ptr [proc_table + edx + PCB_STATE], PROC_FREE
 
 .next_zombie:
-    inc     eax
+    inc     esi
     loop    1b
 
+    pop     edi
+    pop     esi
     pop     ecx
     pop     eax
     ret

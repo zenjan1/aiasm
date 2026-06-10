@@ -37,7 +37,7 @@ pic_remap:
     # OCW1: 启用 IRQ0 (PIT) 和 IRQ1 (键盘)，屏蔽其余
     mov     al, 0xFC            # 11111100: IRQ0,1 启用
     out     0x21, al
-    mov     al, 0xFF            # 屏蔽全部从片
+    mov     al, 0x3F            # 屏蔽从片IRQ8-13，启用IRQ14(IDE1)/IRQ15(IDE2)
     out     0xA1, al
 
     pop     eax

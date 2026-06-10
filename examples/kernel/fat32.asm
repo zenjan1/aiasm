@@ -252,16 +252,17 @@ fat32_get_file_info:
     cmp     byte ptr [fat32_initialized], 1
     jne     fat32_get_fail
 
-    # 读取根目录扇区
+    # 读取根目录起始扇区
     mov     eax, [root_dir_lba]
     mov     edi, offset fat32_dir_buffer
     call    ata_read_sector
     cmp     eax, 0
     jne     fat32_get_fail
 
-    # 遍历目录项
-    mov     edi, offset fat32_dir_buffer
+    # 遍历目录项（支持多扇区/多簇根目录）
     mov     edx, 16              # 16 entries per sector
+    mov     ebx, [root_dir_lba]  # current sector LBA
+    mov     ecx, [sec_per_clus]  # sectors per cluster counter
 
 fat32_get_loop:
     # 检查目录项
@@ -281,6 +282,7 @@ fat32_get_loop:
 
     # 比较文件名
     push    ecx
+    push    edx
     push    esi
     push    edi
     mov     ecx, 11
@@ -298,6 +300,7 @@ fat32_get_cmp:
     # 文件名匹配
     pop     edi                  # 恢复目录项指针
     pop     esi
+    pop     edx
     pop     ecx
 
     # 获取簇号 (低 16 位)
@@ -310,6 +313,7 @@ fat32_get_cmp:
 fat32_get_cmp_fail:
     pop     edi
     pop     esi
+    pop     edx
     pop     ecx
     jmp     fat32_get_next
 
@@ -317,6 +321,48 @@ fat32_get_next:
     add     edi, 32
     dec     edx
     jnz     fat32_get_loop
+
+    # 当前扇区读完，读取下一扇区
+    inc     ebx
+    dec     ecx
+    jnz     .read_next_sector    # 同一簇内还有扇区
+
+    # 簇结束，跟随 FAT 链到下一簇
+    # ebx = next sector LBA (already incremented past current cluster)
+    # 计算当前簇号: cluster = (ebx - data_region_lba) / sec_per_clus + 2
+    mov     eax, ebx
+    sub     eax, [data_region_lba]
+    xor     edx, edx
+    movzx   ecx, byte ptr [sec_per_clus]
+    div     ecx
+    add     eax, 2               # eax = current cluster number
+
+    # 从 FAT 表读取下一簇
+    push    ebx
+    push    edi
+    call    fat32_get_next_cluster   # eax -> next cluster (or >= 0x0FFFFFF8 for EOF)
+    pop     edi
+    pop     ebx
+
+    cmp     eax, 0x0FFFFFF8
+    jae     fat32_get_fail       # EOF, no more clusters
+
+    # 计算下一簇的起始 LBA
+    sub     eax, 2
+    movzx   ecx, byte ptr [sec_per_clus]
+    imul    eax, ecx
+    add     eax, [data_region_lba]
+    mov     ebx, eax
+    movzx   ecx, byte ptr [sec_per_clus]
+
+.read_next_sector:
+    mov     eax, ebx
+    mov     edi, offset fat32_dir_buffer
+    call    ata_read_sector
+    cmp     eax, 0
+    jne     fat32_get_fail
+    mov     edx, 16              # reset entry counter
+    jmp     fat32_get_loop
 
 fat32_get_fail:
     mov     eax, 0xFFFFFFFF
@@ -338,6 +384,7 @@ fat32_get_exit:
 fat32_read_cluster:
     push    ebx
     push    ecx
+    push    esi
 
     # Cluster -> LBA: LBA = (Cluster - 2) * SecPerClus + DataRegionLBA
     sub     eax, 2
@@ -345,9 +392,29 @@ fat32_read_cluster:
     imul    eax, ebx
     add     eax, [data_region_lba]
 
-    # 读取扇区
+    # 读取簇的所有扇区
+    movzx   ecx, byte ptr [sec_per_clus]
+    mov     esi, eax            # save LBA in callee-saved register
+.read_sector:
+    test    ecx, ecx
+    jz      .done
+    mov     eax, esi            # restore LBA for ata_read_sector
     call    ata_read_sector
+    test    eax, eax
+    jnz     .read_err
+    add     edi, 512
+    inc     esi                 # advance to next LBA
+    dec     ecx
+    jmp     .read_sector
 
+.read_err:
+    mov     eax, -1
+    jmp     .cleanup
+
+.done:
+    xor     eax, eax            # success
+.cleanup:
+    pop     esi
     pop     ecx
     pop     ebx
     ret

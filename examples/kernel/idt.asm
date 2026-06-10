@@ -152,8 +152,40 @@ isr_handler:
     jmp     .done
 
 .is_exception:
-    # 异常: 直接挂起
+    # 异常: 根据类型分别处理
+    cmp     eax, 14             # #PF (Page Fault)
+    je      .handle_pf
+    cmp     eax, 13             # #GP (General Protection Fault)
+    je      .handle_gp
+    cmp     eax, 0              # #DE (Divide Error)
+    je      .handle_de
+    # 其他异常: 打印信息并挂起
+    mov     eax, [esp + 8]      # 从原始栈读取异常向量
     jmp     kernel_halt
+
+.handle_pf:
+    # Page Fault: 读取 CR2 并打印
+    mov     eax, cr2
+    push    eax                 # fault address
+    call    log_page_fault
+    add     esp, 4
+    # 如果 paging.asm 有 demand page handler，尝试恢复
+    call    demand_page_alloc
+    test    eax, eax
+    jnz     .done               # 恢复成功
+    jmp     kernel_halt
+
+.handle_gp:
+    # #GP: 打印 GPF 信息
+    mov     eax, [esp + 32]     # error code (deep in ISR stack)
+    push    eax
+    call    log_gpf
+    add     esp, 4
+    jmp     kernel_halt
+
+.handle_de:
+    # #DE: 除零错误，不挂起，返回错误码
+    jmp     .done               # 继续执行，让代码处理错误
 
 .unknown:
     # 未知中断向量: 静默忽略
@@ -174,6 +206,7 @@ isr_handler:
 
 .syscall:
     call    syscall_dispatch
+    add     esp, 4            # pop error code (dummy or real)
     pop     edx
     pop     ecx
     pop     ebx
@@ -257,3 +290,77 @@ idt_load:
     .globl  kernel_halt
     .globl  pic_send_eoi
     .globl  syscall_dispatch
+
+# ============================================================================
+# log_page_fault: 打印 Page Fault 信息（CR2 已在 eax 中）
+# 输入：[esp+4] = fault address
+# ============================================================================
+    .globl  log_page_fault
+log_page_fault:
+    push    ebp
+    mov     ebp, esp
+    push    eax
+    push    esi
+
+    mov     esi, offset pf_log_msg
+    call    uart_puts
+
+    # 打印 CR2 值（从参数读取）
+    mov     eax, [ebp + 8]
+    mov     edi, offset pf_log_hex
+    mov     dl, 8
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+
+    mov     al, 0x0D
+    call    uart_putc
+    mov     al, 0x0A
+    call    uart_putc
+
+    pop     esi
+    pop     eax
+    pop     ebp
+    ret
+
+# ============================================================================
+# log_gpf: 打印 General Protection Fault 信息
+# 输入：[esp+4] = error code
+# ============================================================================
+    .globl  log_gpf
+log_gpf:
+    push    ebp
+    mov     ebp, esp
+    push    eax
+    push    esi
+
+    mov     esi, offset gpf_log_msg
+    call    uart_puts
+
+    # 打印 error code
+    mov     eax, [ebp + 8]
+    mov     edi, offset gpf_log_hex
+    mov     dl, 8
+    call    utils_itoa
+    mov     esi, eax
+    call    uart_puts
+
+    mov     al, 0x0D
+    call    uart_putc
+    mov     al, 0x0A
+    call    uart_putc
+
+    pop     esi
+    pop     eax
+    pop     ebp
+    ret
+
+    .section .rodata
+pf_log_msg:
+    .asciz  "\r\n*** PAGE FAULT *** CR2=0x"
+pf_log_hex:
+    .space  16
+gpf_log_msg:
+    .asciz  "\r\n*** GENERAL PROTECTION FAULT *** ERR=0x"
+gpf_log_hex:
+    .space  16

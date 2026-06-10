@@ -98,13 +98,16 @@ utils_memcpy:
 # -----------------------------------------------------------------------------
     .globl  utils_memset
 utils_memset:
-    push    edi
-    mov     ah, al
+    push    edi             # save original dest pointer
+    push    ecx             # save byte count
+    mov     ah, al          # replicate byte across 32 bits of eax
     movzx   ebx, ax
     shl     eax, 16
     mov     ax, bx
+    shr     ecx, 2          # convert bytes -> dwords for stosd
     rep     stosd
-    pop     eax
+    pop     ecx             # restore byte count
+    pop     eax             # restore and return original dest pointer
     ret
 
 # -----------------------------------------------------------------------------

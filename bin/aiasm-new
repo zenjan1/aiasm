@@ -64,7 +64,7 @@ cat > "$PROJECT/src/hello.asm" << 'ASM'
 # 功能：打印"Hello, World!"并退出
 # 输入：无
 # 输出：无
-# 破坏的寄存器：rax, rdi, rsi, rdx
+# 破坏的寄存器：eax, ebx, ecx, edx
 # 栈使用：0字节
 # -----------------------------------------------------------------------------
     .globl _start
@@ -75,16 +75,16 @@ msg_len = . - msg
 
 _start:
     # write(1, "Hello, World!\n", 14)
-    mov     rax, 1
-    mov     rdi, 1
-    lea     rsi, [rip + msg]
+    mov     eax, 4
+    mov     ebx, 1
+    mov     ecx, offset msg
     mov     edx, msg_len
-    syscall
+    int     0x80
 
     # exit(0)
-    mov     rax, 60
-    mov     rdi, 0
-    syscall
+    mov     eax, 1
+    mov     ebx, 0
+    int     0x80
 ASM
 
 # ── 生成测试用例模板 ──
@@ -95,7 +95,7 @@ cat > "$PROJECT/tests/test_hello.asm" << 'ASM'
 # 功能：打印"Hello, AI-ASM!"用于测试
 # 输入：无
 # 输出：打印"Hello, AI-ASM!\n"到stdout
-# 破坏的寄存器：rax, rdi, rsi, rdx
+# 破坏的寄存器：eax, ebx, ecx, edx
 # 栈使用：0字节
 # -----------------------------------------------------------------------------
     .globl _start
@@ -106,16 +106,16 @@ msg_len = . - msg
 
 _start:
     # write(1, "Hello, AI-ASM!\n", 15)
-    mov     rax, 1
-    mov     rdi, 1
-    lea     rsi, [rip + msg]
+    mov     eax, 4
+    mov     ebx, 1
+    mov     ecx, offset msg
     mov     edx, msg_len
-    syscall
+    int     0x80
 
     # exit(0)
-    mov     rax, 60
-    mov     rdi, 0
-    syscall
+    mov     eax, 1
+    mov     ebx, 0
+    int     0x80
 ASM
 
 cat > "$PROJECT/tests/test_hello.expect" << 'EXPECT'

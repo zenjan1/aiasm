@@ -2,7 +2,7 @@
 
 专为 AI 设计的最小汇编语言工具链，包含一个从零编写的 32 位 x86 交互操作系统内核，内置 WASM 字节码运行时引擎和完整网络协议栈。基于 GNU AS 汇编语法（Intel 模式），零依赖，纯汇编实现。
 
-**当前版本**: v1.71 | **内核版本**: v1.19 | **代码行数**: 254,065 行 | **测试状态**: ✅ 5000+ WASM 测试通过
+**当前版本**: v1.72 | **内核版本**: v1.20 | **代码行数**: 290,163 行 | **测试状态**: ✅ 5000+ WASM 测试通过 | **Bug 修复**: ✅ 44+ 个 bug 已修复
 
 ## 目录
 
@@ -80,7 +80,8 @@ qemu-system-i386 -kernel examples/kernel/interactive -nographic -no-reboot
 - **物理内存管理**：位图式分配器，支持 128MB，4KB 页
 - **虚拟内存分页**：32 位两级分页，内核恒等映射
 - **进程管理**：最多 16 进程，时间片轮转调度
-- **系统调用**：INT 0x80 接口，8 个系统调用
+- **系统调用**：INT 0x80 接口，8 个系统调用，支持 VFS/FAT32 文件操作 (open/close/read/write)
+- **文件描述符表**：每进程 8 个 FD，支持 stdin/stdout/stderr/VFS/FAT32，fork 继承
 - **WASM 运行时**：238 条指令，完整核心 WASM 指令集
 - **网络协议栈**：e1000 驱动、ARP、ICMP ping、UDP、TCP、DHCP、HTTP 服务器
 
@@ -117,7 +118,7 @@ bash run_gtk.sh
 | `help` | 显示帮助信息 |
 | `clear` | 清屏 |
 | `echo <text>` | 打印文本 |
-| `version` | 显示内核版本 (v0.59) |
+| `version` | 显示内核版本 (v1.71) |
 | `tick` | 显示系统时钟滴答数 |
 | `reboot` | 重启系统 |
 | `shutdown` | 关闭系统 |
@@ -294,6 +295,7 @@ WASM 测试全部通过：wasmtest2-11 + wasmapp (fibonacci/factorial/multiply/s
 
 | 版本 | 主要特性 |
 |------|----------|
+| v1.72 | 🎉 正式发布 - 44+ bug修复 + FD表系统 + syscall重构 + 进程管理增强 |
 | v1.71 | 🎉 正式发布 - README 完善 + 项目发布准备 + .gitignore |
 | v1.70 | 5000 WASM 测试超级里程碑，wasmtest4501-5000 |
 | v1.69 | 内核 HTTP 响应头版本更新 |
@@ -317,3 +319,19 @@ WASM 测试全部通过：wasmtest2-11 + wasmapp (fibonacci/factorial/multiply/s
 ## 许可证
 
 MIT License. 详见 LICENSE。
+
+## v1.72 更新日志
+
+### Bug 修复 (44+)
+- **进程管理**: PCB_SIZE 统一到 272 字节 (含 FD 表), yield() 寄存器保存修复, exit() FD 清理
+- **系统调用**: 正确栈帧读取 (ebp+48), 寄存器保存/恢复, FD 验证 (FD_TYPE_FREE 检查)
+- **分页系统**: get_physical_address 页偏移修复, demand_page_alloc 页表索引修复
+- **FAT32**: 多扇区根目录遍历, FAT 链跟随, read_cluster LBA 保存修复
+- **僵尸进程**: _reap_zombies 循环计数器修复 (eax→esi)
+- **其他**: shell.asm PCB 偏移修复, 死代码清理, 重复定义删除
+
+### 新功能
+- **文件描述符表**: 每进程 8 个 FD (stdin/stdout/stderr + 5 个文件), fork 继承
+- **sys_open/sys_close**: VFS + FAT32 文件打开/关闭
+- **FD 类型系统**: FD_TYPE_FREE/STDIN/STDOUT/STDERR/VFS/FAT32
+- **FPU 支持**: FPU 初始化, PCB FPU 状态保存区

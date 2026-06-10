@@ -258,9 +258,11 @@ get_physical_address:
     push    ecx
     push    edx
 
-    mov     ebx, eax            # 保存虚拟地址
+    mov     ebx, eax            # save virtual address
+    mov     esi, eax            # save for page offset
+    and     esi, 0xFFF          # page offset
 
-    # 页目录索引
+    # page directory index
     shr     ebx, 22
     and     ebx, 0x3FF
 
@@ -269,7 +271,7 @@ get_physical_address:
     jz      .gp_not_mapped
     and     ecx, 0xFFFFF000
 
-    # 页表内索引
+    # page table index
     mov     edx, eax
     shr     edx, 12
     and     edx, 0x3FF
@@ -278,12 +280,9 @@ get_physical_address:
     test    eax, PT_PRESENT
     jz      .gp_not_mapped
 
-    # 物理页帧 + 页内偏移
+    # physical page frame + page offset
     and     eax, 0xFFFFF000
-    mov     ecx, eax            # 保存页帧
-    mov     eax, eax
-    and     eax, 0xFFF          # 页内偏移（应该已经是 0，因为页对齐）
-    mov     eax, ecx
+    or      eax, esi            # merge page frame + offset
 
     pop     edx
     pop     ecx
@@ -330,13 +329,6 @@ page_fault_handler:
 
     jmp     kernel_halt
 
-    pop     esi
-    pop     edx
-    pop     ecx
-    pop     ebx
-    pop     eax
-    ret
-
     .section .rodata
 pf_msg:
     .asciz  "\r\n*** PAGE FAULT ***\r\n"
@@ -346,3 +338,82 @@ pf_hex_buf:
     .space  16
 
     .section .text
+
+# ============================================================================
+# demand_page_alloc: 按需分配页面（被 idt.asm 的 #PF handler 调用）
+# 输入：无（从 CR2 读取缺页地址）
+# 输出：eax = 非 0 成功, 0 失败
+# ============================================================================
+    .globl  demand_page_alloc
+demand_page_alloc:
+    push    ebx
+    push    ecx
+    push    edx
+    push    esi
+    push    edi
+
+    # 1. 获取缺页地址
+    mov     eax, cr2
+    and     eax, 0xFFFFF000     # 页对齐
+
+    # 2. 验证地址范围：用户空间 0x00001000 ~ 0xBFFFFFFF
+    #    排除低地址 NULL 区域（0x00000000-0x00000FFF）
+    test    eax, eax
+    jz      .fail               # NULL 页，拒绝
+    cmp     eax, 0xC0000000
+    jae     .fail               # 内核空间，不允许按需分配
+
+    # 3. 检查页目录项是否存在
+    mov     ebx, eax
+    shr     ebx, 22
+    and     ebx, 0x3FF
+    mov     ecx, [PAGE_DIR_ADDR + ebx * 4]
+    test    ecx, PT_PRESENT
+    jz      .fail               # 页目录项不存在，无法创建页表
+
+    # 4. 计算页表地址和索引
+    and     ecx, 0xFFFFF000     # 页表物理地址
+    mov     edx, eax
+    shr     edx, 12
+    and     edx, 0x3FF
+
+    # 5. 检查页表项是否已经被映射（不应该在缺页时存在）
+    test    dword ptr [ecx + edx * 4], PT_PRESENT
+    jnz     .fail               # 已经映射，不是真正的缺页
+
+    # 6. 分配一个物理页
+    call    alloc_page
+    test    eax, eax
+    jz      .fail               # 内存不足
+
+    # 7. 填写页表项：用户可读写
+    mov     esi, edx            # save page table index
+    mov     edx, eax            # PTE value = physical address
+    or      edx, PT_PRESENT | PT_WRITABLE | PT_USER
+    mov     ebx, ecx            # page table base address
+    mov     [ebx + esi * 4], edx   # write PTE using saved index
+
+    # 8. 清零新分配的页面（用户期望新页面为零页）
+    mov     edi, eax            # 物理地址作为虚拟地址（内核恒等映射）
+    mov     ecx, 1024           # 4096 字节 / 4
+    xor     eax, eax
+    cld
+    rep     stosd
+
+    # 9. 刷新 TLB
+    mov     eax, cr3
+    mov     cr3, eax
+
+    mov     eax, 1              # 成功
+    jmp     .demand_done
+.demand_done:
+    pop     edi
+    pop     esi
+    pop     edx
+    pop     ecx
+    pop     ebx
+    ret
+
+.fail:
+    xor     eax, eax            # 失败
+    jmp     .demand_done
