@@ -1,3 +1,46 @@
 {
-  "tasks": []
+  "tasks": [
+    {
+      "id": "c97c5ad0",
+      "cron": "*/5 * * * *",
+      "prompt": "Check /home/a/aiasm-v0.1/.loop/update. If value is '1': Read the prompt from /home/a/aiasm-v0.1/.loop/prompt. Execute that task - do whatever the prompt says. Write results to /home/a/aiasm-v0.1/.loop/result. Then set /home/a/aiasm-v0.1/.loop/update to '0'. If update is not '1', do nothing.",
+      "createdAt": 1780647113582,
+      "lastFiredAt": 1781055536366,
+      "recurring": true,
+      "createdBySessionId": "a9d50060-9ac1-4359-bd17-af7dc0776e06",
+      "createdByPid": 538,
+      "createdByProcStart": "2926"
+    },
+    {
+      "id": "f412854b",
+      "cron": "*/5 * * * *",
+      "prompt": "Check /home/a/aiasm-v0.1/.loop/update. If value is '0': Spawn an Agent subagent with this task: 1. Explore the entire project at /home/a/aiasm-v0.1 - read structure, key source files, config, tests. 2. Identify all bugs, issues, and problems. 3. Write a comprehensive development prompt covering: Bugs found with severity, Proposed fixes, Next development steps for the three-layer WASM OS architecture: (a) 汇编底层 + wasm运行时层 (b) wasm中间层 (c) 外层应用层. 4. Write the development prompt to /home/a/aiasm-v0.1/.loop/prompt. After the agent completes, set /home/a/aiasm-v0.1/.loop/update to '1'. If update is not '0', do nothing.",
+      "createdAt": 1780647120344,
+      "lastFiredAt": 1781055536366,
+      "recurring": true,
+      "createdBySessionId": "a9d50060-9ac1-4359-bd17-af7dc0776e06",
+      "createdByPid": 538,
+      "createdByProcStart": "2926"
+    },
+    {
+      "id": "e4b5c2b3",
+      "cron": "13 * * * *",
+      "prompt": "/loop Check /home/a/aiasm-v0.1/.loop/update. If value is '1': Read the prompt from /home/a/aiasm-v0.1/.loop/prompt. Execute that task - do whatever the prompt says. Write results to /home/a/aiasm-v0.1/.loop/result. Then set /home/a/aiasm-v0.1/.loop/update to '0'. If update is not '1', do nothing.\nCheck /home/a/aiasm-v0.1/.loop/update. If value is '0': Explore the entire project at /home/a/aiasm-v0.1 - read structure, key source files, config, tests. Identify all bugs, issues, and problems. Write a comprehensive development prompt covering: Bugs found with severity, Proposed fixes, Next development steps for the three-layer WASM OS architecture. Write the development prompt to /home/a/aiasm-v0.1/.loop/prompt. After completing, set /home/a/aiasm-v0.1/.loop/update to '1'. If update is not '0', do nothing.\n\nThis is Loop 1 (Bug Fix Loop): focus on finding and fixing bugs. Priority order: P1 (crashes/hangs) → P2 (incorrect behavior) → P3 (code quality). After each cycle, increment the round number in the prompt.",
+      "createdAt": 1781055960179,
+      "recurring": true,
+      "createdBySessionId": "8fb979af-d65d-4c7d-bc4d-d28462c7653c",
+      "createdByPid": 737,
+      "createdByProcStart": "169554"
+    },
+    {
+      "id": "4ef3c58e",
+      "cron": "43 * * * *",
+      "prompt": "/loop This is Loop 2 (Feature Development Loop) for the AI-ASM WASM OS project at /home/a/aiasm-v0.1.\n\nRead the current development prompt from /home/a/aiasm-v0.1/.loop/prompt. Focus on implementing P2 and P3 priority features from the development plan. After completing work, write an updated development prompt to /home/a/aiasm-v0.1/.loop/prompt with new bugs found and progress made.\n\nPriority features to work on:\n- Layer A (汇编底层): FD offset tracking, sys_open flags, VFS data area fix, e1000 IRQ PIC unmask, utils_memset fix, WASM bounds checking, FAT32 write support\n- Layer B (WASM中间层): FAT chain following, file path resolution, VFS/FAT32 file deletion, TCP handshake, DHCP client, ARP cache timeout\n- Layer C (外层应用): FAT32 WASM file loading, shell line editing, WASM module validation\n\nAfter each cycle, commit any changes with message: \"feat: [description of what was implemented]\"",
+      "createdAt": 1781055968724,
+      "recurring": true,
+      "createdBySessionId": "8fb979af-d65d-4c7d-bc4d-d28462c7653c",
+      "createdByPid": 737,
+      "createdByProcStart": "169554"
+    }
+  ]
 }
